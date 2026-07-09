@@ -1,0 +1,1095 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1809,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Bo_Diddley__Bo_Diddley.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Bo Diddley",
+    "title": "Bo Diddley",
+    "album": "",
+    "year": null,
+    "genre": "rhythm and blues"
+  },
+  "genreClassification": {
+    "genre": "rhythm and blues",
+    "subgenres": [
+      "boogie",
+      "early rock",
+      "blues"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a foundational piece of boogie rhythm and blues."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, punchy rhythm tone (think early rock/R&B)",
+      "signatureElements": [
+        "punchy attack",
+        "midrange focus",
+        "slight grit/crunch",
+        "dry clean boost"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal (e.g., Tube Screamer style) for bite",
+        "Amp simulation with punchy cabinet response (e.g., Fender Tweed or Vox AC30 type)",
+        "Wah pedal for rhythmic accents"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Deep modulation (chorus/flanger)",
+        "Excessive reverb/delay"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry, trebly Bo Diddley rhythm crunch",
+      "mustHave": [
+        "boxy attack",
+        "raw single-note rhythm",
+        "light edge-of-breakup",
+        "dry mono feel"
+      ],
+      "avoid": [
+        "lush reverb",
+        "chorus",
+        "fuzz",
+        "modern overdrive"
+      ],
+      "gearClues": [
+        "clean Fender-ish amp",
+        "small combo",
+        "bridge pickup",
+        "light compression"
+      ],
+      "corrections": [
+        "drop wah",
+        "less mid-gain",
+        "more dry twang"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry, trebly Bo Diddley rhythm crunch",
+    "mustHave": [
+      "boxy attack",
+      "raw single-note rhythm",
+      "light edge-of-breakup",
+      "dry mono feel"
+    ],
+    "avoid": [
+      "lush reverb",
+      "chorus",
+      "fuzz",
+      "modern overdrive"
+    ],
+    "gearClues": [
+      "clean Fender-ish amp",
+      "small combo",
+      "bridge pickup",
+      "light compression"
+    ],
+    "corrections": [
+      "drop wah",
+      "less mid-gain",
+      "more dry twang"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on dry, twangy rhythm tones using classic Fender/early rock amp models.",
+          "bestMatchSummary": "A clean signal chain utilizing light compression and a small combo amp (US Deluxe) to achieve the boxy, trebly, single-note crunch characteristic of early boogie rhythm guitar.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain a tight rhythm feel.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide light compression to enhance the attack and sustain of single-note rhythms, matching the 'light compression' clue.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "70%",
+                "Level": "65%"
+              },
+              "purpose": "Provide a subtle 'edge-of-breakup' and boost the twang without sounding like modern overdrive. The Green OD is versatile for this clean crunch.",
+              "matchQuality": "close",
+              "gap": "The ideal model would be a specific early Fender circuit (e.g., Deluxe Reverb), but Green OD provides the necessary low-gain, bright character.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Wah is explicitly avoided by the 'drop wah' correction and the nature of the rhythm style.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "40%",
+                "Treble": "75%",
+                "Midrange": "60%",
+                "Bass": "50%"
+              },
+              "purpose": "Simulate the 'clean Fender-ish amp' and 'small combo' clue, providing the necessary bright, boxy tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the small combo feel and provide a bright, focused sound suitable for dry rhythm work.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+4 dB"
+              },
+              "purpose": "Enhance the 'trebly' and 'boxy attack' while maintaining clarity for single-note rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/delay",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Modulation effects (like Chorus) are explicitly avoided by the 'avoid' list.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Delay is not required for the dry, punchy rhythm style and would detract from the raw feel.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide minimal, natural ambience to prevent the tone from sounding completely sterile, while avoiding 'lush reverb'.",
+              "matchQuality": "close",
+              "gap": "The goal is maximum dryness; even a small Room setting must be used carefully.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The tone requires extreme dryness and punch. All ambience (Room, Plate, Spring) must be kept at minimal levels to maintain the raw, boogie feel."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism for a tighter, more focused dry rhythm sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 IR (e.g., Fender Tweed)",
+              "reason": "Enhance the boxy attack and vintage feel of early boogie rhythms.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Tighter, more focused dry tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Bo Diddley - Bo Diddley - Valeton GP-180",
+        "song": {
+          "artist": "Bo Diddley",
+          "title": "Bo Diddley",
+          "album": "",
+          "year": null,
+          "genre": "rhythm and blues"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry, trebly Bo Diddley rhythm crunch",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean signal chain utilizing light compression and a small combo amp (US Deluxe) to achieve the boxy, trebly, single-note crunch characteristic of early boogie rhythm guitar.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain a tight rhythm feel.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "30%",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Provide light compression to enhance the attack and sustain of single-note rhythms, matching the 'light compression' clue.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/overdrive",
+            "module": "DST",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "70%",
+              "Level": "65%"
+            },
+            "purpose": "Provide a subtle 'edge-of-breakup' and boost the twang without sounding like modern overdrive. The Green OD is versatile for this clean crunch.",
+            "matchQuality": "close",
+            "gap": "The ideal model would be a specific early Fender circuit (e.g., Deluxe Reverb), but Green OD provides the necessary low-gain, bright character.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Wah is explicitly avoided by the 'drop wah' correction and the nature of the rhythm style.",
+            "matchQuality": "perfect",
+            "gap": "N/A (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "40%",
+              "Treble": "75%",
+              "Midrange": "60%",
+              "Bass": "50%"
+            },
+            "purpose": "Simulate the 'clean Fender-ish amp' and 'small combo' clue, providing the necessary bright, boxy tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Match the small combo feel and provide a bright, focused sound suitable for dry rhythm work.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low": "-2 dB",
+              "Mid": "+3 dB",
+              "High": "+4 dB"
+            },
+            "purpose": "Enhance the 'trebly' and 'boxy attack' while maintaining clarity for single-note rhythm playing.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/delay",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Modulation effects (like Chorus) are explicitly avoided by the 'avoid' list.",
+            "matchQuality": "perfect",
+            "gap": "N/A (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Delay is not required for the dry, punchy rhythm style and would detract from the raw feel.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Provide minimal, natural ambience to prevent the tone from sounding completely sterile, while avoiding 'lush reverb'.",
+            "matchQuality": "close",
+            "gap": "The goal is maximum dryness; even a small Room setting must be used carefully.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry, trebly Bo Diddley rhythm crunch",
+          "toneProfile": "dry, trebly Bo Diddley rhythm crunch",
+          "idealSignalChain": "clean Fender-ish amp | small combo | bridge pickup | light compression",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "clean Fender-ish amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge pickup",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compression",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "boxy attack",
+            "raw single-note rhythm",
+            "light edge-of-breakup",
+            "dry mono feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on dry, twangy rhythm tones using classic Fender/early rock amp models.",
+          "bestMatchSummary": "A clean signal chain utilizing light compression and a small combo amp (US Deluxe) to achieve the boxy, trebly, single-note crunch characteristic of early boogie rhythm guitar.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain a tight rhythm feel.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "30%",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide light compression to enhance the attack and sustain of single-note rhythms, matching the 'light compression' clue.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/overdrive",
+              "module": "DST",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "70%",
+                "Level": "65%"
+              },
+              "purpose": "Provide a subtle 'edge-of-breakup' and boost the twang without sounding like modern overdrive. The Green OD is versatile for this clean crunch.",
+              "matchQuality": "close",
+              "gap": "The ideal model would be a specific early Fender circuit (e.g., Deluxe Reverb), but Green OD provides the necessary low-gain, bright character.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Wah is explicitly avoided by the 'drop wah' correction and the nature of the rhythm style.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "40%",
+                "Treble": "75%",
+                "Midrange": "60%",
+                "Bass": "50%"
+              },
+              "purpose": "Simulate the 'clean Fender-ish amp' and 'small combo' clue, providing the necessary bright, boxy tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the small combo feel and provide a bright, focused sound suitable for dry rhythm work.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+4 dB"
+              },
+              "purpose": "Enhance the 'trebly' and 'boxy attack' while maintaining clarity for single-note rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/delay",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Modulation effects (like Chorus) are explicitly avoided by the 'avoid' list.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Delay is not required for the dry, punchy rhythm style and would detract from the raw feel.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide minimal, natural ambience to prevent the tone from sounding completely sterile, while avoiding 'lush reverb'.",
+              "matchQuality": "close",
+              "gap": "The goal is maximum dryness; even a small Room setting must be used carefully.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism for a tighter, more focused dry rhythm sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 IR (e.g., Fender Tweed)",
+              "reason": "Enhance the boxy attack and vintage feel of early boogie rhythms.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Tighter, more focused dry tone",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop wah",
+          "less mid-gain",
+          "more dry twang"
+        ],
+        "warnings": [
+          "The tone requires extreme dryness and punch. All ambience (Room, Plate, Spring) must be kept at minimal levels to maintain the raw, boogie feel."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 13.581,
+      "prompt_chars": 989,
+      "response_chars": 472,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 131,
+        "total_duration": 13578063700,
+        "prompt_eval_duration": 63531000,
+        "eval_duration": 920887000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.569,
+      "prompt_chars": 5395,
+      "response_chars": 457,
+      "usage": {
+        "input_tokens": 1518,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 128,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1646
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.836,
+      "prompt_chars": 3526,
+      "response_chars": 5612,
+      "usage": {
+        "prompt_eval_count": 1203,
+        "eval_count": 1596,
+        "total_duration": 11803395800,
+        "prompt_eval_duration": 124709000,
+        "eval_duration": 11298722000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 14.345,
+      "prompt_chars": 7689,
+      "response_chars": 527,
+      "usage": {
+        "prompt_eval_count": 2156,
+        "eval_count": 148,
+        "total_duration": 14324563800,
+        "prompt_eval_duration": 212200000,
+        "eval_duration": 1070665999
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.366,
+      "prompt_chars": 2824,
+      "response_chars": 176,
+      "usage": {
+        "prompt_eval_count": 903,
+        "eval_count": 50,
+        "total_duration": 12337549400,
+        "prompt_eval_duration": 170980000,
+        "eval_duration": 347750000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Bo Diddley",
+      "title": "Bo Diddley",
+      "album": "",
+      "year": null,
+      "genre": "rhythm and blues"
+    },
+    "rig": {
+      "rigName": "Bo Diddley - Bo Diddley - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry, trebly Bo Diddley rhythm crunch",
+      "signalChainSummary": "A clean signal chain utilizing light compression and a small combo amp (US Deluxe) to achieve the boxy, trebly, single-note crunch characteristic of early boogie rhythm guitar.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain a tight rhythm feel.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "30%",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Provide light compression to enhance the attack and sustain of single-note rhythms, matching the 'light compression' clue.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "70%",
+            "Level": "65%"
+          },
+          "purpose": "Provide a subtle 'edge-of-breakup' and boost the twang without sounding like modern overdrive. The Green OD is versatile for this clean crunch.",
+          "matchQuality": "close",
+          "gap": "The ideal model would be a specific early Fender circuit (e.g., Deluxe Reverb), but Green OD provides the necessary low-gain, bright character.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Wah is explicitly avoided by the 'drop wah' correction and the nature of the rhythm style.",
+          "matchQuality": "exact",
+          "gap": "N/A (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "40%",
+            "Treble": "75%",
+            "Midrange": "60%",
+            "Bass": "50%"
+          },
+          "purpose": "Simulate the 'clean Fender-ish amp' and 'small combo' clue, providing the necessary bright, boxy tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Match the small combo feel and provide a bright, focused sound suitable for dry rhythm work.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low": "-2 dB",
+            "Mid": "+3 dB",
+            "High": "+4 dB"
+          },
+          "purpose": "Enhance the 'trebly' and 'boxy attack' while maintaining clarity for single-note rhythm playing.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/delay",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Modulation effects (like Chorus) are explicitly avoided by the 'avoid' list.",
+          "matchQuality": "exact",
+          "gap": "N/A (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Delay is not required for the dry, punchy rhythm style and would detract from the raw feel.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Provide minimal, natural ambience to prevent the tone from sounding completely sterile, while avoiding 'lush reverb'.",
+          "matchQuality": "close",
+          "gap": "The goal is maximum dryness; even a small Room setting must be used carefully.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry, trebly Bo Diddley rhythm crunch",
+      "mustHave": [
+        "boxy attack",
+        "raw single-note rhythm",
+        "light edge-of-breakup",
+        "dry mono feel"
+      ],
+      "avoid": [
+        "lush reverb",
+        "chorus",
+        "fuzz",
+        "modern overdrive"
+      ],
+      "gearClues": [
+        "clean Fender-ish amp",
+        "small combo",
+        "bridge pickup",
+        "light compression"
+      ],
+      "corrections": [
+        "drop wah",
+        "less mid-gain",
+        "more dry twang"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "rhythm and blues",
+      "styleTags": [
+        "boogie",
+        "early rock",
+        "blues"
+      ],
+      "targetTone": "dry, trebly Bo Diddley rhythm crunch",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism for a tighter, more focused dry rhythm sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 2x12 IR (e.g., Fender Tweed)",
+          "reason": "Enhance the boxy attack and vintage feel of early boogie rhythms.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Tighter, more focused dry tone",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1809,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

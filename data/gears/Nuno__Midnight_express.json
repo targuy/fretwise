@@ -1,0 +1,1115 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1907,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Nuno__Midnight_express.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Nuno",
+    "title": "Midnight express",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "rock"
+    ],
+    "confidence": "high",
+    "rationale": "The combination of wah, delay, and reverb suggests a polished, melodic pop-rock sound."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "E minor (Aeolian)",
+      "signatureElements": [
+        "crunch",
+        "delay",
+        "reverb",
+        "wah"
+      ],
+      "gearHypotheses": [
+        "Amp/Cab: Fender Twin Reverb style",
+        "Effects: Chorus, Delay, Wah"
+      ],
+      "avoid": [
+        "fuzz",
+        "distortion",
+        "overdrive"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "wet wah-crunch lead with delay and reverb",
+      "mustHave": [
+        "wah",
+        "crunch",
+        "delay",
+        "reverb"
+      ],
+      "avoid": [
+        "fuzz",
+        "heavy distortion",
+        "clean Twin"
+      ],
+      "gearClues": [
+        "lead electric",
+        "midgain amp",
+        "Marshall-style cab",
+        "single wah"
+      ],
+      "corrections": [
+        "replace key label",
+        "drop Fender Twin",
+        "keep wah as decisive effect"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "wet wah-crunch lead with delay and reverb",
+    "mustHave": [
+      "wah",
+      "crunch",
+      "delay",
+      "reverb"
+    ],
+    "avoid": [
+      "fuzz",
+      "heavy distortion",
+      "clean Twin"
+    ],
+    "gearClues": [
+      "lead electric",
+      "midgain amp",
+      "Marshall-style cab",
+      "single wah"
+    ],
+    "corrections": [
+      "replace key label",
+      "drop Fender Twin",
+      "keep wah as decisive effect"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on midgain crunch, wah sweep, and spacious ambient effects (delay/reverb) for a lead tone.",
+          "bestMatchSummary": "A classic British-style setup using the UK 45 or UK 50 amp model with moderate gain, followed by a Wah pedal, Chorus for width, Digital Delay for space, and Room/Plate reverb for atmosphere.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide initial mid-range crunch and boost the signal into the amp.",
+              "matchQuality": "close",
+              "gap": "The target requires 'crunch' but Green OD provides a versatile, slightly British grit suitable for lead work without being overly aggressive.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Similar mild overdrive character."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "Midrange Sweep",
+                "Depth": "Medium"
+              },
+              "purpose": "Implement the required wah sweep effect for lead lines.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "modulation/width",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "Medium",
+                "Mix": "50%"
+              },
+              "purpose": "Add width and shimmer to the lead tone.",
+              "matchQuality": "close",
+              "gap": "Not explicitly required, but Chorus enhances the 'wet' and spacious feel of a lead guitar.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use a mild gain boost if needed (keeping the crunch from Green OD).",
+              "matchQuality": "none",
+              "gap": "The 'crunch' is handled by Green OD and the amp choice; no dedicated distortion unit is necessary.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "5/10",
+                "Treble": "7/10",
+                "Midrange": "8/10",
+                "Bass": "6/10"
+              },
+              "purpose": "Simulate the required midgain, British-style 'crunch' amp tone.",
+              "matchQuality": "close",
+              "gap": "The clue suggests Marshall-style cab and midgain; UK 45 provides a classic, punchy lead sound.",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "A slightly different British voicing option."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required Marshall-style cabinet voicing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "40%",
+                "Mix": "30%"
+              },
+              "purpose": "Implement the required delay effect for spaciousness.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Implement the required reverb effect for atmosphere.",
+              "matchQuality": "close",
+              "gap": "Room provides a natural, open space ambiance suitable for lead work.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A more metallic/defined reverb option."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "EQ/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Slightly scoop the low end and boost mids to help the lead tone cut through.",
+              "matchQuality": "close",
+              "gap": "Used for final tonal shaping, emphasizing the mid-range 'crunch'.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is not specified (e.g., genre/era), so the choice of UK 45 and Green OD assumes a classic rock/blues lead context, which aligns with 'wah-crunch'."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR to better capture the Marshall-style cab voicing and enhance overall clarity.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (specific model)",
+              "reason": "Better captures the required British/Marshall tone for lead crunch.",
+              "replacesBlockOrder": 7,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved clarity and punch in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Nuno - Midnight express - Valeton GP-180",
+        "song": {
+          "artist": "Nuno",
+          "title": "Midnight express",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "wet wah-crunch lead with delay and reverb",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic British-style setup using the UK 45 or UK 50 amp model with moderate gain, followed by a Wah pedal, Chorus for width, Digital Delay for space, and Room/Plate reverb for atmosphere.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide initial mid-range crunch and boost the signal into the amp.",
+            "matchQuality": "close",
+            "gap": "The target requires 'crunch' but Green OD provides a versatile, slightly British grit suitable for lead work without being overly aggressive.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Similar mild overdrive character."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": true,
+            "settings": {
+              "Frequency": "Midrange Sweep",
+              "Depth": "Medium"
+            },
+            "purpose": "Implement the required wah sweep effect for lead lines.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "modulation/width",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "Medium",
+              "Mix": "50%"
+            },
+            "purpose": "Add width and shimmer to the lead tone.",
+            "matchQuality": "close",
+            "gap": "Not explicitly required, but Chorus enhances the 'wet' and spacious feel of a lead guitar.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass or use a mild gain boost if needed (keeping the crunch from Green OD).",
+            "matchQuality": "none",
+            "gap": "The 'crunch' is handled by Green OD and the amp choice; no dedicated distortion unit is necessary.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "5/10",
+              "Treble": "7/10",
+              "Midrange": "8/10",
+              "Bass": "6/10"
+            },
+            "purpose": "Simulate the required midgain, British-style 'crunch' amp tone.",
+            "matchQuality": "close",
+            "gap": "The clue suggests Marshall-style cab and midgain; UK 45 provides a classic, punchy lead sound.",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "A slightly different British voicing option."
+              }
+            ]
+          },
+          {
+            "order": 7,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the required Marshall-style cabinet voicing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "350 ms",
+              "Feedback": "40%",
+              "Mix": "30%"
+            },
+            "purpose": "Implement the required delay effect for spaciousness.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "30%"
+            },
+            "purpose": "Implement the required reverb effect for atmosphere.",
+            "matchQuality": "close",
+            "gap": "Room provides a natural, open space ambiance suitable for lead work.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "A more metallic/defined reverb option."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "EQ/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "+1 dB"
+            },
+            "purpose": "Slightly scoop the low end and boost mids to help the lead tone cut through.",
+            "matchQuality": "close",
+            "gap": "Used for final tonal shaping, emphasizing the mid-range 'crunch'.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "wet wah-crunch lead with delay and reverb",
+          "toneProfile": "wet wah-crunch lead with delay and reverb",
+          "idealSignalChain": "lead electric | midgain amp | Marshall-style cab | single wah",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "lead electric",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "midgain amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall-style cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single wah",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "wah",
+            "crunch",
+            "delay",
+            "reverb"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on midgain crunch, wah sweep, and spacious ambient effects (delay/reverb) for a lead tone.",
+          "bestMatchSummary": "A classic British-style setup using the UK 45 or UK 50 amp model with moderate gain, followed by a Wah pedal, Chorus for width, Digital Delay for space, and Room/Plate reverb for atmosphere.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide initial mid-range crunch and boost the signal into the amp.",
+              "matchQuality": "close",
+              "gap": "The target requires 'crunch' but Green OD provides a versatile, slightly British grit suitable for lead work without being overly aggressive.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Similar mild overdrive character."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "Midrange Sweep",
+                "Depth": "Medium"
+              },
+              "purpose": "Implement the required wah sweep effect for lead lines.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "modulation/width",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "Medium",
+                "Mix": "50%"
+              },
+              "purpose": "Add width and shimmer to the lead tone.",
+              "matchQuality": "close",
+              "gap": "Not explicitly required, but Chorus enhances the 'wet' and spacious feel of a lead guitar.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use a mild gain boost if needed (keeping the crunch from Green OD).",
+              "matchQuality": "none",
+              "gap": "The 'crunch' is handled by Green OD and the amp choice; no dedicated distortion unit is necessary.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "5/10",
+                "Treble": "7/10",
+                "Midrange": "8/10",
+                "Bass": "6/10"
+              },
+              "purpose": "Simulate the required midgain, British-style 'crunch' amp tone.",
+              "matchQuality": "close",
+              "gap": "The clue suggests Marshall-style cab and midgain; UK 45 provides a classic, punchy lead sound.",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "A slightly different British voicing option."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required Marshall-style cabinet voicing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "40%",
+                "Mix": "30%"
+              },
+              "purpose": "Implement the required delay effect for spaciousness.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Implement the required reverb effect for atmosphere.",
+              "matchQuality": "close",
+              "gap": "Room provides a natural, open space ambiance suitable for lead work.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A more metallic/defined reverb option."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "EQ/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Slightly scoop the low end and boost mids to help the lead tone cut through.",
+              "matchQuality": "close",
+              "gap": "Used for final tonal shaping, emphasizing the mid-range 'crunch'.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR to better capture the Marshall-style cab voicing and enhance overall clarity.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (specific model)",
+              "reason": "Better captures the required British/Marshall tone for lead crunch.",
+              "replacesBlockOrder": 7,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved clarity and punch in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "replace key label",
+          "drop Fender Twin",
+          "keep wah as decisive effect"
+        ],
+        "warnings": [
+          "The source material is not specified (e.g., genre/era), so the choice of UK 45 and Green OD assumes a classic rock/blues lead context, which aligns with 'wah-crunch'."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 15.797,
+      "prompt_chars": 989,
+      "response_chars": 252,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 75,
+        "total_duration": 15774774700,
+        "prompt_eval_duration": 64861000,
+        "eval_duration": 527251999
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.452,
+      "prompt_chars": 5169,
+      "response_chars": 421,
+      "usage": {
+        "input_tokens": 1461,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 115,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1576
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 65.851,
+      "prompt_chars": 3483,
+      "response_chars": 5698,
+      "usage": {
+        "prompt_eval_count": 1181,
+        "eval_count": 1635,
+        "total_duration": 65825310000,
+        "prompt_eval_duration": 119303000,
+        "eval_duration": 11351425000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 27.683,
+      "prompt_chars": 7746,
+      "response_chars": 551,
+      "usage": {
+        "prompt_eval_count": 2173,
+        "eval_count": 143,
+        "total_duration": 27661753000,
+        "prompt_eval_duration": 209788000,
+        "eval_duration": 1010642000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 15.57,
+      "prompt_chars": 2687,
+      "response_chars": 169,
+      "usage": {
+        "prompt_eval_count": 862,
+        "eval_count": 46,
+        "total_duration": 15567310100,
+        "prompt_eval_duration": 99514000,
+        "eval_duration": 321222000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Nuno",
+      "title": "Midnight express",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "Nuno - Midnight express - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "wet wah-crunch lead with delay and reverb",
+      "signalChainSummary": "A classic British-style setup using the UK 45 or UK 50 amp model with moderate gain, followed by a Wah pedal, Chorus for width, Digital Delay for space, and Room/Plate reverb for atmosphere.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide initial mid-range crunch and boost the signal into the amp.",
+          "matchQuality": "close",
+          "gap": "The target requires 'crunch' but Green OD provides a versatile, slightly British grit suitable for lead work without being overly aggressive.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Similar mild overdrive character."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": true,
+          "settings": {
+            "Frequency": "Midrange Sweep",
+            "Depth": "Medium"
+          },
+          "purpose": "Implement the required wah sweep effect for lead lines.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "modulation/width",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "Medium",
+            "Mix": "50%"
+          },
+          "purpose": "Add width and shimmer to the lead tone.",
+          "matchQuality": "close",
+          "gap": "Not explicitly required, but Chorus enhances the 'wet' and spacious feel of a lead guitar.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass or use a mild gain boost if needed (keeping the crunch from Green OD).",
+          "matchQuality": "fallback",
+          "gap": "The 'crunch' is handled by Green OD and the amp choice; no dedicated distortion unit is necessary.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "5/10",
+            "Treble": "7/10",
+            "Midrange": "8/10",
+            "Bass": "6/10"
+          },
+          "purpose": "Simulate the required midgain, British-style 'crunch' amp tone.",
+          "matchQuality": "close",
+          "gap": "The clue suggests Marshall-style cab and midgain; UK 45 provides a classic, punchy lead sound.",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "A slightly different British voicing option."
+            }
+          ]
+        },
+        {
+          "order": 7,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the required Marshall-style cabinet voicing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "350 ms",
+            "Feedback": "40%",
+            "Mix": "30%"
+          },
+          "purpose": "Implement the required delay effect for spaciousness.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "30%"
+          },
+          "purpose": "Implement the required reverb effect for atmosphere.",
+          "matchQuality": "close",
+          "gap": "Room provides a natural, open space ambiance suitable for lead work.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "A more metallic/defined reverb option."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "EQ/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "+1 dB"
+          },
+          "purpose": "Slightly scoop the low end and boost mids to help the lead tone cut through.",
+          "matchQuality": "close",
+          "gap": "Used for final tonal shaping, emphasizing the mid-range 'crunch'.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "wet wah-crunch lead with delay and reverb",
+      "mustHave": [
+        "wah",
+        "crunch",
+        "delay",
+        "reverb"
+      ],
+      "avoid": [
+        "fuzz",
+        "heavy distortion",
+        "clean Twin"
+      ],
+      "gearClues": [
+        "lead electric",
+        "midgain amp",
+        "Marshall-style cab",
+        "single wah"
+      ],
+      "corrections": [
+        "replace key label",
+        "drop Fender Twin",
+        "keep wah as decisive effect"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "rock"
+      ],
+      "targetTone": "wet wah-crunch lead with delay and reverb",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR to better capture the Marshall-style cab voicing and enhance overall clarity.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Marshall 4x12 (specific model)",
+          "reason": "Better captures the required British/Marshall tone for lead crunch.",
+          "replacesBlockOrder": 7,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Improved clarity and punch in the mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1907,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -158,3 +158,68 @@ def test_no_models_endpoint(tmp_path: Path, monkeypatch) -> None:
 def test_missing_song_404(tmp_path: Path, monkeypatch) -> None:
     client = _client(tmp_path, monkeypatch, with_json=True)
     assert client.get("/api/rig/Nobody - Unknown.gp5").status_code == 404
+
+
+def test_gear_prompt_grounds_in_existing_sheet(tmp_path: Path, monkeypatch) -> None:
+    client = _client(tmp_path, monkeypatch, with_json=True)
+    res = client.get("/api/gears/AC_DC - Highway to Hell.gp5/prompt")
+    assert res.status_code == 200
+    assert res.headers["content-type"].startswith("text/markdown")
+    body = res.text
+    assert "AC/DC" in body
+    assert "Highway to Hell" in body
+    assert "songsgear.fretwise.gear.v2" in body
+    assert '"UK SLP"' in body  # the existing sheet's AMP model is echoed back for review
+
+
+def test_gear_prompt_falls_back_to_filename_when_no_sheet(tmp_path: Path, monkeypatch) -> None:
+    client = _client(tmp_path, monkeypatch)
+    res = client.get("/api/gears/AC_DC - Highway to Hell.gp5/prompt")
+    assert res.status_code == 200
+    assert "AC_DC" in res.text
+    assert "Highway to Hell" in res.text
+
+
+def test_save_gear_sheet_overwrites_existing_in_place(tmp_path: Path, monkeypatch) -> None:
+    client = _client(tmp_path, monkeypatch, with_json=True)
+    gears_dir = Path(web_settings.load()["gears_dir"])
+    original_path = gears_dir / "ac-dc__highway-to-hell.json"
+    assert original_path.is_file()
+
+    corrected = _doc_v2("AC/DC", "Highway to Hell", confidence="high")
+    corrected["rig"]["blocks"][0]["model"] = "UK 45"
+
+    res = client.post("/api/gears/AC_DC - Highway to Hell.gp5/save", json={"gear": corrected})
+    assert res.status_code == 200
+    payload = res.json()
+    assert payload["saved"] == "ac-dc__highway-to-hell.json"
+    assert payload["view"]["reglages"]["AMP"]["preset"] == "UK 45"
+    # No stray second file: the pre-existing sheet was overwritten, not duplicated.
+    assert sorted(p.name for p in gears_dir.glob("*.json")) == ["ac-dc__highway-to-hell.json"]
+
+    view = client.get("/api/rig/AC_DC - Highway to Hell.gp5").json()
+    assert view["reglages"]["AMP"]["preset"] == "UK 45"
+
+
+def test_save_gear_sheet_creates_canonical_file_when_absent(tmp_path: Path, monkeypatch) -> None:
+    client = _client(tmp_path, monkeypatch)
+    gears_dir = Path(web_settings.load()["gears_dir"])
+    gear = _doc_v2("Metallica", "Enter Sandman")
+
+    res = client.post("/api/gears/Metallica - Enter Sandman.gp5/save", json={"gear": gear})
+    assert res.status_code == 200
+    assert res.json()["saved"] == "metallica__enter-sandman.json"
+    assert (gears_dir / "metallica__enter-sandman.json").is_file()
+
+    view = client.get("/api/rig/Metallica - Enter Sandman.gp5").json()
+    assert view["is_gears"] is True
+
+
+def test_save_gear_sheet_rejects_invalid_document(tmp_path: Path, monkeypatch) -> None:
+    client = _client(tmp_path, monkeypatch)
+    bad = {"schemaVersion": "songsgear.fretwise.gear.v2", "song": {"artist": "X"}}  # no title, no blocks
+
+    res = client.post("/api/gears/X - Y.gp5/save", json={"gear": bad})
+
+    assert res.status_code == 400
+    assert "song.title" in res.text

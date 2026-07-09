@@ -1,0 +1,1112 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1789,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Alice_Cooper__School_s_Out.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Alice Cooper",
+    "title": "School's Out",
+    "album": "",
+    "year": null,
+    "genre": "glam rock"
+  },
+  "genreClassification": {
+    "genre": "glam rock",
+    "subgenres": [
+      "hard rock",
+      "punk rock"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and tone profile strongly suggest classic glam/hard rock sounds."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, crunchy rock tone with a slight nasal edge.",
+      "signatureElements": [
+        "Crunch overdrive (mid-focused)",
+        "Slightly scooped mids for punchy rhythm parts",
+        "Controlled fuzz/grit on leads",
+        "Bright treble presence"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal (e.g., Tube Screamer style) into a British-voiced amp model (AC30/Plexi family)",
+        "Boost pedal for solos with high gain and compression"
+      ],
+      "avoid": [
+        "Deep, dark fuzz tones",
+        "Highly modulated effects (chorus/flanger)",
+        "Clean jazz tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dirty glam-rock crunch with biting upper mids",
+      "mustHave": [
+        "riffy crunch",
+        "bright bite",
+        "slightly gritty lead",
+        "tight rhythm"
+      ],
+      "avoid": [
+        "scooped modern metal",
+        "fuzzy psychedelic wash",
+        "chorus",
+        "flanger"
+      ],
+      "gearClues": [
+        "Plexi/Marshall",
+        "mid-hump drive",
+        "single-coil or humbucker",
+        "4x12"
+      ],
+      "corrections": [
+        "Drop fuzz lead idea",
+        "Less scoop, more upper-mid bite",
+        "Keep it raw and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dirty glam-rock crunch with biting upper mids",
+    "mustHave": [
+      "riffy crunch",
+      "bright bite",
+      "slightly gritty lead",
+      "tight rhythm"
+    ],
+    "avoid": [
+      "scooped modern metal",
+      "fuzzy psychedelic wash",
+      "chorus",
+      "flanger"
+    ],
+    "gearClues": [
+      "Plexi/Marshall",
+      "mid-hump drive",
+      "single-coil or humbucker",
+      "4x12"
+    ],
+    "corrections": [
+      "Drop fuzz lead idea",
+      "Less scoop, more upper-mid bite",
+      "Keep it raw and punchy"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Classic rock/Glam Rock tone emulation, focusing on mid-range punch and grit.",
+          "bestMatchSummary": "A classic British crunch setup using the UK 45 or UK 50 model for a Plexi/Marshall vibe, paired with Distortion and a bright cab to achieve the required dirty glam-rock bite.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp drive/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "40%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the initial grit and mid-hump boost characteristic of Plexi/Marshall tones.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general overdrive, but it helps simulate the classic British preamp push needed for this genre.",
+              "alternatives": [
+                "Blues OD (if more vintage grit is desired)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "50%",
+                "Tone": "60%",
+                "Level": "75%"
+              },
+              "purpose": "Add the necessary dirty crunch and sustain for the main riffs.",
+              "matchQuality": "close",
+              "gap": "Using a general Distortion model to achieve the required 'dirty glam-rock' saturation without going into full metal territory.",
+              "alternatives": [
+                "RAT-style (if more aggressive bite is needed)"
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6/10",
+                "Treble": "7/10",
+                "Midrange": "8/10",
+                "Bass": "6/10"
+              },
+              "purpose": "Emulate the classic British Marshall sound (Plexi) for punch and upper-mid bite.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet tone and necessary high-end clarity.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Boost the upper mids and treble to achieve the 'bright bite' and cut through the mix.",
+              "matchQuality": "close",
+              "gap": "Using a general EQ model, but specific mid-range boosting is crucial for this genre's signature sound.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Sweep Depth": "50%",
+                "Resonance": "40%"
+              },
+              "purpose": "Optional wah for lead lines or rhythmic accents (if needed). Kept optional to avoid unwanted effects.",
+              "matchQuality": "close",
+              "gap": "The genre doesn't mandate a Wah, but it is useful for adding character in the lead sections of glam rock.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Subtle echo for depth on lead lines without muddying the rhythm.",
+              "matchQuality": "close",
+              "gap": "A subtle delay is used to add dimension, which is generally useful in rock music.",
+              "alternatives": [
+                "Tape (if a warmer, less defined echo is preferred)"
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a natural sense of space and size to the overall tone.",
+              "matchQuality": "close",
+              "gap": "Room reverb is versatile, providing enough ambience without sounding overly wet or distracting from the punchy rhythm.",
+              "alternatives": [
+                "Plate (if a more controlled, metallic shimmer is desired)"
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "1.0"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is rock music, not non-guitar based. The rig is built to emulate the required classic glam-rock tone."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better upper-mid bite and vintage cabinet realism.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 UK/US (e.g., Celestion Greenback or similar)",
+              "reason": "Enhance upper-mid bite and vintage punch required for glam rock.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and definition in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Alice Cooper - School's Out - Valeton GP-180",
+        "song": {
+          "artist": "Alice Cooper",
+          "title": "School's Out",
+          "album": "",
+          "year": null,
+          "genre": "glam rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dirty glam-rock crunch with biting upper mids",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic British crunch setup using the UK 45 or UK 50 model for a Plexi/Marshall vibe, paired with Distortion and a bright cab to achieve the required dirty glam-rock bite.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp drive/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "40%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide the initial grit and mid-hump boost characteristic of Plexi/Marshall tones.",
+            "matchQuality": "close",
+            "gap": "The Green OD is a general overdrive, but it helps simulate the classic British preamp push needed for this genre.",
+            "alternatives": [
+              "Blues OD (if more vintage grit is desired)"
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "50%",
+              "Tone": "60%",
+              "Level": "75%"
+            },
+            "purpose": "Add the necessary dirty crunch and sustain for the main riffs.",
+            "matchQuality": "close",
+            "gap": "Using a general Distortion model to achieve the required 'dirty glam-rock' saturation without going into full metal territory.",
+            "alternatives": [
+              "RAT-style (if more aggressive bite is needed)"
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "6/10",
+              "Treble": "7/10",
+              "Midrange": "8/10",
+              "Bass": "6/10"
+            },
+            "purpose": "Emulate the classic British Marshall sound (Plexi) for punch and upper-mid bite.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet tone and necessary high-end clarity.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-1 dB",
+              "Midrange": "+3 dB",
+              "Treble": "+2 dB"
+            },
+            "purpose": "Boost the upper mids and treble to achieve the 'bright bite' and cut through the mix.",
+            "matchQuality": "close",
+            "gap": "Using a general EQ model, but specific mid-range boosting is crucial for this genre's signature sound.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": true,
+            "settings": {
+              "Sweep Depth": "50%",
+              "Resonance": "40%"
+            },
+            "purpose": "Optional wah for lead lines or rhythmic accents (if needed). Kept optional to avoid unwanted effects.",
+            "matchQuality": "close",
+            "gap": "The genre doesn't mandate a Wah, but it is useful for adding character in the lead sections of glam rock.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2%",
+              "Mix": "15%"
+            },
+            "purpose": "Subtle echo for depth on lead lines without muddying the rhythm.",
+            "matchQuality": "close",
+            "gap": "A subtle delay is used to add dimension, which is generally useful in rock music.",
+            "alternatives": [
+              "Tape (if a warmer, less defined echo is preferred)"
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add a natural sense of space and size to the overall tone.",
+            "matchQuality": "close",
+            "gap": "Room reverb is versatile, providing enough ambience without sounding overly wet or distracting from the punchy rhythm.",
+            "alternatives": [
+              "Plate (if a more controlled, metallic shimmer is desired)"
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "1.0"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dirty glam-rock crunch with biting upper mids",
+          "toneProfile": "dirty glam-rock crunch with biting upper mids",
+          "idealSignalChain": "Plexi/Marshall | mid-hump drive | single-coil or humbucker | 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Plexi/Marshall",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "mid-hump drive",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coil or humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "riffy crunch",
+            "bright bite",
+            "slightly gritty lead",
+            "tight rhythm"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Classic rock/Glam Rock tone emulation, focusing on mid-range punch and grit.",
+          "bestMatchSummary": "A classic British crunch setup using the UK 45 or UK 50 model for a Plexi/Marshall vibe, paired with Distortion and a bright cab to achieve the required dirty glam-rock bite.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp drive/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "40%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the initial grit and mid-hump boost characteristic of Plexi/Marshall tones.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a general overdrive, but it helps simulate the classic British preamp push needed for this genre.",
+              "alternatives": [
+                "Blues OD (if more vintage grit is desired)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "50%",
+                "Tone": "60%",
+                "Level": "75%"
+              },
+              "purpose": "Add the necessary dirty crunch and sustain for the main riffs.",
+              "matchQuality": "close",
+              "gap": "Using a general Distortion model to achieve the required 'dirty glam-rock' saturation without going into full metal territory.",
+              "alternatives": [
+                "RAT-style (if more aggressive bite is needed)"
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6/10",
+                "Treble": "7/10",
+                "Midrange": "8/10",
+                "Bass": "6/10"
+              },
+              "purpose": "Emulate the classic British Marshall sound (Plexi) for punch and upper-mid bite.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet tone and necessary high-end clarity.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Boost the upper mids and treble to achieve the 'bright bite' and cut through the mix.",
+              "matchQuality": "close",
+              "gap": "Using a general EQ model, but specific mid-range boosting is crucial for this genre's signature sound.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Sweep Depth": "50%",
+                "Resonance": "40%"
+              },
+              "purpose": "Optional wah for lead lines or rhythmic accents (if needed). Kept optional to avoid unwanted effects.",
+              "matchQuality": "close",
+              "gap": "The genre doesn't mandate a Wah, but it is useful for adding character in the lead sections of glam rock.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2%",
+                "Mix": "15%"
+              },
+              "purpose": "Subtle echo for depth on lead lines without muddying the rhythm.",
+              "matchQuality": "close",
+              "gap": "A subtle delay is used to add dimension, which is generally useful in rock music.",
+              "alternatives": [
+                "Tape (if a warmer, less defined echo is preferred)"
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add a natural sense of space and size to the overall tone.",
+              "matchQuality": "close",
+              "gap": "Room reverb is versatile, providing enough ambience without sounding overly wet or distracting from the punchy rhythm.",
+              "alternatives": [
+                "Plate (if a more controlled, metallic shimmer is desired)"
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "1.0"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better upper-mid bite and vintage cabinet realism.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 UK/US (e.g., Celestion Greenback or similar)",
+              "reason": "Enhance upper-mid bite and vintage punch required for glam rock.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and definition in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "Drop fuzz lead idea",
+          "Less scoop, more upper-mid bite",
+          "Keep it raw and punchy"
+        ],
+        "warnings": [
+          "The source material is rock music, not non-guitar based. The rig is built to emulate the required classic glam-rock tone."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.128,
+      "prompt_chars": 993,
+      "response_chars": 534,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 136,
+        "total_duration": 12125074700,
+        "prompt_eval_duration": 136929000,
+        "eval_duration": 921185000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.963,
+      "prompt_chars": 5455,
+      "response_chars": 504,
+      "usage": {
+        "input_tokens": 1520,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 141,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1661
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.792,
+      "prompt_chars": 3577,
+      "response_chars": 5762,
+      "usage": {
+        "prompt_eval_count": 1214,
+        "eval_count": 1634,
+        "total_duration": 11784698400,
+        "prompt_eval_duration": 125514000,
+        "eval_duration": 11282801000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.357,
+      "prompt_chars": 7894,
+      "response_chars": 537,
+      "usage": {
+        "prompt_eval_count": 2205,
+        "eval_count": 146,
+        "total_duration": 11334322900,
+        "prompt_eval_duration": 216528000,
+        "eval_duration": 1012922000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.455,
+      "prompt_chars": 2798,
+      "response_chars": 177,
+      "usage": {
+        "prompt_eval_count": 893,
+        "eval_count": 47,
+        "total_duration": 12440976900,
+        "prompt_eval_duration": 210823000,
+        "eval_duration": 331585000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Alice Cooper",
+      "title": "School's Out",
+      "album": "",
+      "year": null,
+      "genre": "glam rock"
+    },
+    "rig": {
+      "rigName": "Alice Cooper - School's Out - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dirty glam-rock crunch with biting upper mids",
+      "signalChainSummary": "A classic British crunch setup using the UK 45 or UK 50 model for a Plexi/Marshall vibe, paired with Distortion and a bright cab to achieve the required dirty glam-rock bite.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp drive/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "40%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide the initial grit and mid-hump boost characteristic of Plexi/Marshall tones.",
+          "matchQuality": "close",
+          "gap": "The Green OD is a general overdrive, but it helps simulate the classic British preamp push needed for this genre.",
+          "alternatives": [
+            {
+              "model": "Blues OD (if more vintage grit is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "50%",
+            "Tone": "60%",
+            "Level": "75%"
+          },
+          "purpose": "Add the necessary dirty crunch and sustain for the main riffs.",
+          "matchQuality": "close",
+          "gap": "Using a general Distortion model to achieve the required 'dirty glam-rock' saturation without going into full metal territory.",
+          "alternatives": [
+            {
+              "model": "RAT-style (if more aggressive bite is needed)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "6/10",
+            "Treble": "7/10",
+            "Midrange": "8/10",
+            "Bass": "6/10"
+          },
+          "purpose": "Emulate the classic British Marshall sound (Plexi) for punch and upper-mid bite.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet tone and necessary high-end clarity.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-1 dB",
+            "Midrange": "+3 dB",
+            "Treble": "+2 dB"
+          },
+          "purpose": "Boost the upper mids and treble to achieve the 'bright bite' and cut through the mix.",
+          "matchQuality": "close",
+          "gap": "Using a general EQ model, but specific mid-range boosting is crucial for this genre's signature sound.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": true,
+          "settings": {
+            "Sweep Depth": "50%",
+            "Resonance": "40%"
+          },
+          "purpose": "Optional wah for lead lines or rhythmic accents (if needed). Kept optional to avoid unwanted effects.",
+          "matchQuality": "close",
+          "gap": "The genre doesn't mandate a Wah, but it is useful for adding character in the lead sections of glam rock.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2%",
+            "Mix": "15%"
+          },
+          "purpose": "Subtle echo for depth on lead lines without muddying the rhythm.",
+          "matchQuality": "close",
+          "gap": "A subtle delay is used to add dimension, which is generally useful in rock music.",
+          "alternatives": [
+            {
+              "model": "Tape (if a warmer, less defined echo is preferred)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add a natural sense of space and size to the overall tone.",
+          "matchQuality": "close",
+          "gap": "Room reverb is versatile, providing enough ambience without sounding overly wet or distracting from the punchy rhythm.",
+          "alternatives": [
+            {
+              "model": "Plate (if a more controlled, metallic shimmer is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "1.0"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dirty glam-rock crunch with biting upper mids",
+      "mustHave": [
+        "riffy crunch",
+        "bright bite",
+        "slightly gritty lead",
+        "tight rhythm"
+      ],
+      "avoid": [
+        "scooped modern metal",
+        "fuzzy psychedelic wash",
+        "chorus",
+        "flanger"
+      ],
+      "gearClues": [
+        "Plexi/Marshall",
+        "mid-hump drive",
+        "single-coil or humbucker",
+        "4x12"
+      ],
+      "corrections": [
+        "Drop fuzz lead idea",
+        "Less scoop, more upper-mid bite",
+        "Keep it raw and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "glam rock",
+      "styleTags": [
+        "hard rock",
+        "punk rock"
+      ],
+      "targetTone": "dirty glam-rock crunch with biting upper mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better upper-mid bite and vintage cabinet realism.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 4x12 UK/US (e.g., Celestion Greenback or similar)",
+          "reason": "Enhance upper-mid bite and vintage punch required for glam rock.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and definition in the mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1789,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1092 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1913,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Parikrama_But_It_Rained__Solo.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Parikrama-But It Rained",
+    "title": "Solo",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "arena rock",
+      "melodic"
+    ],
+    "confidence": "high",
+    "rationale": "The bright, delay-heavy lead tone suggests a polished pop/rock sound."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, slightly compressed clean/crunch with noticeable delay and reverb.",
+      "signatureElements": [
+        "Delay (dotted eighth notes)",
+        "Reverb (hall or plate)",
+        "Clean-to-Crunch breakup",
+        "Slight chorus/modulation"
+      ],
+      "gearHypotheses": [
+        "Modeling Amp/Cab (e.g., Fender Twin style)",
+        "Chorus effect",
+        "Digital Delay unit"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Distortion pedal (unless very light)"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright singing lead with delay and hall reverb",
+      "mustHave": [
+        "clean-to-edge breakup",
+        "dotted delay",
+        "hall/plate reverb",
+        "slight chorus",
+        "sustaining lead"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "dry tone",
+        "big distortion",
+        "dark muffled cab"
+      ],
+      "gearClues": [
+        "Fender-style clean amp",
+        "digital delay",
+        "chorus",
+        "single coils or humbucker lead"
+      ],
+      "corrections": [
+        "drop generic crunch",
+        "make delay/reverb primary",
+        "keep chorus light"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright singing lead with delay and hall reverb",
+    "mustHave": [
+      "clean-to-edge breakup",
+      "dotted delay",
+      "hall/plate reverb",
+      "slight chorus",
+      "sustaining lead"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "dry tone",
+      "big distortion",
+      "dark muffled cab"
+    ],
+    "gearClues": [
+      "Fender-style clean amp",
+      "digital delay",
+      "chorus",
+      "single coils or humbucker lead"
+    ],
+    "corrections": [
+      "drop generic crunch",
+      "make delay/reverb primary",
+      "keep chorus light"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean headroom with delay and reverb as primary elements.",
+          "bestMatchSummary": "A Fender-style clean platform (US Deluxe/Silver Twin) is used to achieve the required brightness and sustain. The signal chain emphasizes Chorus for subtle movement, followed by a light overdrive boost for controlled breakup, and concludes with Digital Delay and Plate Reverb for the signature atmospheric lead sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%"
+              },
+              "purpose": "Provide controlled clean-to-edge breakup and sustain for the lead lines.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of OD to keep the tone bright and avoid heavy distortion, matching the 'clean-to-edge' requirement.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "A good alternative for light breakup."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "30%",
+                "Feedback": "40%"
+              },
+              "purpose": "Add subtle movement and width to the clean tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use a light drive if needed (kept off to maintain brightness).",
+              "matchQuality": "N/A",
+              "gap": "The Boost module handles the required breakup; dedicated distortion is avoided per instructions.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "40%",
+                "Treble": "70%",
+                "Midrange": "65%"
+              },
+              "purpose": "Simulate the bright, clean headroom of a Fender-style amp.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate sound suitable for lead work.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "50%",
+                "Midrange": "60%",
+                "Treble": "75%"
+              },
+              "purpose": "Enhance the high-end sparkle and clarity required for a singing lead tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "40%",
+                "Mix": "35%"
+              },
+              "purpose": "Achieve the required dotted delay effect and rhythmic echo.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "3.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide the required 'hall/plate reverb' and atmospheric sustain.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Room",
+                  "reason": "A good alternative for a more natural hall sound."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "75%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a complex rock track, but the rig focuses on simulating the bright, atmospheric lead tone rather than the full band sound."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the required articulate and singing lead tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., vintage Fender 2x12)",
+              "reason": "Enhance articulation for bright, sustained leads.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and presence",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Parikrama-But It Rained - Solo - Valeton GP-180",
+        "song": {
+          "artist": "Parikrama-But It Rained",
+          "title": "Solo",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright singing lead with delay and hall reverb",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A Fender-style clean platform (US Deluxe/Silver Twin) is used to achieve the required brightness and sustain. The signal chain emphasizes Chorus for subtle movement, followed by a light overdrive boost for controlled breakup, and concludes with Digital Delay and Plate Reverb for the signature atmospheric lead sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/drive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%"
+            },
+            "purpose": "Provide controlled clean-to-edge breakup and sustain for the lead lines.",
+            "matchQuality": "close",
+            "gap": "Using Boost instead of OD to keep the tone bright and avoid heavy distortion, matching the 'clean-to-edge' requirement.",
+            "alternatives": [
+              {
+                "model": "Green OD",
+                "reason": "A good alternative for light breakup."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "2 Hz",
+              "Depth": "30%",
+              "Feedback": "40%"
+            },
+            "purpose": "Add subtle movement and width to the clean tone.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass or use a light drive if needed (kept off to maintain brightness).",
+            "matchQuality": "N/A",
+            "gap": "The Boost module handles the required breakup; dedicated distortion is avoided per instructions.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "40%",
+              "Treble": "70%",
+              "Midrange": "65%"
+            },
+            "purpose": "Simulate the bright, clean headroom of a Fender-style amp.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright and articulate sound suitable for lead work.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "50%",
+              "Midrange": "60%",
+              "Treble": "75%"
+            },
+            "purpose": "Enhance the high-end sparkle and clarity required for a singing lead tone.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "350 ms",
+              "Feedback": "40%",
+              "Mix": "35%"
+            },
+            "purpose": "Achieve the required dotted delay effect and rhythmic echo.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Plate",
+            "active": true,
+            "settings": {
+              "Decay Time": "3.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide the required 'hall/plate reverb' and atmospheric sustain.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Room",
+                "reason": "A good alternative for a more natural hall sound."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "75%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright singing lead with delay and hall reverb",
+          "toneProfile": "bright singing lead with delay and hall reverb",
+          "idealSignalChain": "Fender-style clean amp | digital delay | chorus | single coils or humbucker lead",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Fender-style clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "digital delay",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "chorus",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single coils or humbucker lead",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean-to-edge breakup",
+            "dotted delay",
+            "hall/plate reverb",
+            "slight chorus",
+            "sustaining lead"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, clean headroom with delay and reverb as primary elements.",
+          "bestMatchSummary": "A Fender-style clean platform (US Deluxe/Silver Twin) is used to achieve the required brightness and sustain. The signal chain emphasizes Chorus for subtle movement, followed by a light overdrive boost for controlled breakup, and concludes with Digital Delay and Plate Reverb for the signature atmospheric lead sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%"
+              },
+              "purpose": "Provide controlled clean-to-edge breakup and sustain for the lead lines.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of OD to keep the tone bright and avoid heavy distortion, matching the 'clean-to-edge' requirement.",
+              "alternatives": [
+                {
+                  "model": "Green OD",
+                  "reason": "A good alternative for light breakup."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "30%",
+                "Feedback": "40%"
+              },
+              "purpose": "Add subtle movement and width to the clean tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass or use a light drive if needed (kept off to maintain brightness).",
+              "matchQuality": "N/A",
+              "gap": "The Boost module handles the required breakup; dedicated distortion is avoided per instructions.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "40%",
+                "Treble": "70%",
+                "Midrange": "65%"
+              },
+              "purpose": "Simulate the bright, clean headroom of a Fender-style amp.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate sound suitable for lead work.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "50%",
+                "Midrange": "60%",
+                "Treble": "75%"
+              },
+              "purpose": "Enhance the high-end sparkle and clarity required for a singing lead tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "40%",
+                "Mix": "35%"
+              },
+              "purpose": "Achieve the required dotted delay effect and rhythmic echo.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "3.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide the required 'hall/plate reverb' and atmospheric sustain.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Room",
+                  "reason": "A good alternative for a more natural hall sound."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "75%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the required articulate and singing lead tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., vintage Fender 2x12)",
+              "reason": "Enhance articulation for bright, sustained leads.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and presence",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop generic crunch",
+          "make delay/reverb primary",
+          "keep chorus light"
+        ],
+        "warnings": [
+          "The source material is a complex rock track, but the rig focuses on simulating the bright, atmospheric lead tone rather than the full band sound."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 14.186,
+      "prompt_chars": 996,
+      "response_chars": 421,
+      "usage": {
+        "prompt_eval_count": 325,
+        "eval_count": 105,
+        "total_duration": 14183252500,
+        "prompt_eval_duration": 164377000,
+        "eval_duration": 736076000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.879,
+      "prompt_chars": 5345,
+      "response_chars": 528,
+      "usage": {
+        "input_tokens": 1495,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 139,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1634
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 14.847,
+      "prompt_chars": 3611,
+      "response_chars": 5247,
+      "usage": {
+        "prompt_eval_count": 1215,
+        "eval_count": 1482,
+        "total_duration": 14827643600,
+        "prompt_eval_duration": 145861000,
+        "eval_duration": 10341637000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 64.501,
+      "prompt_chars": 7407,
+      "response_chars": 541,
+      "usage": {
+        "prompt_eval_count": 2054,
+        "eval_count": 142,
+        "total_duration": 64470470600,
+        "prompt_eval_duration": 189829000,
+        "eval_duration": 974944000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 20.33,
+      "prompt_chars": 2954,
+      "response_chars": 169,
+      "usage": {
+        "prompt_eval_count": 896,
+        "eval_count": 48,
+        "total_duration": 20316037800,
+        "prompt_eval_duration": 119635000,
+        "eval_duration": 325251000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Parikrama-But It Rained",
+      "title": "Solo",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "Parikrama-But It Rained - Solo - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright singing lead with delay and hall reverb",
+      "signalChainSummary": "A Fender-style clean platform (US Deluxe/Silver Twin) is used to achieve the required brightness and sustain. The signal chain emphasizes Chorus for subtle movement, followed by a light overdrive boost for controlled breakup, and concludes with Digital Delay and Plate Reverb for the signature atmospheric lead sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/drive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%"
+          },
+          "purpose": "Provide controlled clean-to-edge breakup and sustain for the lead lines.",
+          "matchQuality": "close",
+          "gap": "Using Boost instead of OD to keep the tone bright and avoid heavy distortion, matching the 'clean-to-edge' requirement.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": "A good alternative for light breakup."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "2 Hz",
+            "Depth": "30%",
+            "Feedback": "40%"
+          },
+          "purpose": "Add subtle movement and width to the clean tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass or use a light drive if needed (kept off to maintain brightness).",
+          "matchQuality": "fallback",
+          "gap": "The Boost module handles the required breakup; dedicated distortion is avoided per instructions.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "40%",
+            "Treble": "70%",
+            "Midrange": "65%"
+          },
+          "purpose": "Simulate the bright, clean headroom of a Fender-style amp.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright and articulate sound suitable for lead work.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "50%",
+            "Midrange": "60%",
+            "Treble": "75%"
+          },
+          "purpose": "Enhance the high-end sparkle and clarity required for a singing lead tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "350 ms",
+            "Feedback": "40%",
+            "Mix": "35%"
+          },
+          "purpose": "Achieve the required dotted delay effect and rhythmic echo.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Plate",
+          "active": true,
+          "settings": {
+            "Decay Time": "3.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide the required 'hall/plate reverb' and atmospheric sustain.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Room",
+              "reason": "A good alternative for a more natural hall sound."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "75%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright singing lead with delay and hall reverb",
+      "mustHave": [
+        "clean-to-edge breakup",
+        "dotted delay",
+        "hall/plate reverb",
+        "slight chorus",
+        "sustaining lead"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "dry tone",
+        "big distortion",
+        "dark muffled cab"
+      ],
+      "gearClues": [
+        "Fender-style clean amp",
+        "digital delay",
+        "chorus",
+        "single coils or humbucker lead"
+      ],
+      "corrections": [
+        "drop generic crunch",
+        "make delay/reverb primary",
+        "keep chorus light"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "arena rock",
+        "melodic"
+      ],
+      "targetTone": "bright singing lead with delay and hall reverb",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better capture the required articulate and singing lead tone.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR (e.g., vintage Fender 2x12)",
+          "reason": "Enhance articulation for bright, sustained leads.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and presence",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1913,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

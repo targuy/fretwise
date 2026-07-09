@@ -1,0 +1,1082 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1988,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\unknown_artist__Trypes_Taksidiara_Psihi.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Τρύπες",
+    "title": "Trypes-Ταξιδιάρα Ψυχή - Taksidiara Psihi",
+    "album": "",
+    "year": null,
+    "genre": "indie pop"
+  },
+  "genreClassification": {
+    "genre": "indie pop",
+    "subgenres": [
+      "baroque pop",
+      "dream pop",
+      "ethereal"
+    ],
+    "confidence": "high",
+    "rationale": "The jangly, chorus-heavy tone suggests atmospheric indie or baroque pop."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven clean tone with deep reverb and subtle chorus/modulation.",
+      "signatureElements": [
+        "Chorus modulation (subtle)",
+        "Deep spring/plate reverb",
+        "Slightly broken-up tube amp crunch (low gain)"
+      ],
+      "gearHypotheses": [
+        "Modulation pedal (e.g., Chorus)",
+        "Reverb unit (Plate or Spring)",
+        "Low-gain overdrive/accompanying dirt box"
+      ],
+      "avoid": [
+        "High-gain distortion",
+        "Wah sweeps",
+        "Aggressive fuzz"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "jangly chorus clean with slight breakup and room/reverb",
+      "mustHave": [
+        "subtle chorus",
+        "light edge breakup",
+        "bright single-note lead",
+        "roomy reverb"
+      ],
+      "avoid": [
+        "high gain",
+        "heavy fuzz",
+        "wah",
+        "dark muffled tone"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "Vox/Fender-style amp",
+        "2x12 or combo",
+        "chorus pedal",
+        "spring/plate reverb"
+      ],
+      "corrections": [
+        "drop deep reverb",
+        "keep chorus subtle",
+        "more jangle than crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "jangly chorus clean with slight breakup and room/reverb",
+    "mustHave": [
+      "subtle chorus",
+      "light edge breakup",
+      "bright single-note lead",
+      "roomy reverb"
+    ],
+    "avoid": [
+      "high gain",
+      "heavy fuzz",
+      "wah",
+      "dark muffled tone"
+    ],
+    "gearClues": [
+      "single-coil guitar",
+      "Vox/Fender-style amp",
+      "2x12 or combo",
+      "chorus pedal",
+      "spring/plate reverb"
+    ],
+    "corrections": [
+      "drop deep reverb",
+      "keep chorus subtle",
+      "more jangle than crunch"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "The source is a modern Greek indie/pop track, requiring a clean, jangly, and atmospheric tone. The rig focuses on Fender/Vox-style cleanliness (US Deluxe/Silver Twin) combined with chorus and room reverb to achieve the specified 'jangly chorus clean' sound.",
+          "bestMatchSummary": "Clean signal chain using US Deluxe for warmth, followed by Chorus for jangle, a light OD boost for edge breakup, and finally Room/Plate reverb for atmosphere. The overall tone is bright, airy, and highly melodic.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide subtle, transparent boost and light edge breakup without sounding dirty.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its clean character, mimicking a slight overdrive needed for 'light edge breakup' while maintaining transparency.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "A general boost would also work but might lack the specific harmonic richness of the Green OD."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "modulation/jangle",
+              "module": "Chorus",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "50%",
+                "Feedback": "30%"
+              },
+              "purpose": "Create the required 'subtle chorus' and jangling effect.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "35%",
+                "Treble": "60%",
+                "Midrange": "55%",
+                "Bass": "50%"
+              },
+              "purpose": "Simulate the desired Vox/Fender-style clean, bright, and articulate tone.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is ideal for clean, chimey tones associated with Fender/Vox gear.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Also suitable for clean sounds, but the US Deluxe often provides a slightly more pronounced vintage sparkle."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir simulation",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound matching the clean US Deluxe amp.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Brighten the high end and enhance single-note clarity for a 'bright single-note lead' sound.",
+              "matchQuality": "close",
+              "gap": "Used to fine-tune the frequency response, emphasizing treble for jangle.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "delay/time effect",
+              "module": "Digital Delay",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "35%"
+              },
+              "purpose": "Add subtle rhythmic depth and space without distracting from the main melody.",
+              "matchQuality": "close",
+              "gap": "A moderate delay adds necessary 'roomy' feel, complementing the reverb.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Could be used for a warmer echo, but Digital Delay offers more precise control for subtle rhythmic placement."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "3.5 s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide the required 'roomy reverb' and atmospheric depth.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "Volume",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is non-guitar (Greek indie/pop), so the rig focuses on achieving a highly melodic, clean, and atmospheric guitar texture rather than replicating specific instrumental parts."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for more natural room ambiance.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance the sense of space and warmth in the clean tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased natural ambiance",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Τρύπες - Trypes-Ταξιδιάρα Ψυχή - Taksidiara Psihi - Valeton GP-180",
+        "song": {
+          "artist": "Τρύπες",
+          "title": "Trypes-Ταξιδιάρα Ψυχή - Taksidiara Psihi",
+          "album": "",
+          "year": null,
+          "genre": "indie pop"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "jangly chorus clean with slight breakup and room/reverb",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Clean signal chain using US Deluxe for warmth, followed by Chorus for jangle, a light OD boost for edge breakup, and finally Room/Plate reverb for atmosphere. The overall tone is bright, airy, and highly melodic.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/drive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide subtle, transparent boost and light edge breakup without sounding dirty.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen for its clean character, mimicking a slight overdrive needed for 'light edge breakup' while maintaining transparency.",
+            "alternatives": [
+              {
+                "model": "Boost",
+                "reason": "A general boost would also work but might lack the specific harmonic richness of the Green OD."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "modulation/jangle",
+            "module": "Chorus",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "4 Hz",
+              "Depth": "50%",
+              "Feedback": "30%"
+            },
+            "purpose": "Create the required 'subtle chorus' and jangling effect.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "35%",
+              "Treble": "60%",
+              "Midrange": "55%",
+              "Bass": "50%"
+            },
+            "purpose": "Simulate the desired Vox/Fender-style clean, bright, and articulate tone.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is ideal for clean, chimey tones associated with Fender/Vox gear.",
+            "alternatives": [
+              {
+                "model": "Silver Twin",
+                "reason": "Also suitable for clean sounds, but the US Deluxe often provides a slightly more pronounced vintage sparkle."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir simulation",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Provide a bright and articulate cabinet sound matching the clean US Deluxe amp.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Brighten the high end and enhance single-note clarity for a 'bright single-note lead' sound.",
+            "matchQuality": "close",
+            "gap": "Used to fine-tune the frequency response, emphasizing treble for jangle.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "delay/time effect",
+            "module": "Digital Delay",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "35%"
+            },
+            "purpose": "Add subtle rhythmic depth and space without distracting from the main melody.",
+            "matchQuality": "close",
+            "gap": "A moderate delay adds necessary 'roomy' feel, complementing the reverb.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "Could be used for a warmer echo, but Digital Delay offers more precise control for subtle rhythmic placement."
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "3.5 s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide the required 'roomy reverb' and atmospheric depth.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "Volume",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "jangly chorus clean with slight breakup and room/reverb",
+          "toneProfile": "jangly chorus clean with slight breakup and room/reverb",
+          "idealSignalChain": "single-coil guitar | Vox/Fender-style amp | 2x12 or combo | chorus pedal | spring/plate reverb",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Vox/Fender-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "chorus pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "spring/plate reverb",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "subtle chorus",
+            "light edge breakup",
+            "bright single-note lead",
+            "roomy reverb"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "The source is a modern Greek indie/pop track, requiring a clean, jangly, and atmospheric tone. The rig focuses on Fender/Vox-style cleanliness (US Deluxe/Silver Twin) combined with chorus and room reverb to achieve the specified 'jangly chorus clean' sound.",
+          "bestMatchSummary": "Clean signal chain using US Deluxe for warmth, followed by Chorus for jangle, a light OD boost for edge breakup, and finally Room/Plate reverb for atmosphere. The overall tone is bright, airy, and highly melodic.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide subtle, transparent boost and light edge breakup without sounding dirty.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen for its clean character, mimicking a slight overdrive needed for 'light edge breakup' while maintaining transparency.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "A general boost would also work but might lack the specific harmonic richness of the Green OD."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "modulation/jangle",
+              "module": "Chorus",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "50%",
+                "Feedback": "30%"
+              },
+              "purpose": "Create the required 'subtle chorus' and jangling effect.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "35%",
+                "Treble": "60%",
+                "Midrange": "55%",
+                "Bass": "50%"
+              },
+              "purpose": "Simulate the desired Vox/Fender-style clean, bright, and articulate tone.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is ideal for clean, chimey tones associated with Fender/Vox gear.",
+              "alternatives": [
+                {
+                  "model": "Silver Twin",
+                  "reason": "Also suitable for clean sounds, but the US Deluxe often provides a slightly more pronounced vintage sparkle."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir simulation",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound matching the clean US Deluxe amp.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Brighten the high end and enhance single-note clarity for a 'bright single-note lead' sound.",
+              "matchQuality": "close",
+              "gap": "Used to fine-tune the frequency response, emphasizing treble for jangle.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "delay/time effect",
+              "module": "Digital Delay",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "35%"
+              },
+              "purpose": "Add subtle rhythmic depth and space without distracting from the main melody.",
+              "matchQuality": "close",
+              "gap": "A moderate delay adds necessary 'roomy' feel, complementing the reverb.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Could be used for a warmer echo, but Digital Delay offers more precise control for subtle rhythmic placement."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "3.5 s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide the required 'roomy reverb' and atmospheric depth.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "Volume",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for more natural room ambiance.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance the sense of space and warmth in the clean tone.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased natural ambiance",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop deep reverb",
+          "keep chorus subtle",
+          "more jangle than crunch"
+        ],
+        "warnings": [
+          "The source material is non-guitar (Greek indie/pop), so the rig focuses on achieving a highly melodic, clean, and atmospheric guitar texture rather than replicating specific instrumental parts."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 18.088,
+      "prompt_chars": 1015,
+      "response_chars": 453,
+      "usage": {
+        "prompt_eval_count": 338,
+        "eval_count": 117,
+        "total_duration": 18085364000,
+        "prompt_eval_duration": 63686000,
+        "eval_duration": 818821000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.834,
+      "prompt_chars": 5396,
+      "response_chars": 523,
+      "usage": {
+        "input_tokens": 1522,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 143,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1665
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 88.598,
+      "prompt_chars": 3625,
+      "response_chars": 5703,
+      "usage": {
+        "prompt_eval_count": 1234,
+        "eval_count": 1563,
+        "total_duration": 88578081200,
+        "prompt_eval_duration": 141597000,
+        "eval_duration": 11106133000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 10.289,
+      "prompt_chars": 7869,
+      "response_chars": 470,
+      "usage": {
+        "prompt_eval_count": 2154,
+        "eval_count": 127,
+        "total_duration": 10260227000,
+        "prompt_eval_duration": 224021000,
+        "eval_duration": 927771000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 14.671,
+      "prompt_chars": 2835,
+      "response_chars": 188,
+      "usage": {
+        "prompt_eval_count": 888,
+        "eval_count": 53,
+        "total_duration": 14656329100,
+        "prompt_eval_duration": 108409000,
+        "eval_duration": 367764000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Τρύπες",
+      "title": "Trypes-Ταξιδιάρα Ψυχή - Taksidiara Psihi",
+      "album": "",
+      "year": null,
+      "genre": "indie pop"
+    },
+    "rig": {
+      "rigName": "Τρύπες - Trypes-Ταξιδιάρα Ψυχή - Taksidiara Psihi - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "jangly chorus clean with slight breakup and room/reverb",
+      "signalChainSummary": "Clean signal chain using US Deluxe for warmth, followed by Chorus for jangle, a light OD boost for edge breakup, and finally Room/Plate reverb for atmosphere. The overall tone is bright, airy, and highly melodic.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/drive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide subtle, transparent boost and light edge breakup without sounding dirty.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen for its clean character, mimicking a slight overdrive needed for 'light edge breakup' while maintaining transparency.",
+          "alternatives": [
+            {
+              "model": "Boost",
+              "reason": "A general boost would also work but might lack the specific harmonic richness of the Green OD."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "modulation/jangle",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "4 Hz",
+            "Depth": "50%",
+            "Feedback": "30%"
+          },
+          "purpose": "Create the required 'subtle chorus' and jangling effect.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "35%",
+            "Treble": "60%",
+            "Midrange": "55%",
+            "Bass": "50%"
+          },
+          "purpose": "Simulate the desired Vox/Fender-style clean, bright, and articulate tone.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is ideal for clean, chimey tones associated with Fender/Vox gear.",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "Also suitable for clean sounds, but the US Deluxe often provides a slightly more pronounced vintage sparkle."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir simulation",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Provide a bright and articulate cabinet sound matching the clean US Deluxe amp.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Brighten the high end and enhance single-note clarity for a 'bright single-note lead' sound.",
+          "matchQuality": "close",
+          "gap": "Used to fine-tune the frequency response, emphasizing treble for jangle.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "35%"
+          },
+          "purpose": "Add subtle rhythmic depth and space without distracting from the main melody.",
+          "matchQuality": "close",
+          "gap": "A moderate delay adds necessary 'roomy' feel, complementing the reverb.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "Could be used for a warmer echo, but Digital Delay offers more precise control for subtle rhythmic placement."
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "3.5 s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide the required 'roomy reverb' and atmospheric depth.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "jangly chorus clean with slight breakup and room/reverb",
+      "mustHave": [
+        "subtle chorus",
+        "light edge breakup",
+        "bright single-note lead",
+        "roomy reverb"
+      ],
+      "avoid": [
+        "high gain",
+        "heavy fuzz",
+        "wah",
+        "dark muffled tone"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "Vox/Fender-style amp",
+        "2x12 or combo",
+        "chorus pedal",
+        "spring/plate reverb"
+      ],
+      "corrections": [
+        "drop deep reverb",
+        "keep chorus subtle",
+        "more jangle than crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "indie pop",
+      "styleTags": [
+        "baroque pop",
+        "dream pop",
+        "ethereal"
+      ],
+      "targetTone": "jangly chorus clean with slight breakup and room/reverb",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for more natural room ambiance.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR",
+          "reason": "Enhance the sense of space and warmth in the clean tone.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased natural ambiance",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1988,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://benoit-guitard.fr/schemas/guitar-fingerings/v1.0.json",
+  "title": "Guitar Fingering Unified Record",
+  "description": "A single guitar/bass piece with all fingering data normalized.",
+  "type": "object",
+  "required": ["song_id", "metadata", "tracks"],
+  "properties": {
+    "song_id": {"type": "string", "description": "Unique id (sha1 hash of source)"},
+    "metadata": {
+      "type": "object",
+      "required": ["title", "source_file", "source_format"],
+      "properties": {
+        "title": {"type": "string"},
+        "artist": {"type": ["string", "null"]},
+        "album": {"type": ["string", "null"]},
+        "year": {"type": ["integer", "null"]},
+        "genre": {"type": ["string", "null"]},
+        "source_file": {"type": ["string", "null"]},
+        "source_format": {
+          "type": "string",
+          "enum": ["gp3", "gp4", "gp5", "gpx", "gp", "gp7", "musicxml", "mxl", "xml", "midi", "ascii_tab", "chordpro", "chord_db_csv", "chord_db_json", "unknown"]
+        },
+        "source_url": {"type": ["string", "null"]},
+        "license": {"type": ["string", "null"]},
+        "tempo_bpm": {"type": ["number", "null"]},
+        "time_signature": {"type": ["string", "null"]},
+        "key": {"type": ["string", "null"]},
+        "ingest_timestamp": {"type": ["string", "null"]}
+      }
+    },
+    "tracks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["track_id", "instrument", "tuning", "events"],
+        "properties": {
+          "track_id": {"type": "integer"},
+          "name": {"type": "string"},
+          "instrument": {"type": "string", "enum": ["guitar", "bass", "classical_guitar", "7_string_guitar", "8_string_guitar", "ukulele", "banjo", "mandolin"]},
+          "midi_program": {"type": ["integer", "null"]},
+          "string_count": {"type": "integer", "minimum": 4, "maximum": 12},
+          "tuning": {
+            "type": "array",
+            "items": {"type": "string"},
+            "description": "Low-to-high pitch in scientific notation"
+          },
+          "capo": {"type": "integer", "minimum": 0, "maximum": 24},
+          "is_drum": {"type": "boolean"},
+          "events": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["abs_beat", "duration_beats", "type", "notes"],
+              "properties": {
+                "measure": {"type": "integer", "minimum": 1},
+                "beat_in_measure": {"type": "number"},
+                "abs_beat": {"type": "number"},
+                "duration_beats": {"type": "number"},
+                "type": {"type": "string", "enum": ["note", "chord", "rest"]},
+                "notes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "required": ["pitch_midi"],
+                    "properties": {
+                      "pitch_midi": {"type": ["integer", "null"], "minimum": 0, "maximum": 127},
+                      "string": {"type": ["integer", "null"], "minimum": 1, "maximum": 12},
+                      "fret": {"type": ["integer", "null"], "minimum": 0, "maximum": 30},
+                      "left_hand_finger": {
+                        "type": ["string", "null"],
+                        "enum": ["open", "thumb", "index", "middle", "ring", "pinky", "barre", null]
+                      },
+                      "right_hand_finger": {
+                        "type": ["string", "null"],
+                        "enum": ["p", "i", "m", "a", "c", "pick", null]
+                      },
+                      "techniques": {
+                        "type": "array",
+                        "items": {"type": "string"}
+                      },
+                      "velocity": {"type": ["integer", "null"], "minimum": 0, "maximum": 127},
+                      "tied_to_previous": {"type": "boolean"},
+                      "string_inferred": {"type": "boolean"}
+                    }
+                  }
+                },
+                "chord_symbol": {"type": ["string", "null"]},
+                "chord_diagram": {
+                  "type": ["object", "null"],
+                  "properties": {
+                    "name": {"type": "string"},
+                    "base_fret": {"type": "integer", "minimum": 0},
+                    "frets": {"type": "array", "items": {"type": ["integer", "null"]}},
+                    "fingers": {"type": "array", "items": {"type": ["string", "null"]}},
+                    "barres": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "fret": {"type": "integer"},
+                          "from_string": {"type": "integer"},
+                          "to_string": {"type": "integer"}
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

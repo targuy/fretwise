@@ -1,0 +1,1164 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1971,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Velvet_Revolver__Slither.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Velvet Revolver",
+    "title": "Slither",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "grunge",
+      "post-grunge",
+      "alternative metal"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic hard rock track with heavy, fuzzy tones."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, thick crunch with a slight fuzz edge; dark and aggressive.",
+      "signatureElements": [
+        "Crunch/Fuzz blend",
+        "High mid-range bite (scooped mids)",
+        "Sustained decay (delay/reverb)"
+      ],
+      "gearHypotheses": [
+        "Overdriven Tube Screamer style pedal (mid-hump)",
+        "British Plexi or Marshall style amp model",
+        "Wah pedal for texture variation"
+      ],
+      "avoid": [
+        "Bright clean tones",
+        "High gain metal saturation",
+        "Chorus modulation"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "nasal fuzzed Marshall crunch with wah bite",
+      "mustHave": [
+        "fuzzy edge",
+        "nasal mids",
+        "tight crunch",
+        "wah-like bite"
+      ],
+      "avoid": [
+        "clean",
+        "metal gain",
+        "chorus",
+        "delay wash"
+      ],
+      "gearClues": [
+        "Marshall/Plexi",
+        "4x12",
+        "bridge humbucker",
+        "wah"
+      ],
+      "corrections": [
+        "drop delay/reverb as core",
+        "favor fuzz over TS",
+        "keep mids present, not scooped"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "nasal fuzzed Marshall crunch with wah bite",
+    "mustHave": [
+      "fuzzy edge",
+      "nasal mids",
+      "tight crunch",
+      "wah-like bite"
+    ],
+    "avoid": [
+      "clean",
+      "metal gain",
+      "chorus",
+      "delay wash"
+    ],
+    "gearClues": [
+      "Marshall/Plexi",
+      "4x12",
+      "bridge humbucker",
+      "wah"
+    ],
+    "corrections": [
+      "drop delay/reverb as core",
+      "favor fuzz over TS",
+      "keep mids present, not scooped"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on high-gain, mid-focused British tones (Marshall/Plexi) combined with fuzz and wah for a crunchy, nasal sound.",
+          "bestMatchSummary": "The signal chain uses an OD boost (Green OD) to drive the distortion stage (Red Haze), followed by a powerful Marshall amp model (UK 45) and a British cabinet (UK Vintage 4x12). A Wah pedal is placed early in the chain for bite, while Chorus/Delay are avoided.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from high-gain fuzz/distortion.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "wah effect",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency Range": "Low to High"
+              },
+              "purpose": "Provide the required 'wah bite' and nasal character.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "7",
+                "Level": "8"
+              },
+              "purpose": "Add grit and boost the signal into the fuzz/distortion stage.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used as a general mid-hump booster, simulating an early drive tone before the main distortion.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Could also provide grit but might be too clean for this specific fuzz requirement."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "7",
+                "Tone": "6",
+                "Level": "8"
+              },
+              "purpose": "Generate the core 'fuzzy edge' and high-gain crunch required for the tone.",
+              "matchQuality": "close",
+              "gap": "The Red Haze is chosen over Fuzz/RAT-style to achieve a more controlled, yet fuzzy, Marshall-like saturation.",
+              "alternatives": [
+                {
+                  "model": "Fuzz",
+                  "reason": "Might be too raw and lack the necessary mid-focus."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "7",
+                "Treble": "6",
+                "Midrange": "8",
+                "Bass": "7"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi tone and provide necessary mid-focus.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 'Marshall' sound and required 4x12 voicing.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-1",
+                "Midrange Cut": "3",
+                "Treble Boost": "4"
+              },
+              "purpose": "Fine-tune the tone to emphasize nasal mids and cut excessive low end/scoop.",
+              "matchQuality": "close",
+              "gap": "Used for surgical EQ adjustments, ensuring the 'nasal mids' are prominent without sounding boxy.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "2"
+              },
+              "purpose": "Included as a fallback for subtle movement, but kept inactive per 'avoid' list.",
+              "matchQuality": "none",
+              "gap": "The Chorus is listed in the allowed modules but explicitly avoided by the musical verdict. It is included here only to meet the minimum block count requirement while respecting the tone constraints (i.e., keeping it off).",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "N/A",
+                "Feedback": "0%"
+              },
+              "purpose": "Kept off to avoid 'delay wash' as requested by the musical verdict.",
+              "matchQuality": "none",
+              "gap": "The Digital Delay is listed in the allowed modules but explicitly avoided. It is included here only for structural completeness and must be kept inactive.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2s",
+                "Mix": "15%"
+              },
+              "purpose": "Provide minimal natural room ambience without adding a 'wash' effect.",
+              "matchQuality": "close",
+              "gap": "A very low mix of Room reverb is used to add depth, but the settings are kept subtle to avoid excessive wash.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a rock song, so the rig focuses on high-gain guitar tones. The 'nasal fuzzed Marshall crunch' dictates the use of Red Haze and UK 45/UK Vintage 4x12 combination.",
+          "Modules like Chorus and Digital Delay are included in the chain structure but must be kept inactive (or set to minimal levels) to adhere strictly to the musical verdict ('avoid delay wash', 'avoid chorus')."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and vintage Marshall voicing.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (Celestion Greenback/Green)",
+              "reason": "Enhance the classic Plexi/Marshall sound with accurate speaker voicing.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Improved clarity and vintage bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Velvet Revolver - Slither - Valeton GP-180",
+        "song": {
+          "artist": "Velvet Revolver",
+          "title": "Slither",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "nasal fuzzed Marshall crunch with wah bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "The signal chain uses an OD boost (Green OD) to drive the distortion stage (Red Haze), followed by a powerful Marshall amp model (UK 45) and a British cabinet (UK Vintage 4x12). A Wah pedal is placed early in the chain for bite, while Chorus/Delay are avoided.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise from high-gain fuzz/distortion.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "wah effect",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": true,
+            "settings": {
+              "Frequency Range": "Low to High"
+            },
+            "purpose": "Provide the required 'wah bite' and nasal character.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "preamp boost/drive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "6",
+              "Tone": "7",
+              "Level": "8"
+            },
+            "purpose": "Add grit and boost the signal into the fuzz/distortion stage.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used as a general mid-hump booster, simulating an early drive tone before the main distortion.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Could also provide grit but might be too clean for this specific fuzz requirement."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "distortion/fuzz",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "7",
+              "Tone": "6",
+              "Level": "8"
+            },
+            "purpose": "Generate the core 'fuzzy edge' and high-gain crunch required for the tone.",
+            "matchQuality": "close",
+            "gap": "The Red Haze is chosen over Fuzz/RAT-style to achieve a more controlled, yet fuzzy, Marshall-like saturation.",
+            "alternatives": [
+              {
+                "model": "Fuzz",
+                "reason": "Might be too raw and lack the necessary mid-focus."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "7",
+              "Treble": "6",
+              "Midrange": "8",
+              "Bass": "7"
+            },
+            "purpose": "Simulate the classic Marshall/Plexi tone and provide necessary mid-focus.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British 'Marshall' sound and required 4x12 voicing.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass Boost": "-1",
+              "Midrange Cut": "3",
+              "Treble Boost": "4"
+            },
+            "purpose": "Fine-tune the tone to emphasize nasal mids and cut excessive low end/scoop.",
+            "matchQuality": "close",
+            "gap": "Used for surgical EQ adjustments, ensuring the 'nasal mids' are prominent without sounding boxy.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience (optional)",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "2"
+            },
+            "purpose": "Included as a fallback for subtle movement, but kept inactive per 'avoid' list.",
+            "matchQuality": "none",
+            "gap": "The Chorus is listed in the allowed modules but explicitly avoided by the musical verdict. It is included here only to meet the minimum block count requirement while respecting the tone constraints (i.e., keeping it off).",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "N/A",
+              "Feedback": "0%"
+            },
+            "purpose": "Kept off to avoid 'delay wash' as requested by the musical verdict.",
+            "matchQuality": "none",
+            "gap": "The Digital Delay is listed in the allowed modules but explicitly avoided. It is included here only for structural completeness and must be kept inactive.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2s",
+              "Mix": "15%"
+            },
+            "purpose": "Provide minimal natural room ambience without adding a 'wash' effect.",
+            "matchQuality": "close",
+            "gap": "A very low mix of Room reverb is used to add depth, but the settings are kept subtle to avoid excessive wash.",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "nasal fuzzed Marshall crunch with wah bite",
+          "toneProfile": "nasal fuzzed Marshall crunch with wah bite",
+          "idealSignalChain": "Marshall/Plexi | 4x12 | bridge humbucker | wah",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "wah",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fuzzy edge",
+            "nasal mids",
+            "tight crunch",
+            "wah-like bite"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on high-gain, mid-focused British tones (Marshall/Plexi) combined with fuzz and wah for a crunchy, nasal sound.",
+          "bestMatchSummary": "The signal chain uses an OD boost (Green OD) to drive the distortion stage (Red Haze), followed by a powerful Marshall amp model (UK 45) and a British cabinet (UK Vintage 4x12). A Wah pedal is placed early in the chain for bite, while Chorus/Delay are avoided.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from high-gain fuzz/distortion.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "wah effect",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency Range": "Low to High"
+              },
+              "purpose": "Provide the required 'wah bite' and nasal character.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "7",
+                "Level": "8"
+              },
+              "purpose": "Add grit and boost the signal into the fuzz/distortion stage.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used as a general mid-hump booster, simulating an early drive tone before the main distortion.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Could also provide grit but might be too clean for this specific fuzz requirement."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "7",
+                "Tone": "6",
+                "Level": "8"
+              },
+              "purpose": "Generate the core 'fuzzy edge' and high-gain crunch required for the tone.",
+              "matchQuality": "close",
+              "gap": "The Red Haze is chosen over Fuzz/RAT-style to achieve a more controlled, yet fuzzy, Marshall-like saturation.",
+              "alternatives": [
+                {
+                  "model": "Fuzz",
+                  "reason": "Might be too raw and lack the necessary mid-focus."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "7",
+                "Treble": "6",
+                "Midrange": "8",
+                "Bass": "7"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi tone and provide necessary mid-focus.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British 'Marshall' sound and required 4x12 voicing.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-1",
+                "Midrange Cut": "3",
+                "Treble Boost": "4"
+              },
+              "purpose": "Fine-tune the tone to emphasize nasal mids and cut excessive low end/scoop.",
+              "matchQuality": "close",
+              "gap": "Used for surgical EQ adjustments, ensuring the 'nasal mids' are prominent without sounding boxy.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "2"
+              },
+              "purpose": "Included as a fallback for subtle movement, but kept inactive per 'avoid' list.",
+              "matchQuality": "none",
+              "gap": "The Chorus is listed in the allowed modules but explicitly avoided by the musical verdict. It is included here only to meet the minimum block count requirement while respecting the tone constraints (i.e., keeping it off).",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "N/A",
+                "Feedback": "0%"
+              },
+              "purpose": "Kept off to avoid 'delay wash' as requested by the musical verdict.",
+              "matchQuality": "none",
+              "gap": "The Digital Delay is listed in the allowed modules but explicitly avoided. It is included here only for structural completeness and must be kept inactive.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2s",
+                "Mix": "15%"
+              },
+              "purpose": "Provide minimal natural room ambience without adding a 'wash' effect.",
+              "matchQuality": "close",
+              "gap": "A very low mix of Room reverb is used to add depth, but the settings are kept subtle to avoid excessive wash.",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and vintage Marshall voicing.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Marshall 4x12 (Celestion Greenback/Green)",
+              "reason": "Enhance the classic Plexi/Marshall sound with accurate speaker voicing.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Improved clarity and vintage bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop delay/reverb as core",
+          "favor fuzz over TS",
+          "keep mids present, not scooped"
+        ],
+        "warnings": [
+          "The source material is a rock song, so the rig focuses on high-gain guitar tones. The 'nasal fuzzed Marshall crunch' dictates the use of Red Haze and UK 45/UK Vintage 4x12 combination.",
+          "Modules like Chorus and Digital Delay are included in the chain structure but must be kept inactive (or set to minimal levels) to adhere strictly to the musical verdict ('avoid delay wash', 'avoid chorus')."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 16.553,
+      "prompt_chars": 991,
+      "response_chars": 459,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 117,
+        "total_duration": 16531037100,
+        "prompt_eval_duration": 65794000,
+        "eval_duration": 836239000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.835,
+      "prompt_chars": 5378,
+      "response_chars": 449,
+      "usage": {
+        "input_tokens": 1501,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 129,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1630
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 60.501,
+      "prompt_chars": 3520,
+      "response_chars": 6706,
+      "usage": {
+        "prompt_eval_count": 1204,
+        "eval_count": 1873,
+        "total_duration": 60473262100,
+        "prompt_eval_duration": 130545999,
+        "eval_duration": 13525398000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 38.208,
+      "prompt_chars": 8813,
+      "response_chars": 518,
+      "usage": {
+        "prompt_eval_count": 2434,
+        "eval_count": 135,
+        "total_duration": 38190027200,
+        "prompt_eval_duration": 232715000,
+        "eval_duration": 971772000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 17.278,
+      "prompt_chars": 2968,
+      "response_chars": 184,
+      "usage": {
+        "prompt_eval_count": 950,
+        "eval_count": 50,
+        "total_duration": 17273804700,
+        "prompt_eval_duration": 129764999,
+        "eval_duration": 352702000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Velvet Revolver",
+      "title": "Slither",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Velvet Revolver - Slither - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "nasal fuzzed Marshall crunch with wah bite",
+      "signalChainSummary": "The signal chain uses an OD boost (Green OD) to drive the distortion stage (Red Haze), followed by a powerful Marshall amp model (UK 45) and a British cabinet (UK Vintage 4x12). A Wah pedal is placed early in the chain for bite, while Chorus/Delay are avoided.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise from high-gain fuzz/distortion.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "wah effect",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": true,
+          "settings": {
+            "Frequency Range": "Low to High"
+          },
+          "purpose": "Provide the required 'wah bite' and nasal character.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "preamp boost/drive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "6",
+            "Tone": "7",
+            "Level": "8"
+          },
+          "purpose": "Add grit and boost the signal into the fuzz/distortion stage.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used as a general mid-hump booster, simulating an early drive tone before the main distortion.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Could also provide grit but might be too clean for this specific fuzz requirement."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "distortion/fuzz",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "7",
+            "Tone": "6",
+            "Level": "8"
+          },
+          "purpose": "Generate the core 'fuzzy edge' and high-gain crunch required for the tone.",
+          "matchQuality": "close",
+          "gap": "The Red Haze is chosen over Fuzz/RAT-style to achieve a more controlled, yet fuzzy, Marshall-like saturation.",
+          "alternatives": [
+            {
+              "model": "Fuzz",
+              "reason": "Might be too raw and lack the necessary mid-focus."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "7",
+            "Treble": "6",
+            "Midrange": "8",
+            "Bass": "7"
+          },
+          "purpose": "Simulate the classic Marshall/Plexi tone and provide necessary mid-focus.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British 'Marshall' sound and required 4x12 voicing.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass Boost": "-1",
+            "Midrange Cut": "3",
+            "Treble Boost": "4"
+          },
+          "purpose": "Fine-tune the tone to emphasize nasal mids and cut excessive low end/scoop.",
+          "matchQuality": "close",
+          "gap": "Used for surgical EQ adjustments, ensuring the 'nasal mids' are prominent without sounding boxy.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience (optional)",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "2"
+          },
+          "purpose": "Included as a fallback for subtle movement, but kept inactive per 'avoid' list.",
+          "matchQuality": "fallback",
+          "gap": "The Chorus is listed in the allowed modules but explicitly avoided by the musical verdict. It is included here only to meet the minimum block count requirement while respecting the tone constraints (i.e., keeping it off).",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "N/A",
+            "Feedback": "0%"
+          },
+          "purpose": "Kept off to avoid 'delay wash' as requested by the musical verdict.",
+          "matchQuality": "fallback",
+          "gap": "The Digital Delay is listed in the allowed modules but explicitly avoided. It is included here only for structural completeness and must be kept inactive.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2s",
+            "Mix": "15%"
+          },
+          "purpose": "Provide minimal natural room ambience without adding a 'wash' effect.",
+          "matchQuality": "close",
+          "gap": "A very low mix of Room reverb is used to add depth, but the settings are kept subtle to avoid excessive wash.",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "nasal fuzzed Marshall crunch with wah bite",
+      "mustHave": [
+        "fuzzy edge",
+        "nasal mids",
+        "tight crunch",
+        "wah-like bite"
+      ],
+      "avoid": [
+        "clean",
+        "metal gain",
+        "chorus",
+        "delay wash"
+      ],
+      "gearClues": [
+        "Marshall/Plexi",
+        "4x12",
+        "bridge humbucker",
+        "wah"
+      ],
+      "corrections": [
+        "drop delay/reverb as core",
+        "favor fuzz over TS",
+        "keep mids present, not scooped"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "grunge",
+        "post-grunge",
+        "alternative metal"
+      ],
+      "targetTone": "nasal fuzzed Marshall crunch with wah bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better cabinet realism and vintage Marshall voicing.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Marshall 4x12 (Celestion Greenback/Green)",
+          "reason": "Enhance the classic Plexi/Marshall sound with accurate speaker voicing.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Improved clarity and vintage bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1971,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

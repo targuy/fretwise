@@ -1,0 +1,1201 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1808,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Blondie__Call_Me.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Blondie",
+    "title": "Call Me",
+    "album": "",
+    "year": null,
+    "genre": "new wave"
+  },
+  "genreClassification": {
+    "genre": "new wave",
+    "subgenres": [
+      "pop rock",
+      "punk revival",
+      "synth-pop"
+    ],
+    "confidence": "high",
+    "rationale": "The source genre and the 'New Wave' tone profile confirm this classification."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, punchy punk/new wave rhythm tone",
+      "signatureElements": [
+        "clean-ish crunch",
+        "bright treble focus",
+        "slight chorus or modulation",
+        "punchy attack"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal (e.g., Tube Screamer style)",
+        "Chorus effect",
+        "British-style amp simulation (Marshall/Vox)"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "deep reverb",
+        "dirty distortion"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright tight new wave clean-crunch with chorus sheen",
+      "mustHave": [
+        "clean-ish crunch",
+        "bright top end",
+        "tight punch",
+        "light chorus",
+        "dry mix"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "big reverb",
+        "fuzzy distortion",
+        "thick mid-gain"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "Vox/Marshall edge",
+        "chorus pedal",
+        "small room"
+      ],
+      "corrections": [
+        "name chorus as key texture",
+        "drop Tube Screamer emphasis",
+        "keep gain low"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright tight new wave clean-crunch with chorus sheen",
+    "mustHave": [
+      "clean-ish crunch",
+      "bright top end",
+      "tight punch",
+      "light chorus",
+      "dry mix"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "big reverb",
+      "fuzzy distortion",
+      "thick mid-gain"
+    ],
+    "gearClues": [
+      "single-coil guitar",
+      "Vox/Marshall edge",
+      "chorus pedal",
+      "small room"
+    ],
+    "corrections": [
+      "name chorus as key texture",
+      "drop Tube Screamer emphasis",
+      "keep gain low"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "New Wave/Punk clean crunch with bright, chorus sheen.",
+          "bestMatchSummary": "A tight, bright signal chain using a low-gain boost and US Deluxe amp model, enhanced by Chorus for the signature New Wave texture.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight transients.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the 'Tube Screamer emphasis' (low-gain boost) for tight punch and mid-range focus.",
+              "matchQuality": "close",
+              "gap": "The Boost model is used to emulate a low-gain, high-mid focused overdrive pedal like an SD-2/TS, as specified in the clues.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "If more grit is needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No wah needed for this specific tone).",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion",
+              "module": "DST",
+              "model": "None",
+              "active": true,
+              "settings": {
+                "Drive": "10%",
+                "Tone": "75%",
+                "Level": "60%"
+              },
+              "purpose": "Minimal distortion/grit to achieve the 'clean-ish crunch' without heavy fuzz.",
+              "matchQuality": "close",
+              "gap": "Using minimal settings on a clean DST model (or bypassing) is necessary to avoid thick mid-gain and excessive grit, focusing only on edge breakup.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Red Haze",
+                  "reason": "If slightly more vintage crunch is desired."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amp",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "40%",
+                "Treble": "65%",
+                "Mid": "55%",
+                "Bass": "50%"
+              },
+              "purpose": "Simulate the bright, clean-crunch tone and 'Vox/Marshall edge' associated with New Wave.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe provides a classic American clean platform suitable for pop/new wave tones.",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "Silver Twin",
+                  "reason": "A slightly more open, vintage alternative."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, focused sound suitable for the tight punch and clean tones.",
+              "matchQuality": "close",
+              "gap": "The 2x12 cabinet is ideal for maintaining clarity and tightness in pop/new wave genres.",
+              "alternatives": [
+                {
+                  "module": "CAB/IR",
+                  "model": "UK Vintage 4x12",
+                  "reason": "If a slightly more British edge is desired."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "chorus/mod",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "35%",
+                "Feedback": "20%"
+              },
+              "purpose": "Apply the signature 'light chorus' and 'chorus sheen' required for New Wave texture.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "EQ/tone shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Brighten the top end and ensure 'bright top end' while maintaining overall clarity.",
+              "matchQuality": "close",
+              "gap": "Used for final tonal sculpting to emphasize high frequencies, crucial for New Wave brightness.",
+              "alternatives": [
+                {
+                  "module": "EQ",
+                  "model": "Guitar EQ 2",
+                  "reason": "If a different frequency curve is preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add a subtle 'small room' ambience without sounding big or muddy.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is chosen specifically to fulfill the 'dry mix' requirement while adding necessary space.",
+              "alternatives": [
+                {
+                  "module": "RVB",
+                  "model": "Plate",
+                  "reason": "If a more controlled, less ambient decay is needed."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is New Wave/Punk, requiring a clean-crunch tone. The signal chain prioritizes clarity and brightness over raw power or heavy distortion."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the bright, tight sound required for New Wave/Punk.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 IR (e.g., Fender style)",
+              "reason": "Enhance clarity and tightness crucial for New Wave pop tones.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Blondie - Call Me - Valeton GP-180",
+        "song": {
+          "artist": "Blondie",
+          "title": "Call Me",
+          "album": "",
+          "year": null,
+          "genre": "new wave"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright tight new wave clean-crunch with chorus sheen",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, bright signal chain using a low-gain boost and US Deluxe amp model, enhanced by Chorus for the signature New Wave texture.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain tight transients.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide the 'Tube Screamer emphasis' (low-gain boost) for tight punch and mid-range focus.",
+            "matchQuality": "close",
+            "gap": "The Boost model is used to emulate a low-gain, high-mid focused overdrive pedal like an SD-2/TS, as specified in the clues.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "OD 9",
+                "reason": "If more grit is needed."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass (No wah needed for this specific tone).",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion",
+            "module": "DST",
+            "model": "None",
+            "active": true,
+            "settings": {
+              "Drive": "10%",
+              "Tone": "75%",
+              "Level": "60%"
+            },
+            "purpose": "Minimal distortion/grit to achieve the 'clean-ish crunch' without heavy fuzz.",
+            "matchQuality": "close",
+            "gap": "Using minimal settings on a clean DST model (or bypassing) is necessary to avoid thick mid-gain and excessive grit, focusing only on edge breakup.",
+            "alternatives": [
+              {
+                "module": "DST",
+                "model": "Red Haze",
+                "reason": "If slightly more vintage crunch is desired."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "amp",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "40%",
+              "Treble": "65%",
+              "Mid": "55%",
+              "Bass": "50%"
+            },
+            "purpose": "Simulate the bright, clean-crunch tone and 'Vox/Marshall edge' associated with New Wave.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe provides a classic American clean platform suitable for pop/new wave tones.",
+            "alternatives": [
+              {
+                "module": "AMP",
+                "model": "Silver Twin",
+                "reason": "A slightly more open, vintage alternative."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright, focused sound suitable for the tight punch and clean tones.",
+            "matchQuality": "close",
+            "gap": "The 2x12 cabinet is ideal for maintaining clarity and tightness in pop/new wave genres.",
+            "alternatives": [
+              {
+                "module": "CAB/IR",
+                "model": "UK Vintage 4x12",
+                "reason": "If a slightly more British edge is desired."
+              }
+            ]
+          },
+          {
+            "order": 7,
+            "role": "chorus/mod",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "4 Hz",
+              "Depth": "35%",
+              "Feedback": "20%"
+            },
+            "purpose": "Apply the signature 'light chorus' and 'chorus sheen' required for New Wave texture.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "EQ/tone shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Brighten the top end and ensure 'bright top end' while maintaining overall clarity.",
+            "matchQuality": "close",
+            "gap": "Used for final tonal sculpting to emphasize high frequencies, crucial for New Wave brightness.",
+            "alternatives": [
+              {
+                "module": "EQ",
+                "model": "Guitar EQ 2",
+                "reason": "If a different frequency curve is preferred."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2.0s"
+            },
+            "purpose": "Add a subtle 'small room' ambience without sounding big or muddy.",
+            "matchQuality": "close",
+            "gap": "The Room reverb is chosen specifically to fulfill the 'dry mix' requirement while adding necessary space.",
+            "alternatives": [
+              {
+                "module": "RVB",
+                "model": "Plate",
+                "reason": "If a more controlled, less ambient decay is needed."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume/master control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright tight new wave clean-crunch with chorus sheen",
+          "toneProfile": "bright tight new wave clean-crunch with chorus sheen",
+          "idealSignalChain": "single-coil guitar | Vox/Marshall edge | chorus pedal | small room",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Vox/Marshall edge",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "chorus pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "clean-ish crunch",
+            "bright top end",
+            "tight punch",
+            "light chorus",
+            "dry mix"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "New Wave/Punk clean crunch with bright, chorus sheen.",
+          "bestMatchSummary": "A tight, bright signal chain using a low-gain boost and US Deluxe amp model, enhanced by Chorus for the signature New Wave texture.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight transients.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the 'Tube Screamer emphasis' (low-gain boost) for tight punch and mid-range focus.",
+              "matchQuality": "close",
+              "gap": "The Boost model is used to emulate a low-gain, high-mid focused overdrive pedal like an SD-2/TS, as specified in the clues.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "If more grit is needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No wah needed for this specific tone).",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion",
+              "module": "DST",
+              "model": "None",
+              "active": true,
+              "settings": {
+                "Drive": "10%",
+                "Tone": "75%",
+                "Level": "60%"
+              },
+              "purpose": "Minimal distortion/grit to achieve the 'clean-ish crunch' without heavy fuzz.",
+              "matchQuality": "close",
+              "gap": "Using minimal settings on a clean DST model (or bypassing) is necessary to avoid thick mid-gain and excessive grit, focusing only on edge breakup.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Red Haze",
+                  "reason": "If slightly more vintage crunch is desired."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amp",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "40%",
+                "Treble": "65%",
+                "Mid": "55%",
+                "Bass": "50%"
+              },
+              "purpose": "Simulate the bright, clean-crunch tone and 'Vox/Marshall edge' associated with New Wave.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe provides a classic American clean platform suitable for pop/new wave tones.",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "Silver Twin",
+                  "reason": "A slightly more open, vintage alternative."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright, focused sound suitable for the tight punch and clean tones.",
+              "matchQuality": "close",
+              "gap": "The 2x12 cabinet is ideal for maintaining clarity and tightness in pop/new wave genres.",
+              "alternatives": [
+                {
+                  "module": "CAB/IR",
+                  "model": "UK Vintage 4x12",
+                  "reason": "If a slightly more British edge is desired."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "chorus/mod",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "35%",
+                "Feedback": "20%"
+              },
+              "purpose": "Apply the signature 'light chorus' and 'chorus sheen' required for New Wave texture.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "EQ/tone shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Brighten the top end and ensure 'bright top end' while maintaining overall clarity.",
+              "matchQuality": "close",
+              "gap": "Used for final tonal sculpting to emphasize high frequencies, crucial for New Wave brightness.",
+              "alternatives": [
+                {
+                  "module": "EQ",
+                  "model": "Guitar EQ 2",
+                  "reason": "If a different frequency curve is preferred."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add a subtle 'small room' ambience without sounding big or muddy.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is chosen specifically to fulfill the 'dry mix' requirement while adding necessary space.",
+              "alternatives": [
+                {
+                  "module": "RVB",
+                  "model": "Plate",
+                  "reason": "If a more controlled, less ambient decay is needed."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume/master control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the bright, tight sound required for New Wave/Punk.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 IR (e.g., Fender style)",
+              "reason": "Enhance clarity and tightness crucial for New Wave pop tones.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "name chorus as key texture",
+          "drop Tube Screamer emphasis",
+          "keep gain low"
+        ],
+        "warnings": [
+          "The source material is New Wave/Punk, requiring a clean-crunch tone. The signal chain prioritizes clarity and brightness over raw power or heavy distortion."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.32,
+      "prompt_chars": 996,
+      "response_chars": 385,
+      "usage": {
+        "prompt_eval_count": 326,
+        "eval_count": 101,
+        "total_duration": 11293637800,
+        "prompt_eval_duration": 133026999,
+        "eval_duration": 720704000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.889,
+      "prompt_chars": 5315,
+      "response_chars": 509,
+      "usage": {
+        "input_tokens": 1491,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 136,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1627
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.954,
+      "prompt_chars": 3592,
+      "response_chars": 6333,
+      "usage": {
+        "prompt_eval_count": 1212,
+        "eval_count": 1783,
+        "total_duration": 12945797800,
+        "prompt_eval_duration": 144415000,
+        "eval_duration": 12414799000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 13.882,
+      "prompt_chars": 8530,
+      "response_chars": 515,
+      "usage": {
+        "prompt_eval_count": 2352,
+        "eval_count": 138,
+        "total_duration": 13860871000,
+        "prompt_eval_duration": 232802000,
+        "eval_duration": 1025099999
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 13.186,
+      "prompt_chars": 2740,
+      "response_chars": 219,
+      "usage": {
+        "prompt_eval_count": 872,
+        "eval_count": 72,
+        "total_duration": 13169032300,
+        "prompt_eval_duration": 124463000,
+        "eval_duration": 519467999
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Blondie",
+      "title": "Call Me",
+      "album": "",
+      "year": null,
+      "genre": "new wave"
+    },
+    "rig": {
+      "rigName": "Blondie - Call Me - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright tight new wave clean-crunch with chorus sheen",
+      "signalChainSummary": "A tight, bright signal chain using a low-gain boost and US Deluxe amp model, enhanced by Chorus for the signature New Wave texture.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain tight transients.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide the 'Tube Screamer emphasis' (low-gain boost) for tight punch and mid-range focus.",
+          "matchQuality": "close",
+          "gap": "The Boost model is used to emulate a low-gain, high-mid focused overdrive pedal like an SD-2/TS, as specified in the clues.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "If more grit is needed."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass (No wah needed for this specific tone).",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion",
+          "module": "DST",
+          "model": "None",
+          "active": true,
+          "settings": {
+            "Drive": "10%",
+            "Tone": "75%",
+            "Level": "60%"
+          },
+          "purpose": "Minimal distortion/grit to achieve the 'clean-ish crunch' without heavy fuzz.",
+          "matchQuality": "close",
+          "gap": "Using minimal settings on a clean DST model (or bypassing) is necessary to avoid thick mid-gain and excessive grit, focusing only on edge breakup.",
+          "alternatives": [
+            {
+              "model": "Red Haze",
+              "reason": "If slightly more vintage crunch is desired."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "amp",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "40%",
+            "Treble": "65%",
+            "Mid": "55%",
+            "Bass": "50%"
+          },
+          "purpose": "Simulate the bright, clean-crunch tone and 'Vox/Marshall edge' associated with New Wave.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe provides a classic American clean platform suitable for pop/new wave tones.",
+          "alternatives": [
+            {
+              "model": "Silver Twin",
+              "reason": "A slightly more open, vintage alternative."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright, focused sound suitable for the tight punch and clean tones.",
+          "matchQuality": "close",
+          "gap": "The 2x12 cabinet is ideal for maintaining clarity and tightness in pop/new wave genres.",
+          "alternatives": [
+            {
+              "model": "UK Vintage 4x12",
+              "reason": "If a slightly more British edge is desired."
+            }
+          ]
+        },
+        {
+          "order": 7,
+          "role": "chorus/mod",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "4 Hz",
+            "Depth": "35%",
+            "Feedback": "20%"
+          },
+          "purpose": "Apply the signature 'light chorus' and 'chorus sheen' required for New Wave texture.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "EQ/tone shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Brighten the top end and ensure 'bright top end' while maintaining overall clarity.",
+          "matchQuality": "close",
+          "gap": "Used for final tonal sculpting to emphasize high frequencies, crucial for New Wave brightness.",
+          "alternatives": [
+            {
+              "model": "Guitar EQ 2",
+              "reason": "If a different frequency curve is preferred."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2.0s"
+          },
+          "purpose": "Add a subtle 'small room' ambience without sounding big or muddy.",
+          "matchQuality": "close",
+          "gap": "The Room reverb is chosen specifically to fulfill the 'dry mix' requirement while adding necessary space.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If a more controlled, less ambient decay is needed."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright tight new wave clean-crunch with chorus sheen",
+      "mustHave": [
+        "clean-ish crunch",
+        "bright top end",
+        "tight punch",
+        "light chorus",
+        "dry mix"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "big reverb",
+        "fuzzy distortion",
+        "thick mid-gain"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "Vox/Marshall edge",
+        "chorus pedal",
+        "small room"
+      ],
+      "corrections": [
+        "name chorus as key texture",
+        "drop Tube Screamer emphasis",
+        "keep gain low"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "new wave",
+      "styleTags": [
+        "pop rock",
+        "punk revival",
+        "synth-pop"
+      ],
+      "targetTone": "bright tight new wave clean-crunch with chorus sheen",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better capture the bright, tight sound required for New Wave/Punk.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Bright 2x12 IR (e.g., Fender style)",
+          "reason": "Enhance clarity and tightness crucial for New Wave pop tones.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Increased definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1808,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

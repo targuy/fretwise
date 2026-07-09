@@ -1,0 +1,1079 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1968,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Van_Halen__Drop_Dead_Legs.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Van Halen",
+    "title": "Drop Dead Legs",
+    "album": "",
+    "year": null,
+    "genre": "hard rock"
+  },
+  "genreClassification": {
+    "genre": "hard rock",
+    "subgenres": [
+      "classic rock",
+      "arena rock"
+    ],
+    "confidence": "high",
+    "rationale": "The song is classic Van Halen, fitting the hard rock genre perfectly."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "High-gain, aggressive hard rock tone with pronounced mid-range bite and tight low end.",
+      "signatureElements": [
+        "Fuzz/Overdrive for rhythm parts",
+        "Crunch/Distortion for leads",
+        "Wah pedal sweeps (optional)",
+        "Delay/Reverb for atmosphere",
+        "Marshall JCM800 style amp/cab"
+      ],
+      "gearHypotheses": [
+        "High-gain distortion model (e.g., Tube Screamer + Amp stack)",
+        "British rock amplifier simulation (JCM800 era)",
+        "Overdrive pedal with mid-hump"
+      ],
+      "avoid": [
+        "Thin, scooped tones",
+        "Clean jazz sounds",
+        "Excessive modulation effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "brown EVH crunch with airy top and loose low mids",
+      "mustHave": [
+        "saturated but not modern high gain",
+        "chewy upper mids",
+        "slight flange/phase vibe",
+        "short room or dry"
+      ],
+      "avoid": [
+        "JCM800 bite",
+        "fuzz",
+        "wah",
+        "heavy delay",
+        "scooped clean"
+      ],
+      "gearClues": [
+        "EVH-style humbucker",
+        "plexi/Super Lead",
+        "4x12 greenback",
+        "small room"
+      ],
+      "corrections": [
+        "swap JCM800 for plexi/brown sound",
+        "drop fuzz and wah as core elements",
+        "keep effects subtle, not atmospheric"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "brown EVH crunch with airy top and loose low mids",
+    "mustHave": [
+      "saturated but not modern high gain",
+      "chewy upper mids",
+      "slight flange/phase vibe",
+      "short room or dry"
+    ],
+    "avoid": [
+      "JCM800 bite",
+      "fuzz",
+      "wah",
+      "heavy delay",
+      "scooped clean"
+    ],
+    "gearClues": [
+      "EVH-style humbucker",
+      "plexi/Super Lead",
+      "4x12 greenback",
+      "small room"
+    ],
+    "corrections": [
+      "swap JCM800 for plexi/brown sound",
+      "drop fuzz and wah as core elements",
+      "keep effects subtle, not atmospheric"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic Plexi/Brown tones, emphasizing upper mids and controlled saturation.",
+          "bestMatchSummary": "A vintage British crunch tone using the UK 50 or UK SLP model, paired with a Greenback-style cabinet and subtle Chorus/Room effects to capture the 'brown EVH' sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and noise inherent in high-gain rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the foundational 'brown' grit and mid-hump characteristic of Plexi/EVH tones without excessive modern gain.",
+              "matchQuality": "close",
+              "gap": "The GP-180 lacks a dedicated Tube Screamer model, but Green OD is the closest analog for this classic boost role.",
+              "alternatives": [
+                "Blues OD (if more grit is needed)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/saturation",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "4.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add controlled saturation and upper harmonic content to push the amp into a crunchy, saturated state.",
+              "matchQuality": "close",
+              "gap": "While RAT-style is used for grit, its aggressive nature must be balanced by the Green OD. It helps achieve the 'crunch' without modern high gain.",
+              "alternatives": [
+                "Distortion (if a smoother saturation is preferred)"
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "7",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic British Plexi/Super Lead sound required for EVH's tone, providing the core 'brown' character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "UK SLP (if a slightly more aggressive edge is desired)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Mimic the classic Greenback-style cabinet sound associated with this era of hard rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "Mess 4x12 (if a slightly darker tone is acceptable)"
+              ]
+            },
+            {
+              "order": 6,
+              "role": "modulation/flange",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3.5 Hz",
+                "Depth": "2",
+                "Mix": "4"
+              },
+              "purpose": "Introduce the requested 'slight flange/phase vibe' subtly without making it overly atmospheric.",
+              "matchQuality": "close",
+              "gap": "The Chorus module is used to simulate a subtle phase or flanger effect, as dedicated phaser/flanger models are absent.",
+              "alternatives": [
+                "Tremolo (if the movement needs to be more rhythmic)"
+              ]
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2",
+                "Mid": "+3",
+                "High": "+1"
+              },
+              "purpose": "Boost the upper mids and overall clarity to achieve 'chewy upper mids' while keeping the low end controlled.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a short, natural room ambience as requested, keeping the sound dry and focused.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "Plate (if a more metallic reverb is desired)"
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a hard rock guitar track, so the rig focuses on recreating an aggressive, vintage crunch tone. The Chorus module is used as a substitute for a dedicated phaser/flanger effect."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the generic Greenback IR for a more authentic, high-quality vintage 4x12 model to better capture the desired 'brown' EVH tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage greenback 4x12 IR",
+              "reason": "Enhance authenticity of the classic Plexi/EVH sound and upper-mid definition.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved clarity and vintage character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Van Halen - Drop Dead Legs - Valeton GP-180",
+        "song": {
+          "artist": "Van Halen",
+          "title": "Drop Dead Legs",
+          "album": "",
+          "year": null,
+          "genre": "hard rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "brown EVH crunch with airy top and loose low mids",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A vintage British crunch tone using the UK 50 or UK SLP model, paired with a Greenback-style cabinet and subtle Chorus/Room effects to capture the 'brown EVH' sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and noise inherent in high-gain rock tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the foundational 'brown' grit and mid-hump characteristic of Plexi/EVH tones without excessive modern gain.",
+            "matchQuality": "close",
+            "gap": "The GP-180 lacks a dedicated Tube Screamer model, but Green OD is the closest analog for this classic boost role.",
+            "alternatives": [
+              "Blues OD (if more grit is needed)"
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/saturation",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "4.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Add controlled saturation and upper harmonic content to push the amp into a crunchy, saturated state.",
+            "matchQuality": "close",
+            "gap": "While RAT-style is used for grit, its aggressive nature must be balanced by the Green OD. It helps achieve the 'crunch' without modern high gain.",
+            "alternatives": [
+              "Distortion (if a smoother saturation is preferred)"
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Midrange": "7",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the classic British Plexi/Super Lead sound required for EVH's tone, providing the core 'brown' character.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              "UK SLP (if a slightly more aggressive edge is desired)"
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Mimic the classic Greenback-style cabinet sound associated with this era of hard rock.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              "Mess 4x12 (if a slightly darker tone is acceptable)"
+            ]
+          },
+          {
+            "order": 6,
+            "role": "modulation/flange",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3.5 Hz",
+              "Depth": "2",
+              "Mix": "4"
+            },
+            "purpose": "Introduce the requested 'slight flange/phase vibe' subtly without making it overly atmospheric.",
+            "matchQuality": "close",
+            "gap": "The Chorus module is used to simulate a subtle phase or flanger effect, as dedicated phaser/flanger models are absent.",
+            "alternatives": [
+              "Tremolo (if the movement needs to be more rhythmic)"
+            ]
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low": "-2",
+              "Mid": "+3",
+              "High": "+1"
+            },
+            "purpose": "Boost the upper mids and overall clarity to achieve 'chewy upper mids' while keeping the low end controlled.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide a short, natural room ambience as requested, keeping the sound dry and focused.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              "Plate (if a more metallic reverb is desired)"
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "brown EVH crunch with airy top and loose low mids",
+          "toneProfile": "brown EVH crunch with airy top and loose low mids",
+          "idealSignalChain": "EVH-style humbucker | plexi/Super Lead | 4x12 greenback | small room",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "EVH-style humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "plexi/Super Lead",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 greenback",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "saturated but not modern high gain",
+            "chewy upper mids",
+            "slight flange/phase vibe",
+            "short room or dry"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic Plexi/Brown tones, emphasizing upper mids and controlled saturation.",
+          "bestMatchSummary": "A vintage British crunch tone using the UK 50 or UK SLP model, paired with a Greenback-style cabinet and subtle Chorus/Room effects to capture the 'brown EVH' sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and noise inherent in high-gain rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the foundational 'brown' grit and mid-hump characteristic of Plexi/EVH tones without excessive modern gain.",
+              "matchQuality": "close",
+              "gap": "The GP-180 lacks a dedicated Tube Screamer model, but Green OD is the closest analog for this classic boost role.",
+              "alternatives": [
+                "Blues OD (if more grit is needed)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/saturation",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "4.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add controlled saturation and upper harmonic content to push the amp into a crunchy, saturated state.",
+              "matchQuality": "close",
+              "gap": "While RAT-style is used for grit, its aggressive nature must be balanced by the Green OD. It helps achieve the 'crunch' without modern high gain.",
+              "alternatives": [
+                "Distortion (if a smoother saturation is preferred)"
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Midrange": "7",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic British Plexi/Super Lead sound required for EVH's tone, providing the core 'brown' character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "UK SLP (if a slightly more aggressive edge is desired)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Mimic the classic Greenback-style cabinet sound associated with this era of hard rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "Mess 4x12 (if a slightly darker tone is acceptable)"
+              ]
+            },
+            {
+              "order": 6,
+              "role": "modulation/flange",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3.5 Hz",
+                "Depth": "2",
+                "Mix": "4"
+              },
+              "purpose": "Introduce the requested 'slight flange/phase vibe' subtly without making it overly atmospheric.",
+              "matchQuality": "close",
+              "gap": "The Chorus module is used to simulate a subtle phase or flanger effect, as dedicated phaser/flanger models are absent.",
+              "alternatives": [
+                "Tremolo (if the movement needs to be more rhythmic)"
+              ]
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2",
+                "Mid": "+3",
+                "High": "+1"
+              },
+              "purpose": "Boost the upper mids and overall clarity to achieve 'chewy upper mids' while keeping the low end controlled.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide a short, natural room ambience as requested, keeping the sound dry and focused.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                "Plate (if a more metallic reverb is desired)"
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the generic Greenback IR for a more authentic, high-quality vintage 4x12 model to better capture the desired 'brown' EVH tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage greenback 4x12 IR",
+              "reason": "Enhance authenticity of the classic Plexi/EVH sound and upper-mid definition.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved clarity and vintage character",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "swap JCM800 for plexi/brown sound",
+          "drop fuzz and wah as core elements",
+          "keep effects subtle, not atmospheric"
+        ],
+        "warnings": [
+          "The source material is a hard rock guitar track, so the rig focuses on recreating an aggressive, vintage crunch tone. The Chorus module is used as a substitute for a dedicated phaser/flanger effect."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 17.755,
+      "prompt_chars": 1001,
+      "response_chars": 564,
+      "usage": {
+        "prompt_eval_count": 325,
+        "eval_count": 147,
+        "total_duration": 17752137700,
+        "prompt_eval_duration": 67793000,
+        "eval_duration": 1065088000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.94,
+      "prompt_chars": 5505,
+      "response_chars": 568,
+      "usage": {
+        "input_tokens": 1533,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 160,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1693
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 88.84,
+      "prompt_chars": 3656,
+      "response_chars": 5465,
+      "usage": {
+        "prompt_eval_count": 1242,
+        "eval_count": 1541,
+        "total_duration": 88818888300,
+        "prompt_eval_duration": 144910000,
+        "eval_duration": 10934671000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.144,
+      "prompt_chars": 7654,
+      "response_chars": 632,
+      "usage": {
+        "prompt_eval_count": 2140,
+        "eval_count": 171,
+        "total_duration": 11122417100,
+        "prompt_eval_duration": 228247000,
+        "eval_duration": 1280634000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 14.647,
+      "prompt_chars": 2775,
+      "response_chars": 175,
+      "usage": {
+        "prompt_eval_count": 889,
+        "eval_count": 47,
+        "total_duration": 14621806000,
+        "prompt_eval_duration": 111104000,
+        "eval_duration": 336520000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Van Halen",
+      "title": "Drop Dead Legs",
+      "album": "",
+      "year": null,
+      "genre": "hard rock"
+    },
+    "rig": {
+      "rigName": "Van Halen - Drop Dead Legs - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "brown EVH crunch with airy top and loose low mids",
+      "signalChainSummary": "A vintage British crunch tone using the UK 50 or UK SLP model, paired with a Greenback-style cabinet and subtle Chorus/Room effects to capture the 'brown EVH' sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and noise inherent in high-gain rock tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the foundational 'brown' grit and mid-hump characteristic of Plexi/EVH tones without excessive modern gain.",
+          "matchQuality": "close",
+          "gap": "The GP-180 lacks a dedicated Tube Screamer model, but Green OD is the closest analog for this classic boost role.",
+          "alternatives": [
+            {
+              "model": "Blues OD (if more grit is needed)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/saturation",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "4.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Add controlled saturation and upper harmonic content to push the amp into a crunchy, saturated state.",
+          "matchQuality": "close",
+          "gap": "While RAT-style is used for grit, its aggressive nature must be balanced by the Green OD. It helps achieve the 'crunch' without modern high gain.",
+          "alternatives": [
+            {
+              "model": "Distortion (if a smoother saturation is preferred)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Midrange": "7",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the classic British Plexi/Super Lead sound required for EVH's tone, providing the core 'brown' character.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK SLP (if a slightly more aggressive edge is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Mimic the classic Greenback-style cabinet sound associated with this era of hard rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Mess 4x12 (if a slightly darker tone is acceptable)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "modulation/flange",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3.5 Hz",
+            "Depth": "2",
+            "Mix": "4"
+          },
+          "purpose": "Introduce the requested 'slight flange/phase vibe' subtly without making it overly atmospheric.",
+          "matchQuality": "close",
+          "gap": "The Chorus module is used to simulate a subtle phase or flanger effect, as dedicated phaser/flanger models are absent.",
+          "alternatives": [
+            {
+              "model": "Tremolo (if the movement needs to be more rhythmic)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low": "-2",
+            "Mid": "+3",
+            "High": "+1"
+          },
+          "purpose": "Boost the upper mids and overall clarity to achieve 'chewy upper mids' while keeping the low end controlled.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide a short, natural room ambience as requested, keeping the sound dry and focused.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Plate (if a more metallic reverb is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "brown EVH crunch with airy top and loose low mids",
+      "mustHave": [
+        "saturated but not modern high gain",
+        "chewy upper mids",
+        "slight flange/phase vibe",
+        "short room or dry"
+      ],
+      "avoid": [
+        "JCM800 bite",
+        "fuzz",
+        "wah",
+        "heavy delay",
+        "scooped clean"
+      ],
+      "gearClues": [
+        "EVH-style humbucker",
+        "plexi/Super Lead",
+        "4x12 greenback",
+        "small room"
+      ],
+      "corrections": [
+        "swap JCM800 for plexi/brown sound",
+        "drop fuzz and wah as core elements",
+        "keep effects subtle, not atmospheric"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "hard rock",
+      "styleTags": [
+        "classic rock",
+        "arena rock"
+      ],
+      "targetTone": "brown EVH crunch with airy top and loose low mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the generic Greenback IR for a more authentic, high-quality vintage 4x12 model to better capture the desired 'brown' EVH tone.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage greenback 4x12 IR",
+          "reason": "Enhance authenticity of the classic Plexi/EVH sound and upper-mid definition.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Improved clarity and vintage character",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1968,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1073 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1851,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Herbie_Hancock__Chameleon.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Herbie Hancock",
+    "title": "Chameleon",
+    "album": "",
+    "year": null,
+    "genre": "jazz fusion"
+  },
+  "genreClassification": {
+    "genre": "jazz fusion",
+    "subgenres": [
+      "funk",
+      "groove"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic example of jazz-funk, matching the wah and compressed tone profile."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Funky, percussive funk/jazz fusion tone",
+      "signatureElements": [
+        "Wah pedal sweeps (wah)",
+        "Tight, punchy rhythm playing",
+        "Slightly overdriven crunch or fuzz for texture",
+        "Deep bass response"
+      ],
+      "gearHypotheses": [
+        "Overdrive/Fuzz emulation (for grit)",
+        "Wah effect unit",
+        "Compressor (for sustain and punch)"
+      ],
+      "avoid": [
+        "Clean jazz ballad tones",
+        "Heavy distortion (metal/rock)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "funky compressed rhythm with wah emphasis and light grit",
+      "mustHave": [
+        "wah sweeps",
+        "tight muted attack",
+        "compressed punch",
+        "light fuzz/grit"
+      ],
+      "avoid": [
+        "clean jazz tone",
+        "heavy metal distortion",
+        "washy reverb"
+      ],
+      "gearClues": [
+        "wah pedal",
+        "compressor",
+        "light overdrive",
+        "single-coil or split-coil"
+      ],
+      "corrections": [
+        "drop deep bass as a target",
+        "keep grit subtle",
+        "make wah the key texture"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "funky compressed rhythm with wah emphasis and light grit",
+    "mustHave": [
+      "wah sweeps",
+      "tight muted attack",
+      "compressed punch",
+      "light fuzz/grit"
+    ],
+    "avoid": [
+      "clean jazz tone",
+      "heavy metal distortion",
+      "washy reverb"
+    ],
+    "gearClues": [
+      "wah pedal",
+      "compressor",
+      "light overdrive",
+      "single-coil or split-coil"
+    ],
+    "corrections": [
+      "drop deep bass as a target",
+      "keep grit subtle",
+      "make wah the key texture"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, funky rhythm tones using compression and wah, simulating a clean jazz/fusion sound with subtle grit.",
+          "bestMatchSummary": "Gate -> Comp -> Green OD -> Wah -> UK 50 -> UK Vintage 4x12 -> Chorus -> Digital Delay -> Room",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Tighten the rhythm and eliminate unwanted noise inherent in funk/fusion playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-10 dB",
+                "Ratio": "3:1"
+              },
+              "purpose": "Achieve the 'compressed punch' and tight muted attack required for funk rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/grit",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%"
+              },
+              "purpose": "Provide the 'light fuzz/grit' and subtle harmonic richness without sounding like heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a versatile choice for light grit, simulating tube breakup suitable for fusion tones.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more aggressive option if the required grit needs to be noticeable."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "wah effect",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "Midrange Sweep"
+              },
+              "purpose": "Implement the key 'wah sweeps' and texture required for the funk genre.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "4/10",
+                "Treble": "6/10"
+              },
+              "purpose": "Select a clean, articulate British amp tone suitable for the bright, punchy sound of jazz fusion.",
+              "matchQuality": "close",
+              "gap": "The UK 50 provides enough headroom and clarity without being overly aggressive like the AC30 or too dark like the Bellman.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if a more American, chimey clean tone is preferred."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a balanced and articulate cabinet sound that complements the UK 50 amp model.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/EQ",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "20%"
+              },
+              "purpose": "Add subtle movement and width to the rhythm parts without muddying the funk punch.",
+              "matchQuality": "close",
+              "gap": "Chorus adds a nice 'glue' effect, enhancing the spaciousness needed for fusion while keeping the tone focused.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Add rhythmic depth and space to the phrases, crucial for jazz/fusion phrasing.",
+              "matchQuality": "close",
+              "gap": "A moderate delay adds complexity without distracting from the main rhythm groove.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%"
+              },
+              "purpose": "Provide a subtle sense of space and depth without the washiness that was requested to be avoided.",
+              "matchQuality": "close",
+              "gap": "Room reverb is generally less intrusive than Plate or Spring, fitting the tight funk aesthetic.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "1.0"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The tone is optimized for a funky, rhythm-focused electric guitar performance. The original recording's deep bass elements are intentionally excluded from the signal chain focus."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism for a more articulate and punchy funk/fusion sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-definition 4x12 IR (e.g., Ampeg or Fender)",
+              "reason": "Enhance the tight, articulate punch needed for funk/fusion rhythm.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Herbie Hancock - Chameleon - Valeton GP-180",
+        "song": {
+          "artist": "Herbie Hancock",
+          "title": "Chameleon",
+          "album": "",
+          "year": null,
+          "genre": "jazz fusion"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "funky compressed rhythm with wah emphasis and light grit",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Gate -> Comp -> Green OD -> Wah -> UK 50 -> UK Vintage 4x12 -> Chorus -> Digital Delay -> Room",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Tighten the rhythm and eliminate unwanted noise inherent in funk/fusion playing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-10 dB",
+              "Ratio": "3:1"
+            },
+            "purpose": "Achieve the 'compressed punch' and tight muted attack required for funk rhythm playing.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "overdrive/grit",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "65%"
+            },
+            "purpose": "Provide the 'light fuzz/grit' and subtle harmonic richness without sounding like heavy distortion.",
+            "matchQuality": "close",
+            "gap": "The Green OD is a versatile choice for light grit, simulating tube breakup suitable for fusion tones.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly more aggressive option if the required grit needs to be noticeable."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "wah effect",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": true,
+            "settings": {
+              "Frequency": "Midrange Sweep"
+            },
+            "purpose": "Implement the key 'wah sweeps' and texture required for the funk genre.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "4/10",
+              "Treble": "6/10"
+            },
+            "purpose": "Select a clean, articulate British amp tone suitable for the bright, punchy sound of jazz fusion.",
+            "matchQuality": "close",
+            "gap": "The UK 50 provides enough headroom and clarity without being overly aggressive like the AC30 or too dark like the Bellman.",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "A good alternative if a more American, chimey clean tone is preferred."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a balanced and articulate cabinet sound that complements the UK 50 amp model.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/EQ",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "20%"
+            },
+            "purpose": "Add subtle movement and width to the rhythm parts without muddying the funk punch.",
+            "matchQuality": "close",
+            "gap": "Chorus adds a nice 'glue' effect, enhancing the spaciousness needed for fusion while keeping the tone focused.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2"
+            },
+            "purpose": "Add rhythmic depth and space to the phrases, crucial for jazz/fusion phrasing.",
+            "matchQuality": "close",
+            "gap": "A moderate delay adds complexity without distracting from the main rhythm groove.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%"
+            },
+            "purpose": "Provide a subtle sense of space and depth without the washiness that was requested to be avoided.",
+            "matchQuality": "close",
+            "gap": "Room reverb is generally less intrusive than Plate or Spring, fitting the tight funk aesthetic.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "1.0"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "funky compressed rhythm with wah emphasis and light grit",
+          "toneProfile": "funky compressed rhythm with wah emphasis and light grit",
+          "idealSignalChain": "wah pedal | compressor | light overdrive | single-coil or split-coil",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "wah pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "compressor",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light overdrive",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coil or split-coil",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "wah sweeps",
+            "tight muted attack",
+            "compressed punch",
+            "light fuzz/grit"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, funky rhythm tones using compression and wah, simulating a clean jazz/fusion sound with subtle grit.",
+          "bestMatchSummary": "Gate -> Comp -> Green OD -> Wah -> UK 50 -> UK Vintage 4x12 -> Chorus -> Digital Delay -> Room",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Tighten the rhythm and eliminate unwanted noise inherent in funk/fusion playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-10 dB",
+                "Ratio": "3:1"
+              },
+              "purpose": "Achieve the 'compressed punch' and tight muted attack required for funk rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/grit",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "65%"
+              },
+              "purpose": "Provide the 'light fuzz/grit' and subtle harmonic richness without sounding like heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is a versatile choice for light grit, simulating tube breakup suitable for fusion tones.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more aggressive option if the required grit needs to be noticeable."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "wah effect",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "Midrange Sweep"
+              },
+              "purpose": "Implement the key 'wah sweeps' and texture required for the funk genre.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "4/10",
+                "Treble": "6/10"
+              },
+              "purpose": "Select a clean, articulate British amp tone suitable for the bright, punchy sound of jazz fusion.",
+              "matchQuality": "close",
+              "gap": "The UK 50 provides enough headroom and clarity without being overly aggressive like the AC30 or too dark like the Bellman.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if a more American, chimey clean tone is preferred."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a balanced and articulate cabinet sound that complements the UK 50 amp model.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/EQ",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "20%"
+              },
+              "purpose": "Add subtle movement and width to the rhythm parts without muddying the funk punch.",
+              "matchQuality": "close",
+              "gap": "Chorus adds a nice 'glue' effect, enhancing the spaciousness needed for fusion while keeping the tone focused.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Add rhythmic depth and space to the phrases, crucial for jazz/fusion phrasing.",
+              "matchQuality": "close",
+              "gap": "A moderate delay adds complexity without distracting from the main rhythm groove.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%"
+              },
+              "purpose": "Provide a subtle sense of space and depth without the washiness that was requested to be avoided.",
+              "matchQuality": "close",
+              "gap": "Room reverb is generally less intrusive than Plate or Spring, fitting the tight funk aesthetic.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "1.0"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism for a more articulate and punchy funk/fusion sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-definition 4x12 IR (e.g., Ampeg or Fender)",
+              "reason": "Enhance the tight, articulate punch needed for funk/fusion rhythm.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop deep bass as a target",
+          "keep grit subtle",
+          "make wah the key texture"
+        ],
+        "warnings": [
+          "The tone is optimized for a funky, rhythm-focused electric guitar performance. The original recording's deep bass elements are intentionally excluded from the signal chain focus."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 21.265,
+      "prompt_chars": 1003,
+      "response_chars": 419,
+      "usage": {
+        "prompt_eval_count": 325,
+        "eval_count": 110,
+        "total_duration": 21235737600,
+        "prompt_eval_duration": 185403000,
+        "eval_duration": 1923412000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.808,
+      "prompt_chars": 5350,
+      "response_chars": 507,
+      "usage": {
+        "input_tokens": 1502,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 132,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1634
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 113.624,
+      "prompt_chars": 3583,
+      "response_chars": 5596,
+      "usage": {
+        "prompt_eval_count": 1201,
+        "eval_count": 1537,
+        "total_duration": 113564095600,
+        "prompt_eval_duration": 281262000,
+        "eval_duration": 21345654000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 5.97,
+      "prompt_chars": 7722,
+      "response_chars": 547,
+      "usage": {
+        "prompt_eval_count": 2095,
+        "eval_count": 150,
+        "total_duration": 5924502500,
+        "prompt_eval_duration": 244622000,
+        "eval_duration": 1137871000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 16.07,
+      "prompt_chars": 2706,
+      "response_chars": 185,
+      "usage": {
+        "prompt_eval_count": 858,
+        "eval_count": 50,
+        "total_duration": 16047229800,
+        "prompt_eval_duration": 272143000,
+        "eval_duration": 997509000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Herbie Hancock",
+      "title": "Chameleon",
+      "album": "",
+      "year": null,
+      "genre": "jazz fusion"
+    },
+    "rig": {
+      "rigName": "Herbie Hancock - Chameleon - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "funky compressed rhythm with wah emphasis and light grit",
+      "signalChainSummary": "Gate -> Comp -> Green OD -> Wah -> UK 50 -> UK Vintage 4x12 -> Chorus -> Digital Delay -> Room",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Tighten the rhythm and eliminate unwanted noise inherent in funk/fusion playing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-10 dB",
+            "Ratio": "3:1"
+          },
+          "purpose": "Achieve the 'compressed punch' and tight muted attack required for funk rhythm playing.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "overdrive/grit",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "65%"
+          },
+          "purpose": "Provide the 'light fuzz/grit' and subtle harmonic richness without sounding like heavy distortion.",
+          "matchQuality": "close",
+          "gap": "The Green OD is a versatile choice for light grit, simulating tube breakup suitable for fusion tones.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly more aggressive option if the required grit needs to be noticeable."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "wah effect",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": true,
+          "settings": {
+            "Frequency": "Midrange Sweep"
+          },
+          "purpose": "Implement the key 'wah sweeps' and texture required for the funk genre.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "4/10",
+            "Treble": "6/10"
+          },
+          "purpose": "Select a clean, articulate British amp tone suitable for the bright, punchy sound of jazz fusion.",
+          "matchQuality": "close",
+          "gap": "The UK 50 provides enough headroom and clarity without being overly aggressive like the AC30 or too dark like the Bellman.",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "A good alternative if a more American, chimey clean tone is preferred."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a balanced and articulate cabinet sound that complements the UK 50 amp model.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/EQ",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "20%"
+          },
+          "purpose": "Add subtle movement and width to the rhythm parts without muddying the funk punch.",
+          "matchQuality": "close",
+          "gap": "Chorus adds a nice 'glue' effect, enhancing the spaciousness needed for fusion while keeping the tone focused.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2"
+          },
+          "purpose": "Add rhythmic depth and space to the phrases, crucial for jazz/fusion phrasing.",
+          "matchQuality": "close",
+          "gap": "A moderate delay adds complexity without distracting from the main rhythm groove.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%"
+          },
+          "purpose": "Provide a subtle sense of space and depth without the washiness that was requested to be avoided.",
+          "matchQuality": "close",
+          "gap": "Room reverb is generally less intrusive than Plate or Spring, fitting the tight funk aesthetic.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "1.0"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "funky compressed rhythm with wah emphasis and light grit",
+      "mustHave": [
+        "wah sweeps",
+        "tight muted attack",
+        "compressed punch",
+        "light fuzz/grit"
+      ],
+      "avoid": [
+        "clean jazz tone",
+        "heavy metal distortion",
+        "washy reverb"
+      ],
+      "gearClues": [
+        "wah pedal",
+        "compressor",
+        "light overdrive",
+        "single-coil or split-coil"
+      ],
+      "corrections": [
+        "drop deep bass as a target",
+        "keep grit subtle",
+        "make wah the key texture"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "jazz fusion",
+      "styleTags": [
+        "funk",
+        "groove"
+      ],
+      "targetTone": "funky compressed rhythm with wah emphasis and light grit",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism for a more articulate and punchy funk/fusion sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "High-definition 4x12 IR (e.g., Ampeg or Fender)",
+          "reason": "Enhance the tight, articulate punch needed for funk/fusion rhythm.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1851,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

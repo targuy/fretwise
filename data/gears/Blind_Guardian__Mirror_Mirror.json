@@ -1,0 +1,1085 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1806,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Blind_Guardian__Mirror_Mirror.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Blind Guardian",
+    "title": "Mirror Mirror",
+    "album": "",
+    "year": null,
+    "genre": "power metal"
+  },
+  "genreClassification": {
+    "genre": "power metal",
+    "subgenres": [
+      "epic metal",
+      "symphonic metal"
+    ],
+    "confidence": "high",
+    "rationale": "Blind Guardian is a foundational band in the power/symphonic metal genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "High gain, aggressive crunch with clear articulation",
+      "signatureElements": [
+        "fuzz",
+        "crunch",
+        "delay",
+        "reverb",
+        "high-gain amp/cab"
+      ],
+      "gearHypotheses": [
+        "Overdriven Tube Screamer style pedal (for mid-hump)",
+        "Modern high-gain distortion pedal",
+        "Delay unit (dotted eighth notes)"
+      ],
+      "avoid": [
+        "scooped mids",
+        "overly clean tones",
+        "vintage tweed sounds"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "tight high-gain metal crunch with bright attack",
+      "mustHave": [
+        "fast palm-mute clarity",
+        "tight low end",
+        "upper-mid bite",
+        "lead delay",
+        "dry reverb"
+      ],
+      "avoid": [
+        "fuzz",
+        "scooped mids",
+        "clean twang",
+        "vintage tweed"
+      ],
+      "gearClues": [
+        "humbuckers",
+        "Mesa/modern high-gain amp",
+        "4x12 cab",
+        "Tube Screamer boost",
+        "digital delay"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "replace crunch with tight metal distortion",
+        "keep delay but not dotted-eighth assumption"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "tight high-gain metal crunch with bright attack",
+    "mustHave": [
+      "fast palm-mute clarity",
+      "tight low end",
+      "upper-mid bite",
+      "lead delay",
+      "dry reverb"
+    ],
+    "avoid": [
+      "fuzz",
+      "scooped mids",
+      "clean twang",
+      "vintage tweed"
+    ],
+    "gearClues": [
+      "humbuckers",
+      "Mesa/modern high-gain amp",
+      "4x12 cab",
+      "Tube Screamer boost",
+      "digital delay"
+    ],
+    "corrections": [
+      "drop fuzz",
+      "replace crunch with tight metal distortion",
+      "keep delay but not dotted-eighth assumption"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "High-gain metal tone simulation using modern high-gain amps and tight distortion, focusing on clarity and upper-mid bite.",
+          "bestMatchSummary": "Gate 1 -> Boost (TS style) -> Distortion (high gain) -> AMP (Recti/UK 800) -> CAB/IR (4x12) -> EQ -> Chorus -> Digital Delay -> Room",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Eliminate hum and noise inherent in high-gain metal playing.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Simulate the Tube Screamer boost for tightening up the low end and adding upper-mid bite.",
+              "matchQuality": "close",
+              "gap": "The GP-180 does not have a dedicated TS model, but 'Boost' serves the function of an aggressive mid-hump overdrive.",
+              "alternatives": [
+                "OD 9 (if more grit is desired)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "75%",
+                "Tone": "60%",
+                "Level": "80%"
+              },
+              "purpose": "Provide the core high-gain metal crunch and sustain.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                "RAT-style (if a more aggressive, dirtier edge is needed)"
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "Recti",
+              "active": true,
+              "settings": {
+                "Gain": "70%",
+                "Bass": "65%",
+                "Mids": "75%",
+                "Treble": "65%"
+              },
+              "purpose": "Model a modern high-gain amp suitable for metal genres, providing tight low end and aggressive upper mids.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                "UK 800 (if a slightly more British/punchy sound is preferred)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "Mess 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide a robust and articulate cabinet sound suitable for modern metal tones.",
+              "matchQuality": "close",
+              "gap": "While 'UK Vintage 4x12' is available, 'Mess 4x12' offers a more versatile, aggressive voicing better suited to the required tight high-gain tone.",
+              "alternatives": [
+                "UK Vintage 4x12"
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-3 dB",
+                "Mids": "+4 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Sculpt the tone by cutting unnecessary low-end mud and boosting upper-mids for maximum bite and clarity.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/chorus",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "20%",
+                "Feedback": "15%"
+              },
+              "purpose": "Add subtle width and movement to the overall tone without compromising the tightness of the rhythm playing.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "40%",
+                "Mix": "30%"
+              },
+              "purpose": "Provide the required lead delay effect for melodic passages.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5 s",
+                "Mix": "15%"
+              },
+              "purpose": "Add a subtle sense of space and dimension without sounding overly wet or muddy.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                "Plate (if a more controlled decay is preferred)"
+              ]
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and overall tone articulation.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., modern 4x12)",
+              "reason": "Enhance the tightness and definition of the high-gain metal crunch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Blind Guardian - Mirror Mirror - Valeton GP-180",
+        "song": {
+          "artist": "Blind Guardian",
+          "title": "Mirror Mirror",
+          "album": "",
+          "year": null,
+          "genre": "power metal"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "tight high-gain metal crunch with bright attack",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Gate 1 -> Boost (TS style) -> Distortion (high gain) -> AMP (Recti/UK 800) -> CAB/IR (4x12) -> EQ -> Chorus -> Digital Delay -> Room",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Eliminate hum and noise inherent in high-gain metal playing.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Simulate the Tube Screamer boost for tightening up the low end and adding upper-mid bite.",
+            "matchQuality": "close",
+            "gap": "The GP-180 does not have a dedicated TS model, but 'Boost' serves the function of an aggressive mid-hump overdrive.",
+            "alternatives": [
+              "OD 9 (if more grit is desired)"
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "75%",
+              "Tone": "60%",
+              "Level": "80%"
+            },
+            "purpose": "Provide the core high-gain metal crunch and sustain.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": [
+              "RAT-style (if a more aggressive, dirtier edge is needed)"
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "Recti",
+            "active": true,
+            "settings": {
+              "Gain": "70%",
+              "Bass": "65%",
+              "Mids": "75%",
+              "Treble": "65%"
+            },
+            "purpose": "Model a modern high-gain amp suitable for metal genres, providing tight low end and aggressive upper mids.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": [
+              "UK 800 (if a slightly more British/punchy sound is preferred)"
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "Mess 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "Distance": "3 ft"
+            },
+            "purpose": "Provide a robust and articulate cabinet sound suitable for modern metal tones.",
+            "matchQuality": "close",
+            "gap": "While 'UK Vintage 4x12' is available, 'Mess 4x12' offers a more versatile, aggressive voicing better suited to the required tight high-gain tone.",
+            "alternatives": [
+              "UK Vintage 4x12"
+            ]
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-3 dB",
+              "Mids": "+4 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Sculpt the tone by cutting unnecessary low-end mud and boosting upper-mids for maximum bite and clarity.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/chorus",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "20%",
+              "Feedback": "15%"
+            },
+            "purpose": "Add subtle width and movement to the overall tone without compromising the tightness of the rhythm playing.",
+            "matchQuality": "close",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "350 ms",
+              "Feedback": "40%",
+              "Mix": "30%"
+            },
+            "purpose": "Provide the required lead delay effect for melodic passages.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5 s",
+              "Mix": "15%"
+            },
+            "purpose": "Add a subtle sense of space and dimension without sounding overly wet or muddy.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": [
+              "Plate (if a more controlled decay is preferred)"
+            ]
+          }
+        ],
+        "general": {
+          "targetSound": "tight high-gain metal crunch with bright attack",
+          "toneProfile": "tight high-gain metal crunch with bright attack",
+          "idealSignalChain": "humbuckers | Mesa/modern high-gain amp | 4x12 cab | Tube Screamer boost | digital delay",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "humbuckers",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Mesa/modern high-gain amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Tube Screamer boost",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "digital delay",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fast palm-mute clarity",
+            "tight low end",
+            "upper-mid bite",
+            "lead delay",
+            "dry reverb"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "High-gain metal tone simulation using modern high-gain amps and tight distortion, focusing on clarity and upper-mid bite.",
+          "bestMatchSummary": "Gate 1 -> Boost (TS style) -> Distortion (high gain) -> AMP (Recti/UK 800) -> CAB/IR (4x12) -> EQ -> Chorus -> Digital Delay -> Room",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Eliminate hum and noise inherent in high-gain metal playing.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Simulate the Tube Screamer boost for tightening up the low end and adding upper-mid bite.",
+              "matchQuality": "close",
+              "gap": "The GP-180 does not have a dedicated TS model, but 'Boost' serves the function of an aggressive mid-hump overdrive.",
+              "alternatives": [
+                "OD 9 (if more grit is desired)"
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "75%",
+                "Tone": "60%",
+                "Level": "80%"
+              },
+              "purpose": "Provide the core high-gain metal crunch and sustain.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                "RAT-style (if a more aggressive, dirtier edge is needed)"
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "Recti",
+              "active": true,
+              "settings": {
+                "Gain": "70%",
+                "Bass": "65%",
+                "Mids": "75%",
+                "Treble": "65%"
+              },
+              "purpose": "Model a modern high-gain amp suitable for metal genres, providing tight low end and aggressive upper mids.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                "UK 800 (if a slightly more British/punchy sound is preferred)"
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "Mess 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "Distance": "3 ft"
+              },
+              "purpose": "Provide a robust and articulate cabinet sound suitable for modern metal tones.",
+              "matchQuality": "close",
+              "gap": "While 'UK Vintage 4x12' is available, 'Mess 4x12' offers a more versatile, aggressive voicing better suited to the required tight high-gain tone.",
+              "alternatives": [
+                "UK Vintage 4x12"
+              ]
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-3 dB",
+                "Mids": "+4 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Sculpt the tone by cutting unnecessary low-end mud and boosting upper-mids for maximum bite and clarity.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/chorus",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "20%",
+                "Feedback": "15%"
+              },
+              "purpose": "Add subtle width and movement to the overall tone without compromising the tightness of the rhythm playing.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "40%",
+                "Mix": "30%"
+              },
+              "purpose": "Provide the required lead delay effect for melodic passages.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5 s",
+                "Mix": "15%"
+              },
+              "purpose": "Add a subtle sense of space and dimension without sounding overly wet or muddy.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                "Plate (if a more controlled decay is preferred)"
+              ]
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and overall tone articulation.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., modern 4x12)",
+              "reason": "Enhance the tightness and definition of the high-gain metal crunch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and punch",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop fuzz",
+          "replace crunch with tight metal distortion",
+          "keep delay but not dotted-eighth assumption"
+        ],
+        "warnings": [],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.179,
+      "prompt_chars": 996,
+      "response_chars": 394,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 104,
+        "total_duration": 12176634000,
+        "prompt_eval_duration": 61053000,
+        "eval_duration": 710049000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.106,
+      "prompt_chars": 5330,
+      "response_chars": 552,
+      "usage": {
+        "input_tokens": 1493,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 150,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1643
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 23.058,
+      "prompt_chars": 3642,
+      "response_chars": 5163,
+      "usage": {
+        "prompt_eval_count": 1225,
+        "eval_count": 1526,
+        "total_duration": 23051490200,
+        "prompt_eval_duration": 162775000,
+        "eval_duration": 10613210000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 2.545,
+      "prompt_chars": 7336,
+      "response_chars": 514,
+      "usage": {
+        "prompt_eval_count": 2108,
+        "eval_count": 140,
+        "total_duration": 2538598700,
+        "prompt_eval_duration": 225626000,
+        "eval_duration": 973771000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.342,
+      "prompt_chars": 2791,
+      "response_chars": 184,
+      "usage": {
+        "prompt_eval_count": 910,
+        "eval_count": 50,
+        "total_duration": 11320504500,
+        "prompt_eval_duration": 185630000,
+        "eval_duration": 353963000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Blind Guardian",
+      "title": "Mirror Mirror",
+      "album": "",
+      "year": null,
+      "genre": "power metal"
+    },
+    "rig": {
+      "rigName": "Blind Guardian - Mirror Mirror - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "tight high-gain metal crunch with bright attack",
+      "signalChainSummary": "Gate 1 -> Boost (TS style) -> Distortion (high gain) -> AMP (Recti/UK 800) -> CAB/IR (4x12) -> EQ -> Chorus -> Digital Delay -> Room",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Eliminate hum and noise inherent in high-gain metal playing.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Simulate the Tube Screamer boost for tightening up the low end and adding upper-mid bite.",
+          "matchQuality": "close",
+          "gap": "The GP-180 does not have a dedicated TS model, but 'Boost' serves the function of an aggressive mid-hump overdrive.",
+          "alternatives": [
+            {
+              "model": "OD 9 (if more grit is desired)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "75%",
+            "Tone": "60%",
+            "Level": "80%"
+          },
+          "purpose": "Provide the core high-gain metal crunch and sustain.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": [
+            {
+              "model": "RAT-style (if a more aggressive, dirtier edge is needed)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "Recti",
+          "active": true,
+          "settings": {
+            "Gain": "70%",
+            "Bass": "65%",
+            "Mids": "75%",
+            "Treble": "65%"
+          },
+          "purpose": "Model a modern high-gain amp suitable for metal genres, providing tight low end and aggressive upper mids.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": [
+            {
+              "model": "UK 800 (if a slightly more British/punchy sound is preferred)",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "Mess 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "Distance": "3 ft"
+          },
+          "purpose": "Provide a robust and articulate cabinet sound suitable for modern metal tones.",
+          "matchQuality": "close",
+          "gap": "While 'UK Vintage 4x12' is available, 'Mess 4x12' offers a more versatile, aggressive voicing better suited to the required tight high-gain tone.",
+          "alternatives": [
+            {
+              "model": "UK Vintage 4x12",
+              "reason": ""
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-3 dB",
+            "Mids": "+4 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Sculpt the tone by cutting unnecessary low-end mud and boosting upper-mids for maximum bite and clarity.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/chorus",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "20%",
+            "Feedback": "15%"
+          },
+          "purpose": "Add subtle width and movement to the overall tone without compromising the tightness of the rhythm playing.",
+          "matchQuality": "close",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "350 ms",
+            "Feedback": "40%",
+            "Mix": "30%"
+          },
+          "purpose": "Provide the required lead delay effect for melodic passages.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5 s",
+            "Mix": "15%"
+          },
+          "purpose": "Add a subtle sense of space and dimension without sounding overly wet or muddy.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": [
+            {
+              "model": "Plate (if a more controlled decay is preferred)",
+              "reason": ""
+            }
+          ]
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "tight high-gain metal crunch with bright attack",
+      "mustHave": [
+        "fast palm-mute clarity",
+        "tight low end",
+        "upper-mid bite",
+        "lead delay",
+        "dry reverb"
+      ],
+      "avoid": [
+        "fuzz",
+        "scooped mids",
+        "clean twang",
+        "vintage tweed"
+      ],
+      "gearClues": [
+        "humbuckers",
+        "Mesa/modern high-gain amp",
+        "4x12 cab",
+        "Tube Screamer boost",
+        "digital delay"
+      ],
+      "corrections": [
+        "drop fuzz",
+        "replace crunch with tight metal distortion",
+        "keep delay but not dotted-eighth assumption"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "power metal",
+      "styleTags": [
+        "epic metal",
+        "symphonic metal"
+      ],
+      "targetTone": "tight high-gain metal crunch with bright attack",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and overall tone articulation.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR (e.g., modern 4x12)",
+          "reason": "Enhance the tightness and definition of the high-gain metal crunch.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and punch",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1806,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

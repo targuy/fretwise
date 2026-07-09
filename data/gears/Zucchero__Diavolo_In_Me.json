@@ -1,0 +1,1004 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1984,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Zucchero__Diavolo_In_Me.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Zucchero",
+    "title": "Diavolo In Me",
+    "album": "",
+    "year": null,
+    "genre": "blues rock"
+  },
+  "genreClassification": {
+    "genre": "blues rock",
+    "subgenres": [
+      "rock"
+    ],
+    "confidence": "high",
+    "rationale": "The target tone and gear clues point directly to classic blues-rock sounds."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly gritty blues rock tone with a warm, round midrange focus.",
+      "signatureElements": [
+        "Crunch (mid-scooped)",
+        "Slight fuzz/grit for texture",
+        "Warm reverb and delay"
+      ],
+      "gearHypotheses": [
+        "Modeling amp simulating Fender Twin Reverb or Vox AC30",
+        "Overdrive pedal (e.g., Tube Screamer style) for grit boost"
+      ],
+      "avoid": [
+        "High-gain metal tones",
+        "Bright, brittle clean sounds",
+        "Excessive digital modulation"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "gritty blues-rock crunch with slight fuzz edge",
+      "mustHave": [
+        "mid-gain crunch",
+        "fuzzy grit",
+        "warm mids",
+        "dry drive"
+      ],
+      "avoid": [
+        "clean Fender sheen",
+        "scooped crunch",
+        "heavy delay",
+        "metal gain"
+      ],
+      "gearClues": [
+        "Marshall/Plexi style",
+        "single-coil or humbucker",
+        "1x12 or 4x12"
+      ],
+      "corrections": [
+        "drop warm delay",
+        "replace mid-scooped with mid-forward",
+        "keep fuzz subtle but audible"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "gritty blues-rock crunch with slight fuzz edge",
+    "mustHave": [
+      "mid-gain crunch",
+      "fuzzy grit",
+      "warm mids",
+      "dry drive"
+    ],
+    "avoid": [
+      "clean Fender sheen",
+      "scooped crunch",
+      "heavy delay",
+      "metal gain"
+    ],
+    "gearClues": [
+      "Marshall/Plexi style",
+      "single-coil or humbucker",
+      "1x12 or 4x12"
+    ],
+    "corrections": [
+      "drop warm delay",
+      "replace mid-scooped with mid-forward",
+      "keep fuzz subtle but audible"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on mid-gain British tones with subtle fuzz and warmth.",
+          "bestMatchSummary": "A classic blues-rock chain using a Green OD for initial grit, followed by the UK 45 amp model to capture the Plexi sound, enhanced by Chorus and Room reverb for depth.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-60 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the initial mid-gain crunch and fuzzy grit required for blues rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Add subtle, audible fuzzy grit without sounding overly aggressive.",
+              "matchQuality": "close",
+              "gap": "The Red Haze is a general fuzz/distortion model; careful settings are needed to keep it subtle as requested.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "7",
+                "Bass": "6"
+              },
+              "purpose": "Emulate the Marshall/Plexi style amp tone for classic blues-rock crunch and warm mids.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound matching the UK 45 amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "3",
+                "Midrange": "7",
+                "Treble": "5"
+              },
+              "purpose": "Boost the warm mids and ensure a mid-forward tone, counteracting any potential scoop.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3",
+                "Depth": "4",
+                "Mix": "5"
+              },
+              "purpose": "Add subtle movement and depth to the tone without distracting from the core grit.",
+              "matchQuality": "close",
+              "gap": "Chorus is generally used for clean tones, but a light setting adds useful dimension here.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "3s",
+                "Mix": "20%"
+              },
+              "purpose": "Add natural space and warmth to the overall sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume/attenuation",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is not explicitly guitar-based, but the rig is built to imitate a gritty blues-rock electric guitar performance.",
+          "Careful adjustment of Red Haze (fuzz) settings is crucial to ensure the grit remains subtle and audible, rather than overwhelming the mix."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism for a more authentic British blues-rock sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., Celestion Greenback or 2x12)",
+              "reason": "Enhance the vintage, mid-focused British tone for Zucchero's style.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more articulate mids and bite.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Zucchero - Diavolo In Me - Valeton GP-180",
+        "song": {
+          "artist": "Zucchero",
+          "title": "Diavolo In Me",
+          "album": "",
+          "year": null,
+          "genre": "blues rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "gritty blues-rock crunch with slight fuzz edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic blues-rock chain using a Green OD for initial grit, followed by the UK 45 amp model to capture the Plexi sound, enhanced by Chorus and Room reverb for depth.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-60 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "4",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the initial mid-gain crunch and fuzzy grit required for blues rock.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "2",
+              "Tone": "5",
+              "Level": "6"
+            },
+            "purpose": "Add subtle, audible fuzzy grit without sounding overly aggressive.",
+            "matchQuality": "close",
+            "gap": "The Red Haze is a general fuzz/distortion model; careful settings are needed to keep it subtle as requested.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Midrange": "7",
+              "Bass": "6"
+            },
+            "purpose": "Emulate the Marshall/Plexi style amp tone for classic blues-rock crunch and warm mids.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet sound matching the UK 45 amp.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "3",
+              "Midrange": "7",
+              "Treble": "5"
+            },
+            "purpose": "Boost the warm mids and ensure a mid-forward tone, counteracting any potential scoop.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3",
+              "Depth": "4",
+              "Mix": "5"
+            },
+            "purpose": "Add subtle movement and depth to the tone without distracting from the core grit.",
+            "matchQuality": "close",
+            "gap": "Chorus is generally used for clean tones, but a light setting adds useful dimension here.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "3s",
+              "Mix": "20%"
+            },
+            "purpose": "Add natural space and warmth to the overall sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume/attenuation",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "gritty blues-rock crunch with slight fuzz edge",
+          "toneProfile": "gritty blues-rock crunch with slight fuzz edge",
+          "idealSignalChain": "Marshall/Plexi style | single-coil or humbucker | 1x12 or 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi style",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coil or humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "1x12 or 4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "mid-gain crunch",
+            "fuzzy grit",
+            "warm mids",
+            "dry drive"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on mid-gain British tones with subtle fuzz and warmth.",
+          "bestMatchSummary": "A classic blues-rock chain using a Green OD for initial grit, followed by the UK 45 amp model to capture the Plexi sound, enhanced by Chorus and Room reverb for depth.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-60 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the initial mid-gain crunch and fuzzy grit required for blues rock.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Add subtle, audible fuzzy grit without sounding overly aggressive.",
+              "matchQuality": "close",
+              "gap": "The Red Haze is a general fuzz/distortion model; careful settings are needed to keep it subtle as requested.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "7",
+                "Bass": "6"
+              },
+              "purpose": "Emulate the Marshall/Plexi style amp tone for classic blues-rock crunch and warm mids.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound matching the UK 45 amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "3",
+                "Midrange": "7",
+                "Treble": "5"
+              },
+              "purpose": "Boost the warm mids and ensure a mid-forward tone, counteracting any potential scoop.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3",
+                "Depth": "4",
+                "Mix": "5"
+              },
+              "purpose": "Add subtle movement and depth to the tone without distracting from the core grit.",
+              "matchQuality": "close",
+              "gap": "Chorus is generally used for clean tones, but a light setting adds useful dimension here.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "3s",
+                "Mix": "20%"
+              },
+              "purpose": "Add natural space and warmth to the overall sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume/attenuation",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism for a more authentic British blues-rock sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., Celestion Greenback or 2x12)",
+              "reason": "Enhance the vintage, mid-focused British tone for Zucchero's style.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, more articulate mids and bite.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop warm delay",
+          "replace mid-scooped with mid-forward",
+          "keep fuzz subtle but audible"
+        ],
+        "warnings": [
+          "The source material is not explicitly guitar-based, but the rig is built to imitate a gritty blues-rock electric guitar performance.",
+          "Careful adjustment of Red Haze (fuzz) settings is crucial to ensure the grit remains subtle and audible, rather than overwhelming the mix."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 16.206,
+      "prompt_chars": 990,
+      "response_chars": 462,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 117,
+        "total_duration": 16203113400,
+        "prompt_eval_duration": 79719000,
+        "eval_duration": 864895000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.838,
+      "prompt_chars": 5374,
+      "response_chars": 495,
+      "usage": {
+        "input_tokens": 1507,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 139,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1646
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 93.128,
+      "prompt_chars": 3558,
+      "response_chars": 4678,
+      "usage": {
+        "prompt_eval_count": 1275,
+        "eval_count": 1345,
+        "total_duration": 38000033200,
+        "prompt_eval_duration": 152615000,
+        "eval_duration": 9474067000
+      },
+      "attempts": 2,
+      "retryFailures": [
+        {
+          "attempt": 1,
+          "error": "Expecting ',' delimiter: line 38 column 8 (char 1080)"
+        }
+      ]
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 4.047,
+      "prompt_chars": 6747,
+      "response_chars": 557,
+      "usage": {
+        "prompt_eval_count": 1915,
+        "eval_count": 157,
+        "total_duration": 4020827000,
+        "prompt_eval_duration": 192049000,
+        "eval_duration": 1118151000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 14.655,
+      "prompt_chars": 2651,
+      "response_chars": 160,
+      "usage": {
+        "prompt_eval_count": 853,
+        "eval_count": 42,
+        "total_duration": 14650807900,
+        "prompt_eval_duration": 124169000,
+        "eval_duration": 298740000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Zucchero",
+      "title": "Diavolo In Me",
+      "album": "",
+      "year": null,
+      "genre": "blues rock"
+    },
+    "rig": {
+      "rigName": "Zucchero - Diavolo In Me - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "gritty blues-rock crunch with slight fuzz edge",
+      "signalChainSummary": "A classic blues-rock chain using a Green OD for initial grit, followed by the UK 45 amp model to capture the Plexi sound, enhanced by Chorus and Room reverb for depth.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-60 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "4",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the initial mid-gain crunch and fuzzy grit required for blues rock.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "2",
+            "Tone": "5",
+            "Level": "6"
+          },
+          "purpose": "Add subtle, audible fuzzy grit without sounding overly aggressive.",
+          "matchQuality": "close",
+          "gap": "The Red Haze is a general fuzz/distortion model; careful settings are needed to keep it subtle as requested.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Midrange": "7",
+            "Bass": "6"
+          },
+          "purpose": "Emulate the Marshall/Plexi style amp tone for classic blues-rock crunch and warm mids.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet sound matching the UK 45 amp.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "3",
+            "Midrange": "7",
+            "Treble": "5"
+          },
+          "purpose": "Boost the warm mids and ensure a mid-forward tone, counteracting any potential scoop.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3",
+            "Depth": "4",
+            "Mix": "5"
+          },
+          "purpose": "Add subtle movement and depth to the tone without distracting from the core grit.",
+          "matchQuality": "close",
+          "gap": "Chorus is generally used for clean tones, but a light setting adds useful dimension here.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "3s",
+            "Mix": "20%"
+          },
+          "purpose": "Add natural space and warmth to the overall sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume/attenuation",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "gritty blues-rock crunch with slight fuzz edge",
+      "mustHave": [
+        "mid-gain crunch",
+        "fuzzy grit",
+        "warm mids",
+        "dry drive"
+      ],
+      "avoid": [
+        "clean Fender sheen",
+        "scooped crunch",
+        "heavy delay",
+        "metal gain"
+      ],
+      "gearClues": [
+        "Marshall/Plexi style",
+        "single-coil or humbucker",
+        "1x12 or 4x12"
+      ],
+      "corrections": [
+        "drop warm delay",
+        "replace mid-scooped with mid-forward",
+        "keep fuzz subtle but audible"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues rock",
+      "styleTags": [
+        "rock"
+      ],
+      "targetTone": "gritty blues-rock crunch with slight fuzz edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism for a more authentic British blues-rock sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR (e.g., Celestion Greenback or 2x12)",
+          "reason": "Enhance the vintage, mid-focused British tone for Zucchero's style.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Warmer, more articulate mids and bite.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1984,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

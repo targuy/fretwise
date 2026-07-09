@@ -1,0 +1,1110 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1864,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Junoon__Sayonee.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Junoon",
+    "title": "Sayonee",
+    "album": "",
+    "year": null,
+    "genre": "rock"
+  },
+  "genreClassification": {
+    "genre": "rock",
+    "subgenres": [
+      "pop rock",
+      "alternative rock"
+    ],
+    "confidence": "high",
+    "rationale": "Junoon is a prominent Pakistani band known for blending rock with Sufi and folk influences."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly crunchy rock tone with pronounced delay and reverb.",
+      "signatureElements": [
+        "Delay (dotted eighth notes)",
+        "Reverb (hall/plate)",
+        "Crunch (mid-scooped)"
+      ],
+      "gearHypotheses": [
+        "Amp: Fender Twin Reverb style",
+        "Cab: 2x12 or 4x12 Celestion Greenback style",
+        "Effect: Chorus/Modulation for atmosphere"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Overdriven distortion",
+        "Clean arpeggios"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "nasal sitar-like electric lead with delay and spacious reverb",
+      "mustHave": [
+        "sitar-like lead phrasing",
+        "pronounced delay",
+        "spacious reverb",
+        "slight grit",
+        "sustaining attack"
+      ],
+      "avoid": [
+        "generic rock crunch",
+        "mid-scooped clean",
+        "heavy fuzz",
+        "chorus wash"
+      ],
+      "gearClues": [
+        "electric guitar",
+        "lead pickup",
+        "delay pedal",
+        "plate/hall reverb",
+        "bright combo or voiced lead amp"
+      ],
+      "corrections": [
+        "drop Fender Twin default",
+        "make sitar-like texture primary",
+        "avoid chorus unless clearly heard"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "nasal sitar-like electric lead with delay and spacious reverb",
+    "mustHave": [
+      "sitar-like lead phrasing",
+      "pronounced delay",
+      "spacious reverb",
+      "slight grit",
+      "sustaining attack"
+    ],
+    "avoid": [
+      "generic rock crunch",
+      "mid-scooped clean",
+      "heavy fuzz",
+      "chorus wash"
+    ],
+    "gearClues": [
+      "electric guitar",
+      "lead pickup",
+      "delay pedal",
+      "plate/hall reverb",
+      "bright combo or voiced lead amp"
+    ],
+    "corrections": [
+      "drop Fender Twin default",
+      "make sitar-like texture primary",
+      "avoid chorus unless clearly heard"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, sustained lead tones with heavy delay and reverb to emulate sitar textures.",
+          "bestMatchSummary": "A clean/bright signal chain using a mild boost for sustain, followed by a classic British amp model (AC30 TB) for voicing, and heavily processed with Digital Delay and Plate Reverb to achieve the required spacious, nasal lead sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and sustain tail.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/sustain",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6"
+              },
+              "purpose": "Provide gentle sustain and lift the signal for lead playing.",
+              "matchQuality": "close",
+              "gap": "A dedicated compressor would be ideal for sustaining attack, but Boost provides necessary gain structure.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Comp",
+                  "reason": "Better sustain control."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/grit",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Add slight grit and harmonic richness without heavy fuzz.",
+              "matchQuality": "close",
+              "gap": "The sitar tone requires minimal distortion; this setting keeps it subtle, acting more like a touch of breakup than crunch.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Red Haze",
+                  "reason": "If the grit needs to be slightly warmer."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "6",
+                "Midrange": "7",
+                "Bass": "4"
+              },
+              "purpose": "Provide a bright, articulate voicing suitable for lead lines and sitar emulation.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Complement the bright AC30 voicing and provide a classic British sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+4"
+              },
+              "purpose": "Enhance the nasal, bright quality and cut low-end mud.",
+              "matchQuality": "close",
+              "gap": "A dedicated tone stack would be better, but Guitar EQ 1 allows for precise high-mid boost needed for sitar texture.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass WAH to keep the tone clean and focused on delay/reverb.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "400 ms",
+                "Feedback": "6",
+                "Mix": "5"
+              },
+              "purpose": "Provide the pronounced echo and rhythmic texture essential for sitar phrasing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb effect",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "4s",
+                "Mix": "5"
+              },
+              "purpose": "Create a spacious, ethereal atmosphere required for the sitar-like lead.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is non-guitar (Indian classical/pop fusion). The rig focuses on achieving a bright, sustained lead tone using delay and reverb to emulate the sitar's characteristic nasal texture."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism for better articulation of the sitar-like lead tones.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Sitar/Lead Tone Clarity",
+              "recommendedAsset": "Bright, open 2x12 or single mic IR (e.g., Fender Deluxe)",
+              "reason": "A smaller, brighter cabinet will enhance the nasal, articulate lead tone and reduce muddiness.",
+              "replacesBlockOrder": 5,
+              "whenToUse": null,
+              "expectedGain": "Increased clarity and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Junoon - Sayonee - Valeton GP-180",
+        "song": {
+          "artist": "Junoon",
+          "title": "Sayonee",
+          "album": "",
+          "year": null,
+          "genre": "rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "nasal sitar-like electric lead with delay and spacious reverb",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean/bright signal chain using a mild boost for sustain, followed by a classic British amp model (AC30 TB) for voicing, and heavily processed with Digital Delay and Plate Reverb to achieve the required spacious, nasal lead sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 2",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and sustain tail.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/sustain",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "6"
+            },
+            "purpose": "Provide gentle sustain and lift the signal for lead playing.",
+            "matchQuality": "close",
+            "gap": "A dedicated compressor would be ideal for sustaining attack, but Boost provides necessary gain structure.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "Comp",
+                "reason": "Better sustain control."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/grit",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "2",
+              "Tone": "5",
+              "Level": "6"
+            },
+            "purpose": "Add slight grit and harmonic richness without heavy fuzz.",
+            "matchQuality": "close",
+            "gap": "The sitar tone requires minimal distortion; this setting keeps it subtle, acting more like a touch of breakup than crunch.",
+            "alternatives": [
+              {
+                "module": "DST",
+                "model": "Red Haze",
+                "reason": "If the grit needs to be slightly warmer."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "5",
+              "Treble": "6",
+              "Midrange": "7",
+              "Bass": "4"
+            },
+            "purpose": "Provide a bright, articulate voicing suitable for lead lines and sitar emulation.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Complement the bright AC30 voicing and provide a classic British sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Midrange": "+3",
+              "Treble": "+4"
+            },
+            "purpose": "Enhance the nasal, bright quality and cut low-end mud.",
+            "matchQuality": "close",
+            "gap": "A dedicated tone stack would be better, but Guitar EQ 1 allows for precise high-mid boost needed for sitar texture.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/texture",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass WAH to keep the tone clean and focused on delay/reverb.",
+            "matchQuality": "perfect",
+            "gap": "N/A (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "400 ms",
+              "Feedback": "6",
+              "Mix": "5"
+            },
+            "purpose": "Provide the pronounced echo and rhythmic texture essential for sitar phrasing.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb effect",
+            "module": "RVB",
+            "model": "Plate",
+            "active": true,
+            "settings": {
+              "Decay Time": "4s",
+              "Mix": "5"
+            },
+            "purpose": "Create a spacious, ethereal atmosphere required for the sitar-like lead.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "nasal sitar-like electric lead with delay and spacious reverb",
+          "toneProfile": "nasal sitar-like electric lead with delay and spacious reverb",
+          "idealSignalChain": "electric guitar | lead pickup | delay pedal | plate/hall reverb | bright combo or voiced lead amp",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "electric guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "lead pickup",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "delay pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "plate/hall reverb",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bright combo or voiced lead amp",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "sitar-like lead phrasing",
+            "pronounced delay",
+            "spacious reverb",
+            "slight grit",
+            "sustaining attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, sustained lead tones with heavy delay and reverb to emulate sitar textures.",
+          "bestMatchSummary": "A clean/bright signal chain using a mild boost for sustain, followed by a classic British amp model (AC30 TB) for voicing, and heavily processed with Digital Delay and Plate Reverb to achieve the required spacious, nasal lead sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and sustain tail.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/sustain",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6"
+              },
+              "purpose": "Provide gentle sustain and lift the signal for lead playing.",
+              "matchQuality": "close",
+              "gap": "A dedicated compressor would be ideal for sustaining attack, but Boost provides necessary gain structure.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Comp",
+                  "reason": "Better sustain control."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/grit",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "2",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Add slight grit and harmonic richness without heavy fuzz.",
+              "matchQuality": "close",
+              "gap": "The sitar tone requires minimal distortion; this setting keeps it subtle, acting more like a touch of breakup than crunch.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Red Haze",
+                  "reason": "If the grit needs to be slightly warmer."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "5",
+                "Treble": "6",
+                "Midrange": "7",
+                "Bass": "4"
+              },
+              "purpose": "Provide a bright, articulate voicing suitable for lead lines and sitar emulation.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Complement the bright AC30 voicing and provide a classic British sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Midrange": "+3",
+                "Treble": "+4"
+              },
+              "purpose": "Enhance the nasal, bright quality and cut low-end mud.",
+              "matchQuality": "close",
+              "gap": "A dedicated tone stack would be better, but Guitar EQ 1 allows for precise high-mid boost needed for sitar texture.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass WAH to keep the tone clean and focused on delay/reverb.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "400 ms",
+                "Feedback": "6",
+                "Mix": "5"
+              },
+              "purpose": "Provide the pronounced echo and rhythmic texture essential for sitar phrasing.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb effect",
+              "module": "RVB",
+              "model": "Plate",
+              "active": true,
+              "settings": {
+                "Decay Time": "4s",
+                "Mix": "5"
+              },
+              "purpose": "Create a spacious, ethereal atmosphere required for the sitar-like lead.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism for better articulation of the sitar-like lead tones.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Sitar/Lead Tone Clarity",
+              "recommendedAsset": "Bright, open 2x12 or single mic IR (e.g., Fender Deluxe)",
+              "reason": "A smaller, brighter cabinet will enhance the nasal, articulate lead tone and reduce muddiness.",
+              "replacesBlockOrder": 5,
+              "whenToUse": null,
+              "expectedGain": "Increased clarity and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop Fender Twin default",
+          "make sitar-like texture primary",
+          "avoid chorus unless clearly heard"
+        ],
+        "warnings": [
+          "The source material is non-guitar (Indian classical/pop fusion). The rig focuses on achieving a bright, sustained lead tone using delay and reverb to emulate the sitar's characteristic nasal texture."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 17.848,
+      "prompt_chars": 982,
+      "response_chars": 424,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 118,
+        "total_duration": 17844521100,
+        "prompt_eval_duration": 95740000,
+        "eval_duration": 1025109999
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.516,
+      "prompt_chars": 5334,
+      "response_chars": 601,
+      "usage": {
+        "input_tokens": 1502,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 153,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1655
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 61.97,
+      "prompt_chars": 3677,
+      "response_chars": 5486,
+      "usage": {
+        "prompt_eval_count": 1226,
+        "eval_count": 1537,
+        "total_duration": 61948147400,
+        "prompt_eval_duration": 293291000,
+        "eval_duration": 28440833000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 148.071,
+      "prompt_chars": 7718,
+      "response_chars": 569,
+      "usage": {
+        "prompt_eval_count": 2120,
+        "eval_count": 151,
+        "total_duration": 148064982400,
+        "prompt_eval_duration": 524534999,
+        "eval_duration": 2934322000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 24.487,
+      "prompt_chars": 2996,
+      "response_chars": 194,
+      "usage": {
+        "prompt_eval_count": 918,
+        "eval_count": 49,
+        "total_duration": 24482806900,
+        "prompt_eval_duration": 289503000,
+        "eval_duration": 950246000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Junoon",
+      "title": "Sayonee",
+      "album": "",
+      "year": null,
+      "genre": "rock"
+    },
+    "rig": {
+      "rigName": "Junoon - Sayonee - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "nasal sitar-like electric lead with delay and spacious reverb",
+      "signalChainSummary": "A clean/bright signal chain using a mild boost for sustain, followed by a classic British amp model (AC30 TB) for voicing, and heavily processed with Digital Delay and Plate Reverb to achieve the required spacious, nasal lead sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 2",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and sustain tail.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/sustain",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "6"
+          },
+          "purpose": "Provide gentle sustain and lift the signal for lead playing.",
+          "matchQuality": "close",
+          "gap": "A dedicated compressor would be ideal for sustaining attack, but Boost provides necessary gain structure.",
+          "alternatives": [
+            {
+              "model": "Comp",
+              "reason": "Better sustain control."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/grit",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "2",
+            "Tone": "5",
+            "Level": "6"
+          },
+          "purpose": "Add slight grit and harmonic richness without heavy fuzz.",
+          "matchQuality": "close",
+          "gap": "The sitar tone requires minimal distortion; this setting keeps it subtle, acting more like a touch of breakup than crunch.",
+          "alternatives": [
+            {
+              "model": "Red Haze",
+              "reason": "If the grit needs to be slightly warmer."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "5",
+            "Treble": "6",
+            "Midrange": "7",
+            "Bass": "4"
+          },
+          "purpose": "Provide a bright, articulate voicing suitable for lead lines and sitar emulation.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Complement the bright AC30 voicing and provide a classic British sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Midrange": "+3",
+            "Treble": "+4"
+          },
+          "purpose": "Enhance the nasal, bright quality and cut low-end mud.",
+          "matchQuality": "close",
+          "gap": "A dedicated tone stack would be better, but Guitar EQ 1 allows for precise high-mid boost needed for sitar texture.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/texture",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass WAH to keep the tone clean and focused on delay/reverb.",
+          "matchQuality": "exact",
+          "gap": "N/A (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "400 ms",
+            "Feedback": "6",
+            "Mix": "5"
+          },
+          "purpose": "Provide the pronounced echo and rhythmic texture essential for sitar phrasing.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb effect",
+          "module": "RVB",
+          "model": "Plate",
+          "active": true,
+          "settings": {
+            "Decay Time": "4s",
+            "Mix": "5"
+          },
+          "purpose": "Create a spacious, ethereal atmosphere required for the sitar-like lead.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "nasal sitar-like electric lead with delay and spacious reverb",
+      "mustHave": [
+        "sitar-like lead phrasing",
+        "pronounced delay",
+        "spacious reverb",
+        "slight grit",
+        "sustaining attack"
+      ],
+      "avoid": [
+        "generic rock crunch",
+        "mid-scooped clean",
+        "heavy fuzz",
+        "chorus wash"
+      ],
+      "gearClues": [
+        "electric guitar",
+        "lead pickup",
+        "delay pedal",
+        "plate/hall reverb",
+        "bright combo or voiced lead amp"
+      ],
+      "corrections": [
+        "drop Fender Twin default",
+        "make sitar-like texture primary",
+        "avoid chorus unless clearly heard"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "rock",
+      "styleTags": [
+        "pop rock",
+        "alternative rock"
+      ],
+      "targetTone": "nasal sitar-like electric lead with delay and spacious reverb",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism for better articulation of the sitar-like lead tones.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Sitar/Lead Tone Clarity",
+          "recommendedAsset": "Bright, open 2x12 or single mic IR (e.g., Fender Deluxe)",
+          "reason": "A smaller, brighter cabinet will enhance the nasal, articulate lead tone and reduce muddiness.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "",
+          "expectedGain": "Increased clarity and definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1864,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

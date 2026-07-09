@@ -1,0 +1,996 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1941,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Shaka_Ponk__My_Name_Is_Stain.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Shaka Ponk",
+    "title": "My Name Is Stain",
+    "album": "",
+    "year": null,
+    "genre": "alternative rock"
+  },
+  "genreClassification": {
+    "genre": "alternative rock",
+    "subgenres": [
+      "post-punk",
+      "indie rock",
+      "garage rock"
+    ],
+    "confidence": "high",
+    "rationale": "The aggressive fuzz and post-punk energy suggest alternative/garage rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Aggressive, distorted rock tone with a thick fuzz foundation and mid-range crunch.",
+      "signatureElements": [
+        "Fuzz (thick/aggressive)",
+        "Crunch (mid-scooped)",
+        "Distortion (high gain)"
+      ],
+      "gearHypotheses": [
+        "Overdriven Tube Screamer style pedal",
+        "High-gain distortion pedal",
+        "Amp simulation modeling (Brit/US stack)"
+      ],
+      "avoid": [
+        "Clean tones",
+        "Wah effects",
+        "Heavy modulation"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "aggressive fuzz-rock crunch with gritty mid bite",
+      "mustHave": [
+        "thick fuzz",
+        "tight distorted crunch",
+        "dirty upper mids"
+      ],
+      "avoid": [
+        "clean tone",
+        "scooped metal high gain",
+        "heavy modulation"
+      ],
+      "gearClues": [
+        "single-coil or humbucker electric",
+        "Brit amp",
+        "4x12 cab",
+        "fuzz pedal"
+      ],
+      "corrections": [
+        "drop Tube Screamer focus",
+        "keep fuzz ahead of distortion",
+        "avoid mid-scooped phrasing"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "aggressive fuzz-rock crunch with gritty mid bite",
+    "mustHave": [
+      "thick fuzz",
+      "tight distorted crunch",
+      "dirty upper mids"
+    ],
+    "avoid": [
+      "clean tone",
+      "scooped metal high gain",
+      "heavy modulation"
+    ],
+    "gearClues": [
+      "single-coil or humbucker electric",
+      "Brit amp",
+      "4x12 cab",
+      "fuzz pedal"
+    ],
+    "corrections": [
+      "drop Tube Screamer focus",
+      "keep fuzz ahead of distortion",
+      "avoid mid-scooped phrasing"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Aggressive, mid-focused fuzz rock tone.",
+          "bestMatchSummary": "Fuzz -> Boost/OD -> Amp (UK 45) -> Cab (UK Vintage 4x12) with Room ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain fuzz noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Tone": "5.0"
+              },
+              "purpose": "Tighten the fuzz and boost upper mids/attack.",
+              "matchQuality": "close",
+              "gap": "Using Boost to simulate a Tube Screamer focus (as suggested by 'drop Tube Screamer focus') without dedicated OD pedal choice.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "If the boost alone is insufficient for tightening."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "7.0",
+                "Tone": "6.5"
+              },
+              "purpose": "Provide the thick fuzz foundation required for the aggressive rock sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Treble": "7.0",
+                "Mid": "7.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Simulate a British amp tone (Brit amp clue) that handles fuzz well and provides grit.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is chosen for its classic, aggressive rock character suitable for the genre.",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK SLP",
+                  "reason": "If a slightly cleaner British tone was desired."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required British cabinet sound and 4x12 configuration.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "EQ/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "30%",
+                "Decay Time": "2.5s"
+              },
+              "purpose": "Add subtle ambience and depth without muddying the aggressive fuzz tone.",
+              "matchQuality": "close",
+              "gap": "Room reverb is used to add space, fulfilling the need for a slight ambient touch while avoiding heavy modulation.",
+              "alternatives": [
+                {
+                  "module": "EQ/MOD/DLY/RVB/VOL",
+                  "model": "Plate",
+                  "reason": "If a more defined reverb tail is preferred."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "1.0 Hz",
+                "Depth": "2.0"
+              },
+              "purpose": "Placeholder for potential subtle movement (kept off by default to avoid heavy modulation).",
+              "matchQuality": "none",
+              "gap": "The instructions explicitly advise avoiding heavy modulation, so this module is included but deactivated.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is not specified, but the tone requires a high-gain fuzz rock setup. The choice policy prioritizes aggressive mid-range grit and thickness."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., Celestion Greenback 4x12)",
+              "reason": "Improve the grit and definition of the British cabinet sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased punch and clarity in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Shaka Ponk - My Name Is Stain - Valeton GP-180",
+        "song": {
+          "artist": "Shaka Ponk",
+          "title": "My Name Is Stain",
+          "album": "",
+          "year": null,
+          "genre": "alternative rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "aggressive fuzz-rock crunch with gritty mid bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Fuzz -> Boost/OD -> Amp (UK 45) -> Cab (UK Vintage 4x12) with Room ambience.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up high-gain fuzz noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "6.0",
+              "Tone": "5.0"
+            },
+            "purpose": "Tighten the fuzz and boost upper mids/attack.",
+            "matchQuality": "close",
+            "gap": "Using Boost to simulate a Tube Screamer focus (as suggested by 'drop Tube Screamer focus') without dedicated OD pedal choice.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "OD 9",
+                "reason": "If the boost alone is insufficient for tightening."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz",
+            "module": "DST",
+            "model": "Fuzz",
+            "active": true,
+            "settings": {
+              "Drive": "7.0",
+              "Tone": "6.5"
+            },
+            "purpose": "Provide the thick fuzz foundation required for the aggressive rock sound.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6.0",
+              "Treble": "7.0",
+              "Mid": "7.0",
+              "Bass": "6.0"
+            },
+            "purpose": "Simulate a British amp tone (Brit amp clue) that handles fuzz well and provides grit.",
+            "matchQuality": "close",
+            "gap": "The UK 45 is chosen for its classic, aggressive rock character suitable for the genre.",
+            "alternatives": [
+              {
+                "module": "AMP",
+                "model": "UK SLP",
+                "reason": "If a slightly cleaner British tone was desired."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the required British cabinet sound and 4x12 configuration.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "EQ/ambience",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "30%",
+              "Decay Time": "2.5s"
+            },
+            "purpose": "Add subtle ambience and depth without muddying the aggressive fuzz tone.",
+            "matchQuality": "close",
+            "gap": "Room reverb is used to add space, fulfilling the need for a slight ambient touch while avoiding heavy modulation.",
+            "alternatives": [
+              {
+                "module": "EQ/MOD/DLY/RVB/VOL",
+                "model": "Plate",
+                "reason": "If a more defined reverb tail is preferred."
+              }
+            ]
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "1.0 Hz",
+              "Depth": "2.0"
+            },
+            "purpose": "Placeholder for potential subtle movement (kept off by default to avoid heavy modulation).",
+            "matchQuality": "none",
+            "gap": "The instructions explicitly advise avoiding heavy modulation, so this module is included but deactivated.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "volume/master control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "aggressive fuzz-rock crunch with gritty mid bite",
+          "toneProfile": "aggressive fuzz-rock crunch with gritty mid bite",
+          "idealSignalChain": "single-coil or humbucker electric | Brit amp | 4x12 cab | fuzz pedal",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil or humbucker electric",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Brit amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "fuzz pedal",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "thick fuzz",
+            "tight distorted crunch",
+            "dirty upper mids"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Aggressive, mid-focused fuzz rock tone.",
+          "bestMatchSummary": "Fuzz -> Boost/OD -> Amp (UK 45) -> Cab (UK Vintage 4x12) with Room ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up high-gain fuzz noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Tone": "5.0"
+              },
+              "purpose": "Tighten the fuzz and boost upper mids/attack.",
+              "matchQuality": "close",
+              "gap": "Using Boost to simulate a Tube Screamer focus (as suggested by 'drop Tube Screamer focus') without dedicated OD pedal choice.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "If the boost alone is insufficient for tightening."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "7.0",
+                "Tone": "6.5"
+              },
+              "purpose": "Provide the thick fuzz foundation required for the aggressive rock sound.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Treble": "7.0",
+                "Mid": "7.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Simulate a British amp tone (Brit amp clue) that handles fuzz well and provides grit.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is chosen for its classic, aggressive rock character suitable for the genre.",
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK SLP",
+                  "reason": "If a slightly cleaner British tone was desired."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required British cabinet sound and 4x12 configuration.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "EQ/ambience",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "30%",
+                "Decay Time": "2.5s"
+              },
+              "purpose": "Add subtle ambience and depth without muddying the aggressive fuzz tone.",
+              "matchQuality": "close",
+              "gap": "Room reverb is used to add space, fulfilling the need for a slight ambient touch while avoiding heavy modulation.",
+              "alternatives": [
+                {
+                  "module": "EQ/MOD/DLY/RVB/VOL",
+                  "model": "Plate",
+                  "reason": "If a more defined reverb tail is preferred."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "1.0 Hz",
+                "Depth": "2.0"
+              },
+              "purpose": "Placeholder for potential subtle movement (kept off by default to avoid heavy modulation).",
+              "matchQuality": "none",
+              "gap": "The instructions explicitly advise avoiding heavy modulation, so this module is included but deactivated.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "volume/master control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., Celestion Greenback 4x12)",
+              "reason": "Improve the grit and definition of the British cabinet sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased punch and clarity in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop Tube Screamer focus",
+          "keep fuzz ahead of distortion",
+          "avoid mid-scooped phrasing"
+        ],
+        "warnings": [
+          "The source material is not specified, but the tone requires a high-gain fuzz rock setup. The choice policy prioritizes aggressive mid-range grit and thickness."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 19.003,
+      "prompt_chars": 995,
+      "response_chars": 418,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 105,
+        "total_duration": 18999066700,
+        "prompt_eval_duration": 83968000,
+        "eval_duration": 879369000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.718,
+      "prompt_chars": 5341,
+      "response_chars": 498,
+      "usage": {
+        "input_tokens": 1493,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 133,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1626
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 81.335,
+      "prompt_chars": 3559,
+      "response_chars": 4723,
+      "usage": {
+        "prompt_eval_count": 1199,
+        "eval_count": 1374,
+        "total_duration": 81304940300,
+        "prompt_eval_duration": 148268000,
+        "eval_duration": 11636075000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 36.239,
+      "prompt_chars": 6789,
+      "response_chars": 529,
+      "usage": {
+        "prompt_eval_count": 1930,
+        "eval_count": 144,
+        "total_duration": 36213933500,
+        "prompt_eval_duration": 232002000,
+        "eval_duration": 1217879000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 17.544,
+      "prompt_chars": 2508,
+      "response_chars": 198,
+      "usage": {
+        "prompt_eval_count": 824,
+        "eval_count": 52,
+        "total_duration": 17527096600,
+        "prompt_eval_duration": 141800000,
+        "eval_duration": 432539000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Shaka Ponk",
+      "title": "My Name Is Stain",
+      "album": "",
+      "year": null,
+      "genre": "alternative rock"
+    },
+    "rig": {
+      "rigName": "Shaka Ponk - My Name Is Stain - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "aggressive fuzz-rock crunch with gritty mid bite",
+      "signalChainSummary": "Fuzz -> Boost/OD -> Amp (UK 45) -> Cab (UK Vintage 4x12) with Room ambience.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up high-gain fuzz noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "6.0",
+            "Tone": "5.0"
+          },
+          "purpose": "Tighten the fuzz and boost upper mids/attack.",
+          "matchQuality": "close",
+          "gap": "Using Boost to simulate a Tube Screamer focus (as suggested by 'drop Tube Screamer focus') without dedicated OD pedal choice.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "If the boost alone is insufficient for tightening."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz",
+          "module": "DST",
+          "model": "Fuzz",
+          "active": true,
+          "settings": {
+            "Drive": "7.0",
+            "Tone": "6.5"
+          },
+          "purpose": "Provide the thick fuzz foundation required for the aggressive rock sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6.0",
+            "Treble": "7.0",
+            "Mid": "7.0",
+            "Bass": "6.0"
+          },
+          "purpose": "Simulate a British amp tone (Brit amp clue) that handles fuzz well and provides grit.",
+          "matchQuality": "close",
+          "gap": "The UK 45 is chosen for its classic, aggressive rock character suitable for the genre.",
+          "alternatives": [
+            {
+              "model": "UK SLP",
+              "reason": "If a slightly cleaner British tone was desired."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the required British cabinet sound and 4x12 configuration.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "EQ/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "30%",
+            "Decay Time": "2.5s"
+          },
+          "purpose": "Add subtle ambience and depth without muddying the aggressive fuzz tone.",
+          "matchQuality": "close",
+          "gap": "Room reverb is used to add space, fulfilling the need for a slight ambient touch while avoiding heavy modulation.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If a more defined reverb tail is preferred."
+            }
+          ]
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "1.0 Hz",
+            "Depth": "2.0"
+          },
+          "purpose": "Placeholder for potential subtle movement (kept off by default to avoid heavy modulation).",
+          "matchQuality": "fallback",
+          "gap": "The instructions explicitly advise avoiding heavy modulation, so this module is included but deactivated.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "volume/master control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "aggressive fuzz-rock crunch with gritty mid bite",
+      "mustHave": [
+        "thick fuzz",
+        "tight distorted crunch",
+        "dirty upper mids"
+      ],
+      "avoid": [
+        "clean tone",
+        "scooped metal high gain",
+        "heavy modulation"
+      ],
+      "gearClues": [
+        "single-coil or humbucker electric",
+        "Brit amp",
+        "4x12 cab",
+        "fuzz pedal"
+      ],
+      "corrections": [
+        "drop Tube Screamer focus",
+        "keep fuzz ahead of distortion",
+        "avoid mid-scooped phrasing"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "alternative rock",
+      "styleTags": [
+        "post-punk",
+        "indie rock",
+        "garage rock"
+      ],
+      "targetTone": "aggressive fuzz-rock crunch with gritty mid bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better cabinet realism and punch.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR (e.g., Celestion Greenback 4x12)",
+          "reason": "Improve the grit and definition of the British cabinet sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased punch and clarity in the mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1941,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

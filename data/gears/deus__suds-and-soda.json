@@ -1,0 +1,972 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1824,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Deus__Suds_Soda.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Deus",
+    "title": "Suds & Soda",
+    "album": "",
+    "year": null,
+    "genre": "garage rock"
+  },
+  "genreClassification": {
+    "genre": "garage rock",
+    "subgenres": [
+      "indie rock",
+      "raw rock"
+    ],
+    "confidence": "high",
+    "rationale": "The tone profile emphasizes raw, fuzzy, midrange-heavy garage rock crunch."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, crunchy punk/garage rock tone with a slight fuzz edge.",
+      "signatureElements": [
+        "Crunch overdrive (TS style)",
+        "Slightly dirty amp character",
+        "Punk rhythm strumming"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal (e.g., Tube Screamer clone)",
+        "Amp simulation (British or American clean head)"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Clean ambient tones",
+        "Wah effects"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "ragged garage rock crunch with slight fuzz edge",
+      "mustHave": [
+        "abrasive rhythm strum",
+        "dirty amp break-up",
+        "slight fuzz grain",
+        "dry midrange push"
+      ],
+      "avoid": [
+        "TS-polished overdrive",
+        "heavy distortion",
+        "clean ambience"
+      ],
+      "gearClues": [
+        "single-coil or P-90",
+        "British combo",
+        "small/medium cab",
+        "light fuzz"
+      ],
+      "corrections": [
+        "replace TS style with fuzzier edge",
+        "keep it dry and raw",
+        "favor garage crunch over punk metal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "ragged garage rock crunch with slight fuzz edge",
+    "mustHave": [
+      "abrasive rhythm strum",
+      "dirty amp break-up",
+      "slight fuzz grain",
+      "dry midrange push"
+    ],
+    "avoid": [
+      "TS-polished overdrive",
+      "heavy distortion",
+      "clean ambience"
+    ],
+    "gearClues": [
+      "single-coil or P-90",
+      "British combo",
+      "small/medium cab",
+      "light fuzz"
+    ],
+    "corrections": [
+      "replace TS style with fuzzier edge",
+      "keep it dry and raw",
+      "favor garage crunch over punk metal"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on raw, mid-heavy garage crunch using fuzz and British amp models.",
+          "bestMatchSummary": "A gritty signal chain starting with a Fuzz boost, followed by an OD pedal for grit, feeding into a UK 45 or UK 50 style amplifier, paired with a dry cabinet to achieve the desired raw, midrange-focused garage rock tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up stray noise inherent in garage rock recordings.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "Medium",
+                "Tone": "Mid-focused",
+                "Level": "High"
+              },
+              "purpose": "Provide the required 'slight fuzz grain' and abrasive edge.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "Medium-High",
+                "Tone": "Mid-boosted",
+                "Level": "Medium"
+              },
+              "purpose": "Add dirty amp break-up and midrange push without the polish of a TS pedal.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD for its slightly more aggressive, less polished grit suitable for garage rock.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Too clean/polished."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "Medium-High",
+                "Treble": "Mid",
+                "Bass": "Mid",
+                "Presence": "High"
+              },
+              "purpose": "Simulate the 'British combo' sound and dirty amp break-up.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close",
+                "EQ": "Mid-scooped"
+              },
+              "purpose": "Provide a classic British cabinet sound that complements the UK 45 amp model.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "EQ/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Enhance the 'dry midrange push' and cut excessive low-end mud.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Optional subtle movement for texture (kept off by default).",
+              "matchQuality": "close",
+              "gap": "Not strictly necessary for the raw garage sound, but included as a versatile option.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "Medium",
+                "Feedback": "Low",
+                "Mix": "Very Low"
+              },
+              "purpose": "Add minimal space and depth without sounding clean or ambient.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to prevent the sound from being completely dry, while maintaining raw character.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is assumed to be a guitar performance. The rig focuses on achieving a gritty, mid-heavy garage rock tone."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and grit by swapping the default IR for a more raw, British combo sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British Combo 1x12 or 2x12 (raw)",
+              "reason": "The current cabinet is too polished; needs a rawer, more aggressive British sound to match the garage grit.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased raw aggression and midrange punch.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Deus - Suds & Soda - Valeton GP-180",
+        "song": {
+          "artist": "Deus",
+          "title": "Suds & Soda",
+          "album": "",
+          "year": null,
+          "genre": "garage rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "ragged garage rock crunch with slight fuzz edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A gritty signal chain starting with a Fuzz boost, followed by an OD pedal for grit, feeding into a UK 45 or UK 50 style amplifier, paired with a dry cabinet to achieve the desired raw, midrange-focused garage rock tone.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up stray noise inherent in garage rock recordings.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "DST",
+            "model": "Fuzz",
+            "active": true,
+            "settings": {
+              "Drive": "Medium",
+              "Tone": "Mid-focused",
+              "Level": "High"
+            },
+            "purpose": "Provide the required 'slight fuzz grain' and abrasive edge.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "Medium-High",
+              "Tone": "Mid-boosted",
+              "Level": "Medium"
+            },
+            "purpose": "Add dirty amp break-up and midrange push without the polish of a TS pedal.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen over Blues OD for its slightly more aggressive, less polished grit suitable for garage rock.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Too clean/polished."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amp simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "Medium-High",
+              "Treble": "Mid",
+              "Bass": "Mid",
+              "Presence": "High"
+            },
+            "purpose": "Simulate the 'British combo' sound and dirty amp break-up.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Close",
+              "EQ": "Mid-scooped"
+            },
+            "purpose": "Provide a classic British cabinet sound that complements the UK 45 amp model.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "EQ/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+3 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Enhance the 'dry midrange push' and cut excessive low-end mud.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/texture",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Low"
+            },
+            "purpose": "Optional subtle movement for texture (kept off by default).",
+            "matchQuality": "close",
+            "gap": "Not strictly necessary for the raw garage sound, but included as a versatile option.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "Medium",
+              "Feedback": "Low",
+              "Mix": "Very Low"
+            },
+            "purpose": "Add minimal space and depth without sounding clean or ambient.",
+            "matchQuality": "close",
+            "gap": "Used sparingly to prevent the sound from being completely dry, while maintaining raw character.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "ragged garage rock crunch with slight fuzz edge",
+          "toneProfile": "ragged garage rock crunch with slight fuzz edge",
+          "idealSignalChain": "single-coil or P-90 | British combo | small/medium cab | light fuzz",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil or P-90",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "British combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small/medium cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light fuzz",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "abrasive rhythm strum",
+            "dirty amp break-up",
+            "slight fuzz grain",
+            "dry midrange push"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on raw, mid-heavy garage crunch using fuzz and British amp models.",
+          "bestMatchSummary": "A gritty signal chain starting with a Fuzz boost, followed by an OD pedal for grit, feeding into a UK 45 or UK 50 style amplifier, paired with a dry cabinet to achieve the desired raw, midrange-focused garage rock tone.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up stray noise inherent in garage rock recordings.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "Medium",
+                "Tone": "Mid-focused",
+                "Level": "High"
+              },
+              "purpose": "Provide the required 'slight fuzz grain' and abrasive edge.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "Medium-High",
+                "Tone": "Mid-boosted",
+                "Level": "Medium"
+              },
+              "purpose": "Add dirty amp break-up and midrange push without the polish of a TS pedal.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD for its slightly more aggressive, less polished grit suitable for garage rock.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Too clean/polished."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amp simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "Medium-High",
+                "Treble": "Mid",
+                "Bass": "Mid",
+                "Presence": "High"
+              },
+              "purpose": "Simulate the 'British combo' sound and dirty amp break-up.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close",
+                "EQ": "Mid-scooped"
+              },
+              "purpose": "Provide a classic British cabinet sound that complements the UK 45 amp model.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "EQ/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Enhance the 'dry midrange push' and cut excessive low-end mud.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Optional subtle movement for texture (kept off by default).",
+              "matchQuality": "close",
+              "gap": "Not strictly necessary for the raw garage sound, but included as a versatile option.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "Medium",
+                "Feedback": "Low",
+                "Mix": "Very Low"
+              },
+              "purpose": "Add minimal space and depth without sounding clean or ambient.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to prevent the sound from being completely dry, while maintaining raw character.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and grit by swapping the default IR for a more raw, British combo sound.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British Combo 1x12 or 2x12 (raw)",
+              "reason": "The current cabinet is too polished; needs a rawer, more aggressive British sound to match the garage grit.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased raw aggression and midrange punch.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "replace TS style with fuzzier edge",
+          "keep it dry and raw",
+          "favor garage crunch over punk metal"
+        ],
+        "warnings": [
+          "The source material is assumed to be a guitar performance. The rig focuses on achieving a gritty, mid-heavy garage rock tone."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.813,
+      "prompt_chars": 984,
+      "response_chars": 402,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 100,
+        "total_duration": 11790769400,
+        "prompt_eval_duration": 177949000,
+        "eval_duration": 746998000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.109,
+      "prompt_chars": 5308,
+      "response_chars": 535,
+      "usage": {
+        "input_tokens": 1485,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 140,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1625
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 9.452,
+      "prompt_chars": 3592,
+      "response_chars": 4542,
+      "usage": {
+        "prompt_eval_count": 1208,
+        "eval_count": 1293,
+        "total_duration": 9444173900,
+        "prompt_eval_duration": 147548000,
+        "eval_duration": 8939485000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.66,
+      "prompt_chars": 6627,
+      "response_chars": 606,
+      "usage": {
+        "prompt_eval_count": 1858,
+        "eval_count": 161,
+        "total_duration": 12639903500,
+        "prompt_eval_duration": 169998000,
+        "eval_duration": 1133526000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.292,
+      "prompt_chars": 2659,
+      "response_chars": 178,
+      "usage": {
+        "prompt_eval_count": 835,
+        "eval_count": 48,
+        "total_duration": 12269518300,
+        "prompt_eval_duration": 196975000,
+        "eval_duration": 353683000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Deus",
+      "title": "Suds & Soda",
+      "album": "",
+      "year": null,
+      "genre": "garage rock"
+    },
+    "rig": {
+      "rigName": "Deus - Suds & Soda - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "ragged garage rock crunch with slight fuzz edge",
+      "signalChainSummary": "A gritty signal chain starting with a Fuzz boost, followed by an OD pedal for grit, feeding into a UK 45 or UK 50 style amplifier, paired with a dry cabinet to achieve the desired raw, midrange-focused garage rock tone.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up stray noise inherent in garage rock recordings.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "DST",
+          "model": "Fuzz",
+          "active": true,
+          "settings": {
+            "Drive": "Medium",
+            "Tone": "Mid-focused",
+            "Level": "High"
+          },
+          "purpose": "Provide the required 'slight fuzz grain' and abrasive edge.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "Medium-High",
+            "Tone": "Mid-boosted",
+            "Level": "Medium"
+          },
+          "purpose": "Add dirty amp break-up and midrange push without the polish of a TS pedal.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen over Blues OD for its slightly more aggressive, less polished grit suitable for garage rock.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Too clean/polished."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amp simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "Medium-High",
+            "Treble": "Mid",
+            "Bass": "Mid",
+            "Presence": "High"
+          },
+          "purpose": "Simulate the 'British combo' sound and dirty amp break-up.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Close",
+            "EQ": "Mid-scooped"
+          },
+          "purpose": "Provide a classic British cabinet sound that complements the UK 45 amp model.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "EQ/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+3 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Enhance the 'dry midrange push' and cut excessive low-end mud.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/texture",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Low"
+          },
+          "purpose": "Optional subtle movement for texture (kept off by default).",
+          "matchQuality": "close",
+          "gap": "Not strictly necessary for the raw garage sound, but included as a versatile option.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "Medium",
+            "Feedback": "Low",
+            "Mix": "Very Low"
+          },
+          "purpose": "Add minimal space and depth without sounding clean or ambient.",
+          "matchQuality": "close",
+          "gap": "Used sparingly to prevent the sound from being completely dry, while maintaining raw character.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "ragged garage rock crunch with slight fuzz edge",
+      "mustHave": [
+        "abrasive rhythm strum",
+        "dirty amp break-up",
+        "slight fuzz grain",
+        "dry midrange push"
+      ],
+      "avoid": [
+        "TS-polished overdrive",
+        "heavy distortion",
+        "clean ambience"
+      ],
+      "gearClues": [
+        "single-coil or P-90",
+        "British combo",
+        "small/medium cab",
+        "light fuzz"
+      ],
+      "corrections": [
+        "replace TS style with fuzzier edge",
+        "keep it dry and raw",
+        "favor garage crunch over punk metal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "garage rock",
+      "styleTags": [
+        "indie rock",
+        "raw rock"
+      ],
+      "targetTone": "ragged garage rock crunch with slight fuzz edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and grit by swapping the default IR for a more raw, British combo sound.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "British Combo 1x12 or 2x12 (raw)",
+          "reason": "The current cabinet is too polished; needs a rawer, more aggressive British sound to match the garage grit.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased raw aggression and midrange punch.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1824,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

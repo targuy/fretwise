@@ -57,6 +57,15 @@ def gears_filename(artist: str, title: str) -> str:
     return f"{gears_key(artist, title)}.json"
 
 
+def gears_filename_for_rig(rig: dict) -> str:
+    """Return the canonical filename for an assembled rig document.
+
+    Reads ``rig['song']['artist']`` / ``['title']`` (the SongsGears schema shape).
+    """
+    song = rig.get("song") if isinstance(rig.get("song"), dict) else {}
+    return gears_filename(str(song.get("artist") or ""), str(song.get("title") or ""))
+
+
 def gears_key_from_filename(filename: str) -> str:
     """Derive the canonical gears key from a score/partition filename.
 

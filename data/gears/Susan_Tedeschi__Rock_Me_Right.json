@@ -1,0 +1,981 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1951,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Susan_Tedeschi__Rock_Me_Right.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Susan Tedeschi",
+    "title": "Rock Me Right",
+    "album": "",
+    "year": null,
+    "genre": "blues rock"
+  },
+  "genreClassification": {
+    "genre": "blues rock",
+    "subgenres": [
+      "blues",
+      "rock"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and tone profile strongly suggest a classic blues-infused rock sound."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven blues rock tone",
+      "signatureElements": [
+        "crunch",
+        "mild overdrive",
+        "slight compression",
+        "vintage tube amp feel"
+      ],
+      "gearHypotheses": [
+        "British style crunch amp model (e.g., AC30/Plexi)",
+        "Low-gain distortion pedal or amp simulation"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "digital clean tones",
+        "extreme modulation"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dirty blues-rock crunch with raw vocal amp bite",
+      "mustHave": [
+        "gritty edge-of-breakup crunch",
+        "strong mid bite",
+        "slight compression",
+        "small amp drive"
+      ],
+      "avoid": [
+        "fuzzy saturation",
+        "clean sparkle",
+        "heavy modulation"
+      ],
+      "gearClues": [
+        "Strat/Tele",
+        "tube combo",
+        "Marshall or Fender pushed"
+      ],
+      "corrections": [
+        "lean more raw than warm",
+        "raise bite and grit",
+        "keep gain modest"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dirty blues-rock crunch with raw vocal amp bite",
+    "mustHave": [
+      "gritty edge-of-breakup crunch",
+      "strong mid bite",
+      "slight compression",
+      "small amp drive"
+    ],
+    "avoid": [
+      "fuzzy saturation",
+      "clean sparkle",
+      "heavy modulation"
+    ],
+    "gearClues": [
+      "Strat/Tele",
+      "tube combo",
+      "Marshall or Fender pushed"
+    ],
+    "corrections": [
+      "lean more raw than warm",
+      "raise bite and grit",
+      "keep gain modest"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on mid-range bite and classic blues crunch, simulating a pushed tube combo.",
+          "bestMatchSummary": "A gritty, mid-focused signal chain using an OD pedal for initial grit, followed by the UK 45 amp model to capture the raw, biting sound of a vintage Marshall setup.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the initial 'gritty edge-of-breakup crunch' and mid-range bite.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "4:1",
+                "Attack": "medium",
+                "Level": "6"
+              },
+              "purpose": "Apply slight compression to smooth dynamics and enhance sustain.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Skipped. The Green OD and UK 45 amp provide sufficient grit without needing a dedicated distortion pedal.",
+              "matchQuality": "none",
+              "gap": "The 'mustHave' list suggests crunch, but the chosen pedals (Green OD/UK 45) handle this better than adding another gain stage.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the raw, biting sound of a pushed Marshall tube combo.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet tone that complements the Marshall simulation.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1",
+                "Mid": "4",
+                "High": "3"
+              },
+              "purpose": "Boost the mid-range bite and grit as requested.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space and depth without distracting from the raw tone.",
+              "matchQuality": "close",
+              "gap": "The target is 'raw,' so modulation/reverb must be kept minimal to avoid sounding too polished.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is blues-rock, which requires a raw, aggressive tone. The settings prioritize mid-range punch and grit over warmth or clean sparkle."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the vintage tube combo sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 IR (e.g., Fender Deluxe or Vox AC30)",
+              "reason": "The current UK Vintage 4x12 is too generic; a specific vintage cab will enhance the raw blues tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "More authentic tube bite and character.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Susan Tedeschi - Rock Me Right - Valeton GP-180",
+        "song": {
+          "artist": "Susan Tedeschi",
+          "title": "Rock Me Right",
+          "album": "",
+          "year": null,
+          "genre": "blues rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dirty blues-rock crunch with raw vocal amp bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A gritty, mid-focused signal chain using an OD pedal for initial grit, followed by the UK 45 amp model to capture the raw, biting sound of a vintage Marshall setup.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and background noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the initial 'gritty edge-of-breakup crunch' and mid-range bite.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Ratio": "4:1",
+              "Attack": "medium",
+              "Level": "6"
+            },
+            "purpose": "Apply slight compression to smooth dynamics and enhance sustain.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Skipped. The Green OD and UK 45 amp provide sufficient grit without needing a dedicated distortion pedal.",
+            "matchQuality": "none",
+            "gap": "The 'mustHave' list suggests crunch, but the chosen pedals (Green OD/UK 45) handle this better than adding another gain stage.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Mid": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the raw, biting sound of a pushed Marshall tube combo.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a classic British cabinet tone that complements the Marshall simulation.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low": "-1",
+              "Mid": "4",
+              "High": "3"
+            },
+            "purpose": "Boost the mid-range bite and grit as requested.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay": "1.5s"
+            },
+            "purpose": "Add a subtle sense of space and depth without distracting from the raw tone.",
+            "matchQuality": "close",
+            "gap": "The target is 'raw,' so modulation/reverb must be kept minimal to avoid sounding too polished.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dirty blues-rock crunch with raw vocal amp bite",
+          "toneProfile": "dirty blues-rock crunch with raw vocal amp bite",
+          "idealSignalChain": "Strat/Tele | tube combo | Marshall or Fender pushed",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Strat/Tele",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "tube combo",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall or Fender pushed",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "gritty edge-of-breakup crunch",
+            "strong mid bite",
+            "slight compression",
+            "small amp drive"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on mid-range bite and classic blues crunch, simulating a pushed tube combo.",
+          "bestMatchSummary": "A gritty, mid-focused signal chain using an OD pedal for initial grit, followed by the UK 45 amp model to capture the raw, biting sound of a vintage Marshall setup.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and background noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the initial 'gritty edge-of-breakup crunch' and mid-range bite.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Ratio": "4:1",
+                "Attack": "medium",
+                "Level": "6"
+              },
+              "purpose": "Apply slight compression to smooth dynamics and enhance sustain.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Skipped. The Green OD and UK 45 amp provide sufficient grit without needing a dedicated distortion pedal.",
+              "matchQuality": "none",
+              "gap": "The 'mustHave' list suggests crunch, but the chosen pedals (Green OD/UK 45) handle this better than adding another gain stage.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the raw, biting sound of a pushed Marshall tube combo.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet tone that complements the Marshall simulation.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1",
+                "Mid": "4",
+                "High": "3"
+              },
+              "purpose": "Boost the mid-range bite and grit as requested.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space and depth without distracting from the raw tone.",
+              "matchQuality": "close",
+              "gap": "The target is 'raw,' so modulation/reverb must be kept minimal to avoid sounding too polished.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the vintage tube combo sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 4x12 IR (e.g., Fender Deluxe or Vox AC30)",
+              "reason": "The current UK Vintage 4x12 is too generic; a specific vintage cab will enhance the raw blues tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "More authentic tube bite and character.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "lean more raw than warm",
+          "raise bite and grit",
+          "keep gain modest"
+        ],
+        "warnings": [
+          "The source material is blues-rock, which requires a raw, aggressive tone. The settings prioritize mid-range punch and grit over warmth or clean sparkle."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 17.521,
+      "prompt_chars": 996,
+      "response_chars": 369,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 94,
+        "total_duration": 17517575300,
+        "prompt_eval_duration": 90440000,
+        "eval_duration": 769182000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.797,
+      "prompt_chars": 5293,
+      "response_chars": 487,
+      "usage": {
+        "input_tokens": 1483,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 125,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1608
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 61.411,
+      "prompt_chars": 3549,
+      "response_chars": 4563,
+      "usage": {
+        "prompt_eval_count": 1193,
+        "eval_count": 1336,
+        "total_duration": 61403288200,
+        "prompt_eval_duration": 135074000,
+        "eval_duration": 11030116000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 44.279,
+      "prompt_chars": 6617,
+      "response_chars": 585,
+      "usage": {
+        "prompt_eval_count": 1886,
+        "eval_count": 160,
+        "total_duration": 44272272000,
+        "prompt_eval_duration": 202935000,
+        "eval_duration": 1345522000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 19.199,
+      "prompt_chars": 2694,
+      "response_chars": 174,
+      "usage": {
+        "prompt_eval_count": 858,
+        "eval_count": 45,
+        "total_duration": 19176382600,
+        "prompt_eval_duration": 136780000,
+        "eval_duration": 358780000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Susan Tedeschi",
+      "title": "Rock Me Right",
+      "album": "",
+      "year": null,
+      "genre": "blues rock"
+    },
+    "rig": {
+      "rigName": "Susan Tedeschi - Rock Me Right - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dirty blues-rock crunch with raw vocal amp bite",
+      "signalChainSummary": "A gritty, mid-focused signal chain using an OD pedal for initial grit, followed by the UK 45 amp model to capture the raw, biting sound of a vintage Marshall setup.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and background noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the initial 'gritty edge-of-breakup crunch' and mid-range bite.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Ratio": "4:1",
+            "Attack": "medium",
+            "Level": "6"
+          },
+          "purpose": "Apply slight compression to smooth dynamics and enhance sustain.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Skipped. The Green OD and UK 45 amp provide sufficient grit without needing a dedicated distortion pedal.",
+          "matchQuality": "fallback",
+          "gap": "The 'mustHave' list suggests crunch, but the chosen pedals (Green OD/UK 45) handle this better than adding another gain stage.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Mid": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the raw, biting sound of a pushed Marshall tube combo.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a classic British cabinet tone that complements the Marshall simulation.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low": "-1",
+            "Mid": "4",
+            "High": "3"
+          },
+          "purpose": "Boost the mid-range bite and grit as requested.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/effect",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay": "1.5s"
+          },
+          "purpose": "Add a subtle sense of space and depth without distracting from the raw tone.",
+          "matchQuality": "close",
+          "gap": "The target is 'raw,' so modulation/reverb must be kept minimal to avoid sounding too polished.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dirty blues-rock crunch with raw vocal amp bite",
+      "mustHave": [
+        "gritty edge-of-breakup crunch",
+        "strong mid bite",
+        "slight compression",
+        "small amp drive"
+      ],
+      "avoid": [
+        "fuzzy saturation",
+        "clean sparkle",
+        "heavy modulation"
+      ],
+      "gearClues": [
+        "Strat/Tele",
+        "tube combo",
+        "Marshall or Fender pushed"
+      ],
+      "corrections": [
+        "lean more raw than warm",
+        "raise bite and grit",
+        "keep gain modest"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues rock",
+      "styleTags": [
+        "blues",
+        "rock"
+      ],
+      "targetTone": "dirty blues-rock crunch with raw vocal amp bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better capture the vintage tube combo sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 4x12 IR (e.g., Fender Deluxe or Vox AC30)",
+          "reason": "The current UK Vintage 4x12 is too generic; a specific vintage cab will enhance the raw blues tone.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "More authentic tube bite and character.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1951,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

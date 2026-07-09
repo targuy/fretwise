@@ -1,0 +1,1135 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1810,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Boehse_Onkelz__Fuer_Immer.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Boehse Onkelz",
+    "title": "Fuer Immer",
+    "album": "",
+    "year": null,
+    "genre": "punk rock"
+  },
+  "genreClassification": {
+    "genre": "punk rock",
+    "subgenres": [
+      "new wave",
+      "pop punk"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and tone profile suggest high-energy, crunchy pop/punk rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Crunchy, mid-focused rock tone with slight grit and pronounced sustain.",
+      "signatureElements": [
+        "Mid-range focus",
+        "Slight fuzz/grit (low drive)",
+        "Clean attack for rhythm parts",
+        "Moderate delay/reverb tail"
+      ],
+      "gearHypotheses": [
+        "Modeling amp head (e.g., Fender Twin/Deluxe style) for clean base",
+        "Overdrive pedal (e.g., Tube Screamer style) for mid-hump and grit",
+        "Chorus or Flanger effect for texture"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "Bright, scooped tones",
+        "Excessive modulation (tremolo)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry Marshall-style crunch with mid push",
+      "mustHave": [
+        "tight palm-muted crunch",
+        "upper-mid bite",
+        "slight sustain",
+        "mostly dry mix"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "flanger",
+        "heavy delay"
+      ],
+      "gearClues": [
+        "Plexi/JCM-style amp",
+        "4x12 cab",
+        "bridge humbucker"
+      ],
+      "corrections": [
+        "drop Twin/Deluxe base",
+        "drop chorus/flanger",
+        "reduce delay/reverb"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry Marshall-style crunch with mid push",
+    "mustHave": [
+      "tight palm-muted crunch",
+      "upper-mid bite",
+      "slight sustain",
+      "mostly dry mix"
+    ],
+    "avoid": [
+      "fuzz",
+      "chorus",
+      "flanger",
+      "heavy delay"
+    ],
+    "gearClues": [
+      "Plexi/JCM-style amp",
+      "4x12 cab",
+      "bridge humbucker"
+    ],
+    "corrections": [
+      "drop Twin/Deluxe base",
+      "drop chorus/flanger",
+      "reduce delay/reverb"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic British crunch tones (Plexi/JCM) with tight palm-muting capability and upper-mid focus.",
+          "bestMatchSummary": "A clean boost into a UK 45 or UK 50 model, paired with the UK Vintage 4x12 cabinet. The signal chain emphasizes mid-range punch and controlled crunch for rhythm playing.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from the guitar signal.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recording/practice setup.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Mid-Focus"
+              },
+              "purpose": "Provide a subtle, controlled lift and mid-range emphasis to cut through the mix.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used as a general tone shaper/preamp boost since no specific EQ or OD was mandated for this role. This helps achieve the 'mid push'.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "If more grit than just mid-focus lift is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/crunch",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "Mid-Boosted",
+                "Level": "6"
+              },
+              "purpose": "Simulate the classic Plexi/JCM crunch tone and provide tight palm-muted aggression.",
+              "matchQuality": "close",
+              "gap": "While 'Red Haze' is often used for fuzz, its voicing can be dialed back to achieve a controlled, mid-focused British crunch suitable for rhythm work. This choice prioritizes the desired grit over pure tone accuracy.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "A safer alternative if Red Haze is too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Model the classic British Marshall sound (Plexi/JCM style) with strong upper-mid bite.",
+              "matchQuality": "exact",
+              "gap": "None. Directly matches the 'Plexi/JCM-style amp' clue.",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "A slightly more modern, aggressive alternative."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required classic British cabinet voicing (4x12) for full-bodied crunch.",
+              "matchQuality": "exact",
+              "gap": "None. Matches '4x12 cab' clue and general tone requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Fine-tune the tone by boosting the upper mids and slightly reducing low end for tightness.",
+              "matchQuality": "exact",
+              "gap": "None. Used to fulfill the 'upper-mid bite' requirement precisely.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Placeholder. Disabled to adhere to 'avoid chorus' instruction.",
+              "matchQuality": "N/A",
+              "gap": "The module is included but deactivated, ensuring the tone remains dry and focused on crunch.",
+              "alternatives": [],
+              "model": "None"
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "N/A",
+                "Feedback": "Low"
+              },
+              "purpose": "Placeholder. Disabled to adhere to 'avoid heavy delay' instruction.",
+              "matchQuality": "N/A",
+              "gap": "The module is included but deactivated, ensuring the tone remains dry and focused on crunch.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add minimal ambient space and slight sustain without sounding wet or distracting.",
+              "matchQuality": "close",
+              "gap": "The 'mostly dry mix' requirement limits the reverb, so a low-mix Room setting is used for subtle depth.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a slightly more controlled decay is preferred over room ambience."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment to ensure the signal is balanced and punchy.",
+              "matchQuality": "exact",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material was not explicitly analyzed, but the rig is built to emulate a tight, mid-pushed British rock rhythm tone (Plexi/JCM style).",
+          "Modules like Chorus and Digital Delay are included in the chain structure but deactivated to meet the 'avoid' criteria."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and natural upper-mid bite.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "UK 4x12 (Celestion Greenback/V30)",
+              "reason": "Enhance the classic British crunch tone with more realistic mid-range punch and bite.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Improved clarity and definition in rhythm playing.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Boehse Onkelz - Fuer Immer - Valeton GP-180",
+        "song": {
+          "artist": "Boehse Onkelz",
+          "title": "Fuer Immer",
+          "album": "",
+          "year": null,
+          "genre": "punk rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry Marshall-style crunch with mid push",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean boost into a UK 45 or UK 50 model, paired with the UK Vintage 4x12 cabinet. The signal chain emphasizes mid-range punch and controlled crunch for rhythm playing.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise from the guitar signal.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean recording/practice setup.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "Mid-Focus"
+            },
+            "purpose": "Provide a subtle, controlled lift and mid-range emphasis to cut through the mix.",
+            "matchQuality": "close",
+            "gap": "The Boost module is used as a general tone shaper/preamp boost since no specific EQ or OD was mandated for this role. This helps achieve the 'mid push'.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "If more grit than just mid-focus lift is desired."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/crunch",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "4",
+              "Tone": "Mid-Boosted",
+              "Level": "6"
+            },
+            "purpose": "Simulate the classic Plexi/JCM crunch tone and provide tight palm-muted aggression.",
+            "matchQuality": "close",
+            "gap": "While 'Red Haze' is often used for fuzz, its voicing can be dialed back to achieve a controlled, mid-focused British crunch suitable for rhythm work. This choice prioritizes the desired grit over pure tone accuracy.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "A safer alternative if Red Haze is too aggressive."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Midrange": "8",
+              "Bass": "6"
+            },
+            "purpose": "Model the classic British Marshall sound (Plexi/JCM style) with strong upper-mid bite.",
+            "matchQuality": "exact",
+            "gap": "None. Directly matches the 'Plexi/JCM-style amp' clue.",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "A slightly more modern, aggressive alternative."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the required classic British cabinet voicing (4x12) for full-bodied crunch.",
+            "matchQuality": "exact",
+            "gap": "None. Matches '4x12 cab' clue and general tone requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "+1 dB"
+            },
+            "purpose": "Fine-tune the tone by boosting the upper mids and slightly reducing low end for tightness.",
+            "matchQuality": "exact",
+            "gap": "None. Used to fulfill the 'upper-mid bite' requirement precisely.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/texture",
+            "module": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Low"
+            },
+            "purpose": "Placeholder. Disabled to adhere to 'avoid chorus' instruction.",
+            "matchQuality": "N/A",
+            "gap": "The module is included but deactivated, ensuring the tone remains dry and focused on crunch.",
+            "alternatives": [],
+            "model": "None"
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "N/A",
+              "Feedback": "Low"
+            },
+            "purpose": "Placeholder. Disabled to adhere to 'avoid heavy delay' instruction.",
+            "matchQuality": "N/A",
+            "gap": "The module is included but deactivated, ensuring the tone remains dry and focused on crunch.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2.0s"
+            },
+            "purpose": "Add minimal ambient space and slight sustain without sounding wet or distracting.",
+            "matchQuality": "close",
+            "gap": "The 'mostly dry mix' requirement limits the reverb, so a low-mix Room setting is used for subtle depth.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "If a slightly more controlled decay is preferred over room ambience."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment to ensure the signal is balanced and punchy.",
+            "matchQuality": "exact",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry Marshall-style crunch with mid push",
+          "toneProfile": "dry Marshall-style crunch with mid push",
+          "idealSignalChain": "Plexi/JCM-style amp | 4x12 cab | bridge humbucker",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Plexi/JCM-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight palm-muted crunch",
+            "upper-mid bite",
+            "slight sustain",
+            "mostly dry mix"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic British crunch tones (Plexi/JCM) with tight palm-muting capability and upper-mid focus.",
+          "bestMatchSummary": "A clean boost into a UK 45 or UK 50 model, paired with the UK Vintage 4x12 cabinet. The signal chain emphasizes mid-range punch and controlled crunch for rhythm playing.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from the guitar signal.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean recording/practice setup.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "Mid-Focus"
+              },
+              "purpose": "Provide a subtle, controlled lift and mid-range emphasis to cut through the mix.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used as a general tone shaper/preamp boost since no specific EQ or OD was mandated for this role. This helps achieve the 'mid push'.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "If more grit than just mid-focus lift is desired."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/crunch",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "Mid-Boosted",
+                "Level": "6"
+              },
+              "purpose": "Simulate the classic Plexi/JCM crunch tone and provide tight palm-muted aggression.",
+              "matchQuality": "close",
+              "gap": "While 'Red Haze' is often used for fuzz, its voicing can be dialed back to achieve a controlled, mid-focused British crunch suitable for rhythm work. This choice prioritizes the desired grit over pure tone accuracy.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "A safer alternative if Red Haze is too aggressive."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Model the classic British Marshall sound (Plexi/JCM style) with strong upper-mid bite.",
+              "matchQuality": "exact",
+              "gap": "None. Directly matches the 'Plexi/JCM-style amp' clue.",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "A slightly more modern, aggressive alternative."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the required classic British cabinet voicing (4x12) for full-bodied crunch.",
+              "matchQuality": "exact",
+              "gap": "None. Matches '4x12 cab' clue and general tone requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Fine-tune the tone by boosting the upper mids and slightly reducing low end for tightness.",
+              "matchQuality": "exact",
+              "gap": "None. Used to fulfill the 'upper-mid bite' requirement precisely.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low"
+              },
+              "purpose": "Placeholder. Disabled to adhere to 'avoid chorus' instruction.",
+              "matchQuality": "N/A",
+              "gap": "The module is included but deactivated, ensuring the tone remains dry and focused on crunch.",
+              "alternatives": [],
+              "model": "None"
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "N/A",
+                "Feedback": "Low"
+              },
+              "purpose": "Placeholder. Disabled to adhere to 'avoid heavy delay' instruction.",
+              "matchQuality": "N/A",
+              "gap": "The module is included but deactivated, ensuring the tone remains dry and focused on crunch.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Add minimal ambient space and slight sustain without sounding wet or distracting.",
+              "matchQuality": "close",
+              "gap": "The 'mostly dry mix' requirement limits the reverb, so a low-mix Room setting is used for subtle depth.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a slightly more controlled decay is preferred over room ambience."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment to ensure the signal is balanced and punchy.",
+              "matchQuality": "exact",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and natural upper-mid bite.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "UK 4x12 (Celestion Greenback/V30)",
+              "reason": "Enhance the classic British crunch tone with more realistic mid-range punch and bite.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Improved clarity and definition in rhythm playing.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop Twin/Deluxe base",
+          "drop chorus/flanger",
+          "reduce delay/reverb"
+        ],
+        "warnings": [
+          "The source material was not explicitly analyzed, but the rig is built to emulate a tight, mid-pushed British rock rhythm tone (Plexi/JCM style).",
+          "Modules like Chorus and Digital Delay are included in the chain structure but deactivated to meet the 'avoid' criteria."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.935,
+      "prompt_chars": 992,
+      "response_chars": 536,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 141,
+        "total_duration": 11904908200,
+        "prompt_eval_duration": 131019000,
+        "eval_duration": 980618000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 3.481,
+      "prompt_chars": 5462,
+      "response_chars": 452,
+      "usage": {
+        "input_tokens": 1530,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 129,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1659
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 23.939,
+      "prompt_chars": 3517,
+      "response_chars": 6475,
+      "usage": {
+        "prompt_eval_count": 1208,
+        "eval_count": 1793,
+        "total_duration": 23910469000,
+        "prompt_eval_duration": 141613000,
+        "eval_duration": 12864092000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 2.679,
+      "prompt_chars": 8567,
+      "response_chars": 539,
+      "usage": {
+        "prompt_eval_count": 2358,
+        "eval_count": 144,
+        "total_duration": 2658164700,
+        "prompt_eval_duration": 241706000,
+        "eval_duration": 1088002000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.552,
+      "prompt_chars": 2724,
+      "response_chars": 193,
+      "usage": {
+        "prompt_eval_count": 882,
+        "eval_count": 66,
+        "total_duration": 11547275500,
+        "prompt_eval_duration": 100138000,
+        "eval_duration": 435777000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Boehse Onkelz",
+      "title": "Fuer Immer",
+      "album": "",
+      "year": null,
+      "genre": "punk rock"
+    },
+    "rig": {
+      "rigName": "Boehse Onkelz - Fuer Immer - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry Marshall-style crunch with mid push",
+      "signalChainSummary": "A clean boost into a UK 45 or UK 50 model, paired with the UK Vintage 4x12 cabinet. The signal chain emphasizes mid-range punch and controlled crunch for rhythm playing.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise from the guitar signal.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean recording/practice setup.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "Mid-Focus"
+          },
+          "purpose": "Provide a subtle, controlled lift and mid-range emphasis to cut through the mix.",
+          "matchQuality": "close",
+          "gap": "The Boost module is used as a general tone shaper/preamp boost since no specific EQ or OD was mandated for this role. This helps achieve the 'mid push'.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "If more grit than just mid-focus lift is desired."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/crunch",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "4",
+            "Tone": "Mid-Boosted",
+            "Level": "6"
+          },
+          "purpose": "Simulate the classic Plexi/JCM crunch tone and provide tight palm-muted aggression.",
+          "matchQuality": "close",
+          "gap": "While 'Red Haze' is often used for fuzz, its voicing can be dialed back to achieve a controlled, mid-focused British crunch suitable for rhythm work. This choice prioritizes the desired grit over pure tone accuracy.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "A safer alternative if Red Haze is too aggressive."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Midrange": "8",
+            "Bass": "6"
+          },
+          "purpose": "Model the classic British Marshall sound (Plexi/JCM style) with strong upper-mid bite.",
+          "matchQuality": "exact",
+          "gap": "None. Directly matches the 'Plexi/JCM-style amp' clue.",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "A slightly more modern, aggressive alternative."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the required classic British cabinet voicing (4x12) for full-bodied crunch.",
+          "matchQuality": "exact",
+          "gap": "None. Matches '4x12 cab' clue and general tone requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "+1 dB"
+          },
+          "purpose": "Fine-tune the tone by boosting the upper mids and slightly reducing low end for tightness.",
+          "matchQuality": "exact",
+          "gap": "None. Used to fulfill the 'upper-mid bite' requirement precisely.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/texture",
+          "module": "PRE",
+          "model": "None",
+          "active": false,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Low"
+          },
+          "purpose": "Placeholder. Disabled to adhere to 'avoid chorus' instruction.",
+          "matchQuality": "fallback",
+          "gap": "The module is included but deactivated, ensuring the tone remains dry and focused on crunch.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "N/A",
+            "Feedback": "Low"
+          },
+          "purpose": "Placeholder. Disabled to adhere to 'avoid heavy delay' instruction.",
+          "matchQuality": "fallback",
+          "gap": "The module is included but deactivated, ensuring the tone remains dry and focused on crunch.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2.0s"
+          },
+          "purpose": "Add minimal ambient space and slight sustain without sounding wet or distracting.",
+          "matchQuality": "close",
+          "gap": "The 'mostly dry mix' requirement limits the reverb, so a low-mix Room setting is used for subtle depth.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If a slightly more controlled decay is preferred over room ambience."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment to ensure the signal is balanced and punchy.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry Marshall-style crunch with mid push",
+      "mustHave": [
+        "tight palm-muted crunch",
+        "upper-mid bite",
+        "slight sustain",
+        "mostly dry mix"
+      ],
+      "avoid": [
+        "fuzz",
+        "chorus",
+        "flanger",
+        "heavy delay"
+      ],
+      "gearClues": [
+        "Plexi/JCM-style amp",
+        "4x12 cab",
+        "bridge humbucker"
+      ],
+      "corrections": [
+        "drop Twin/Deluxe base",
+        "drop chorus/flanger",
+        "reduce delay/reverb"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "punk rock",
+      "styleTags": [
+        "new wave",
+        "pop punk"
+      ],
+      "targetTone": "dry Marshall-style crunch with mid push",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better cabinet realism and natural upper-mid bite.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "UK 4x12 (Celestion Greenback/V30)",
+          "reason": "Enhance the classic British crunch tone with more realistic mid-range punch and bite.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Improved clarity and definition in rhythm playing.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1810,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

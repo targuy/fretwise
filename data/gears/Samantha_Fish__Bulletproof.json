@@ -1,0 +1,1001 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1935,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Samantha_Fish__Bulletproof.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Samantha Fish",
+    "title": "Bulletproof",
+    "album": "",
+    "year": null,
+    "genre": "blues rock"
+  },
+  "genreClassification": {
+    "genre": "blues rock",
+    "subgenres": [
+      "blues",
+      "rock"
+    ],
+    "confidence": "high",
+    "rationale": "The tone profile and gear clues point directly to aggressive blues-rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Warm, slightly overdriven blues tone with pronounced mid-range focus.",
+      "signatureElements": [
+        "Bluesy lead lines",
+        "Mid-boosted crunch/grit",
+        "Subtle delay and reverb for space"
+      ],
+      "gearHypotheses": [
+        "Tube Screamer style overdrive (for grit)",
+        "British single-coil amp model (e.g., AC30 emulation)",
+        "Wah pedal (optional, for texture)"
+      ],
+      "avoid": [
+        "Heavy distortion",
+        "High gain metal tones",
+        "Bright scooped mids"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "risky blues-rock crunch with edge and bite",
+      "mustHave": [
+        "mid-forward drive",
+        "tight pick attack",
+        "slight grit",
+        "small delay or room"
+      ],
+      "avoid": [
+        "heavy metal gain",
+        "scooped clean",
+        "lush chorus"
+      ],
+      "gearClues": [
+        "single-coil or PAF",
+        "Marshall/AC30 edge",
+        "Tube Screamer",
+        "small combo"
+      ],
+      "corrections": [
+        "drop generic warm/bluesy wording",
+        "make the drive a bit nastier and more present",
+        "keep effects minimal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "risky blues-rock crunch with edge and bite",
+    "mustHave": [
+      "mid-forward drive",
+      "tight pick attack",
+      "slight grit",
+      "small delay or room"
+    ],
+    "avoid": [
+      "heavy metal gain",
+      "scooped clean",
+      "lush chorus"
+    ],
+    "gearClues": [
+      "single-coil or PAF",
+      "Marshall/AC30 edge",
+      "Tube Screamer",
+      "small combo"
+    ],
+    "corrections": [
+      "drop generic warm/bluesy wording",
+      "make the drive a bit nastier and more present",
+      "keep effects minimal"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on mid-forward, gritty blues-rock tone using classic British voicing and boost.",
+          "bestMatchSummary": "A tight, aggressive blues-rock crunch achieved with a Tube Screamer style overdrive into an AC30-voiced amp, complemented by minimal room ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "3.0",
+                "Tone": "6.5",
+                "Level": "7.0"
+              },
+              "purpose": "Simulate the Tube Screamer boost for mid-forward grit and tight attack.",
+              "matchQuality": "close",
+              "gap": "The dedicated TS model is absent, so Boost is used to mimic its tightening effect.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "A more direct OD option if the 'Boost' tone is too clean."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "5.0",
+                "Tone": "6.0",
+                "Level": "7.0"
+              },
+              "purpose": "Add nastier bite and aggressive crunch required for the blues-rock edge.",
+              "matchQuality": "close",
+              "gap": "The RAT is a good general grit source, providing more aggression than just the Boost alone.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "A broader choice if the RAT-style bite is too specific."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7.0",
+                "Mid": "7.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Provide the classic Marshall/AC30 voicing, known for mid-forward punch and bite.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Complement the AC30 voicing with a classic British cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1.0",
+                "Mid": "+2.0",
+                "Treble": "+1.5"
+              },
+              "purpose": "Sculpt the tone by emphasizing mids and adding bite, counteracting any low-end muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space and depth without sounding lush or overly wet.",
+              "matchQuality": "close",
+              "gap": "Room reverb is the best choice for minimal ambience, avoiding excessive wash.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A slightly more controlled alternative if Room sounds too open."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "volume/control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a blues-rock performance, requiring an aggressive and mid-focused tone. The chain prioritizes British voicing (AC30/UK Vintage 4x12) combined with multiple gain stages to achieve the required 'nastier' crunch."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for increased bite and presence in the blues-rock context.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-gain British 4x12 (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance mid-range bite and aggression for the blues-rock edge.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased presence and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Samantha Fish - Bulletproof - Valeton GP-180",
+        "song": {
+          "artist": "Samantha Fish",
+          "title": "Bulletproof",
+          "album": "",
+          "year": null,
+          "genre": "blues rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "risky blues-rock crunch with edge and bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, aggressive blues-rock crunch achieved with a Tube Screamer style overdrive into an AC30-voiced amp, complemented by minimal room ambience.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/overdrive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Drive": "3.0",
+              "Tone": "6.5",
+              "Level": "7.0"
+            },
+            "purpose": "Simulate the Tube Screamer boost for mid-forward grit and tight attack.",
+            "matchQuality": "close",
+            "gap": "The dedicated TS model is absent, so Boost is used to mimic its tightening effect.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "A more direct OD option if the 'Boost' tone is too clean."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "5.0",
+              "Tone": "6.0",
+              "Level": "7.0"
+            },
+            "purpose": "Add nastier bite and aggressive crunch required for the blues-rock edge.",
+            "matchQuality": "close",
+            "gap": "The RAT is a good general grit source, providing more aggression than just the Boost alone.",
+            "alternatives": [
+              {
+                "model": "Distortion",
+                "reason": "A broader choice if the RAT-style bite is too specific."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7.0",
+              "Mid": "7.0",
+              "Bass": "6.0"
+            },
+            "purpose": "Provide the classic Marshall/AC30 voicing, known for mid-forward punch and bite.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Complement the AC30 voicing with a classic British cabinet sound.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-1.0",
+              "Mid": "+2.0",
+              "Treble": "+1.5"
+            },
+            "purpose": "Sculpt the tone by emphasizing mids and adding bite, counteracting any low-end muddiness.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add a subtle sense of space and depth without sounding lush or overly wet.",
+            "matchQuality": "close",
+            "gap": "Room reverb is the best choice for minimal ambience, avoiding excessive wash.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "A slightly more controlled alternative if Room sounds too open."
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "volume/control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "risky blues-rock crunch with edge and bite",
+          "toneProfile": "risky blues-rock crunch with edge and bite",
+          "idealSignalChain": "single-coil or PAF | Marshall/AC30 edge | Tube Screamer | small combo",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil or PAF",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall/AC30 edge",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Tube Screamer",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small combo",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "mid-forward drive",
+            "tight pick attack",
+            "slight grit",
+            "small delay or room"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on mid-forward, gritty blues-rock tone using classic British voicing and boost.",
+          "bestMatchSummary": "A tight, aggressive blues-rock crunch achieved with a Tube Screamer style overdrive into an AC30-voiced amp, complemented by minimal room ambience.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/overdrive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Drive": "3.0",
+                "Tone": "6.5",
+                "Level": "7.0"
+              },
+              "purpose": "Simulate the Tube Screamer boost for mid-forward grit and tight attack.",
+              "matchQuality": "close",
+              "gap": "The dedicated TS model is absent, so Boost is used to mimic its tightening effect.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "A more direct OD option if the 'Boost' tone is too clean."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "5.0",
+                "Tone": "6.0",
+                "Level": "7.0"
+              },
+              "purpose": "Add nastier bite and aggressive crunch required for the blues-rock edge.",
+              "matchQuality": "close",
+              "gap": "The RAT is a good general grit source, providing more aggression than just the Boost alone.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "A broader choice if the RAT-style bite is too specific."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7.0",
+                "Mid": "7.0",
+                "Bass": "6.0"
+              },
+              "purpose": "Provide the classic Marshall/AC30 voicing, known for mid-forward punch and bite.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Complement the AC30 voicing with a classic British cabinet sound.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1.0",
+                "Mid": "+2.0",
+                "Treble": "+1.5"
+              },
+              "purpose": "Sculpt the tone by emphasizing mids and adding bite, counteracting any low-end muddiness.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add a subtle sense of space and depth without sounding lush or overly wet.",
+              "matchQuality": "close",
+              "gap": "Room reverb is the best choice for minimal ambience, avoiding excessive wash.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A slightly more controlled alternative if Room sounds too open."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "volume/control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for increased bite and presence in the blues-rock context.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-gain British 4x12 (e.g., Celestion Greenback/V30)",
+              "reason": "Enhance mid-range bite and aggression for the blues-rock edge.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased presence and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop generic warm/bluesy wording",
+          "make the drive a bit nastier and more present",
+          "keep effects minimal"
+        ],
+        "warnings": [
+          "The source material is a blues-rock performance, requiring an aggressive and mid-focused tone. The chain prioritizes British voicing (AC30/UK Vintage 4x12) combined with multiple gain stages to achieve the required 'nastier' crunch."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 15.725,
+      "prompt_chars": 993,
+      "response_chars": 453,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 115,
+        "total_duration": 15715580700,
+        "prompt_eval_duration": 53489000,
+        "eval_duration": 796026000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 4.214,
+      "prompt_chars": 5374,
+      "response_chars": 521,
+      "usage": {
+        "input_tokens": 1502,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 139,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1641
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 41.711,
+      "prompt_chars": 3587,
+      "response_chars": 4790,
+      "usage": {
+        "prompt_eval_count": 1207,
+        "eval_count": 1394,
+        "total_duration": 41703187800,
+        "prompt_eval_duration": 130080999,
+        "eval_duration": 9810868000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 41.613,
+      "prompt_chars": 6884,
+      "response_chars": 545,
+      "usage": {
+        "prompt_eval_count": 1958,
+        "eval_count": 154,
+        "total_duration": 41589130700,
+        "prompt_eval_duration": 187888000,
+        "eval_duration": 1128733000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 29.084,
+      "prompt_chars": 2611,
+      "response_chars": 166,
+      "usage": {
+        "prompt_eval_count": 836,
+        "eval_count": 44,
+        "total_duration": 29066577900,
+        "prompt_eval_duration": 127149000,
+        "eval_duration": 309069000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Samantha Fish",
+      "title": "Bulletproof",
+      "album": "",
+      "year": null,
+      "genre": "blues rock"
+    },
+    "rig": {
+      "rigName": "Samantha Fish - Bulletproof - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "risky blues-rock crunch with edge and bite",
+      "signalChainSummary": "A tight, aggressive blues-rock crunch achieved with a Tube Screamer style overdrive into an AC30-voiced amp, complemented by minimal room ambience.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/overdrive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Drive": "3.0",
+            "Tone": "6.5",
+            "Level": "7.0"
+          },
+          "purpose": "Simulate the Tube Screamer boost for mid-forward grit and tight attack.",
+          "matchQuality": "close",
+          "gap": "The dedicated TS model is absent, so Boost is used to mimic its tightening effect.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "A more direct OD option if the 'Boost' tone is too clean."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "5.0",
+            "Tone": "6.0",
+            "Level": "7.0"
+          },
+          "purpose": "Add nastier bite and aggressive crunch required for the blues-rock edge.",
+          "matchQuality": "close",
+          "gap": "The RAT is a good general grit source, providing more aggression than just the Boost alone.",
+          "alternatives": [
+            {
+              "model": "Distortion",
+              "reason": "A broader choice if the RAT-style bite is too specific."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7.0",
+            "Mid": "7.0",
+            "Bass": "6.0"
+          },
+          "purpose": "Provide the classic Marshall/AC30 voicing, known for mid-forward punch and bite.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Complement the AC30 voicing with a classic British cabinet sound.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-1.0",
+            "Mid": "+2.0",
+            "Treble": "+1.5"
+          },
+          "purpose": "Sculpt the tone by emphasizing mids and adding bite, counteracting any low-end muddiness.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add a subtle sense of space and depth without sounding lush or overly wet.",
+          "matchQuality": "close",
+          "gap": "Room reverb is the best choice for minimal ambience, avoiding excessive wash.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "A slightly more controlled alternative if Room sounds too open."
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "volume/control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "risky blues-rock crunch with edge and bite",
+      "mustHave": [
+        "mid-forward drive",
+        "tight pick attack",
+        "slight grit",
+        "small delay or room"
+      ],
+      "avoid": [
+        "heavy metal gain",
+        "scooped clean",
+        "lush chorus"
+      ],
+      "gearClues": [
+        "single-coil or PAF",
+        "Marshall/AC30 edge",
+        "Tube Screamer",
+        "small combo"
+      ],
+      "corrections": [
+        "drop generic warm/bluesy wording",
+        "make the drive a bit nastier and more present",
+        "keep effects minimal"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "blues rock",
+      "styleTags": [
+        "blues",
+        "rock"
+      ],
+      "targetTone": "risky blues-rock crunch with edge and bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for increased bite and presence in the blues-rock context.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "High-gain British 4x12 (e.g., Celestion Greenback/V30)",
+          "reason": "Enhance mid-range bite and aggression for the blues-rock edge.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased presence and definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1935,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

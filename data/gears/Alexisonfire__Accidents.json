@@ -1,0 +1,1170 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1788,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Alexisonfire__Accidents.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Alexisonfire",
+    "title": "Accidents",
+    "album": "",
+    "year": null,
+    "genre": "post-hardcore"
+  },
+  "genreClassification": {
+    "genre": "post-hardcore",
+    "subgenres": [
+      "punk rock",
+      "emo"
+    ],
+    "confidence": "high",
+    "rationale": "The aggressive crunch, fuzz, and post-hardcore focus define the genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "High-gain, aggressive metal crunch",
+      "signatureElements": [
+        "fuzz",
+        "high gain distortion",
+        "tight rhythm tone",
+        "aggressive palm muting"
+      ],
+      "gearHypotheses": [
+        "Overdriven amp model (e.g., Mesa/Marshall)",
+        "Heavy EQ boost in the mids/highs",
+        "Noise gate for tight rhythm"
+      ],
+      "avoid": [
+        "clean tones",
+        "ambient effects",
+        "low-gain breakup"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "aggressive post-hardcore crunch with fuzzed edge",
+      "mustHave": [
+        "tight palm mutes",
+        "abrasive mid bite",
+        "fuzz texture",
+        "dry rhythm"
+      ],
+      "avoid": [
+        "polished metal",
+        "scooped lows",
+        "ambient delay",
+        "clean breakup"
+      ],
+      "gearClues": [
+        "Marshall/Plexi or Mesa gain",
+        "4x12 cab",
+        "noise gate",
+        "optional fuzz pedal"
+      ],
+      "corrections": [
+        "replace generic metal with punk/post-hardcore crunch",
+        "keep fuzz as texture, not modern metal saturation"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "aggressive post-hardcore crunch with fuzzed edge",
+    "mustHave": [
+      "tight palm mutes",
+      "abrasive mid bite",
+      "fuzz texture",
+      "dry rhythm"
+    ],
+    "avoid": [
+      "polished metal",
+      "scooped lows",
+      "ambient delay",
+      "clean breakup"
+    ],
+    "gearClues": [
+      "Marshall/Plexi or Mesa gain",
+      "4x12 cab",
+      "noise gate",
+      "optional fuzz pedal"
+    ],
+    "corrections": [
+      "replace generic metal with punk/post-hardcore crunch",
+      "keep fuzz as texture, not modern metal saturation"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on aggressive, mid-focused gain structure (UK 45/Red Haze) to achieve post-hardcore crunch.",
+          "bestMatchSummary": "Gate -> Boost -> Red Haze -> UK 45 -> UK Vintage 4x12 -> Guitar EQ 2 -> Chorus -> Digital Delay -> Room",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Tight gating for aggressive rhythm playing and palm mutes.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "pre-gain boost/compression",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3 dB",
+                "Tone": "Mid Focus"
+              },
+              "purpose": "Slight lift and tightening of the signal before fuzz/gain stage.",
+              "matchQuality": "close",
+              "gap": "No dedicated pre-amp boost with tone control, using general Boost module.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Comp",
+                  "reason": "For more aggressive compression if the signal is too loose."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz texture",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "Medium",
+                "Tone": "Mid-High Focus",
+                "Fuzz": "Moderate"
+              },
+              "purpose": "Providing the required fuzzed edge and abrasive texture without sounding like modern metal saturation.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Fuzz",
+                  "reason": "If the Red Haze is too complex, a simpler Fuzz might be needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "High",
+                "Treble": "Mid-High",
+                "Bass": "Medium"
+              },
+              "purpose": "Simulating the punchy, mid-focused sound of a Plexi/Marshall stack suitable for post-hardcore.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK 50",
+                  "reason": "A slightly more aggressive alternative if the UK 45 is too tame."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ Boost": "Midrange"
+              },
+              "purpose": "Providing the classic British cabinet tone and necessary mid-focus for clarity.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "Mid Boost": "+4 dB (800 Hz)",
+                "High Cut": "8 kHz"
+              },
+              "purpose": "Aggressively boosting the mid-range bite and tightening the low end for 'abrasive mid bite'.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low",
+                "Mix": "20%"
+              },
+              "purpose": "Adding subtle movement and width to the rhythm parts without sounding ambient or clean.",
+              "matchQuality": "close",
+              "gap": "Chorus is often associated with cleaner tones; settings must be kept minimal to avoid 'polished metal' sound.",
+              "alternatives": [
+                {
+                  "module": "MOD",
+                  "model": "Tremolo",
+                  "reason": "If the chorus effect is too noticeable, a subtle tremolo might work."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "delay/space",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "15%"
+              },
+              "purpose": "Adding controlled space and depth for fills, keeping the effect subtle to avoid 'ambient delay'.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Providing a natural sense of space without adding excessive wash or sounding too polished.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "1.0"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is post-hardcore/punk rock. The settings for Chorus and Digital Delay must be kept very subtle (low mix/feedback) to prevent the sound from becoming too 'polished' or 'ambient', which the verdict explicitly advises against."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and mid-focus for aggressive post-hardcore crunch.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-gain 4x12 IR (e.g., British/UK style)",
+              "reason": "Enhance mid-focus and punch for aggressive post-hardcore sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After testing GP-180 preset",
+              "expectedGain": "Increased clarity and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Alexisonfire - Accidents - Valeton GP-180",
+        "song": {
+          "artist": "Alexisonfire",
+          "title": "Accidents",
+          "album": "",
+          "year": null,
+          "genre": "post-hardcore"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "aggressive post-hardcore crunch with fuzzed edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Gate -> Boost -> Red Haze -> UK 45 -> UK Vintage 4x12 -> Guitar EQ 2 -> Chorus -> Digital Delay -> Room",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Tight gating for aggressive rhythm playing and palm mutes.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "pre-gain boost/compression",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3 dB",
+              "Tone": "Mid Focus"
+            },
+            "purpose": "Slight lift and tightening of the signal before fuzz/gain stage.",
+            "matchQuality": "close",
+            "gap": "No dedicated pre-amp boost with tone control, using general Boost module.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "Comp",
+                "reason": "For more aggressive compression if the signal is too loose."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz texture",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "Medium",
+              "Tone": "Mid-High Focus",
+              "Fuzz": "Moderate"
+            },
+            "purpose": "Providing the required fuzzed edge and abrasive texture without sounding like modern metal saturation.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": [
+              {
+                "module": "DST",
+                "model": "Fuzz",
+                "reason": "If the Red Haze is too complex, a simpler Fuzz might be needed."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "High",
+              "Treble": "Mid-High",
+              "Bass": "Medium"
+            },
+            "purpose": "Simulating the punchy, mid-focused sound of a Plexi/Marshall stack suitable for post-hardcore.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": [
+              {
+                "module": "AMP",
+                "model": "UK 50",
+                "reason": "A slightly more aggressive alternative if the UK 45 is too tame."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ Boost": "Midrange"
+            },
+            "purpose": "Providing the classic British cabinet tone and necessary mid-focus for clarity.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low Cut": "100 Hz",
+              "Mid Boost": "+4 dB (800 Hz)",
+              "High Cut": "8 kHz"
+            },
+            "purpose": "Aggressively boosting the mid-range bite and tightening the low end for 'abrasive mid bite'.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/texture",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "Slow",
+              "Depth": "Low",
+              "Mix": "20%"
+            },
+            "purpose": "Adding subtle movement and width to the rhythm parts without sounding ambient or clean.",
+            "matchQuality": "close",
+            "gap": "Chorus is often associated with cleaner tones; settings must be kept minimal to avoid 'polished metal' sound.",
+            "alternatives": [
+              {
+                "module": "MOD",
+                "model": "Tremolo",
+                "reason": "If the chorus effect is too noticeable, a subtle tremolo might work."
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "delay/space",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "15%"
+            },
+            "purpose": "Adding controlled space and depth for fills, keeping the effect subtle to avoid 'ambient delay'.",
+            "matchQuality": "close",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "10%"
+            },
+            "purpose": "Providing a natural sense of space without adding excessive wash or sounding too polished.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "1.0"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "aggressive post-hardcore crunch with fuzzed edge",
+          "toneProfile": "aggressive post-hardcore crunch with fuzzed edge",
+          "idealSignalChain": "Marshall/Plexi or Mesa gain | 4x12 cab | noise gate | optional fuzz pedal",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi or Mesa gain",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "noise gate",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "optional fuzz pedal",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight palm mutes",
+            "abrasive mid bite",
+            "fuzz texture",
+            "dry rhythm"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on aggressive, mid-focused gain structure (UK 45/Red Haze) to achieve post-hardcore crunch.",
+          "bestMatchSummary": "Gate -> Boost -> Red Haze -> UK 45 -> UK Vintage 4x12 -> Guitar EQ 2 -> Chorus -> Digital Delay -> Room",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Tight gating for aggressive rhythm playing and palm mutes.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "pre-gain boost/compression",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3 dB",
+                "Tone": "Mid Focus"
+              },
+              "purpose": "Slight lift and tightening of the signal before fuzz/gain stage.",
+              "matchQuality": "close",
+              "gap": "No dedicated pre-amp boost with tone control, using general Boost module.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "Comp",
+                  "reason": "For more aggressive compression if the signal is too loose."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz texture",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "Medium",
+                "Tone": "Mid-High Focus",
+                "Fuzz": "Moderate"
+              },
+              "purpose": "Providing the required fuzzed edge and abrasive texture without sounding like modern metal saturation.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Fuzz",
+                  "reason": "If the Red Haze is too complex, a simpler Fuzz might be needed."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "High",
+                "Treble": "Mid-High",
+                "Bass": "Medium"
+              },
+              "purpose": "Simulating the punchy, mid-focused sound of a Plexi/Marshall stack suitable for post-hardcore.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": [
+                {
+                  "module": "AMP",
+                  "model": "UK 50",
+                  "reason": "A slightly more aggressive alternative if the UK 45 is too tame."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ Boost": "Midrange"
+              },
+              "purpose": "Providing the classic British cabinet tone and necessary mid-focus for clarity.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "Mid Boost": "+4 dB (800 Hz)",
+                "High Cut": "8 kHz"
+              },
+              "purpose": "Aggressively boosting the mid-range bite and tightening the low end for 'abrasive mid bite'.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "Slow",
+                "Depth": "Low",
+                "Mix": "20%"
+              },
+              "purpose": "Adding subtle movement and width to the rhythm parts without sounding ambient or clean.",
+              "matchQuality": "close",
+              "gap": "Chorus is often associated with cleaner tones; settings must be kept minimal to avoid 'polished metal' sound.",
+              "alternatives": [
+                {
+                  "module": "MOD",
+                  "model": "Tremolo",
+                  "reason": "If the chorus effect is too noticeable, a subtle tremolo might work."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "delay/space",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "15%"
+              },
+              "purpose": "Adding controlled space and depth for fills, keeping the effect subtle to avoid 'ambient delay'.",
+              "matchQuality": "close",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Providing a natural sense of space without adding excessive wash or sounding too polished.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "1.0"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and mid-focus for aggressive post-hardcore crunch.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "High-gain 4x12 IR (e.g., British/UK style)",
+              "reason": "Enhance mid-focus and punch for aggressive post-hardcore sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After testing GP-180 preset",
+              "expectedGain": "Increased clarity and bite",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "replace generic metal with punk/post-hardcore crunch",
+          "keep fuzz as texture, not modern metal saturation"
+        ],
+        "warnings": [
+          "The source material is post-hardcore/punk rock. The settings for Chorus and Digital Delay must be kept very subtle (low mix/feedback) to prevent the sound from becoming too 'polished' or 'ambient', which the verdict explicitly advises against."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 577.958,
+      "prompt_chars": 990,
+      "response_chars": 374,
+      "usage": {
+        "prompt_eval_count": 466,
+        "eval_count": 99,
+        "total_duration": 5479046100,
+        "prompt_eval_duration": 97704000,
+        "eval_duration": 700249000
+      },
+      "attempts": 4,
+      "retryFailures": [
+        {
+          "attempt": 1,
+          "error": "HTTP 500 from http://localhost:11434/api/generate: {\"error\":\"llama-server process has terminated: exit status 0xc0000409: The system detected an overrun of a stack-based buffer in this application. This overrun could potentially allow a malicious user to gain control of this application.\"}"
+        },
+        {
+          "attempt": 2,
+          "error": "HTTP 500 from http://localhost:11434/api/generate: {\"error\":\"llama-server process has terminated: exit status 0xc0000409: The system detected an overrun of a stack-based buffer in this application. This overrun could potentially allow a malicious user to gain control of this application.: GGML_ASSERT\"}"
+        },
+        {
+          "attempt": 3,
+          "error": "HTTP 500 from http://localhost:11434/api/generate: {\"error\":\"llama-server process has terminated: exit status 0xc0000409: The system detected an overrun of a stack-based buffer in this application. This overrun could potentially allow a malicious user to gain control of this application.: GGML_ASSERT(n_inputs \\u003c GGML_SCHED_MAX_SPLIT_INPUTS) failed\"}"
+        }
+      ]
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.926,
+      "prompt_chars": 5298,
+      "response_chars": 538,
+      "usage": {
+        "input_tokens": 1484,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 140,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1624
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 23.846,
+      "prompt_chars": 3601,
+      "response_chars": 6033,
+      "usage": {
+        "prompt_eval_count": 1211,
+        "eval_count": 1703,
+        "total_duration": 23829106200,
+        "prompt_eval_duration": 112141000,
+        "eval_duration": 11954433000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 2.641,
+      "prompt_chars": 8221,
+      "response_chars": 532,
+      "usage": {
+        "prompt_eval_count": 2271,
+        "eval_count": 151,
+        "total_duration": 2623110000,
+        "prompt_eval_duration": 229077000,
+        "eval_duration": 1102360000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.126,
+      "prompt_chars": 2802,
+      "response_chars": 170,
+      "usage": {
+        "prompt_eval_count": 890,
+        "eval_count": 49,
+        "total_duration": 12104649100,
+        "prompt_eval_duration": 119377000,
+        "eval_duration": 365773000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Alexisonfire",
+      "title": "Accidents",
+      "album": "",
+      "year": null,
+      "genre": "post-hardcore"
+    },
+    "rig": {
+      "rigName": "Alexisonfire - Accidents - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "aggressive post-hardcore crunch with fuzzed edge",
+      "signalChainSummary": "Gate -> Boost -> Red Haze -> UK 45 -> UK Vintage 4x12 -> Guitar EQ 2 -> Chorus -> Digital Delay -> Room",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Tight gating for aggressive rhythm playing and palm mutes.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "pre-gain boost/compression",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3 dB",
+            "Tone": "Mid Focus"
+          },
+          "purpose": "Slight lift and tightening of the signal before fuzz/gain stage.",
+          "matchQuality": "close",
+          "gap": "No dedicated pre-amp boost with tone control, using general Boost module.",
+          "alternatives": [
+            {
+              "model": "Comp",
+              "reason": "For more aggressive compression if the signal is too loose."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz texture",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "Medium",
+            "Tone": "Mid-High Focus",
+            "Fuzz": "Moderate"
+          },
+          "purpose": "Providing the required fuzzed edge and abrasive texture without sounding like modern metal saturation.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": [
+            {
+              "model": "Fuzz",
+              "reason": "If the Red Haze is too complex, a simpler Fuzz might be needed."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "High",
+            "Treble": "Mid-High",
+            "Bass": "Medium"
+          },
+          "purpose": "Simulating the punchy, mid-focused sound of a Plexi/Marshall stack suitable for post-hardcore.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "A slightly more aggressive alternative if the UK 45 is too tame."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ Boost": "Midrange"
+          },
+          "purpose": "Providing the classic British cabinet tone and necessary mid-focus for clarity.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low Cut": "100 Hz",
+            "Mid Boost": "+4 dB (800 Hz)",
+            "High Cut": "8 kHz"
+          },
+          "purpose": "Aggressively boosting the mid-range bite and tightening the low end for 'abrasive mid bite'.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/texture",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "Slow",
+            "Depth": "Low",
+            "Mix": "20%"
+          },
+          "purpose": "Adding subtle movement and width to the rhythm parts without sounding ambient or clean.",
+          "matchQuality": "close",
+          "gap": "Chorus is often associated with cleaner tones; settings must be kept minimal to avoid 'polished metal' sound.",
+          "alternatives": [
+            {
+              "model": "Tremolo",
+              "reason": "If the chorus effect is too noticeable, a subtle tremolo might work."
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "delay/space",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "15%"
+          },
+          "purpose": "Adding controlled space and depth for fills, keeping the effect subtle to avoid 'ambient delay'.",
+          "matchQuality": "close",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "10%"
+          },
+          "purpose": "Providing a natural sense of space without adding excessive wash or sounding too polished.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "1.0"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "aggressive post-hardcore crunch with fuzzed edge",
+      "mustHave": [
+        "tight palm mutes",
+        "abrasive mid bite",
+        "fuzz texture",
+        "dry rhythm"
+      ],
+      "avoid": [
+        "polished metal",
+        "scooped lows",
+        "ambient delay",
+        "clean breakup"
+      ],
+      "gearClues": [
+        "Marshall/Plexi or Mesa gain",
+        "4x12 cab",
+        "noise gate",
+        "optional fuzz pedal"
+      ],
+      "corrections": [
+        "replace generic metal with punk/post-hardcore crunch",
+        "keep fuzz as texture, not modern metal saturation"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "post-hardcore",
+      "styleTags": [
+        "punk rock",
+        "emo"
+      ],
+      "targetTone": "aggressive post-hardcore crunch with fuzzed edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and mid-focus for aggressive post-hardcore crunch.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "High-gain 4x12 IR (e.g., British/UK style)",
+          "reason": "Enhance mid-focus and punch for aggressive post-hardcore sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "After testing GP-180 preset",
+          "expectedGain": "Increased clarity and bite",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1788,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

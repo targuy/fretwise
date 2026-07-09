@@ -1,0 +1,1129 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1973,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Volbeat__A_Warrior_s_Call.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Volbeat",
+    "title": "A Warrior's Call",
+    "album": "",
+    "year": null,
+    "genre": "metal"
+  },
+  "genreClassification": {
+    "genre": "metal",
+    "subgenres": [
+      "heavy metal",
+      "thrash metal"
+    ],
+    "confidence": "high",
+    "rationale": "Volbeat's style is characterized by aggressive, riff-heavy heavy metal."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, aggressive crunch with pronounced mid-range bite and tight low end.",
+      "signatureElements": [
+        "Aggressive palm muting rhythm riffing",
+        "High-gain saturation (crunch/fuzz blend)",
+        "Pronounced midrange focus for cutting through mix",
+        "Tight, punchy attack"
+      ],
+      "gearHypotheses": [
+        "Overdriven Tube Screamer style pedal (mid-hump)",
+        "Modern high-gain amp model (e.g., Mesa Boogie Rectifier type)"
+      ],
+      "avoid": [
+        "Excessive scooped mids",
+        "Flabby low end",
+        "Ambient delay/reverb tails"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "tight Marshall-style crunch with gritty fuzz edge",
+      "mustHave": [
+        "snappy palm-muted riff",
+        "upper-mid bite",
+        "slight fuzz grit",
+        "dry attack"
+      ],
+      "avoid": [
+        "Mesa scoop",
+        "big reverb",
+        "syrupy sustain"
+      ],
+      "gearClues": [
+        "humbucker",
+        "Marshall/Plexi",
+        "4x12",
+        "possible fuzz pedal"
+      ],
+      "corrections": [
+        "swap Rectifier vibe for Marshall lean",
+        "add fuzz edge, not just overdrive",
+        "keep it dry and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "tight Marshall-style crunch with gritty fuzz edge",
+    "mustHave": [
+      "snappy palm-muted riff",
+      "upper-mid bite",
+      "slight fuzz grit",
+      "dry attack"
+    ],
+    "avoid": [
+      "Mesa scoop",
+      "big reverb",
+      "syrupy sustain"
+    ],
+    "gearClues": [
+      "humbucker",
+      "Marshall/Plexi",
+      "4x12",
+      "possible fuzz pedal"
+    ],
+    "corrections": [
+      "swap Rectifier vibe for Marshall lean",
+      "add fuzz edge, not just overdrive",
+      "keep it dry and punchy"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on high-gain, punchy British tones with added fuzz grit.",
+          "bestMatchSummary": "A tight, aggressive signal chain using a Marshall-style preamp (UK 45/50) combined with an OD pedal and Fuzz distortion to achieve the required crunch and upper-mid bite, keeping the overall sound dry and focused.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and hum inherent in high-gain riffing.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for aggressive rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide initial grit and boost the upper-mids for punchy riff articulation.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used here to simulate a slight, aggressive preamp push before the main distortion stage.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly warmer alternative if the tone needs less bite."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "5",
+                "Level": "7"
+              },
+              "purpose": "Add the required 'gritty fuzz edge' without losing definition, simulating a classic stompbox grit.",
+              "matchQuality": "close",
+              "gap": "The Fuzz model is chosen over RAT-style or Muff-style to provide controlled saturation that complements the Marshall tone rather than muddying it.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "If a more aggressive, mid-focused fuzz bite is desired."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi sound required for tight, punchy British rock tones.",
+              "matchQuality": "perfect",
+              "gap": "None. This is the core tone requirement.",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "A slightly more open and less aggressive alternative."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the classic Marshall-era cabinet sound and punchy midrange response.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard pairing for UK rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+2 dB"
+              },
+              "purpose": "Enhance the upper-mid bite and cut any excessive low-end mud from the fuzz/amp stack.",
+              "matchQuality": "close",
+              "gap": "Used for surgical tone shaping, which is critical for tight riffing.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "3"
+              },
+              "purpose": "Left inactive to maintain a dry, aggressive attack. Included as an option for variation.",
+              "matchQuality": "none",
+              "gap": "The module is included but deactivated because the target tone requires maximum dryness and punch.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "1"
+              },
+              "purpose": "Add subtle rhythmic depth and space without sounding 'big' or wash-out.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to add dimension, avoiding the 'big reverb' trap mentioned in the verdict.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide minimal natural room ambience to ground the sound without sounding syrupy or overly wet.",
+              "matchQuality": "close",
+              "gap": "The mix is kept very low (15%) to satisfy the 'keep it dry' requirement while adding necessary depth.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment for optimal mix balance.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a high-energy rock track, requiring aggressive gain staging (Fuzz -> Green OD -> UK 45). Ensure the settings are balanced to maintain definition and prevent excessive muddiness."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better Marshall cabinet realism and punch.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Marshall 4x12 Cabinet",
+              "recommendedAsset": "Brit Cab (specific to Plexi/JCM style)",
+              "reason": "Enhance the core British rock tone with more authentic Marshall character and punch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Volbeat - A Warrior's Call - Valeton GP-180",
+        "song": {
+          "artist": "Volbeat",
+          "title": "A Warrior's Call",
+          "album": "",
+          "year": null,
+          "genre": "metal"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "tight Marshall-style crunch with gritty fuzz edge",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, aggressive signal chain using a Marshall-style preamp (UK 45/50) combined with an OD pedal and Fuzz distortion to achieve the required crunch and upper-mid bite, keeping the overall sound dry and focused.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up pick noise and hum inherent in high-gain riffing.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for aggressive rock tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/drive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "4",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide initial grit and boost the upper-mids for punchy riff articulation.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used here to simulate a slight, aggressive preamp push before the main distortion stage.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly warmer alternative if the tone needs less bite."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz",
+            "module": "DST",
+            "model": "Fuzz",
+            "active": true,
+            "settings": {
+              "Drive": "6",
+              "Tone": "5",
+              "Level": "7"
+            },
+            "purpose": "Add the required 'gritty fuzz edge' without losing definition, simulating a classic stompbox grit.",
+            "matchQuality": "close",
+            "gap": "The Fuzz model is chosen over RAT-style or Muff-style to provide controlled saturation that complements the Marshall tone rather than muddying it.",
+            "alternatives": [
+              {
+                "model": "RAT-style",
+                "reason": "If a more aggressive, mid-focused fuzz bite is desired."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Midrange": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the classic Marshall/Plexi sound required for tight, punchy British rock tones.",
+            "matchQuality": "perfect",
+            "gap": "None. This is the core tone requirement.",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "A slightly more open and less aggressive alternative."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Flat"
+            },
+            "purpose": "Provide the classic Marshall-era cabinet sound and punchy midrange response.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard pairing for UK rock tones.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low": "-2 dB",
+              "Mid": "+3 dB",
+              "High": "+2 dB"
+            },
+            "purpose": "Enhance the upper-mid bite and cut any excessive low-end mud from the fuzz/amp stack.",
+            "matchQuality": "close",
+            "gap": "Used for surgical tone shaping, which is critical for tight riffing.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation (optional)",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "2 Hz",
+              "Depth": "3"
+            },
+            "purpose": "Left inactive to maintain a dry, aggressive attack. Included as an option for variation.",
+            "matchQuality": "none",
+            "gap": "The module is included but deactivated because the target tone requires maximum dryness and punch.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "1"
+            },
+            "purpose": "Add subtle rhythmic depth and space without sounding 'big' or wash-out.",
+            "matchQuality": "close",
+            "gap": "Used sparingly to add dimension, avoiding the 'big reverb' trap mentioned in the verdict.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Provide minimal natural room ambience to ground the sound without sounding syrupy or overly wet.",
+            "matchQuality": "close",
+            "gap": "The mix is kept very low (15%) to satisfy the 'keep it dry' requirement while adding necessary depth.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment for optimal mix balance.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "tight Marshall-style crunch with gritty fuzz edge",
+          "toneProfile": "tight Marshall-style crunch with gritty fuzz edge",
+          "idealSignalChain": "humbucker | Marshall/Plexi | 4x12 | possible fuzz pedal",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "possible fuzz pedal",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "snappy palm-muted riff",
+            "upper-mid bite",
+            "slight fuzz grit",
+            "dry attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on high-gain, punchy British tones with added fuzz grit.",
+          "bestMatchSummary": "A tight, aggressive signal chain using a Marshall-style preamp (UK 45/50) combined with an OD pedal and Fuzz distortion to achieve the required crunch and upper-mid bite, keeping the overall sound dry and focused.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up pick noise and hum inherent in high-gain riffing.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for aggressive rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide initial grit and boost the upper-mids for punchy riff articulation.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used here to simulate a slight, aggressive preamp push before the main distortion stage.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly warmer alternative if the tone needs less bite."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "5",
+                "Level": "7"
+              },
+              "purpose": "Add the required 'gritty fuzz edge' without losing definition, simulating a classic stompbox grit.",
+              "matchQuality": "close",
+              "gap": "The Fuzz model is chosen over RAT-style or Muff-style to provide controlled saturation that complements the Marshall tone rather than muddying it.",
+              "alternatives": [
+                {
+                  "model": "RAT-style",
+                  "reason": "If a more aggressive, mid-focused fuzz bite is desired."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi sound required for tight, punchy British rock tones.",
+              "matchQuality": "perfect",
+              "gap": "None. This is the core tone requirement.",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "A slightly more open and less aggressive alternative."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Flat"
+              },
+              "purpose": "Provide the classic Marshall-era cabinet sound and punchy midrange response.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard pairing for UK rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low": "-2 dB",
+                "Mid": "+3 dB",
+                "High": "+2 dB"
+              },
+              "purpose": "Enhance the upper-mid bite and cut any excessive low-end mud from the fuzz/amp stack.",
+              "matchQuality": "close",
+              "gap": "Used for surgical tone shaping, which is critical for tight riffing.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation (optional)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "2 Hz",
+                "Depth": "3"
+              },
+              "purpose": "Left inactive to maintain a dry, aggressive attack. Included as an option for variation.",
+              "matchQuality": "none",
+              "gap": "The module is included but deactivated because the target tone requires maximum dryness and punch.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "1"
+              },
+              "purpose": "Add subtle rhythmic depth and space without sounding 'big' or wash-out.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to add dimension, avoiding the 'big reverb' trap mentioned in the verdict.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide minimal natural room ambience to ground the sound without sounding syrupy or overly wet.",
+              "matchQuality": "close",
+              "gap": "The mix is kept very low (15%) to satisfy the 'keep it dry' requirement while adding necessary depth.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment for optimal mix balance.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better Marshall cabinet realism and punch.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Marshall 4x12 Cabinet",
+              "recommendedAsset": "Brit Cab (specific to Plexi/JCM style)",
+              "reason": "Enhance the core British rock tone with more authentic Marshall character and punch.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "swap Rectifier vibe for Marshall lean",
+          "add fuzz edge, not just overdrive",
+          "keep it dry and punchy"
+        ],
+        "warnings": [
+          "The source material is a high-energy rock track, requiring aggressive gain staging (Fuzz -> Green OD -> UK 45). Ensure the settings are balanced to maintain definition and prevent excessive muddiness."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 17.224,
+      "prompt_chars": 992,
+      "response_chars": 523,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 134,
+        "total_duration": 17220733300,
+        "prompt_eval_duration": 66965000,
+        "eval_duration": 959396000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.717,
+      "prompt_chars": 5443,
+      "response_chars": 501,
+      "usage": {
+        "input_tokens": 1520,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 137,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1657
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 60.883,
+      "prompt_chars": 3566,
+      "response_chars": 6253,
+      "usage": {
+        "prompt_eval_count": 1211,
+        "eval_count": 1722,
+        "total_duration": 60863458000,
+        "prompt_eval_duration": 122781000,
+        "eval_duration": 12170808000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 42.743,
+      "prompt_chars": 8390,
+      "response_chars": 523,
+      "usage": {
+        "prompt_eval_count": 2290,
+        "eval_count": 137,
+        "total_duration": 42736312700,
+        "prompt_eval_duration": 222444000,
+        "eval_duration": 1000007000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 18.381,
+      "prompt_chars": 2850,
+      "response_chars": 174,
+      "usage": {
+        "prompt_eval_count": 901,
+        "eval_count": 48,
+        "total_duration": 18376020900,
+        "prompt_eval_duration": 132157999,
+        "eval_duration": 348225000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Volbeat",
+      "title": "A Warrior's Call",
+      "album": "",
+      "year": null,
+      "genre": "metal"
+    },
+    "rig": {
+      "rigName": "Volbeat - A Warrior's Call - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "tight Marshall-style crunch with gritty fuzz edge",
+      "signalChainSummary": "A tight, aggressive signal chain using a Marshall-style preamp (UK 45/50) combined with an OD pedal and Fuzz distortion to achieve the required crunch and upper-mid bite, keeping the overall sound dry and focused.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up pick noise and hum inherent in high-gain riffing.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for aggressive rock tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/drive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "4",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide initial grit and boost the upper-mids for punchy riff articulation.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used here to simulate a slight, aggressive preamp push before the main distortion stage.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly warmer alternative if the tone needs less bite."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz",
+          "module": "DST",
+          "model": "Fuzz",
+          "active": true,
+          "settings": {
+            "Drive": "6",
+            "Tone": "5",
+            "Level": "7"
+          },
+          "purpose": "Add the required 'gritty fuzz edge' without losing definition, simulating a classic stompbox grit.",
+          "matchQuality": "close",
+          "gap": "The Fuzz model is chosen over RAT-style or Muff-style to provide controlled saturation that complements the Marshall tone rather than muddying it.",
+          "alternatives": [
+            {
+              "model": "RAT-style",
+              "reason": "If a more aggressive, mid-focused fuzz bite is desired."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Midrange": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the classic Marshall/Plexi sound required for tight, punchy British rock tones.",
+          "matchQuality": "exact",
+          "gap": "None. This is the core tone requirement.",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "A slightly more open and less aggressive alternative."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Flat"
+          },
+          "purpose": "Provide the classic Marshall-era cabinet sound and punchy midrange response.",
+          "matchQuality": "exact",
+          "gap": "None. Standard pairing for UK rock tones.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low": "-2 dB",
+            "Mid": "+3 dB",
+            "High": "+2 dB"
+          },
+          "purpose": "Enhance the upper-mid bite and cut any excessive low-end mud from the fuzz/amp stack.",
+          "matchQuality": "close",
+          "gap": "Used for surgical tone shaping, which is critical for tight riffing.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation (optional)",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "2 Hz",
+            "Depth": "3"
+          },
+          "purpose": "Left inactive to maintain a dry, aggressive attack. Included as an option for variation.",
+          "matchQuality": "fallback",
+          "gap": "The module is included but deactivated because the target tone requires maximum dryness and punch.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "1"
+          },
+          "purpose": "Add subtle rhythmic depth and space without sounding 'big' or wash-out.",
+          "matchQuality": "close",
+          "gap": "Used sparingly to add dimension, avoiding the 'big reverb' trap mentioned in the verdict.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Provide minimal natural room ambience to ground the sound without sounding syrupy or overly wet.",
+          "matchQuality": "close",
+          "gap": "The mix is kept very low (15%) to satisfy the 'keep it dry' requirement while adding necessary depth.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment for optimal mix balance.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "tight Marshall-style crunch with gritty fuzz edge",
+      "mustHave": [
+        "snappy palm-muted riff",
+        "upper-mid bite",
+        "slight fuzz grit",
+        "dry attack"
+      ],
+      "avoid": [
+        "Mesa scoop",
+        "big reverb",
+        "syrupy sustain"
+      ],
+      "gearClues": [
+        "humbucker",
+        "Marshall/Plexi",
+        "4x12",
+        "possible fuzz pedal"
+      ],
+      "corrections": [
+        "swap Rectifier vibe for Marshall lean",
+        "add fuzz edge, not just overdrive",
+        "keep it dry and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "metal",
+      "styleTags": [
+        "heavy metal",
+        "thrash metal"
+      ],
+      "targetTone": "tight Marshall-style crunch with gritty fuzz edge",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better Marshall cabinet realism and punch.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Marshall 4x12 Cabinet",
+          "recommendedAsset": "Brit Cab (specific to Plexi/JCM style)",
+          "reason": "Enhance the core British rock tone with more authentic Marshall character and punch.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased realism and definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1973,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

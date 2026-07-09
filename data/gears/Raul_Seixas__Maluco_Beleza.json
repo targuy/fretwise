@@ -1,0 +1,1080 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1925,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Raul_Seixas__Maluco_Beleza.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Raul Seixas",
+    "title": "Maluco Beleza",
+    "album": "",
+    "year": null,
+    "genre": "rock"
+  },
+  "genreClassification": {
+    "genre": "rock",
+    "subgenres": [
+      "psychedelic rock",
+      "pop rock"
+    ],
+    "confidence": "high",
+    "rationale": "Raul Seixas' style is rooted in Brazilian psychedelic and pop rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, slightly overdriven clean tone with a touch of chorus/modulation.",
+      "signatureElements": [
+        "Chorus/Vibrato modulation",
+        "Clean-to-crunch dynamic shifts",
+        "Mid-focused EQ curve",
+        "Slightly compressed attack"
+      ],
+      "gearHypotheses": [
+        "Modulation pedal (e.g., CE-1 type)",
+        "Overdrive/Boost pedal (for crunch)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Distortion saturation",
+        "Deep reverb tails"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright edge-of-breakup rock with light chorus",
+      "mustHave": [
+        "chorus shimmer",
+        "slight crunch",
+        "mid push",
+        "tight attack"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "deep reverb",
+        "smooth clean",
+        "modern hi-gain"
+      ],
+      "gearClues": [
+        "single-coil or humbucker electric",
+        "Vox/Marshall-style amp",
+        "light chorus pedal",
+        "small combo or 2x12"
+      ],
+      "corrections": [
+        "drop clean-to-crunch shifts",
+        "keep chorus subtle",
+        "lean more rock than clean"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright edge-of-breakup rock with light chorus",
+    "mustHave": [
+      "chorus shimmer",
+      "slight crunch",
+      "mid push",
+      "tight attack"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "deep reverb",
+      "smooth clean",
+      "modern hi-gain"
+    ],
+    "gearClues": [
+      "single-coil or humbucker electric",
+      "Vox/Marshall-style amp",
+      "light chorus pedal",
+      "small combo or 2x12"
+    ],
+    "corrections": [
+      "drop clean-to-crunch shifts",
+      "keep chorus subtle",
+      "lean more rock than clean"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic rock tones (Vox/Marshall style) with chorus and mid-range emphasis.",
+          "bestMatchSummary": "A bright, crunchy signal chain using a Vox-style amp simulation, enhanced by Chorus for shimmer and EQ boosts to emphasize the mids and attack.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight signal definition.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the required 'slight crunch' and boost the signal for a tight attack without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD/OD 9 to achieve a slightly brighter, more vintage breakup sound suitable for classic rock.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A good alternative if the crunch needs more grit."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No wah needed for this specific tone).",
+              "matchQuality": "perfect",
+              "gap": "The musical verdict does not require a wah effect.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": true,
+              "settings": {},
+              "purpose": "Bypass (The Green OD provides sufficient crunch; heavy fuzz is avoided).",
+              "matchQuality": "perfect",
+              "gap": "No dedicated distortion unit is needed as the required gain comes from the PRE stage.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "75%",
+                "Midrange": "80%"
+              },
+              "purpose": "Simulate the desired Vox/Marshall-style bright, mid-pushed classic rock tone.",
+              "matchQuality": "close",
+              "gap": "UK SLP is ideal for vintage British tones and provides the necessary brightness and punch.",
+              "alternatives": [
+                {
+                  "model": "AC30 TB",
+                  "reason": "A strong alternative if a more pure Vox sound is desired."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound that complements the UK SLP amp model.",
+              "matchQuality": "close",
+              "gap": "None. This pairing is standard for vintage rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/mod",
+              "module": "EQ/MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3.5 Hz",
+                "Depth": "40%",
+                "Feedback": "20%"
+              },
+              "purpose": "Add the required 'chorus shimmer' subtly without sounding overly wet or modern.",
+              "matchQuality": "perfect",
+              "gap": "None. Settings are dialed back to keep the effect subtle, as requested.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/time",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No specific delay effect was requested).",
+              "matchQuality": "perfect",
+              "gap": "The focus is on crunch and shimmer, not rhythmic echo.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add subtle space and depth without the 'deep reverb' or excessive ambience.",
+              "matchQuality": "close",
+              "gap": "The Room setting provides a natural, non-metallic decay that fits the classic rock context.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A good alternative if a slightly more defined room sound is needed."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume/control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic rock/pop song, and the rig focuses on achieving a bright, mid-pushed vintage tone (Vox/Marshall style) to match the 'Maluco Beleza' vibe."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default IR for a more vintage, mid-focused 2x12 or 4x12 to better match the classic rock tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage British 2x12/4x12 IR (e.g., AC30)",
+              "reason": "Enhance vintage character and mid-focus for classic rock tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved tonal depth and realism",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Raul Seixas - Maluco Beleza - Valeton GP-180",
+        "song": {
+          "artist": "Raul Seixas",
+          "title": "Maluco Beleza",
+          "album": "",
+          "year": null,
+          "genre": "rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright edge-of-breakup rock with light chorus",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A bright, crunchy signal chain using a Vox-style amp simulation, enhanced by Chorus for shimmer and EQ boosts to emphasize the mids and attack.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain tight signal definition.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide the required 'slight crunch' and boost the signal for a tight attack without heavy distortion.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen over Blues OD/OD 9 to achieve a slightly brighter, more vintage breakup sound suitable for classic rock.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A good alternative if the crunch needs more grit."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass (No wah needed for this specific tone).",
+            "matchQuality": "perfect",
+            "gap": "The musical verdict does not require a wah effect.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": true,
+            "settings": {},
+            "purpose": "Bypass (The Green OD provides sufficient crunch; heavy fuzz is avoided).",
+            "matchQuality": "perfect",
+            "gap": "No dedicated distortion unit is needed as the required gain comes from the PRE stage.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK SLP",
+            "active": true,
+            "settings": {
+              "Gain": "60%",
+              "Treble": "75%",
+              "Midrange": "80%"
+            },
+            "purpose": "Simulate the desired Vox/Marshall-style bright, mid-pushed classic rock tone.",
+            "matchQuality": "close",
+            "gap": "UK SLP is ideal for vintage British tones and provides the necessary brightness and punch.",
+            "alternatives": [
+              {
+                "model": "AC30 TB",
+                "reason": "A strong alternative if a more pure Vox sound is desired."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a classic British cabinet sound that complements the UK SLP amp model.",
+            "matchQuality": "close",
+            "gap": "None. This pairing is standard for vintage rock tones.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization/mod",
+            "module": "EQ/MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3.5 Hz",
+              "Depth": "40%",
+              "Feedback": "20%"
+            },
+            "purpose": "Add the required 'chorus shimmer' subtly without sounding overly wet or modern.",
+            "matchQuality": "perfect",
+            "gap": "None. Settings are dialed back to keep the effect subtle, as requested.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/time",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass (No specific delay effect was requested).",
+            "matchQuality": "perfect",
+            "gap": "The focus is on crunch and shimmer, not rhythmic echo.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Add subtle space and depth without the 'deep reverb' or excessive ambience.",
+            "matchQuality": "close",
+            "gap": "The Room setting provides a natural, non-metallic decay that fits the classic rock context.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "A good alternative if a slightly more defined room sound is needed."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume/control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright edge-of-breakup rock with light chorus",
+          "toneProfile": "bright edge-of-breakup rock with light chorus",
+          "idealSignalChain": "single-coil or humbucker electric | Vox/Marshall-style amp | light chorus pedal | small combo or 2x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil or humbucker electric",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Vox/Marshall-style amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light chorus pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small combo or 2x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "chorus shimmer",
+            "slight crunch",
+            "mid push",
+            "tight attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on classic rock tones (Vox/Marshall style) with chorus and mid-range emphasis.",
+          "bestMatchSummary": "A bright, crunchy signal chain using a Vox-style amp simulation, enhanced by Chorus for shimmer and EQ boosts to emphasize the mids and attack.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight signal definition.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the required 'slight crunch' and boost the signal for a tight attack without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD/OD 9 to achieve a slightly brighter, more vintage breakup sound suitable for classic rock.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A good alternative if the crunch needs more grit."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No wah needed for this specific tone).",
+              "matchQuality": "perfect",
+              "gap": "The musical verdict does not require a wah effect.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": true,
+              "settings": {},
+              "purpose": "Bypass (The Green OD provides sufficient crunch; heavy fuzz is avoided).",
+              "matchQuality": "perfect",
+              "gap": "No dedicated distortion unit is needed as the required gain comes from the PRE stage.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "75%",
+                "Midrange": "80%"
+              },
+              "purpose": "Simulate the desired Vox/Marshall-style bright, mid-pushed classic rock tone.",
+              "matchQuality": "close",
+              "gap": "UK SLP is ideal for vintage British tones and provides the necessary brightness and punch.",
+              "alternatives": [
+                {
+                  "model": "AC30 TB",
+                  "reason": "A strong alternative if a more pure Vox sound is desired."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet sound that complements the UK SLP amp model.",
+              "matchQuality": "close",
+              "gap": "None. This pairing is standard for vintage rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization/mod",
+              "module": "EQ/MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3.5 Hz",
+                "Depth": "40%",
+                "Feedback": "20%"
+              },
+              "purpose": "Add the required 'chorus shimmer' subtly without sounding overly wet or modern.",
+              "matchQuality": "perfect",
+              "gap": "None. Settings are dialed back to keep the effect subtle, as requested.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/time",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No specific delay effect was requested).",
+              "matchQuality": "perfect",
+              "gap": "The focus is on crunch and shimmer, not rhythmic echo.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Add subtle space and depth without the 'deep reverb' or excessive ambience.",
+              "matchQuality": "close",
+              "gap": "The Room setting provides a natural, non-metallic decay that fits the classic rock context.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A good alternative if a slightly more defined room sound is needed."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume/control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the default IR for a more vintage, mid-focused 2x12 or 4x12 to better match the classic rock tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage British 2x12/4x12 IR (e.g., AC30)",
+              "reason": "Enhance vintage character and mid-focus for classic rock tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved tonal depth and realism",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop clean-to-crunch shifts",
+          "keep chorus subtle",
+          "lean more rock than clean"
+        ],
+        "warnings": [
+          "The source material is a classic rock/pop song, and the rig focuses on achieving a bright, mid-pushed vintage tone (Vox/Marshall style) to match the 'Maluco Beleza' vibe."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 16.271,
+      "prompt_chars": 993,
+      "response_chars": 420,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 110,
+        "total_duration": 16261790000,
+        "prompt_eval_duration": 46187000,
+        "eval_duration": 755544000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.188,
+      "prompt_chars": 5341,
+      "response_chars": 522,
+      "usage": {
+        "input_tokens": 1496,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 141,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1637
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 52.918,
+      "prompt_chars": 3595,
+      "response_chars": 5662,
+      "usage": {
+        "prompt_eval_count": 1218,
+        "eval_count": 1572,
+        "total_duration": 52895682500,
+        "prompt_eval_duration": 133009999,
+        "eval_duration": 11624814000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 31.676,
+      "prompt_chars": 7802,
+      "response_chars": 599,
+      "usage": {
+        "prompt_eval_count": 2147,
+        "eval_count": 176,
+        "total_duration": 31653913100,
+        "prompt_eval_duration": 211985000,
+        "eval_duration": 1287224000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 25.809,
+      "prompt_chars": 2767,
+      "response_chars": 170,
+      "usage": {
+        "prompt_eval_count": 884,
+        "eval_count": 47,
+        "total_duration": 25781755300,
+        "prompt_eval_duration": 131985999,
+        "eval_duration": 332350000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Raul Seixas",
+      "title": "Maluco Beleza",
+      "album": "",
+      "year": null,
+      "genre": "rock"
+    },
+    "rig": {
+      "rigName": "Raul Seixas - Maluco Beleza - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright edge-of-breakup rock with light chorus",
+      "signalChainSummary": "A bright, crunchy signal chain using a Vox-style amp simulation, enhanced by Chorus for shimmer and EQ boosts to emphasize the mids and attack.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain tight signal definition.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide the required 'slight crunch' and boost the signal for a tight attack without heavy distortion.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen over Blues OD/OD 9 to achieve a slightly brighter, more vintage breakup sound suitable for classic rock.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A good alternative if the crunch needs more grit."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass (No wah needed for this specific tone).",
+          "matchQuality": "exact",
+          "gap": "The musical verdict does not require a wah effect.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": true,
+          "settings": {},
+          "purpose": "Bypass (The Green OD provides sufficient crunch; heavy fuzz is avoided).",
+          "matchQuality": "exact",
+          "gap": "No dedicated distortion unit is needed as the required gain comes from the PRE stage.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK SLP",
+          "active": true,
+          "settings": {
+            "Gain": "60%",
+            "Treble": "75%",
+            "Midrange": "80%"
+          },
+          "purpose": "Simulate the desired Vox/Marshall-style bright, mid-pushed classic rock tone.",
+          "matchQuality": "close",
+          "gap": "UK SLP is ideal for vintage British tones and provides the necessary brightness and punch.",
+          "alternatives": [
+            {
+              "model": "AC30 TB",
+              "reason": "A strong alternative if a more pure Vox sound is desired."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a classic British cabinet sound that complements the UK SLP amp model.",
+          "matchQuality": "close",
+          "gap": "None. This pairing is standard for vintage rock tones.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization/mod",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3.5 Hz",
+            "Depth": "40%",
+            "Feedback": "20%"
+          },
+          "purpose": "Add the required 'chorus shimmer' subtly without sounding overly wet or modern.",
+          "matchQuality": "exact",
+          "gap": "None. Settings are dialed back to keep the effect subtle, as requested.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/time",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass (No specific delay effect was requested).",
+          "matchQuality": "exact",
+          "gap": "The focus is on crunch and shimmer, not rhythmic echo.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Add subtle space and depth without the 'deep reverb' or excessive ambience.",
+          "matchQuality": "close",
+          "gap": "The Room setting provides a natural, non-metallic decay that fits the classic rock context.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "A good alternative if a slightly more defined room sound is needed."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume/control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright edge-of-breakup rock with light chorus",
+      "mustHave": [
+        "chorus shimmer",
+        "slight crunch",
+        "mid push",
+        "tight attack"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "deep reverb",
+        "smooth clean",
+        "modern hi-gain"
+      ],
+      "gearClues": [
+        "single-coil or humbucker electric",
+        "Vox/Marshall-style amp",
+        "light chorus pedal",
+        "small combo or 2x12"
+      ],
+      "corrections": [
+        "drop clean-to-crunch shifts",
+        "keep chorus subtle",
+        "lean more rock than clean"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "rock",
+      "styleTags": [
+        "psychedelic rock",
+        "pop rock"
+      ],
+      "targetTone": "bright edge-of-breakup rock with light chorus",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the default IR for a more vintage, mid-focused 2x12 or 4x12 to better match the classic rock tone.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage British 2x12/4x12 IR (e.g., AC30)",
+          "reason": "Enhance vintage character and mid-focus for classic rock tone.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Improved tonal depth and realism",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1925,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

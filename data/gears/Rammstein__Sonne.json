@@ -1,0 +1,1000 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1924,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Rammstein__Sonne.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Rammstein",
+    "title": "Sonne",
+    "album": "",
+    "year": null,
+    "genre": "industrial metal"
+  },
+  "genreClassification": {
+    "genre": "industrial metal",
+    "subgenres": [
+      "neue deutsche härte",
+      "metal"
+    ],
+    "confidence": "high",
+    "rationale": "Rammstein's style is defined by industrial, heavy, and mechanical rhythm elements."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Dark, heavily distorted industrial rock tone",
+      "signatureElements": [
+        "Heavy fuzz/distortion",
+        "Mid-scooped crunch",
+        "Driving rhythm focus",
+        "Industrial metallic texture"
+      ],
+      "gearHypotheses": [
+        "High-gain distortion pedal (e.g., Big Muff style)",
+        "Overdriven amp model (British or American high-headroom)"
+      ],
+      "avoid": [
+        "Clean tones",
+        "Wah effects",
+        "Ambient delays"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "tight industrial rhythm crunch with dark low end",
+      "mustHave": [
+        "tight palm-mute",
+        "compressed high gain",
+        "mechanical chug",
+        "dry close-mic feel"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah",
+        "delay",
+        "ambient reverb"
+      ],
+      "gearClues": [
+        "7-string or down-tuned guitar",
+        "high-gain amp",
+        "4x12 cab",
+        "noise gate"
+      ],
+      "corrections": [
+        "replace fuzz with tight distortion",
+        "push percussive mute attack",
+        "keep it dry and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "tight industrial rhythm crunch with dark low end",
+    "mustHave": [
+      "tight palm-mute",
+      "compressed high gain",
+      "mechanical chug",
+      "dry close-mic feel"
+    ],
+    "avoid": [
+      "fuzz",
+      "wah",
+      "delay",
+      "ambient reverb"
+    ],
+    "gearClues": [
+      "7-string or down-tuned guitar",
+      "high-gain amp",
+      "4x12 cab",
+      "noise gate"
+    ],
+    "corrections": [
+      "replace fuzz with tight distortion",
+      "push percussive mute attack",
+      "keep it dry and punchy"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, high-gain distortion and punchy low end suitable for industrial rock.",
+          "bestMatchSummary": "A highly compressed signal chain using a Boost/OD pedal into a modern high-gain amp (Recti) paired with a 4x12 cabinet to achieve the required mechanical, dry, and aggressive rhythm crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-50 dB"
+              },
+              "purpose": "Eliminate hum and noise inherent in high-gain rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "High",
+                "Tone": "Mid-scooped"
+              },
+              "purpose": "Provide aggressive compression and boost the attack for tight palm-muting.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used to simulate a dedicated compressor/overdrive pedal for maximum punch, as required by 'compressed high gain'.",
+              "alternatives": [
+                {
+                  "model": "Comp",
+                  "reason": "A true compressor would be ideal, but Boost provides the necessary aggressive tone shaping and attack boost."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "High",
+                "Tone": "Dark",
+                "Level": "Medium"
+              },
+              "purpose": "Establish the core high-gain rhythm crunch and dark low end.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "Recti",
+              "active": true,
+              "settings": {
+                "Gain": "High",
+                "EQ": "Aggressive Low-Mids"
+              },
+              "purpose": "Provide the modern, aggressive high-gain tone required for industrial rock.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close-mic",
+                "Cabinet Type": "4x12"
+              },
+              "purpose": "Simulate the required dry, punchy, and close-miked sound.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "Mid Boost": "3 kHz (Presence)",
+                "High Cut": "8 kHz"
+              },
+              "purpose": "Sculpt the frequency response to emphasize punch and clarity in the low-mids, while maintaining tightness.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "None",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No modulation or ambient effects are desired (avoiding wah, delay, reverb).",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": false,
+              "settings": {
+                "Mix": "0%"
+              },
+              "purpose": "Keep the sound dry and punchy by minimizing ambient reverb.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is highly aggressive industrial rock. The resulting tone will be extremely high-gain and dark."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for better low-end definition and modern aggression.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Modern 4x12 Industrial IR (e.g., Ampeg/Marshall)",
+              "reason": "Enhance the dark, punchy low end required for industrial rhythm.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Tighter, deeper bass response",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Rammstein - Sonne - Valeton GP-180",
+        "song": {
+          "artist": "Rammstein",
+          "title": "Sonne",
+          "album": "",
+          "year": null,
+          "genre": "industrial metal"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "tight industrial rhythm crunch with dark low end",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A highly compressed signal chain using a Boost/OD pedal into a modern high-gain amp (Recti) paired with a 4x12 cabinet to achieve the required mechanical, dry, and aggressive rhythm crunch.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-50 dB"
+            },
+            "purpose": "Eliminate hum and noise inherent in high-gain rhythm playing.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "High",
+              "Tone": "Mid-scooped"
+            },
+            "purpose": "Provide aggressive compression and boost the attack for tight palm-muting.",
+            "matchQuality": "close",
+            "gap": "The Boost module is used to simulate a dedicated compressor/overdrive pedal for maximum punch, as required by 'compressed high gain'.",
+            "alternatives": [
+              {
+                "model": "Comp",
+                "reason": "A true compressor would be ideal, but Boost provides the necessary aggressive tone shaping and attack boost."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "Distortion",
+            "active": true,
+            "settings": {
+              "Drive": "High",
+              "Tone": "Dark",
+              "Level": "Medium"
+            },
+            "purpose": "Establish the core high-gain rhythm crunch and dark low end.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "Recti",
+            "active": true,
+            "settings": {
+              "Gain": "High",
+              "EQ": "Aggressive Low-Mids"
+            },
+            "purpose": "Provide the modern, aggressive high-gain tone required for industrial rock.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Close-mic",
+              "Cabinet Type": "4x12"
+            },
+            "purpose": "Simulate the required dry, punchy, and close-miked sound.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low Cut": "100 Hz",
+              "Mid Boost": "3 kHz (Presence)",
+              "High Cut": "8 kHz"
+            },
+            "purpose": "Sculpt the frequency response to emphasize punch and clarity in the low-mids, while maintaining tightness.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "None",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "No modulation or ambient effects are desired (avoiding wah, delay, reverb).",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": false,
+            "settings": {
+              "Mix": "0%"
+            },
+            "purpose": "Keep the sound dry and punchy by minimizing ambient reverb.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": null,
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "tight industrial rhythm crunch with dark low end",
+          "toneProfile": "tight industrial rhythm crunch with dark low end",
+          "idealSignalChain": "7-string or down-tuned guitar | high-gain amp | 4x12 cab | noise gate",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "7-string or down-tuned guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "high-gain amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "noise gate",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight palm-mute",
+            "compressed high gain",
+            "mechanical chug",
+            "dry close-mic feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on tight, high-gain distortion and punchy low end suitable for industrial rock.",
+          "bestMatchSummary": "A highly compressed signal chain using a Boost/OD pedal into a modern high-gain amp (Recti) paired with a 4x12 cabinet to achieve the required mechanical, dry, and aggressive rhythm crunch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-50 dB"
+              },
+              "purpose": "Eliminate hum and noise inherent in high-gain rhythm playing.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "High",
+                "Tone": "Mid-scooped"
+              },
+              "purpose": "Provide aggressive compression and boost the attack for tight palm-muting.",
+              "matchQuality": "close",
+              "gap": "The Boost module is used to simulate a dedicated compressor/overdrive pedal for maximum punch, as required by 'compressed high gain'.",
+              "alternatives": [
+                {
+                  "model": "Comp",
+                  "reason": "A true compressor would be ideal, but Boost provides the necessary aggressive tone shaping and attack boost."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "Distortion",
+              "active": true,
+              "settings": {
+                "Drive": "High",
+                "Tone": "Dark",
+                "Level": "Medium"
+              },
+              "purpose": "Establish the core high-gain rhythm crunch and dark low end.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "Recti",
+              "active": true,
+              "settings": {
+                "Gain": "High",
+                "EQ": "Aggressive Low-Mids"
+              },
+              "purpose": "Provide the modern, aggressive high-gain tone required for industrial rock.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close-mic",
+                "Cabinet Type": "4x12"
+              },
+              "purpose": "Simulate the required dry, punchy, and close-miked sound.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low Cut": "100 Hz",
+                "Mid Boost": "3 kHz (Presence)",
+                "High Cut": "8 kHz"
+              },
+              "purpose": "Sculpt the frequency response to emphasize punch and clarity in the low-mids, while maintaining tightness.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "None",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "No modulation or ambient effects are desired (avoiding wah, delay, reverb).",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": false,
+              "settings": {
+                "Mix": "0%"
+              },
+              "purpose": "Keep the sound dry and punchy by minimizing ambient reverb.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": null,
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR for better low-end definition and modern aggression.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Modern 4x12 Industrial IR (e.g., Ampeg/Marshall)",
+              "reason": "Enhance the dark, punchy low end required for industrial rhythm.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Tighter, deeper bass response",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "replace fuzz with tight distortion",
+          "push percussive mute attack",
+          "keep it dry and punchy"
+        ],
+        "warnings": [
+          "The source material is highly aggressive industrial rock. The resulting tone will be extremely high-gain and dark."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 18.101,
+      "prompt_chars": 983,
+      "response_chars": 401,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 98,
+        "total_duration": 18083858400,
+        "prompt_eval_duration": 43257000,
+        "eval_duration": 770665000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.354,
+      "prompt_chars": 5312,
+      "response_chars": 506,
+      "usage": {
+        "input_tokens": 1481,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 138,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1619
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 86.159,
+      "prompt_chars": 3569,
+      "response_chars": 4645,
+      "usage": {
+        "prompt_eval_count": 1209,
+        "eval_count": 1312,
+        "total_duration": 86150625800,
+        "prompt_eval_duration": 109762000,
+        "eval_duration": 9692373000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.147,
+      "prompt_chars": 6719,
+      "response_chars": 543,
+      "usage": {
+        "prompt_eval_count": 1878,
+        "eval_count": 150,
+        "total_duration": 11130600600,
+        "prompt_eval_duration": 214271000,
+        "eval_duration": 1207851000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 14.434,
+      "prompt_chars": 2692,
+      "response_chars": 197,
+      "usage": {
+        "prompt_eval_count": 849,
+        "eval_count": 51,
+        "total_duration": 14412879200,
+        "prompt_eval_duration": 112768000,
+        "eval_duration": 352165000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Rammstein",
+      "title": "Sonne",
+      "album": "",
+      "year": null,
+      "genre": "industrial metal"
+    },
+    "rig": {
+      "rigName": "Rammstein - Sonne - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "tight industrial rhythm crunch with dark low end",
+      "signalChainSummary": "A highly compressed signal chain using a Boost/OD pedal into a modern high-gain amp (Recti) paired with a 4x12 cabinet to achieve the required mechanical, dry, and aggressive rhythm crunch.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-50 dB"
+          },
+          "purpose": "Eliminate hum and noise inherent in high-gain rhythm playing.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "High",
+            "Tone": "Mid-scooped"
+          },
+          "purpose": "Provide aggressive compression and boost the attack for tight palm-muting.",
+          "matchQuality": "close",
+          "gap": "The Boost module is used to simulate a dedicated compressor/overdrive pedal for maximum punch, as required by 'compressed high gain'.",
+          "alternatives": [
+            {
+              "model": "Comp",
+              "reason": "A true compressor would be ideal, but Boost provides the necessary aggressive tone shaping and attack boost."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "Distortion",
+          "active": true,
+          "settings": {
+            "Drive": "High",
+            "Tone": "Dark",
+            "Level": "Medium"
+          },
+          "purpose": "Establish the core high-gain rhythm crunch and dark low end.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "Recti",
+          "active": true,
+          "settings": {
+            "Gain": "High",
+            "EQ": "Aggressive Low-Mids"
+          },
+          "purpose": "Provide the modern, aggressive high-gain tone required for industrial rock.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Close-mic",
+            "Cabinet Type": "4x12"
+          },
+          "purpose": "Simulate the required dry, punchy, and close-miked sound.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low Cut": "100 Hz",
+            "Mid Boost": "3 kHz (Presence)",
+            "High Cut": "8 kHz"
+          },
+          "purpose": "Sculpt the frequency response to emphasize punch and clarity in the low-mids, while maintaining tightness.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "PRE",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "No modulation or ambient effects are desired (avoiding wah, delay, reverb).",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": false,
+          "settings": {
+            "Mix": "0%"
+          },
+          "purpose": "Keep the sound dry and punchy by minimizing ambient reverb.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "tight industrial rhythm crunch with dark low end",
+      "mustHave": [
+        "tight palm-mute",
+        "compressed high gain",
+        "mechanical chug",
+        "dry close-mic feel"
+      ],
+      "avoid": [
+        "fuzz",
+        "wah",
+        "delay",
+        "ambient reverb"
+      ],
+      "gearClues": [
+        "7-string or down-tuned guitar",
+        "high-gain amp",
+        "4x12 cab",
+        "noise gate"
+      ],
+      "corrections": [
+        "replace fuzz with tight distortion",
+        "push percussive mute attack",
+        "keep it dry and punchy"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "industrial metal",
+      "styleTags": [
+        "neue deutsche härte",
+        "metal"
+      ],
+      "targetTone": "tight industrial rhythm crunch with dark low end",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR for better low-end definition and modern aggression.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Modern 4x12 Industrial IR (e.g., Ampeg/Marshall)",
+          "reason": "Enhance the dark, punchy low end required for industrial rhythm.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Tighter, deeper bass response",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1924,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}
