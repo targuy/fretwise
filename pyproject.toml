@@ -55,6 +55,25 @@ auth = [
     "itsdangerous>=2.0",    # signed session cookies (Starlette SessionMiddleware)
     "cryptography>=42",     # encrypt per-user credentials at rest
 ]
+# Bibliothèque de partitions (fretwise.partitions) : synchro Notion directe.
+# Le reste du package est stdlib-only ; requests n'est requis que pour notion_sync.
+partitions = [
+    "requests>=2.31",
+]
+# Entraînement des modèles de doigtés (fretwise.dataset.pipeline) : XGBoost → ONNX.
+# L'inférence (fretwise.ml) n'a besoin que du groupe `ml` (onnxruntime).
+train = [
+    "xgboost>=2.0",
+    "scikit-learn>=1.4",
+    "onnx>=1.16",
+    "onnxmltools>=1.12",
+    "pandas>=2.0",
+    "pyarrow>=15.0",        # export Parquet (fretwise.dataset.exporters.parquet)
+    "tqdm>=4.66",
+    "requests>=2.31",       # scrapers / téléchargements de datasets
+    "beautifulsoup4>=4.12", # fretwise.dataset.scrapers
+    "lxml>=5.0",
+]
 
 [project.scripts]
 fretwise = "fretwise.cli:main"
@@ -68,6 +87,12 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "F", "I", "UP"]
+
+[tool.ruff.lint.per-file-ignores]
+# Code d'entraînement porté depuis GuitarDataSet : grandes tables littérales
+# (dictionnaires d'accords, features) où la limite de 100 colonnes nuirait
+# à la lisibilité. Le code neuf hors tables doit rester ≤ 100 colonnes.
+"src/fretwise/dataset/**" = ["E501"]
 
 [tool.mypy]
 strict = true

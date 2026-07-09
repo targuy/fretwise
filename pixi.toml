@@ -8,10 +8,22 @@ version = "0.5.0"
 [environments]
 default = []
 dev = ["dev"]
+train = ["train"]
 
 [tasks]
 web = { cmd = "fretwise web --port 8080", description = "Lance l'interface web FretWise" }
 test = { cmd = "pytest -v", description = "Lancer les tests" }
+# --- Bibliothèque de partitions (fretwise.partitions) ---
+partitions-daily = { cmd = "python scripts/partitions_daily_sync.py", description = "Pipeline quotidien : move → rebuild → enrich → propose → archive" }
+partitions-rebuild = { cmd = "python scripts/partitions_rebuild.py", description = "Régénère songs_index.tsv + liste_partitions.txt" }
+partitions-move = { cmd = "python scripts/partitions_move_downloads.py", description = "Déplace les .gp de Downloads vers la bibliothèque (dédup)" }
+partitions-propose = { cmd = "python scripts/partitions_propose.py", description = "Propose des morceaux + prompt Songsterr du jour" }
+# --- Fiches gears (fretwise.gears.production) ---
+gears-validate = { cmd = "python scripts/gears_validate.py", description = "Valide les fiches data/gears/*.json" }
+gears-compact = { cmd = "python scripts/gears_compact.py", description = "Compacte les sorties verboses en schéma gear.v2" }
+gears-supersede = { cmd = "python scripts/gears_supersede.py", description = "Fait des fiches gears la source unique (purge legacy)" }
+# --- Dataset / entraînement doigtés (fretwise.dataset, env train) ---
+dataset-eval = { cmd = "python scripts/dataset_eval_fretwise.py", description = "Évalue le pipeline fretwise contre le dataset annoté" }
 
 [dependencies]
 python = "3.11.*"
@@ -42,6 +54,18 @@ boto3 = ">=1.34"
 httpx = ">=0.27"
 google-api-python-client = ">=2.0"
 google-auth = ">=2.0"
+requests = ">=2.31"
+
+[feature.train.pypi-dependencies]
+xgboost = ">=2.0"
+scikit-learn = ">=1.4"
+onnx = ">=1.16"
+onnxmltools = ">=1.12"
+pandas = ">=2.0"
+pyarrow = ">=15.0"
+tqdm = ">=4.66"
+beautifulsoup4 = ">=4.12"
+lxml = ">=5.0"
 
 [feature.dev.pypi-dependencies]
 pytest = ">=7.0"
