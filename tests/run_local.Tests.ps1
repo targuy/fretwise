@@ -14,9 +14,10 @@ $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 Describe 'Test-IsBenignPixiEnvLine' {
 
     It 'matches the real (French-locale) os-error-183 envs-already-exists line' {
-        # Verbatim from the field report; here-string keeps quotes/backticks literal.
+        # Adapted from the field report (drive letter updated to the current
+        # single-checkout D:\ environment); here-string keeps quotes/backticks literal.
         $line = @'
-ERROR Failed to create directory 'E:\pythonProject\fretwise\.pixi\envs': failed to create directory `E:\pythonProject\fretwise\.pixi\envs`: Impossible de creer un fichier deja existant. (os error 183)
+ERROR Failed to create directory 'D:\pythonProject\fretwise\.pixi\envs': failed to create directory `D:\pythonProject\fretwise\.pixi\envs`: Impossible de creer un fichier deja existant. (os error 183)
 '@
         Test-IsBenignPixiEnvLine $line | Should Be $true
     }

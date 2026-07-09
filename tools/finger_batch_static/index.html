@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>FretWise — Batch doigtés</title>
+<style>
+  :root { color-scheme: dark; }
+  body {
+    margin: 0; padding: 24px; background: #14171c; color: #e6e6e6;
+    font: 14px/1.4 -apple-system, Segoe UI, Roboto, sans-serif;
+  }
+  h1 { font-size: 18px; margin: 0 0 4px; }
+  .sub { color: #888; margin-bottom: 20px; }
+  .row { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+  .card {
+    background: #1d2127; border: 1px solid #2a2f37; border-radius: 8px;
+    padding: 14px 18px; flex: 1; min-width: 150px;
+  }
+  .card .num { font-size: 26px; font-weight: 600; }
+  .card .lbl { color: #888; font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
+  .ok { color: #5fce6e; } .err { color: #e2554a; } .warn { color: #e0b34a; }
+  .bar-wrap { background: #2a2f37; border-radius: 6px; height: 22px; overflow: hidden; margin-bottom: 20px; }
+  .bar { background: linear-gradient(90deg,#3d7eff,#5fce6e); height: 100%; width: 0%; transition: width .4s; }
+  .charts { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  canvas { width: 100%; height: 120px; background: #1d2127; border: 1px solid #2a2f37; border-radius: 8px; }
+  .controls button {
+    background: #2a2f37; color: #e6e6e6; border: 1px solid #3a4049; border-radius: 6px;
+    padding: 8px 16px; margin-right: 8px; cursor: pointer; font-size: 13px;
+  }
+  .controls button:hover { background: #3a4049; }
+  .controls button.danger:hover { background: #5a2b27; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 4px 8px; border-bottom: 1px solid #2a2f37; }
+  th { color: #888; font-weight: 500; text-transform: uppercase; font-size: 11px; }
+  .pill { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 11px; }
+  .pill.calibrating { background: #4a3d1a; color: #e0b34a; }
+  .pill.running { background: #1a4a2a; color: #5fce6e; }
+  .pill.paused { background: #4a3d1a; color: #e0b34a; }
+  .pill.stopped { background: #4a1a1a; color: #e2554a; }
+  .pill.done { background: #1a3d4a; color: #5fb8ce; }
+  #last-results div { padding: 2px 0; font-size: 12px; }
+  .muted { color: #666; }
+</style>
+</head>
+<body>
+  <h1>FretWise — Regénération des doigtés</h1>
+  <div class="sub">algo_version <span id="algo-version">—</span> · <span id="status-pill" class="pill">…</span></div>
+
+  <div class="row">
+    <div class="card"><div class="num" id="done">0</div><div class="lbl">traités / <span id="total">0</span></div></div>
+    <div class="card"><div class="num ok" id="ok">0</div><div class="lbl">ok</div></div>
+    <div class="card"><div class="num err" id="err">0</div><div class="lbl">erreurs</div></div>
+    <div class="card"><div class="num" id="workers">—</div><div class="lbl">workers</div></div>
+    <div class="card"><div class="num" id="rate">—</div><div class="lbl">fichiers / min</div></div>
+    <div class="card"><div class="num" id="eta">—</div><div class="lbl">ETA</div></div>
+  </div>
+
+  <div class="bar-wrap"><div class="bar" id="bar"></div></div>
+
+  <div class="controls" style="margin-bottom:20px;">
+    <button onclick="ctrl('pause')">⏸ Pause</button>
+    <button onclick="ctrl('resume')">▶ Reprendre</button>
+    <button class="danger" onclick="ctrl('stop')">■ Stop</button>
+  </div>
+
+  <div class="charts">
+    <div><div class="lbl" style="margin-bottom:4px;">Débit (fichiers/min)</div><canvas id="c-rate"></canvas></div>
+    <div><div class="lbl" style="margin-bottom:4px;">CPU % / RAM %</div><canvas id="c-cpu"></canvas></div>
+    <div><div class="lbl" style="margin-bottom:4px;">GPU % (informatif — non utilisé pour le calcul)</div><canvas id="c-gpu"></canvas></div>
+    <div>
+      <div class="lbl" style="margin-bottom:4px;">En cours</div>
+      <table id="inflight-table"><thead><tr><th>fichier</th><th>durée</th></tr></thead><tbody></tbody></table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="lbl" style="margin-bottom:6px;">Derniers résultats</div>
+    <div id="last-results" class="muted">…</div>
+  </div>
+
+<script>
+function ctrl(action) {
+  fetch('/control/' + action, { method: 'POST' }).then(refresh);
+}
+
+function drawSeries(canvas, series, opts) {
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width = canvas.clientWidth * 2;
+  const h = canvas.height = canvas.clientHeight * 2;
+  ctx.clearRect(0, 0, w, h);
+  if (!series.length) return;
+  const colors = opts.colors || ['#3d7eff'];
+  const max = opts.max || Math.max(1, ...series.flatMap(s => s.map(p => p[1])));
+  const tmin = Math.min(...series[0].map(p => p[0]));
+  const tmax = Math.max(...series[0].map(p => p[0]), tmin + 1);
+  series.forEach((s, i) => {
+    ctx.strokeStyle = colors[i % colors.length];
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    s.forEach(([t, v], idx) => {
+      const x = (t - tmin) / (tmax - tmin) * (w - 10) + 5;
+      const y = h - 10 - (v / max) * (h - 20);
+      if (idx === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    });
+    ctx.stroke();
+  });
+}
+
+function fmtEta(s) {
+  if (s == null) return '—';
+  const m = Math.floor(s / 60), sec = Math.round(s % 60);
+  return m > 0 ? `${m}m${sec.toString().padStart(2,'0')}s` : `${sec}s`;
+}
+
+async function refresh() {
+  let st;
+  try {
+    st = await (await fetch('/state')).json();
+  } catch { return; }
+
+  document.getElementById('algo-version').textContent = st.algo_version;
+  document.getElementById('done').textContent = st.done;
+  document.getElementById('total').textContent = st.total;
+  document.getElementById('ok').textContent = st.ok;
+  document.getElementById('err').textContent = st.err;
+  document.getElementById('workers').textContent = st.calibrating ? 'calibration…' : st.workers;
+  document.getElementById('rate').textContent = st.rate_per_min;
+  document.getElementById('eta').textContent = fmtEta(st.eta_s);
+
+  const pct = st.total ? Math.min(100, st.done / st.total * 100) : 0;
+  document.getElementById('bar').style.width = pct + '%';
+
+  const pill = document.getElementById('status-pill');
+  let label = 'en cours', cls = 'running';
+  if (st.finished) { label = 'terminé'; cls = 'done'; }
+  else if (st.calibrating) { label = 'calibration'; cls = 'calibrating'; }
+  else if (st.user_paused || st.auto_paused) { label = st.auto_paused ? 'pause auto (RAM)' : 'en pause'; cls = 'paused'; }
+  pill.textContent = label;
+  pill.className = 'pill ' + cls;
+
+  const tbody = document.querySelector('#inflight-table tbody');
+  tbody.innerHTML = st.in_flight.map(f => `<tr><td>${f.file}</td><td>${f.elapsed_s}s</td></tr>`).join('')
+    || '<tr><td class="muted" colspan="2">aucun</td></tr>';
+
+  const lr = document.getElementById('last-results');
+  lr.innerHTML = st.last_results.slice().reverse().map(r => {
+    const cls = r.status === 'ok' ? 'ok' : 'err';
+    const extra = r.status === 'ok' ? '' : ` — ${r.error || ''}`;
+    return `<div class="${cls}">[${r.status}] ${r.file}${extra}</div>`;
+  }).join('') || '<div class="muted">…</div>';
+
+  drawSeries(document.getElementById('c-rate'), [st.throughput_history], { colors: ['#5fce6e'] });
+  drawSeries(document.getElementById('c-cpu'), [st.cpu_history, st.mem_history], { colors: ['#3d7eff', '#e0b34a'], max: 100 });
+  drawSeries(document.getElementById('c-gpu'), st.gpu_history.length ? st.gpu_history : [[]], { colors: ['#9d6fd6','#d66f9d'], max: 100 });
+}
+
+refresh();
+setInterval(refresh, 1000);
+</script>
+</body>
+</html>

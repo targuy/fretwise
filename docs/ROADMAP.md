@@ -190,3 +190,68 @@
 > **"Data richness before calculation"**: ALL information from the source file (GP, MusicXML, MIDI) must be captured in the data model (`NoteEvent`, `ChordDiagram`) before any solver runs. The solver only sees what the parser captured. Never infer notation from pitch alone.
 
 This principle ensures that notation symbols (bends, slides, harmonics, muted notes) are correctly preserved through the pipeline and accurately rendered in the output, regardless of whether the optimizer uses them in its cost function at any given phase.
+
+---
+
+## ✅ Phase 7 — Consolidation des utilitaires (juillet 2026)
+
+Les trois projets utilitaires ont été consolidés dans FretWise
+(voir [architecture.md](architecture.md) §3 et [usage.md](usage.md)) :
+
+- ✅ `iCloudDrive\partitions` → `src/fretwise/partitions/` (16 modules, chemins/IDs
+  Notion centralisés, orchestrateur sans subprocess) + 13 wrappers `scripts/partitions_*.py`
+- ✅ `SongsGear\SongsGears` → `src/fretwise/gears/production/` (pipeline LLM, schémas
+  rig.v1/gear.v2, outils compact/export/normalize/validate/batch, naming unifié dans
+  `fretwise.gears.naming`) + 10 wrappers `scripts/gears_*.py`
+- ✅ `GuitarDataSet` → `src/fretwise/dataset/` (parsers, features source-de-vérité,
+  exporters, pipeline build/train/export ONNX) + 13 wrappers `scripts/dataset_*.py`
+- ✅ Tous les CLI regroupés dans `scripts/` (inventaire : [scripts/README.md](../scripts/README.md)),
+  tâches pixi pour les commandes courantes, environnement `train` dédié
+- ✅ Tests : `test_partitions_lib.py` (16), `test_gears_production.py` (25),
+  `test_dataset_port.py` ; non-régression ML/gears/web verte ; ruff propre sur les
+  trois packages ; 127 fichiers AppleDouble `._*` purgés
+
+### Reste à faire — tests
+- [ ] Test de parité complet entraînement↔inférence pour `transition_cost` et
+  `finger_classifier` (le test de parité couvre phrase_window ; généraliser via
+  les calibrations JSON de `data/models/`)
+- [ ] Tests d'intégration `gears_production_batch` (mock des providers HTTP,
+  checkpoint/resume) et `partitions_notion_sync` (requests mocké)
+- [ ] Corriger les 28 échecs préexistants `test_web_hand_viz_*` /
+  `test_core_scene_svg` / `test_visual_standard_tab` (indépendants de la
+  consolidation — liés au chantier hand-viz/playback en cours)
+- [ ] mypy strict sur les packages portés (le code hérité n'est pas typé strict)
+
+### Reste à faire — implémentations
+- [ ] Adapter les watchers PowerShell iCloud (`_watch_partitions.ps1`,
+  `_maintain_partitions.ps1`, `run-*.ps1`, tâches planifiées) pour appeler
+  `scripts/partitions_*.py` du repo (substitutions détaillées dans le rapport de
+  portage ; poser `FRETWISE_PARTITIONS_ROOT` suffit ensuite)
+- [ ] Fusionner les tables GP-180 dupliquées : `gears/production/fretwise_export.py`
+  (MODULE_BY_MODEL/alias) vs `fretwise/rig.py` (_canon_effect/GP180_CHAIN)
+- [ ] Réconcilier définitivement les IDs Notion (canoniques vs `LEGACY_*` dans
+  `partitions/notion_ids.py` — vraisemblablement database-id API vs data-source-id MCP)
+- [ ] Régénérer `phrase_window` v2 côté entraînement : v2 est actif en prod mais
+  seuls les artefacts v1 existent côté dataset (recette v1→v2 à rejouer/documenter)
+- [ ] `transition_cost_v4` : spec draft 55 features + extracteur existent,
+  entraînement jamais lancé
+- [ ] Export Guitar Pro from scratch (bloque MusicXML → GP, cf. plan court terme CLAUDE.md)
+
+### Reste à faire — nettoyage (code mort / orphelins identifiés)
+Racine du repo : `_archive_dupes.py`, `_diff_missing.py`, `_find_dupes.py`
+(one-shots pointant l'ancien lib iCloud — remplacés par `fretwise.partitions`),
+`inspect_measures.py`, `app_full.diff`, `patch_gears.diff`, `killing_solve.json`,
+`debug.png`, `rising_sun_test.svg`, `sultans_test.svg`, `WASimClient.log*` (hors
+sujet), fichiers vides `canonical-` et `scene`, `_tmp_after_fingerings/`,
+`maintenance_backups/` (à archiver hors repo). `scripts/` : `run_fingering.py` et
+les éval golden historiques à réévaluer après stabilisation du pipeline dataset.
+Anciens dépôts : `SongsGear/`, `GuitarDataSet/` et les scripts Python de
+`iCloudDrive\partitions` deviennent des archives en lecture seule (données
+brutes d'entraînement toujours référencées via `FRETWISE_DATASET_ROOT`).
+
+### Évolutions envisagées
+- [ ] Intégrer les wrappers dans le CLI click (`fretwise partitions …`,
+  `fretwise gears …`, `fretwise dataset …`) en gardant les wrappers comme alias
+- [ ] Rapatrier les données d'entraînement de `FRETWISE_DATASET_ROOT` vers un
+  stockage versionné (DVC ou S3 via `fretwise.storage`)
+- [ ] Watcher Downloads multiplateforme en Python (remplacer les .ps1)

@@ -21,6 +21,9 @@ Carte du **code réel** (complète les specs ci-dessus) :
 | Fichier | Contenu |
 |---|---|
 | `docs/architecture-classes.md` | Grandes classes du code : modèles, M1–M6, biomécanique/audit/révision, pipeline de notation `core/`, export, API web, et front office (vues, mains, lecture) + lien front ↔ back |
+| `docs/architecture.md` | Architecture globale post-consolidation : les trois domaines `partitions/`/`gears/`/`dataset/`, contrats inter-modules, environnements pixi |
+| `docs/usage.md` | Guide des workflows par domaine (partitions, gears, dataset) avec variables d'environnement |
+| `docs/Chansons_creation_workflow.md` | Workflow détaillé de bout en bout pour une chanson : identification → téléchargement → intégration → gears → doigtés (avec diagramme) |
 
 **Règle :** toute décision d'implémentation doit être traceable à l'une de ces spécifications. En cas d'ambiguïté, demander une clarification plutôt qu'inventer.
 
@@ -44,9 +47,42 @@ fretwise/
 └── profile/      # M6 — Profil joueur et calibration
 ```
 
+### Domaines consolidés (juillet 2026)
+
+Trois anciens projets utilitaires vivent désormais dans FretWise
+(détails : `docs/architecture.md` §3, workflows : `docs/usage.md`) :
+
+```
+src/fretwise/
+├── partitions/          # bibliothèque de partitions Songsterr (ex-iCloudDrive\partitions)
+│                        #   index TSV source de vérité, dédup, daily sync, prompts Songsterr
+├── gears/               # fiches « son » par chanson
+│   ├── naming.py        #   clé canonique artiste__titre — UNIQUE source (plus de duplication)
+│   ├── adapter.py       #   consommateur (rendu web /api/rig)
+│   └── production/      #   producteur LLM (ex-SongsGear) : schémas rig.v1 / gear.v2,
+│                        #   compact/export/validate, batch économique Ollama→OpenAI→Claude
+└── dataset/             # usine d'entraînement (ex-GuitarDataSet) : parsers, features
+                         #   (source de vérité, parité testée avec fretwise.ml), XGBoost→ONNX
+```
+
+**Règle CLI :** tout point d'entrée en ligne de commande est un wrapper fin dans
+`./scripts/` (`partitions_*.py`, `gears_*.py`, `dataset_*.py` — inventaire dans
+`scripts/README.md`). La logique métier vit dans `src/fretwise/`, jamais dans le wrapper.
+Les chemins machine passent par variables d'environnement (`FRETWISE_PARTITIONS_ROOT`,
+`FRETWISE_GEARS_DIR`, `FRETWISE_DATASET_ROOT`… — tableau dans `docs/usage.md` §1).
+
 ### Contrat d'interface — RÈGLE D'OR
 
 **M5 (Viterbi) est le seul module qui ne change jamais.** La fonction de coût est **injectée** dans l'optimiseur, jamais codée en dur. Chaque module peut évoluer indépendamment tant qu'il respecte son contrat d'entrée/sortie.
+
+Autres contrats inter-modules à ne pas casser :
+- `fretwise.gears.naming.gears_key` : clé partagée producteur/consommateur des fiches
+  gears — toute modification casse la correspondance avec les 1980+ fichiers `data/gears/` ;
+- parité features entraînement↔inférence : `fretwise.dataset.features.*` et `fretwise.ml`
+  doivent produire des vecteurs identiques (vérifié par les calibrations JSON de
+  `data/models/` dans `tests/test_ml_phrase_window.py` / `test_dataset_port.py`) ;
+- schémas `songsgear.fretwise.rig.v1` / `gear.v2` : producteur (`gears/production`)
+  et adapter (`gears/adapter.py`) évoluent ensemble.
 
 ### Modèles de données centraux
 
@@ -113,21 +149,29 @@ fretwise/
 │       │   └── data/                  ← fichiers YAML (accords, gammes)
 │       ├── scoring/
 │       ├── optimizer/
-│       └── profile/
+│       ├── profile/
+│       ├── core/  export/  ml/        ← notation, rendus, inférence ONNX
+│       ├── web/  auth/  storage/      ← FastAPI, OIDC, backends cloud
+│       ├── partitions/                ← bibliothèque de partitions (consolidé)
+│       ├── gears/  gears/production/  ← fiches son consommateur + producteur (consolidé)
+│       └── dataset/                   ← usine d'entraînement des modèles (consolidé)
 │
-├── tests/
-│   ├── fixtures/                      ← fichiers GP de test (5-10 morceaux simples)
-│   ├── test_parser.py
-│   ├── test_generator.py
-│   ├── test_scoring.py
-│   ├── test_optimizer.py
-│   └── test_integration.py
+├── scripts/                           ← TOUS les CLI (wrappers, cf. scripts/README.md)
+├── tools/                             ← outillage opérationnel (finger_batch, loupedeck…)
+│
+├── tests/                             ← suite unique (~1800 tests, test_<module>.py)
+│   └── fixtures/                      ← fichiers GP de test
 │
 ├── data/
 │   ├── patterns/                      ← patterns YAML versionés
-│   └── profiles/                      ← profils joueur JSON
+│   ├── profiles/                      ← profils joueur JSON
+│   ├── gears/                         ← fiches gear.v2 (clé artiste__titre)
+│   └── models/                        ← modèles ONNX + specs + calibrations
 │
+├── pixi.toml                          ← environnement de référence (default/dev/train)
 └── docs/
+    ├── architecture.md  usage.md      ← architecture globale + workflows
+    ├── ROADMAP.md
     └── benchmarks/                    ← résultats de concordance
 ```
 
@@ -147,10 +191,12 @@ fretwise/
 | Lint | ruff | latest |
 | Type checking | mypy | strict |
 | CI/CD | GitHub Actions | — |
+| Environnement | pixi (envs `default`/`dev`/`train`) | 0.68+ |
 | Profil joueur (MVP) | JSON versionné | — |
 | Profil joueur (Phase 3+) | SQLite | — |
-| Interface web (Phase 3+) | React + FastAPI | — |
-| IA (Phase 4) | PyTorch | latest |
+| Interface web | FastAPI (+ front statique) | — |
+| ML doigtés — entraînement | XGBoost → ONNX (env `train`) | — |
+| ML doigtés — inférence | onnxruntime (`fretwise.ml`) | ≥ 1.20 |
 
 ---
 
@@ -264,19 +310,21 @@ git --version
 
 ### Installation du projet
 
+**pixi est l'environnement de référence** (`pixi.toml` : envs `default`, `dev`, `train`) :
+
 ```powershell
-# Cloner le repo
 git clone <url> fretwise
 cd fretwise
+pixi install              # runtime + web + inférence ML
+pixi install -e train     # + XGBoost/sklearn/onnxmltools (entraînement)
+```
 
-# Créer l'environnement virtuel (TOUJOURS dans le projet)
+Alternative venv/pip (sans pixi) :
+
+```powershell
 python -m venv .venv
-
-# Activer l'environnement virtuel
 .\.venv\Scripts\Activate.ps1
-
-# Installer les dépendances de développement
-pip install -e ".[dev]"
+pip install -e ".[dev,ml,partitions,train]"
 ```
 
 ### Si erreur d'exécution de scripts PowerShell
@@ -444,6 +492,10 @@ fretwise convert song.gp out.musicxml
 fretwise convert song.musicxml out.gp --to gp
 ```
 
+> ⚠️ `fretwise calibrate` ci-dessus est un usage **cible** (Phase 5 — Profil
+> joueur), **pas encore implémenté** : il n'existe aucune commande `calibrate`
+> dans `cli.py` à ce jour. Ne pas s'y fier comme documentation d'une commande existante.
+
 ---
 
 ## 🚀 Phases de développement
@@ -487,24 +539,22 @@ Pipeline complet parse → generate → score → optimize livré, et largement 
 ## ⚡ Commandes de référence rapide
 
 ```powershell
-# Activer l'environnement
-.\.venv\Scripts\Activate.ps1
+# Tests
+pixi run test                          # pytest -v
+pixi run pytest tests/test_gears.py -q
 
-# Lancer les tests
-pytest -v
+# Lint + types (env dev)
+pixi run -e dev ruff check src/ tests/
+pixi run -e dev mypy src/fretwise
 
-# Lint
-ruff check src/ tests/
-
-# Type check
-mypy src/fretwise
-
-# Tout en une fois (avant commit)
-ruff check src/ tests/ && mypy src/fretwise && pytest --cov=fretwise
+# Workflows consolidés (cf. docs/usage.md et scripts/README.md)
+pixi run partitions-daily              # pipeline quotidien bibliothèque
+pixi run gears-validate                # validation des fiches gears
+pixi run -e train python scripts/dataset_train_phrase_window.py
 
 # Installer une nouvelle dépendance
-pip install <package>
-# Puis mettre à jour pyproject.toml manuellement
+pixi add --pypi <package>              # met à jour pixi.toml + pixi.lock
+# Puis répercuter dans pyproject.toml (groupe optionnel adapté)
 ```
 
 ---
