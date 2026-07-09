@@ -5,7 +5,7 @@
  * Orchestra: renderer + playback + toolbar
  */
 
-import { activateRigProfile, activateSoundfont, cleanupLibrary, connectStorage, deleteSoundfont, disconnectStorage, downloadFile, fetchExportGp, fetchExportMusicXml, fetchExportMusicXmlAll, fetchExportPdf, fetchFiles, fetchGmInstruments, fetchLlmPrompt, fetchMe, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSongListDownload, fetchSoundfonts, fetchStorage, fetchTracks, fetchSaveGp, fetchRig, fetchRigBank, fetchRigMidiOutputs, recommendRigProfile, saveRigBinding, saveRigProfile, importSongMetadata, saveSettings, uploadFile, uploadSoundfont } from './api.js';
+import { activateRigProfile, activateSoundfont, cleanupLibrary, connectStorage, deleteSoundfont, disconnectStorage, downloadFile, fetchExportGp, fetchExportMusicXml, fetchExportMusicXmlAll, fetchExportPdf, fetchFiles, fetchGearVerificationPrompt, fetchGmInstruments, fetchLlmPrompt, fetchMe, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSongListDownload, fetchSoundfonts, fetchStorage, fetchTracks, fetchSaveGp, fetchRig, fetchRigBank, fetchRigMidiOutputs, recommendRigProfile, saveGearSheet, saveRigBinding, saveRigProfile, importSongMetadata, saveSettings, uploadFile, uploadSoundfont } from './api.js';
 import { getMaskedMeasures, renderAuditBanner, resetAuditBanner, statusBanner } from './audit.js';
 import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { SlopeRenderer } from './slope-renderer.js';
@@ -3628,6 +3628,100 @@ if (btnRig) btnRig.addEventListener('click', _toggleRig);
       rigPanel.style.bottom = 'auto';
     });
     window.addEventListener('mouseup', () => { _rigDrag = null; });
+  }
+}
+
+// ── Gear AI-verification floating panel ─────────────────────────────────
+{
+  const gearVerifyBtn = document.getElementById('rig-verify-ai-btn');
+  const gearVerifyPanel = document.getElementById('gear-verify-panel');
+  const gearVerifyClose = document.getElementById('gear-verify-close');
+  const gearVerifyPromptEl = document.getElementById('gear-verify-prompt');
+  const gearVerifyPasteEl = document.getElementById('gear-verify-paste');
+  const gearVerifyStatusEl = document.getElementById('gear-verify-status');
+  const gearVerifyCopyBtn = document.getElementById('gear-verify-copy-btn');
+  const gearVerifySaveBtn = document.getElementById('gear-verify-save-btn');
+
+  function _setGearVerifyStatus(msg, isError = false) {
+    if (!gearVerifyStatusEl) return;
+    gearVerifyStatusEl.textContent = msg || '';
+    gearVerifyStatusEl.classList.toggle('gear-verify-status-error', !!isError);
+  }
+
+  if (gearVerifyBtn) gearVerifyBtn.addEventListener('click', async () => {
+    if (!gearVerifyPanel || !_lastRigFile) return;
+    gearVerifyPanel.style.display = 'flex';
+    if (gearVerifyPasteEl) gearVerifyPasteEl.value = '';
+    _setGearVerifyStatus('');
+    if (gearVerifyPromptEl) gearVerifyPromptEl.value = 'Chargement du prompt…';
+    try {
+      const prompt = await fetchGearVerificationPrompt(_lastRigFile);
+      if (gearVerifyPromptEl) gearVerifyPromptEl.value = prompt;
+    } catch (e) {
+      if (gearVerifyPromptEl) gearVerifyPromptEl.value = '';
+      _setGearVerifyStatus(e.message || 'Échec du chargement du prompt', true);
+    }
+  });
+
+  if (gearVerifyClose) gearVerifyClose.addEventListener('click', () => {
+    if (gearVerifyPanel) gearVerifyPanel.style.display = 'none';
+  });
+
+  if (gearVerifyCopyBtn) gearVerifyCopyBtn.addEventListener('click', async () => {
+    if (!gearVerifyPromptEl) return;
+    try {
+      await navigator.clipboard.writeText(gearVerifyPromptEl.value);
+      _setGearVerifyStatus('Prompt copié dans le presse-papiers.');
+    } catch (_e) {
+      gearVerifyPromptEl.select();
+      document.execCommand('copy');
+      _setGearVerifyStatus('Prompt copié dans le presse-papiers.');
+    }
+  });
+
+  if (gearVerifySaveBtn) gearVerifySaveBtn.addEventListener('click', async () => {
+    if (!_lastRigFile || !gearVerifyPasteEl) return;
+    let gear;
+    try {
+      gear = JSON.parse(gearVerifyPasteEl.value);
+    } catch (_e) {
+      _setGearVerifyStatus('JSON invalide — vérifiez le collage.', true);
+      return;
+    }
+    _setGearVerifyStatus('Enregistrement…');
+    try {
+      const result = await saveGearSheet(_lastRigFile, gear);
+      _lastRig = result.view;
+      _renderRig(result.view);
+      const warn = (result.warnings || []).length ? ` (${result.warnings.length} avertissement(s))` : '';
+      _setGearVerifyStatus(`Fiche enregistrée${warn}.`);
+      if (gearVerifyPanel) setTimeout(() => { gearVerifyPanel.style.display = 'none'; }, 1200);
+    } catch (e) {
+      _setGearVerifyStatus(e.message || "Échec de l'enregistrement", true);
+    }
+  });
+
+  // Drag support (same pattern as the rig panel).
+  const gearVerifyDrag = document.getElementById('gear-verify-drag');
+  if (gearVerifyDrag && gearVerifyPanel) {
+    let _gearVerifyDrag = null;
+    gearVerifyDrag.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.floating-panel-btn')) return;
+      const rect = gearVerifyPanel.getBoundingClientRect();
+      _gearVerifyDrag = { dx: e.clientX - rect.left, dy: e.clientY - rect.top };
+      e.preventDefault();
+    });
+    window.addEventListener('mousemove', (e) => {
+      if (!_gearVerifyDrag) return;
+      const rect = gearVerifyPanel.getBoundingClientRect();
+      const x = Math.max(12 - rect.width, Math.min(window.innerWidth - 48, e.clientX - _gearVerifyDrag.dx));
+      const y = Math.max(4, Math.min(window.innerHeight - 48, e.clientY - _gearVerifyDrag.dy));
+      gearVerifyPanel.style.left = x + 'px';
+      gearVerifyPanel.style.top = y + 'px';
+      gearVerifyPanel.style.right = 'auto';
+      gearVerifyPanel.style.bottom = 'auto';
+    });
+    window.addEventListener('mouseup', () => { _gearVerifyDrag = null; });
   }
 }
 
