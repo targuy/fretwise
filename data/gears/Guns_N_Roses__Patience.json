@@ -1,1 +1,215 @@
-{"schemaVersion":"songsgear.fretwise.gear.v2","id":"Guns_N_Roses__Patience","song":{"artist":"Guns N' Roses","title":"Patience","genre":"soft rock","subgenres":["ballad","acoustic pop"],"genreConfidence":"high"},"credits":{"guitar":{"guitaristsText":"Slash / Izzy Stradlin","guitarists":["Slash","Izzy Stradlin"],"type":"Solid-body electric","modelsText":"Gibson Les Paul / Gibson ES-175 / Telecaster","models":["Gibson Les Paul","Gibson ES-175","Telecaster"],"confidence":"high","evidence":"Slash's Gibson Les Paul (famously a Kris Derrig replica used on Appetite for Destruction) is iconic; Izzy Stradlin's rhythm work on Telecaster/other guitars is also documented.","notes":"Original entry correct; kept as-is.","source":"songs_guitar_enriched_audited.json (artist-level gear research audit)"}},"tone":{"target":"clean country-tinged acoustic/electric with airy chorus and delay","profile":"clean country-tinged acoustic/electric with airy chorus and delay","summary":"A pristine signal chain focusing on clean headroom (US Deluxe/Silver Twin), enhanced by Chorus for shimmer, followed by a gentle delay and Spring reverb to achieve an acoustic-tinged ballad sound.","mustHave":["clean picking","acoustic feel","chorus shimmer","light delay","wide stereo"],"avoid":["fuzz","heavy crunch","high gain","wah"],"gearClues":["clean amp","12-string or acoustic-like electric","chorus","delay","spring verb"],"corrections":["not generic overdriven clean","lean more acoustic/ballad texture","keep modulation subtle"],"confidence":"medium","needsReview":true},"rig":{"name":"Guns N' Roses - Patience - Valeton GP-180","confidence":"medium","equipment":{"model":"Valeton GP-180"},"output":"FRFR / headphones","blocks":[{"order":1,"role":"noise reduction","module":"NR","model":"Gate 1","active":true,"settings":{"Threshold":"-65 dB"},"purpose":"Clean up ambient noise and hum.","matchQuality":"close","gap":"None"},{"order":2,"role":"preamp/boost","module":"PRE","model":"Comp","active":true,"settings":{"Threshold":"30 dB","Ratio":"4:1","Attack":"Medium"},"purpose":"Smooth dynamics and add sustain for the acoustic feel.","matchQuality":"exact","gap":"None"},{"order":3,"role":"distortion/drive","module":"DST","model":"None","active":false,"purpose":"Keep the signal clean and transparent.","matchQuality":"exact","gap":"N/A (Bypassed)"},{"order":4,"role":"amplifier","module":"AMP","model":"US Deluxe","active":true,"settings":{"Gain":"3","Treble":"6","Midrange":"5","Bass":"4"},"purpose":"Provide clean headroom and a classic American ballad tone.","matchQuality":"exact","gap":"None"},{"order":5,"role":"cabinet/ir","module":"CAB/IR","model":"US 2x12","active":true,"settings":{"Mic Position":"Center"},"purpose":"Complement the clean US Deluxe tone with a focused, articulate sound.","matchQuality":"exact","gap":"None"},{"order":6,"role":"equalization","module":"EQ","model":"Guitar EQ 1","active":true,"settings":{"Bass":"+2 dB","Midrange":"-1 dB","Treble":"+1 dB"},"purpose":"Slight tonal shaping to enhance the acoustic clarity and airiness.","matchQuality":"exact","gap":"None"},{"order":7,"role":"modulation","module":"MOD","model":"Chorus","active":true,"settings":{"Rate":"3 Hz","Depth":"40%","Feedback":"25%"},"purpose":"Create the required 'chorus shimmer' and wide stereo field.","matchQuality":"exact","gap":"None"},{"order":8,"role":"delay","module":"DLY","model":"Digital Delay","active":true,"settings":{"Time":"350 ms","Feedback":"2","Mix":"40%"},"purpose":"Add light, spacious echo for the ballad texture.","matchQuality":"exact","gap":"None"},{"order":9,"role":"reverb","module":"RVB","model":"Spring","active":true,"settings":{"Decay Time":"2.5s","Mix":"30%"},"purpose":"Provide a subtle, vintage room ambience suitable for an acoustic ballad.","matchQuality":"exact","gap":"None"},{"order":10,"role":"volume control","module":"VOL","model":"Volume","active":true,"settings":{"Level":"75%"},"purpose":"Final output level adjustment.","matchQuality":"exact","gap":"None"}]},"improvements":{"summary":"Upgrade IR for better natural room ambiance.","proposals":[{"priority":"P3","type":"IR","target":"Cabinet realism","recommendedAsset":"room-ambience IR (e.g., large hall)","reason":"Enhance the spacious, airy ballad feel.","replacesBlockOrder":5,"whenToUse":"after testing GP-180 preset","expectedGain":"More natural depth and reverb tail.","requiredIfGp180Gap":false}]},"audit":{"workflow":"economic_production_v1","sourceIndex":565,"models":{"ollama":"gemma4:latest","openaiJudge":"gpt-5.4-mini","claudeFallback":"claude-sonnet-4-5"},"finalVerdictSource":"openai","openaiAction":"repair","fallbacks":{"gp180":false,"improvements":false},"sourceFile":"Guns_N_Roses__Patience.json","validation":{"ok":true}}}
+{
+  "schemaVersion": "songsgear.fretwise.gear.v2",
+  "song": {
+    "artist": "Guns N' Roses",
+    "title": "Patience",
+    "album": "G N' R Lies",
+    "year": 1988,
+    "genre": "Acoustic Rock",
+    "subgenres": [
+      "Ballad"
+    ],
+    "genreConfidence": "high"
+  },
+  "credits": {
+    "guitar": {
+      "guitaristsText": "Slash / Izzy Stradlin / Duff McKagan",
+      "type": "Acoustic Guitars",
+      "modelsText": "Guild Acoustic / Gibson J-200",
+      "confidence": "high",
+      "evidence": "The studio recording of Patience features three acoustic guitars playing together (Slash, Izzy, and Duff) with no electric guitars present. Slash used his Guild acoustic guitar for the solos and leads. All guitars are tuned down a half-step to Eb Standard.",
+      "notes": "The original entry incorrectly assumed solid-body electric guitars (Les Paul, Telecaster) and electric clean amps were used on the track. This configuration adapts an electric guitar to simulate that pure acoustic texture, or optimizes the chain for an acoustic piezo pickup.",
+      "source": "GGN'R Lies liner notes, interviews with Slash regarding acoustic tracking."
+    }
+  },
+  "tone": {
+    "target": "Pure organic acoustic tone with warm compression and studio room ambience",
+    "profile": "Warm, bright, and highly dynamic acoustic guitar tone",
+    "summary": "To simulate or amplify the multi-layered acoustic vibe of Patience on the GP-180, we use a high-headroom clean amp (Silver Twin) set completely clean, paired with a compressor to smooth the picking dynamics and a parametric EQ to sculpt the acoustic 'air' while removing harsh electric mid-range.",
+    "mustHave": [
+      "Acoustic guitar or acoustic simulator technique",
+      "Eb Standard Tuning (Eb Ab Db Gb Bb Eb)",
+      "Transparent compression",
+      "Natural room/plate reverb"
+    ],
+    "avoid": [
+      "Heavy chorus",
+      "Flanger",
+      "Overdrive",
+      "Digital delay"
+    ],
+    "gearClues": [
+      "Three acoustic guitars layered",
+      "Microphoned acoustic studio production",
+      "No modulation on the original studio track"
+    ],
+    "corrections": [
+      "Removed Chorus and Delay blocks from active chain because the original track is dry acoustic rock, not an 80s chorused electric clean.",
+      "Changed amp to Silver Twin for maximum clean headroom and transparent reproduction."
+    ],
+    "confidence": "high",
+    "needsReview": false
+  },
+  "rig": {
+    "name": "Guns N' Roses - Patience - Acoustic Simulation",
+    "confidence": "high",
+    "equipment": {
+      "model": "Valeton GP-180"
+    },
+    "recommendedGuitar": "Acoustic-Electric Guitar or Neck/Middle pickup on a Strat/Tele for clean acoustic simulation",
+    "output": "FRFR / Studio Monitors / Headphones",
+    "blocks": [
+      {
+        "module": "NR",
+        "model": "Gate 1",
+        "active": true,
+        "settings": {
+          "Threshold": "-65 dB"
+        },
+        "purpose": "Eliminate low-level single-coil hum or piezo hiss without cutting tails.",
+        "matchQuality": "close",
+        "gap": "None"
+      },
+      {
+        "module": "PRE",
+        "model": "Comp",
+        "active": true,
+        "settings": {
+          "Sustain/Threshold": "40",
+          "Ratio": "3.5:1",
+          "Attack": "Medium",
+          "Level": "50"
+        },
+        "purpose": "Evens out the dynamics of hard acoustic strumming and fingerpicking, mimicking studio compression.",
+        "matchQuality": "exact",
+        "gap": "None"
+      },
+      {
+        "module": "WAH",
+        "model": "V-Wah",
+        "active": false,
+        "settings": {},
+        "purpose": "Bypassed",
+        "matchQuality": "exact",
+        "gap": "N/A"
+      },
+      {
+        "module": "DST",
+        "model": "None",
+        "active": false,
+        "settings": {},
+        "purpose": "Bypassed to maintain pristine clean tone.",
+        "matchQuality": "exact",
+        "gap": "N/A"
+      },
+      {
+        "module": "AMP",
+        "model": "Silver Twin",
+        "active": true,
+        "settings": {
+          "gain": 20,
+          "bass": 45,
+          "middle": 55,
+          "treble": 60,
+          "presence": 50,
+          "level": 65
+        },
+        "purpose": "Provides an ultra-clean, transparent platform with wide frequency response ideal for acoustic rendering.",
+        "matchQuality": "close",
+        "gap": "GP-180 lacks a dedicated acoustic preamp model; Silver Twin acts as a fallback.",
+        "alternatives": [
+          {
+            "model": "US Deluxe",
+            "reason": "Slightly warmer mid-range alternative if the Silver Twin sounds too bright."
+          }
+        ]
+      },
+      {
+        "module": "CAB/IR",
+        "model": "US 2x12",
+        "active": true,
+        "settings": {
+          "Mic Position": "Center",
+          "Level": "50"
+        },
+        "purpose": "Acts as a transparent speaker path to prevent harsh high frequencies from an electric guitar setup.",
+        "matchQuality": "acceptable",
+        "gap": "Factory guitar cabinets impart an electric signature; an acoustic IR would be preferred.",
+        "alternatives": [
+          {
+            "model": "User IR 1",
+            "reason": "Highly recommended to load a dedicated Acoustic Guitar IR here for true realism."
+          }
+        ]
+      },
+      {
+        "module": "EQ",
+        "model": "Guitar EQ 1",
+        "active": true,
+        "settings": {
+          "Bass": "-2 dB",
+          "Midrange": "-3 dB",
+          "Treble": "+4 dB"
+        },
+        "purpose": "Scoops out boxy electric guitar mid-frequencies while boosting high-end brilliance to simulate acoustic string snap.",
+        "matchQuality": "exact",
+        "gap": "None"
+      },
+      {
+        "module": "MOD",
+        "model": "Chorus",
+        "active": false,
+        "settings": {},
+        "purpose": "Bypassed (the studio track features purely organic acoustic tones without modulation effects).",
+        "matchQuality": "exact",
+        "gap": "N/A"
+      },
+      {
+        "module": "DLY",
+        "model": "Digital Delay",
+        "active": false,
+        "settings": {},
+        "purpose": "Bypassed to maintain intimate and upfront acoustic presence.",
+        "matchQuality": "exact",
+        "gap": "N/A"
+      },
+      {
+        "module": "RVB",
+        "model": "Room",
+        "active": true,
+        "settings": {
+          "Decay Time": "1.8s",
+          "Mix": "25%"
+        },
+        "purpose": "Simulates a natural acoustic studio environment where the instruments were mic'd up.",
+        "matchQuality": "exact",
+        "gap": "None"
+      },
+      {
+        "module": "VOL",
+        "model": "Volume",
+        "active": true,
+        "settings": {
+          "Level": "80%"
+        },
+        "purpose": "Final leveling control.",
+        "matchQuality": "exact",
+        "gap": "None"
+      }
+    ]
+  },
+  "improvements": {
+    "summary": "Implement a custom Acoustic Impulse Response for genuine acoustic tone realism.",
+    "proposals": [
+      {
+        "priority": "P1",
+        "type": "IR",
+        "target": "Acoustic Realism",
+        "recommendedAsset": "Acoustic Guitar Body IR (e.g., Martin D-28 or Taylor 314 IR)",
+        "reason": "A standard 2x12 electric guitar cabinet cannot faithfully replicate the wood resonance of an acoustic guitar body. Replacing the CAB block with a dedicated acoustic IR completely transforms an electric signal into a convincing acoustic tone.",
+        "whenToUse": "Immediately to bypass electric cab coloration.",
+        "expectedGain": "Elimination of synthetic high-end and introduction of rich wooden body resonance."
+      }
+    ]
+  }
+}

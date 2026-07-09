@@ -1,0 +1,1156 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1960,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Titas__Comida.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Titãs",
+    "title": "Comida",
+    "album": "",
+    "year": null,
+    "genre": "punk rock"
+  },
+  "genreClassification": {
+    "genre": "punk rock",
+    "subgenres": [
+      "pop punk",
+      "new wave"
+    ],
+    "confidence": "high",
+    "rationale": "The tone profile emphasizes dry, crunchy mids and a lean towards punk over classic rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly dirty crunch with a punchy bass response.",
+      "signatureElements": [
+        "Crunch",
+        "Punchy Bass",
+        "Slight Overdrive"
+      ],
+      "gearHypotheses": [
+        "Modeling Amp/Cab (e.g., Fender Twin or Vox AC30 style)",
+        "Overdrive Pedal (for grit)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "High-gain distortion",
+        "Clean arpeggios"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "dry mid-gain punk-pop crunch with bright upper mids",
+      "mustHave": [
+        "tight crunchy rhythm",
+        "slight grit",
+        "forward mids",
+        "dry mix"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "big clean chorus",
+        "polished high gain"
+      ],
+      "gearClues": [
+        "single-coils or humbuckers",
+        "Marshall/Plexi or similar",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "swap punchy bass for bright mids",
+        "keep it dry and rough",
+        "lean more punk than classic rock"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "dry mid-gain punk-pop crunch with bright upper mids",
+    "mustHave": [
+      "tight crunchy rhythm",
+      "slight grit",
+      "forward mids",
+      "dry mix"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "big clean chorus",
+      "polished high gain"
+    ],
+    "gearClues": [
+      "single-coils or humbuckers",
+      "Marshall/Plexi or similar",
+      "2x12 or 4x12"
+    ],
+    "corrections": [
+      "swap punchy bass for bright mids",
+      "keep it dry and rough",
+      "lean more punk than classic rock"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Punk/Pop Crunch: Focus on mid-gain, bright British tones (Plexi style) with minimal effects to maintain dryness and punch.",
+          "bestMatchSummary": "A tight signal chain using a Boost for initial punch, followed by the UK 45 amp model paired with the UK Vintage 4x12 cabinet. Chorus is avoided, and only subtle reverb/delay are used to keep the sound dry and focused on aggressive mids.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/punch",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide initial punch and tighten the attack for punk rhythm playing.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of OD to keep the tone raw and focused on mid-range aggression, matching the 'punk' feel.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "A good alternative for grit, but Boost is less colored and keeps the sound drier."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/grit",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Output": "5"
+              },
+              "purpose": "Add slight grit and mid-range punch without heavy fuzz or high gain.",
+              "matchQuality": "close",
+              "gap": "The RAT is chosen for its aggressive, focused midrange bite, perfect for punk crunch. Settings are dialed back to avoid excessive distortion.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "More general purpose; RAT-style offers more character in the desired mid-range."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the punchy, bright British Plexi sound suggested by the clues.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Also suitable, but UK 45 often provides a slightly tighter, more aggressive punch for punk."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and necessary punchy tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/mids focus",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1",
+                "Mid": "8",
+                "High": "6"
+              },
+              "purpose": "Boost the upper mids specifically to achieve the 'forward mids' and bright punch required for punk-pop.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0",
+                "Depth": "0"
+              },
+              "purpose": "Disabled. Chorus is explicitly avoided to maintain a dry, aggressive punk sound.",
+              "matchQuality": "N/A",
+              "gap": "The module is included but deactivated as per the 'avoid' list and genre requirements.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/space",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "2"
+              },
+              "purpose": "Add subtle rhythmic space and definition without sounding wet or polished.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to add depth, keeping the mix dry overall. A shorter delay time is preferred for punk rhythm.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Could provide a warmer space, but Digital Delay offers more precise control for tight rhythms."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide minimal, natural room ambience to prevent the sound from being too sterile, while remaining dry.",
+              "matchQuality": "close",
+              "gap": "The mix is kept very low (20%) to ensure the overall tone remains punchy and non-polished.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too bright and artificial for this raw punk sound."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment for optimal mix balance.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a punk-pop track, requiring an aggressive and dry tone. The signal chain prioritizes mid-gain British crunch (UK 45/Plexi style) over high gain or heavy effects to maintain the required raw energy."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the current IR for a more aggressive, mid-focused British punk/pop cab.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British Punk 4x12 (Mid Focus)",
+              "reason": "The existing IR is good but lacks the specific punch and aggressive mid-focus needed for punk rhythm. A dedicated punk cab will tighten the sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Tighter, more defined mids",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Titãs - Comida - Valeton GP-180",
+        "song": {
+          "artist": "Titãs",
+          "title": "Comida",
+          "album": "",
+          "year": null,
+          "genre": "punk rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "dry mid-gain punk-pop crunch with bright upper mids",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight signal chain using a Boost for initial punch, followed by the UK 45 amp model paired with the UK Vintage 4x12 cabinet. Chorus is avoided, and only subtle reverb/delay are used to keep the sound dry and focused on aggressive mids.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain tight rhythm playing.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/punch",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide initial punch and tighten the attack for punk rhythm playing.",
+            "matchQuality": "close",
+            "gap": "Using Boost instead of OD to keep the tone raw and focused on mid-range aggression, matching the 'punk' feel.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "A good alternative for grit, but Boost is less colored and keeps the sound drier."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/grit",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "4",
+              "Tone": "6",
+              "Output": "5"
+            },
+            "purpose": "Add slight grit and mid-range punch without heavy fuzz or high gain.",
+            "matchQuality": "close",
+            "gap": "The RAT is chosen for its aggressive, focused midrange bite, perfect for punk crunch. Settings are dialed back to avoid excessive distortion.",
+            "alternatives": [
+              {
+                "model": "Distortion",
+                "reason": "More general purpose; RAT-style offers more character in the desired mid-range."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Midrange": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the punchy, bright British Plexi sound suggested by the clues.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "Also suitable, but UK 45 often provides a slightly tighter, more aggressive punch for punk."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British cabinet sound and necessary punchy tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/mids focus",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low": "-1",
+              "Mid": "8",
+              "High": "6"
+            },
+            "purpose": "Boost the upper mids specifically to achieve the 'forward mids' and bright punch required for punk-pop.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/texture",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "0",
+              "Depth": "0"
+            },
+            "purpose": "Disabled. Chorus is explicitly avoided to maintain a dry, aggressive punk sound.",
+            "matchQuality": "N/A",
+            "gap": "The module is included but deactivated as per the 'avoid' list and genre requirements.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/space",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "2"
+            },
+            "purpose": "Add subtle rhythmic space and definition without sounding wet or polished.",
+            "matchQuality": "close",
+            "gap": "Used sparingly to add depth, keeping the mix dry overall. A shorter delay time is preferred for punk rhythm.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "Could provide a warmer space, but Digital Delay offers more precise control for tight rhythms."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Provide minimal, natural room ambience to prevent the sound from being too sterile, while remaining dry.",
+            "matchQuality": "close",
+            "gap": "The mix is kept very low (20%) to ensure the overall tone remains punchy and non-polished.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Too bright and artificial for this raw punk sound."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7"
+            },
+            "purpose": "Final output level adjustment for optimal mix balance.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "dry mid-gain punk-pop crunch with bright upper mids",
+          "toneProfile": "dry mid-gain punk-pop crunch with bright upper mids",
+          "idealSignalChain": "single-coils or humbuckers | Marshall/Plexi or similar | 2x12 or 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coils or humbuckers",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi or similar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight crunchy rhythm",
+            "slight grit",
+            "forward mids",
+            "dry mix"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Punk/Pop Crunch: Focus on mid-gain, bright British tones (Plexi style) with minimal effects to maintain dryness and punch.",
+          "bestMatchSummary": "A tight signal chain using a Boost for initial punch, followed by the UK 45 amp model paired with the UK Vintage 4x12 cabinet. Chorus is avoided, and only subtle reverb/delay are used to keep the sound dry and focused on aggressive mids.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/punch",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide initial punch and tighten the attack for punk rhythm playing.",
+              "matchQuality": "close",
+              "gap": "Using Boost instead of OD to keep the tone raw and focused on mid-range aggression, matching the 'punk' feel.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "A good alternative for grit, but Boost is less colored and keeps the sound drier."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/grit",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Output": "5"
+              },
+              "purpose": "Add slight grit and mid-range punch without heavy fuzz or high gain.",
+              "matchQuality": "close",
+              "gap": "The RAT is chosen for its aggressive, focused midrange bite, perfect for punk crunch. Settings are dialed back to avoid excessive distortion.",
+              "alternatives": [
+                {
+                  "model": "Distortion",
+                  "reason": "More general purpose; RAT-style offers more character in the desired mid-range."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the punchy, bright British Plexi sound suggested by the clues.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Also suitable, but UK 45 often provides a slightly tighter, more aggressive punch for punk."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British cabinet sound and necessary punchy tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/mids focus",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1",
+                "Mid": "8",
+                "High": "6"
+              },
+              "purpose": "Boost the upper mids specifically to achieve the 'forward mids' and bright punch required for punk-pop.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0",
+                "Depth": "0"
+              },
+              "purpose": "Disabled. Chorus is explicitly avoided to maintain a dry, aggressive punk sound.",
+              "matchQuality": "N/A",
+              "gap": "The module is included but deactivated as per the 'avoid' list and genre requirements.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/space",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "2"
+              },
+              "purpose": "Add subtle rhythmic space and definition without sounding wet or polished.",
+              "matchQuality": "close",
+              "gap": "Used sparingly to add depth, keeping the mix dry overall. A shorter delay time is preferred for punk rhythm.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Could provide a warmer space, but Digital Delay offers more precise control for tight rhythms."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Provide minimal, natural room ambience to prevent the sound from being too sterile, while remaining dry.",
+              "matchQuality": "close",
+              "gap": "The mix is kept very low (20%) to ensure the overall tone remains punchy and non-polished.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Too bright and artificial for this raw punk sound."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7"
+              },
+              "purpose": "Final output level adjustment for optimal mix balance.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism by swapping the current IR for a more aggressive, mid-focused British punk/pop cab.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British Punk 4x12 (Mid Focus)",
+              "reason": "The existing IR is good but lacks the specific punch and aggressive mid-focus needed for punk rhythm. A dedicated punk cab will tighten the sound.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Tighter, more defined mids",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "swap punchy bass for bright mids",
+          "keep it dry and rough",
+          "lean more punk than classic rock"
+        ],
+        "warnings": [
+          "The source material is a punk-pop track, requiring an aggressive and dry tone. The signal chain prioritizes mid-gain British crunch (UK 45/Plexi style) over high gain or heavy effects to maintain the required raw energy."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 17.227,
+      "prompt_chars": 980,
+      "response_chars": 346,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 98,
+        "total_duration": 17216983800,
+        "prompt_eval_duration": 67759000,
+        "eval_duration": 789668000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.803,
+      "prompt_chars": 5248,
+      "response_chars": 508,
+      "usage": {
+        "input_tokens": 1479,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 140,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1619
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 79.308,
+      "prompt_chars": 3554,
+      "response_chars": 6461,
+      "usage": {
+        "prompt_eval_count": 1208,
+        "eval_count": 1778,
+        "total_duration": 79299130500,
+        "prompt_eval_duration": 142303000,
+        "eval_duration": 14639663000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 33.784,
+      "prompt_chars": 8604,
+      "response_chars": 614,
+      "usage": {
+        "prompt_eval_count": 2343,
+        "eval_count": 159,
+        "total_duration": 33777321000,
+        "prompt_eval_duration": 269666000,
+        "eval_duration": 1365728000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 17.414,
+      "prompt_chars": 2863,
+      "response_chars": 188,
+      "usage": {
+        "prompt_eval_count": 906,
+        "eval_count": 49,
+        "total_duration": 17394406000,
+        "prompt_eval_duration": 130905000,
+        "eval_duration": 346695000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Titãs",
+      "title": "Comida",
+      "album": "",
+      "year": null,
+      "genre": "punk rock"
+    },
+    "rig": {
+      "rigName": "Titãs - Comida - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "dry mid-gain punk-pop crunch with bright upper mids",
+      "signalChainSummary": "A tight signal chain using a Boost for initial punch, followed by the UK 45 amp model paired with the UK Vintage 4x12 cabinet. Chorus is avoided, and only subtle reverb/delay are used to keep the sound dry and focused on aggressive mids.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain tight rhythm playing.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/punch",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide initial punch and tighten the attack for punk rhythm playing.",
+          "matchQuality": "close",
+          "gap": "Using Boost instead of OD to keep the tone raw and focused on mid-range aggression, matching the 'punk' feel.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "A good alternative for grit, but Boost is less colored and keeps the sound drier."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/grit",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "4",
+            "Tone": "6",
+            "Output": "5"
+          },
+          "purpose": "Add slight grit and mid-range punch without heavy fuzz or high gain.",
+          "matchQuality": "close",
+          "gap": "The RAT is chosen for its aggressive, focused midrange bite, perfect for punk crunch. Settings are dialed back to avoid excessive distortion.",
+          "alternatives": [
+            {
+              "model": "Distortion",
+              "reason": "More general purpose; RAT-style offers more character in the desired mid-range."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Midrange": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the punchy, bright British Plexi sound suggested by the clues.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "Also suitable, but UK 45 often provides a slightly tighter, more aggressive punch for punk."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British cabinet sound and necessary punchy tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/mids focus",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low": "-1",
+            "Mid": "8",
+            "High": "6"
+          },
+          "purpose": "Boost the upper mids specifically to achieve the 'forward mids' and bright punch required for punk-pop.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/texture",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "0",
+            "Depth": "0"
+          },
+          "purpose": "Disabled. Chorus is explicitly avoided to maintain a dry, aggressive punk sound.",
+          "matchQuality": "fallback",
+          "gap": "The module is included but deactivated as per the 'avoid' list and genre requirements.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/space",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "2"
+          },
+          "purpose": "Add subtle rhythmic space and definition without sounding wet or polished.",
+          "matchQuality": "close",
+          "gap": "Used sparingly to add depth, keeping the mix dry overall. A shorter delay time is preferred for punk rhythm.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "Could provide a warmer space, but Digital Delay offers more precise control for tight rhythms."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Provide minimal, natural room ambience to prevent the sound from being too sterile, while remaining dry.",
+          "matchQuality": "close",
+          "gap": "The mix is kept very low (20%) to ensure the overall tone remains punchy and non-polished.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Too bright and artificial for this raw punk sound."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7"
+          },
+          "purpose": "Final output level adjustment for optimal mix balance.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "dry mid-gain punk-pop crunch with bright upper mids",
+      "mustHave": [
+        "tight crunchy rhythm",
+        "slight grit",
+        "forward mids",
+        "dry mix"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "big clean chorus",
+        "polished high gain"
+      ],
+      "gearClues": [
+        "single-coils or humbuckers",
+        "Marshall/Plexi or similar",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "swap punchy bass for bright mids",
+        "keep it dry and rough",
+        "lean more punk than classic rock"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "punk rock",
+      "styleTags": [
+        "pop punk",
+        "new wave"
+      ],
+      "targetTone": "dry mid-gain punk-pop crunch with bright upper mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism by swapping the current IR for a more aggressive, mid-focused British punk/pop cab.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "British Punk 4x12 (Mid Focus)",
+          "reason": "The existing IR is good but lacks the specific punch and aggressive mid-focus needed for punk rhythm. A dedicated punk cab will tighten the sound.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Tighter, more defined mids",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1960,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

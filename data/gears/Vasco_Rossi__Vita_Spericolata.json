@@ -1,0 +1,1114 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1969,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Vasco_Rossi__Vita_Spericolata.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Vasco Rossi",
+    "title": "Vita Spericolata",
+    "album": "",
+    "year": null,
+    "genre": "pop rock"
+  },
+  "genreClassification": {
+    "genre": "pop rock",
+    "subgenres": [
+      "italian pop",
+      "80s rock"
+    ],
+    "confidence": "high",
+    "rationale": "Vasco Rossi's style is classic Italian pop/rock, matching the 80s chorus-crunch tone."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly crunchy rock tone with a touch of chorus/modulation.",
+      "signatureElements": [
+        "Chorus/Vibrato modulation",
+        "Slightly overdriven crunch (low gain)",
+        "Punchy mid-range focus",
+        "Clean attack for rhythm parts"
+      ],
+      "gearHypotheses": [
+        "Modulation pedal (e.g., Chorus)",
+        "Low-gain overdrive or distortion (for grit)",
+        "Amp simulation with natural tube character"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "High-gain metal tones",
+        "Extreme scooped mids"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright 80s chorus-crunch rock rhythm",
+      "mustHave": [
+        "chorus sheen",
+        "slight crunch",
+        "bright mids",
+        "clean attack"
+      ],
+      "avoid": [
+        "fuzz",
+        "metal gain",
+        "scooped mids"
+      ],
+      "gearClues": [
+        "single coils or humbuckers",
+        "clean-ish amp",
+        "chorus pedal",
+        "4x12 or 2x12"
+      ],
+      "corrections": [
+        "push chorus more than generic modulation",
+        "keep gain low",
+        "aim for polished 80s texture"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright 80s chorus-crunch rock rhythm",
+    "mustHave": [
+      "chorus sheen",
+      "slight crunch",
+      "bright mids",
+      "clean attack"
+    ],
+    "avoid": [
+      "fuzz",
+      "metal gain",
+      "scooped mids"
+    ],
+    "gearClues": [
+      "single coils or humbuckers",
+      "clean-ish amp",
+      "chorus pedal",
+      "4x12 or 2x12"
+    ],
+    "corrections": [
+      "push chorus more than generic modulation",
+      "keep gain low",
+      "aim for polished 80s texture"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, chorus-drenched rhythm tones with low gain and clear articulation.",
+          "bestMatchSummary": "A clean signal chain utilizing a Chorus effect for 80s sheen, followed by a mild OD boost into the UK 45 amp model, paired with the UK Vintage 4x12 cabinet to achieve bright, crunchy rock rhythms.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "75%",
+                "Level": "60%"
+              },
+              "purpose": "Provide a subtle, bright crunch and boost the signal for articulation.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD for its slightly brighter, more vintage 80s pop-rock character.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A good alternative if the desired crunch leans more towards classic blues."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "Chorus",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "70%",
+                "Feedback": "50%"
+              },
+              "purpose": "Apply the signature 80s chorus sheen and width.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No dedicated distortion needed; gain is handled by the Green OD and amp).",
+              "matchQuality": "perfect",
+              "gap": "The required crunch is best achieved via a mild boost/OD rather than a dedicated distortion unit.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "30%",
+                "Treble": "65%",
+                "Mid": "70%",
+                "Bass": "55%"
+              },
+              "purpose": "Simulate a bright, articulate British rock clean-ish amp tone.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is ideal for the required 'bright mids' and classic pop-rock sound profile.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if a more American clean tone was desired."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet sound and complement the UK 45 amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Slightly enhance the mids and highs to ensure 'bright mids' are prominent.",
+              "matchQuality": "close",
+              "gap": "A slight EQ boost is necessary to meet the specific requirement of emphasizing bright mids in a chorus context.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "20%",
+                "Mix": "35%"
+              },
+              "purpose": "Add subtle depth and polish to the rhythm parts without distracting from the chorus.",
+              "matchQuality": "close",
+              "gap": "A light delay adds necessary 'polish' often associated with 80s production, complementing the Chorus effect.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "If a warmer, less defined ambience is preferred over digital clarity."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "15%"
+              },
+              "purpose": "Provide a subtle sense of space and polish to the overall tone.",
+              "matchQuality": "close",
+              "gap": "A light Room reverb is used instead of Plate/Spring to maintain the bright, open sound required for 80s pop-rock.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "1.0"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a rock song, but the target tone specifies an '80s chorus-crunch' sound. The rig prioritizes bright articulation and sheen over raw power."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism to complement the 80s pop-rock sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance vintage British rock tone and clarity.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased polish/realism",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Vasco Rossi - Vita Spericolata - Valeton GP-180",
+        "song": {
+          "artist": "Vasco Rossi",
+          "title": "Vita Spericolata",
+          "album": "",
+          "year": null,
+          "genre": "pop rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright 80s chorus-crunch rock rhythm",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A clean signal chain utilizing a Chorus effect for 80s sheen, followed by a mild OD boost into the UK 45 amp model, paired with the UK Vintage 4x12 cabinet to achieve bright, crunchy rock rhythms.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "75%",
+              "Level": "60%"
+            },
+            "purpose": "Provide a subtle, bright crunch and boost the signal for articulation.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen over Blues OD for its slightly brighter, more vintage 80s pop-rock character.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A good alternative if the desired crunch leans more towards classic blues."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "modulation",
+            "module": "Chorus",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "4 Hz",
+              "Depth": "70%",
+              "Feedback": "50%"
+            },
+            "purpose": "Apply the signature 80s chorus sheen and width.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass (No dedicated distortion needed; gain is handled by the Green OD and amp).",
+            "matchQuality": "perfect",
+            "gap": "The required crunch is best achieved via a mild boost/OD rather than a dedicated distortion unit.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "30%",
+              "Treble": "65%",
+              "Mid": "70%",
+              "Bass": "55%"
+            },
+            "purpose": "Simulate a bright, articulate British rock clean-ish amp tone.",
+            "matchQuality": "close",
+            "gap": "The UK 45 is ideal for the required 'bright mids' and classic pop-rock sound profile.",
+            "alternatives": [
+              {
+                "model": "US Deluxe",
+                "reason": "A good alternative if a more American clean tone was desired."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British rock cabinet sound and complement the UK 45 amp.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Mid": "+3 dB",
+              "Treble": "+2 dB"
+            },
+            "purpose": "Slightly enhance the mids and highs to ensure 'bright mids' are prominent.",
+            "matchQuality": "close",
+            "gap": "A slight EQ boost is necessary to meet the specific requirement of emphasizing bright mids in a chorus context.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "20%",
+              "Mix": "35%"
+            },
+            "purpose": "Add subtle depth and polish to the rhythm parts without distracting from the chorus.",
+            "matchQuality": "close",
+            "gap": "A light delay adds necessary 'polish' often associated with 80s production, complementing the Chorus effect.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "If a warmer, less defined ambience is preferred over digital clarity."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "15%"
+            },
+            "purpose": "Provide a subtle sense of space and polish to the overall tone.",
+            "matchQuality": "close",
+            "gap": "A light Room reverb is used instead of Plate/Spring to maintain the bright, open sound required for 80s pop-rock.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "1.0"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright 80s chorus-crunch rock rhythm",
+          "toneProfile": "bright 80s chorus-crunch rock rhythm",
+          "idealSignalChain": "single coils or humbuckers | clean-ish amp | chorus pedal | 4x12 or 2x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single coils or humbuckers",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "clean-ish amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "chorus pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 or 2x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "chorus sheen",
+            "slight crunch",
+            "bright mids",
+            "clean attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, chorus-drenched rhythm tones with low gain and clear articulation.",
+          "bestMatchSummary": "A clean signal chain utilizing a Chorus effect for 80s sheen, followed by a mild OD boost into the UK 45 amp model, paired with the UK Vintage 4x12 cabinet to achieve bright, crunchy rock rhythms.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "75%",
+                "Level": "60%"
+              },
+              "purpose": "Provide a subtle, bright crunch and boost the signal for articulation.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD for its slightly brighter, more vintage 80s pop-rock character.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A good alternative if the desired crunch leans more towards classic blues."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "modulation",
+              "module": "Chorus",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "70%",
+                "Feedback": "50%"
+              },
+              "purpose": "Apply the signature 80s chorus sheen and width.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No dedicated distortion needed; gain is handled by the Green OD and amp).",
+              "matchQuality": "perfect",
+              "gap": "The required crunch is best achieved via a mild boost/OD rather than a dedicated distortion unit.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "30%",
+                "Treble": "65%",
+                "Mid": "70%",
+                "Bass": "55%"
+              },
+              "purpose": "Simulate a bright, articulate British rock clean-ish amp tone.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is ideal for the required 'bright mids' and classic pop-rock sound profile.",
+              "alternatives": [
+                {
+                  "model": "US Deluxe",
+                  "reason": "A good alternative if a more American clean tone was desired."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet sound and complement the UK 45 amp.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+2 dB"
+              },
+              "purpose": "Slightly enhance the mids and highs to ensure 'bright mids' are prominent.",
+              "matchQuality": "close",
+              "gap": "A slight EQ boost is necessary to meet the specific requirement of emphasizing bright mids in a chorus context.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "20%",
+                "Mix": "35%"
+              },
+              "purpose": "Add subtle depth and polish to the rhythm parts without distracting from the chorus.",
+              "matchQuality": "close",
+              "gap": "A light delay adds necessary 'polish' often associated with 80s production, complementing the Chorus effect.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "If a warmer, less defined ambience is preferred over digital clarity."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "15%"
+              },
+              "purpose": "Provide a subtle sense of space and polish to the overall tone.",
+              "matchQuality": "close",
+              "gap": "A light Room reverb is used instead of Plate/Spring to maintain the bright, open sound required for 80s pop-rock.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "1.0"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism to complement the 80s pop-rock sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance vintage British rock tone and clarity.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased polish/realism",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "push chorus more than generic modulation",
+          "keep gain low",
+          "aim for polished 80s texture"
+        ],
+        "warnings": [
+          "The source material is a rock song, but the target tone specifies an '80s chorus-crunch' sound. The rig prioritizes bright articulation and sheen over raw power."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 17.297,
+      "prompt_chars": 996,
+      "response_chars": 487,
+      "usage": {
+        "prompt_eval_count": 323,
+        "eval_count": 121,
+        "total_duration": 17271255500,
+        "prompt_eval_duration": 88474000,
+        "eval_duration": 874486000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.538,
+      "prompt_chars": 5417,
+      "response_chars": 472,
+      "usage": {
+        "input_tokens": 1510,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 135,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1645
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 64.47,
+      "prompt_chars": 3541,
+      "response_chars": 5849,
+      "usage": {
+        "prompt_eval_count": 1209,
+        "eval_count": 1647,
+        "total_duration": 64464117100,
+        "prompt_eval_duration": 103435000,
+        "eval_duration": 11792479000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 31.289,
+      "prompt_chars": 7953,
+      "response_chars": 491,
+      "usage": {
+        "prompt_eval_count": 2213,
+        "eval_count": 135,
+        "total_duration": 31259447000,
+        "prompt_eval_duration": 226280000,
+        "eval_duration": 962964000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 28.075,
+      "prompt_chars": 2753,
+      "response_chars": 187,
+      "usage": {
+        "prompt_eval_count": 888,
+        "eval_count": 58,
+        "total_duration": 28050111400,
+        "prompt_eval_duration": 126919000,
+        "eval_duration": 409169000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Vasco Rossi",
+      "title": "Vita Spericolata",
+      "album": "",
+      "year": null,
+      "genre": "pop rock"
+    },
+    "rig": {
+      "rigName": "Vasco Rossi - Vita Spericolata - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright 80s chorus-crunch rock rhythm",
+      "signalChainSummary": "A clean signal chain utilizing a Chorus effect for 80s sheen, followed by a mild OD boost into the UK 45 amp model, paired with the UK Vintage 4x12 cabinet to achieve bright, crunchy rock rhythms.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "75%",
+            "Level": "60%"
+          },
+          "purpose": "Provide a subtle, bright crunch and boost the signal for articulation.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen over Blues OD for its slightly brighter, more vintage 80s pop-rock character.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A good alternative if the desired crunch leans more towards classic blues."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "modulation",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "4 Hz",
+            "Depth": "70%",
+            "Feedback": "50%"
+          },
+          "purpose": "Apply the signature 80s chorus sheen and width.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass (No dedicated distortion needed; gain is handled by the Green OD and amp).",
+          "matchQuality": "exact",
+          "gap": "The required crunch is best achieved via a mild boost/OD rather than a dedicated distortion unit.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "30%",
+            "Treble": "65%",
+            "Mid": "70%",
+            "Bass": "55%"
+          },
+          "purpose": "Simulate a bright, articulate British rock clean-ish amp tone.",
+          "matchQuality": "close",
+          "gap": "The UK 45 is ideal for the required 'bright mids' and classic pop-rock sound profile.",
+          "alternatives": [
+            {
+              "model": "US Deluxe",
+              "reason": "A good alternative if a more American clean tone was desired."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British rock cabinet sound and complement the UK 45 amp.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Mid": "+3 dB",
+            "Treble": "+2 dB"
+          },
+          "purpose": "Slightly enhance the mids and highs to ensure 'bright mids' are prominent.",
+          "matchQuality": "close",
+          "gap": "A slight EQ boost is necessary to meet the specific requirement of emphasizing bright mids in a chorus context.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "20%",
+            "Mix": "35%"
+          },
+          "purpose": "Add subtle depth and polish to the rhythm parts without distracting from the chorus.",
+          "matchQuality": "close",
+          "gap": "A light delay adds necessary 'polish' often associated with 80s production, complementing the Chorus effect.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "If a warmer, less defined ambience is preferred over digital clarity."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "15%"
+          },
+          "purpose": "Provide a subtle sense of space and polish to the overall tone.",
+          "matchQuality": "close",
+          "gap": "A light Room reverb is used instead of Plate/Spring to maintain the bright, open sound required for 80s pop-rock.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "1.0"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright 80s chorus-crunch rock rhythm",
+      "mustHave": [
+        "chorus sheen",
+        "slight crunch",
+        "bright mids",
+        "clean attack"
+      ],
+      "avoid": [
+        "fuzz",
+        "metal gain",
+        "scooped mids"
+      ],
+      "gearClues": [
+        "single coils or humbuckers",
+        "clean-ish amp",
+        "chorus pedal",
+        "4x12 or 2x12"
+      ],
+      "corrections": [
+        "push chorus more than generic modulation",
+        "keep gain low",
+        "aim for polished 80s texture"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pop rock",
+      "styleTags": [
+        "italian pop",
+        "80s rock"
+      ],
+      "targetTone": "bright 80s chorus-crunch rock rhythm",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better cabinet realism to complement the 80s pop-rock sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR",
+          "reason": "Enhance vintage British rock tone and clarity.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased polish/realism",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1969,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

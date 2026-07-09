@@ -1,0 +1,1136 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1811,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Booker_T_the_M_G_s__Green_Onions.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Booker T. & the M.G.'s",
+    "title": "Green Onions",
+    "album": "",
+    "year": null,
+    "genre": "soul"
+  },
+  "genreClassification": {
+    "genre": "soul",
+    "subgenres": [
+      "r&b",
+      "funk",
+      "neo-soul"
+    ],
+    "confidence": "high",
+    "rationale": "Booker T. & the M.G.'s are foundational artists in soul and funk music."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bluesy, slightly dirty clean tone with prominent mid-range focus.",
+      "signatureElements": [
+        "clean",
+        "light compression",
+        "subtle chorus/vibrato (modulation)",
+        "spring reverb",
+        "mid-scooped EQ"
+      ],
+      "gearHypotheses": [
+        "Modeling amp simulating a Fender Twin or Vox AC30",
+        "Overdrive pedal for grit (e.g., Tube Screamer style) used subtly"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "high gain distortion",
+        "bright scooped tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "vintage organ-like guitar twang with light grit",
+      "mustHave": [
+        "treble bite",
+        "short decay",
+        "barely dirty clean",
+        "tight low end",
+        "rhythmic stabs"
+      ],
+      "avoid": [
+        "chorus",
+        "spring reverb wash",
+        "heavy overdrive",
+        "thick sustain"
+      ],
+      "gearClues": [
+        "Fender-style clean amp",
+        "single-coil bridge",
+        "small room",
+        "light compression"
+      ],
+      "corrections": [
+        "remove chorus",
+        "minimize reverb",
+        "favor dry twang over mid scoop",
+        "skip Vox/Tube Screamer tilt"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "vintage organ-like guitar twang with light grit",
+    "mustHave": [
+      "treble bite",
+      "short decay",
+      "barely dirty clean",
+      "tight low end",
+      "rhythmic stabs"
+    ],
+    "avoid": [
+      "chorus",
+      "spring reverb wash",
+      "heavy overdrive",
+      "thick sustain"
+    ],
+    "gearClues": [
+      "Fender-style clean amp",
+      "single-coil bridge",
+      "small room",
+      "light compression"
+    ],
+    "corrections": [
+      "remove chorus",
+      "minimize reverb",
+      "favor dry twang over mid scoop",
+      "skip Vox/Tube Screamer tilt"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage, clean tones with bite and tight low end.",
+          "bestMatchSummary": "A bright, compressed signal chain using a Fender-style amp model (US Deluxe) paired with a clear cabinet to achieve the classic 'Green Onions' twang, emphasizing treble and rhythmic stabs.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight signal definition.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Level": "3",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide light compression to enhance rhythmic stabs and sustain without sounding muddy.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "Green OD",
+              "active": false,
+              "settings": {
+                "Drive": "1",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Use a very subtle boost/grit (like an early clean overdrive) to add character without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is typically used for blues grit, but its low drive setting can mimic the light breakup needed. A dedicated clean booster would be ideal.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "A simple Boost pedal would provide cleaner tone shaping."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "equalization/tone shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+1",
+                "Treble": "+3"
+              },
+              "purpose": "Enhance the required treble bite and maintain a tight low end while avoiding mid-scoop.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "7",
+                "Mid": "6",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the clean, bright tone of a Fender-style amp required for vintage twang.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and focused cabinet sound suitable for clean, twangy tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Frequency": "Low"
+              },
+              "purpose": "Keep the WAH module available for potential rhythmic sweeps, but keep it inactive as per 'avoid' list.",
+              "matchQuality": "close",
+              "gap": "The V-Wah is a general utility and serves as a placeholder since no specific modulation was required beyond Chorus (which must be avoided).",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "250 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Add subtle rhythmic depth and space without creating a wash effect.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "2"
+              },
+              "purpose": "Provide a small room ambiance as requested by the 'gearClues', keeping the reverb minimal.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "active": true,
+              "settings": {
+                "Level": "5"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [],
+              "model": "None"
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic R&B/Soul track, requiring a vintage, bright tone. The chosen US Deluxe amp and US 2x12 cabinet are optimized for this clean, twangy sound.",
+          "The Green OD was set to minimal drive (inactive) as the primary goal is 'barely dirty clean' rather than overt grit."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and refine the subtle boost stage.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage Fender 2x12 IR (e.g., 'Ampeg B-15' or similar)",
+              "reason": "Enhance vintage character and tightness for the twangy sound.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism/tightness",
+              "requiredIfGp180Gap": false
+            },
+            {
+              "priority": "P3",
+              "type": "DST",
+              "target": "Clean Booster/Drive Stage",
+              "recommendedAsset": "Simple clean boost pedal (e.g., 'Boost' alternative)",
+              "reason": "Provide cleaner, more controlled light grit than the Green OD.",
+              "replacesBlockOrder": 3,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Cleaner breakup/more control",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "high",
+          "needsReview": true
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Booker T. & the M.G.'s - Green Onions - Valeton GP-180",
+        "song": {
+          "artist": "Booker T. & the M.G.'s",
+          "title": "Green Onions",
+          "album": "",
+          "year": null,
+          "genre": "soul"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "vintage organ-like guitar twang with light grit",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A bright, compressed signal chain using a Fender-style amp model (US Deluxe) paired with a clear cabinet to achieve the classic 'Green Onions' twang, emphasizing treble and rhythmic stabs.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain tight signal definition.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Level": "3",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Provide light compression to enhance rhythmic stabs and sustain without sounding muddy.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "Green OD",
+            "active": false,
+            "settings": {
+              "Drive": "1",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Use a very subtle boost/grit (like an early clean overdrive) to add character without heavy distortion.",
+            "matchQuality": "close",
+            "gap": "The Green OD is typically used for blues grit, but its low drive setting can mimic the light breakup needed. A dedicated clean booster would be ideal.",
+            "alternatives": [
+              {
+                "model": "Boost",
+                "reason": "A simple Boost pedal would provide cleaner tone shaping."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "equalization/tone shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2",
+              "Mid": "+1",
+              "Treble": "+3"
+            },
+            "purpose": "Enhance the required treble bite and maintain a tight low end while avoiding mid-scoop.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "4",
+              "Treble": "7",
+              "Mid": "6",
+              "Bass": "5"
+            },
+            "purpose": "Simulate the clean, bright tone of a Fender-style amp required for vintage twang.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright and focused cabinet sound suitable for clean, twangy tones.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": false,
+            "settings": {
+              "Frequency": "Low"
+            },
+            "purpose": "Keep the WAH module available for potential rhythmic sweeps, but keep it inactive as per 'avoid' list.",
+            "matchQuality": "close",
+            "gap": "The V-Wah is a general utility and serves as a placeholder since no specific modulation was required beyond Chorus (which must be avoided).",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "250 ms",
+              "Feedback": "2",
+              "Mix": "3"
+            },
+            "purpose": "Add subtle rhythmic depth and space without creating a wash effect.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "2"
+            },
+            "purpose": "Provide a small room ambiance as requested by the 'gearClues', keeping the reverb minimal.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "active": true,
+            "settings": {
+              "Level": "5"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [],
+            "model": "None"
+          }
+        ],
+        "general": {
+          "targetSound": "vintage organ-like guitar twang with light grit",
+          "toneProfile": "vintage organ-like guitar twang with light grit",
+          "idealSignalChain": "Fender-style clean amp | single-coil bridge | small room | light compression",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Fender-style clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coil bridge",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light compression",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "treble bite",
+            "short decay",
+            "barely dirty clean",
+            "tight low end",
+            "rhythmic stabs"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on vintage, clean tones with bite and tight low end.",
+          "bestMatchSummary": "A bright, compressed signal chain using a Fender-style amp model (US Deluxe) paired with a clear cabinet to achieve the classic 'Green Onions' twang, emphasizing treble and rhythmic stabs.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight signal definition.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Level": "3",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Provide light compression to enhance rhythmic stabs and sustain without sounding muddy.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "Green OD",
+              "active": false,
+              "settings": {
+                "Drive": "1",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Use a very subtle boost/grit (like an early clean overdrive) to add character without heavy distortion.",
+              "matchQuality": "close",
+              "gap": "The Green OD is typically used for blues grit, but its low drive setting can mimic the light breakup needed. A dedicated clean booster would be ideal.",
+              "alternatives": [
+                {
+                  "model": "Boost",
+                  "reason": "A simple Boost pedal would provide cleaner tone shaping."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "equalization/tone shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2",
+                "Mid": "+1",
+                "Treble": "+3"
+              },
+              "purpose": "Enhance the required treble bite and maintain a tight low end while avoiding mid-scoop.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "7",
+                "Mid": "6",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the clean, bright tone of a Fender-style amp required for vintage twang.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and focused cabinet sound suitable for clean, twangy tones.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Frequency": "Low"
+              },
+              "purpose": "Keep the WAH module available for potential rhythmic sweeps, but keep it inactive as per 'avoid' list.",
+              "matchQuality": "close",
+              "gap": "The V-Wah is a general utility and serves as a placeholder since no specific modulation was required beyond Chorus (which must be avoided).",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "250 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Add subtle rhythmic depth and space without creating a wash effect.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "2"
+              },
+              "purpose": "Provide a small room ambiance as requested by the 'gearClues', keeping the reverb minimal.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "active": true,
+              "settings": {
+                "Level": "5"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [],
+              "model": "None"
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and refine the subtle boost stage.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage Fender 2x12 IR (e.g., 'Ampeg B-15' or similar)",
+              "reason": "Enhance vintage character and tightness for the twangy sound.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased realism/tightness",
+              "requiredIfGp180Gap": false
+            },
+            {
+              "priority": "P3",
+              "type": "DST",
+              "target": "Clean Booster/Drive Stage",
+              "recommendedAsset": "Simple clean boost pedal (e.g., 'Boost' alternative)",
+              "reason": "Provide cleaner, more controlled light grit than the Green OD.",
+              "replacesBlockOrder": 3,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Cleaner breakup/more control",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "high",
+          "needsReview": true
+        },
+        "assumptions": [
+          "remove chorus",
+          "minimize reverb",
+          "favor dry twang over mid scoop",
+          "skip Vox/Tube Screamer tilt"
+        ],
+        "warnings": [
+          "The source material is a classic R&B/Soul track, requiring a vintage, bright tone. The chosen US Deluxe amp and US 2x12 cabinet are optimized for this clean, twangy sound.",
+          "The Green OD was set to minimal drive (inactive) as the primary goal is 'barely dirty clean' rather than overt grit."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.019,
+      "prompt_chars": 1003,
+      "response_chars": 445,
+      "usage": {
+        "prompt_eval_count": 330,
+        "eval_count": 114,
+        "total_duration": 12000799200,
+        "prompt_eval_duration": 159869000,
+        "eval_duration": 793788000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.641,
+      "prompt_chars": 5382,
+      "response_chars": 545,
+      "usage": {
+        "input_tokens": 1509,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 147,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1656
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.429,
+      "prompt_chars": 3642,
+      "response_chars": 5510,
+      "usage": {
+        "prompt_eval_count": 1228,
+        "eval_count": 1549,
+        "total_duration": 11402414200,
+        "prompt_eval_duration": 133088000,
+        "eval_duration": 10837498000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.905,
+      "prompt_chars": 7699,
+      "response_chars": 899,
+      "usage": {
+        "prompt_eval_count": 2134,
+        "eval_count": 256,
+        "total_duration": 12882851000,
+        "prompt_eval_duration": 201499000,
+        "eval_duration": 1896397000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.526,
+      "prompt_chars": 2900,
+      "response_chars": 169,
+      "usage": {
+        "prompt_eval_count": 909,
+        "eval_count": 56,
+        "total_duration": 12520405900,
+        "prompt_eval_duration": 213830000,
+        "eval_duration": 405574000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Booker T. & the M.G.'s",
+      "title": "Green Onions",
+      "album": "",
+      "year": null,
+      "genre": "soul"
+    },
+    "rig": {
+      "rigName": "Booker T. & the M.G.'s - Green Onions - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "vintage organ-like guitar twang with light grit",
+      "signalChainSummary": "A bright, compressed signal chain using a Fender-style amp model (US Deluxe) paired with a clear cabinet to achieve the classic 'Green Onions' twang, emphasizing treble and rhythmic stabs.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain tight signal definition.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Level": "3",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Provide light compression to enhance rhythmic stabs and sustain without sounding muddy.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/drive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": false,
+          "settings": {
+            "Drive": "1",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Use a very subtle boost/grit (like an early clean overdrive) to add character without heavy distortion.",
+          "matchQuality": "close",
+          "gap": "The Green OD is typically used for blues grit, but its low drive setting can mimic the light breakup needed. A dedicated clean booster would be ideal.",
+          "alternatives": [
+            {
+              "model": "Boost",
+              "reason": "A simple Boost pedal would provide cleaner tone shaping."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "equalization/tone shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2",
+            "Mid": "+1",
+            "Treble": "+3"
+          },
+          "purpose": "Enhance the required treble bite and maintain a tight low end while avoiding mid-scoop.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "4",
+            "Treble": "7",
+            "Mid": "6",
+            "Bass": "5"
+          },
+          "purpose": "Simulate the clean, bright tone of a Fender-style amp required for vintage twang.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright and focused cabinet sound suitable for clean, twangy tones.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": false,
+          "settings": {
+            "Frequency": "Low"
+          },
+          "purpose": "Keep the WAH module available for potential rhythmic sweeps, but keep it inactive as per 'avoid' list.",
+          "matchQuality": "close",
+          "gap": "The V-Wah is a general utility and serves as a placeholder since no specific modulation was required beyond Chorus (which must be avoided).",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "250 ms",
+            "Feedback": "2",
+            "Mix": "3"
+          },
+          "purpose": "Add subtle rhythmic depth and space without creating a wash effect.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "2"
+          },
+          "purpose": "Provide a small room ambiance as requested by the 'gearClues', keeping the reverb minimal.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "None",
+          "active": true,
+          "settings": {
+            "Level": "5"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "vintage organ-like guitar twang with light grit",
+      "mustHave": [
+        "treble bite",
+        "short decay",
+        "barely dirty clean",
+        "tight low end",
+        "rhythmic stabs"
+      ],
+      "avoid": [
+        "chorus",
+        "spring reverb wash",
+        "heavy overdrive",
+        "thick sustain"
+      ],
+      "gearClues": [
+        "Fender-style clean amp",
+        "single-coil bridge",
+        "small room",
+        "light compression"
+      ],
+      "corrections": [
+        "remove chorus",
+        "minimize reverb",
+        "favor dry twang over mid scoop",
+        "skip Vox/Tube Screamer tilt"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "soul",
+      "styleTags": [
+        "r&b",
+        "funk",
+        "neo-soul"
+      ],
+      "targetTone": "vintage organ-like guitar twang with light grit",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and refine the subtle boost stage.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage Fender 2x12 IR (e.g., 'Ampeg B-15' or similar)",
+          "reason": "Enhance vintage character and tightness for the twangy sound.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased realism/tightness",
+          "requiredIfGp180Gap": false
+        },
+        {
+          "priority": "P3",
+          "type": "DST",
+          "target": "Clean Booster/Drive Stage",
+          "recommendedAsset": "Simple clean boost pedal (e.g., 'Boost' alternative)",
+          "reason": "Provide cleaner, more controlled light grit than the Green OD.",
+          "replacesBlockOrder": 3,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Cleaner breakup/more control",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1811,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

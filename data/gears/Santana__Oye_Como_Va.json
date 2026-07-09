@@ -1,0 +1,1141 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1937,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Santana__Oye_Como_Va.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Santana",
+    "title": "Oye Como Va",
+    "album": "",
+    "year": null,
+    "genre": "latin rock"
+  },
+  "genreClassification": {
+    "genre": "latin rock",
+    "subgenres": [
+      "world music",
+      "fusion",
+      "blues"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and song are foundational examples of Latin Rock fusion."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, punchy Latin/Afro-Cuban rhythm tone",
+      "signatureElements": [
+        "clean",
+        "slight chorus/modulation",
+        "light reverb",
+        "punchy attack"
+      ],
+      "gearHypotheses": [
+        "Clean amp model (e.g., Fender Twin style)",
+        "Chorus effect",
+        "Spring Reverb"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "overdriven crunch",
+        "distortion"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm Santana clean with creamy sustain",
+      "mustHave": [
+        "smooth lead sustain",
+        "mild tube compression",
+        "rounded upper mids",
+        "light room reverb"
+      ],
+      "avoid": [
+        "chorus",
+        "bright Fender clean",
+        "heavy fuzz"
+      ],
+      "gearClues": [
+        "humbucker guitar",
+        "Mesa-style lead amp",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "drop chorus",
+        "aim for warm sustain, not punchy clean",
+        "avoid Twin-style sparkle"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm Santana clean with creamy sustain",
+    "mustHave": [
+      "smooth lead sustain",
+      "mild tube compression",
+      "rounded upper mids",
+      "light room reverb"
+    ],
+    "avoid": [
+      "chorus",
+      "bright Fender clean",
+      "heavy fuzz"
+    ],
+    "gearClues": [
+      "humbucker guitar",
+      "Mesa-style lead amp",
+      "2x12 or 4x12"
+    ],
+    "corrections": [
+      "drop chorus",
+      "aim for warm sustain, not punchy clean",
+      "avoid Twin-style sparkle"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on warm, sustained tones using classic rock amp models and compression.",
+          "bestMatchSummary": "A smooth signal chain utilizing mild compression, a moderate overdrive for warmth, an AC30-style clean boost, and the UK 45/UK Vintage 4x12 combination to achieve creamy sustain suitable for Latin Rock lead lines.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Level": "Medium",
+                "Attack": "Slow",
+                "Sustain": "High"
+              },
+              "purpose": "Provide mild tube compression and smooth sustain.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "Low",
+                "Tone": "Medium",
+                "Level": "High"
+              },
+              "purpose": "Add warmth and gentle grit without sounding overly aggressive.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used for its warm, rounded character rather than pure boost.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more aggressive alternative if the warmth needs more bite."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No heavy distortion needed for this warm tone).",
+              "matchQuality": "perfect",
+              "gap": "The required sustain is achieved through compression and amp modeling, not dedicated high-gain distortion.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "Medium",
+                "Treble": "High",
+                "Midrange": "Medium-High",
+                "Bass": "Medium"
+              },
+              "purpose": "Model the classic British clean/mid-focused sound (AC30) suitable for Latin Rock.",
+              "matchQuality": "close",
+              "gap": "The AC30 is chosen over UK 45/UK 50 to avoid 'sparkle' and focus on a rounder, warmer tone.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A solid alternative if the desired sound leans more towards classic British rock."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet voicing that complements the AC30 model.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 is selected for its balanced, non-aggressive tone.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Boost the upper mids and low-mids to achieve a rounded, warm character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/wah",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (Wah is not required for this specific tone).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Add subtle depth and space to the lead lines.",
+              "matchQuality": "close",
+              "gap": "A moderate delay is used for texture, not as a primary effect.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Provide light room ambience and creamy sustain.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is Latin Rock, requiring a warm, sustained tone. The AC30 model and Room reverb are key to achieving the desired creamy sustain while avoiding bright Fender tones."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Swap IR for a warmer, more vintage cabinet voicing to better match Santana's classic Latin Rock sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 4x12 IR",
+              "reason": "The current UK Vintage 4x12 might be too modern/bright for the warm, vintage Santana tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, rounder low end and mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Santana - Oye Como Va - Valeton GP-180",
+        "song": {
+          "artist": "Santana",
+          "title": "Oye Como Va",
+          "album": "",
+          "year": null,
+          "genre": "latin rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm Santana clean with creamy sustain",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A smooth signal chain utilizing mild compression, a moderate overdrive for warmth, an AC30-style clean boost, and the UK 45/UK Vintage 4x12 combination to achieve creamy sustain suitable for Latin Rock lead lines.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/compression",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Level": "Medium",
+              "Attack": "Slow",
+              "Sustain": "High"
+            },
+            "purpose": "Provide mild tube compression and smooth sustain.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "overdrive/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "Low",
+              "Tone": "Medium",
+              "Level": "High"
+            },
+            "purpose": "Add warmth and gentle grit without sounding overly aggressive.",
+            "matchQuality": "close",
+            "gap": "The Green OD is used for its warm, rounded character rather than pure boost.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly more aggressive alternative if the warmth needs more bite."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass (No heavy distortion needed for this warm tone).",
+            "matchQuality": "perfect",
+            "gap": "The required sustain is achieved through compression and amp modeling, not dedicated high-gain distortion.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "Medium",
+              "Treble": "High",
+              "Midrange": "Medium-High",
+              "Bass": "Medium"
+            },
+            "purpose": "Model the classic British clean/mid-focused sound (AC30) suitable for Latin Rock.",
+            "matchQuality": "close",
+            "gap": "The AC30 is chosen over UK 45/UK 50 to avoid 'sparkle' and focus on a rounder, warmer tone.",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "A solid alternative if the desired sound leans more towards classic British rock."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a classic British cabinet voicing that complements the AC30 model.",
+            "matchQuality": "close",
+            "gap": "The UK Vintage 4x12 is selected for its balanced, non-aggressive tone.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Boost the upper mids and low-mids to achieve a rounded, warm character.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/wah",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass (Wah is not required for this specific tone).",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "25%"
+            },
+            "purpose": "Add subtle depth and space to the lead lines.",
+            "matchQuality": "close",
+            "gap": "A moderate delay is used for texture, not as a primary effect.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "30%"
+            },
+            "purpose": "Provide light room ambience and creamy sustain.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume/master",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm Santana clean with creamy sustain",
+          "toneProfile": "warm Santana clean with creamy sustain",
+          "idealSignalChain": "humbucker guitar | Mesa-style lead amp | 2x12 or 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "humbucker guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Mesa-style lead amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "smooth lead sustain",
+            "mild tube compression",
+            "rounded upper mids",
+            "light room reverb"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on warm, sustained tones using classic rock amp models and compression.",
+          "bestMatchSummary": "A smooth signal chain utilizing mild compression, a moderate overdrive for warmth, an AC30-style clean boost, and the UK 45/UK Vintage 4x12 combination to achieve creamy sustain suitable for Latin Rock lead lines.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/compression",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Level": "Medium",
+                "Attack": "Slow",
+                "Sustain": "High"
+              },
+              "purpose": "Provide mild tube compression and smooth sustain.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "overdrive/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "Low",
+                "Tone": "Medium",
+                "Level": "High"
+              },
+              "purpose": "Add warmth and gentle grit without sounding overly aggressive.",
+              "matchQuality": "close",
+              "gap": "The Green OD is used for its warm, rounded character rather than pure boost.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more aggressive alternative if the warmth needs more bite."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (No heavy distortion needed for this warm tone).",
+              "matchQuality": "perfect",
+              "gap": "The required sustain is achieved through compression and amp modeling, not dedicated high-gain distortion.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "Medium",
+                "Treble": "High",
+                "Midrange": "Medium-High",
+                "Bass": "Medium"
+              },
+              "purpose": "Model the classic British clean/mid-focused sound (AC30) suitable for Latin Rock.",
+              "matchQuality": "close",
+              "gap": "The AC30 is chosen over UK 45/UK 50 to avoid 'sparkle' and focus on a rounder, warmer tone.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "A solid alternative if the desired sound leans more towards classic British rock."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic British cabinet voicing that complements the AC30 model.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 is selected for its balanced, non-aggressive tone.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Boost the upper mids and low-mids to achieve a rounded, warm character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/wah",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (Wah is not required for this specific tone).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Add subtle depth and space to the lead lines.",
+              "matchQuality": "close",
+              "gap": "A moderate delay is used for texture, not as a primary effect.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "30%"
+              },
+              "purpose": "Provide light room ambience and creamy sustain.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Swap IR for a warmer, more vintage cabinet voicing to better match Santana's classic Latin Rock sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "vintage 2x12 or 4x12 IR",
+              "reason": "The current UK Vintage 4x12 might be too modern/bright for the warm, vintage Santana tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Warmer, rounder low end and mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus",
+          "aim for warm sustain, not punchy clean",
+          "avoid Twin-style sparkle"
+        ],
+        "warnings": [
+          "The source material is Latin Rock, requiring a warm, sustained tone. The AC30 model and Room reverb are key to achieving the desired creamy sustain while avoiding bright Fender tones."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 15.02,
+      "prompt_chars": 1010,
+      "response_chars": 335,
+      "usage": {
+        "prompt_eval_count": 328,
+        "eval_count": 92,
+        "total_duration": 15017469300,
+        "prompt_eval_duration": 45306000,
+        "eval_duration": 649265000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.594,
+      "prompt_chars": 5279,
+      "response_chars": 483,
+      "usage": {
+        "input_tokens": 1486,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 129,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1615
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 106.61,
+      "prompt_chars": 3559,
+      "response_chars": 5820,
+      "usage": {
+        "prompt_eval_count": 1266,
+        "eval_count": 1651,
+        "total_duration": 83442715300,
+        "prompt_eval_duration": 170804000,
+        "eval_duration": 14434082000
+      },
+      "attempts": 2,
+      "retryFailures": [
+        {
+          "attempt": 1,
+          "error": "Expecting ',' delimiter: line 38 column 8 (char 1192)"
+        }
+      ]
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 25.003,
+      "prompt_chars": 7956,
+      "response_chars": 575,
+      "usage": {
+        "prompt_eval_count": 2212,
+        "eval_count": 165,
+        "total_duration": 24978182100,
+        "prompt_eval_duration": 245860000,
+        "eval_duration": 1392796000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 17.016,
+      "prompt_chars": 2888,
+      "response_chars": 178,
+      "usage": {
+        "prompt_eval_count": 913,
+        "eval_count": 46,
+        "total_duration": 16997266400,
+        "prompt_eval_duration": 143048000,
+        "eval_duration": 384040000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Santana",
+      "title": "Oye Como Va",
+      "album": "",
+      "year": null,
+      "genre": "latin rock"
+    },
+    "rig": {
+      "rigName": "Santana - Oye Como Va - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm Santana clean with creamy sustain",
+      "signalChainSummary": "A smooth signal chain utilizing mild compression, a moderate overdrive for warmth, an AC30-style clean boost, and the UK 45/UK Vintage 4x12 combination to achieve creamy sustain suitable for Latin Rock lead lines.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/compression",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Level": "Medium",
+            "Attack": "Slow",
+            "Sustain": "High"
+          },
+          "purpose": "Provide mild tube compression and smooth sustain.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "overdrive/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "Low",
+            "Tone": "Medium",
+            "Level": "High"
+          },
+          "purpose": "Add warmth and gentle grit without sounding overly aggressive.",
+          "matchQuality": "close",
+          "gap": "The Green OD is used for its warm, rounded character rather than pure boost.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly more aggressive alternative if the warmth needs more bite."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass (No heavy distortion needed for this warm tone).",
+          "matchQuality": "exact",
+          "gap": "The required sustain is achieved through compression and amp modeling, not dedicated high-gain distortion.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "Medium",
+            "Treble": "High",
+            "Midrange": "Medium-High",
+            "Bass": "Medium"
+          },
+          "purpose": "Model the classic British clean/mid-focused sound (AC30) suitable for Latin Rock.",
+          "matchQuality": "close",
+          "gap": "The AC30 is chosen over UK 45/UK 50 to avoid 'sparkle' and focus on a rounder, warmer tone.",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "A solid alternative if the desired sound leans more towards classic British rock."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a classic British cabinet voicing that complements the AC30 model.",
+          "matchQuality": "close",
+          "gap": "The UK Vintage 4x12 is selected for its balanced, non-aggressive tone.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Boost the upper mids and low-mids to achieve a rounded, warm character.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/wah",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass (Wah is not required for this specific tone).",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "25%"
+          },
+          "purpose": "Add subtle depth and space to the lead lines.",
+          "matchQuality": "close",
+          "gap": "A moderate delay is used for texture, not as a primary effect.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "30%"
+          },
+          "purpose": "Provide light room ambience and creamy sustain.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm Santana clean with creamy sustain",
+      "mustHave": [
+        "smooth lead sustain",
+        "mild tube compression",
+        "rounded upper mids",
+        "light room reverb"
+      ],
+      "avoid": [
+        "chorus",
+        "bright Fender clean",
+        "heavy fuzz"
+      ],
+      "gearClues": [
+        "humbucker guitar",
+        "Mesa-style lead amp",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "drop chorus",
+        "aim for warm sustain, not punchy clean",
+        "avoid Twin-style sparkle"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "latin rock",
+      "styleTags": [
+        "world music",
+        "fusion",
+        "blues"
+      ],
+      "targetTone": "warm Santana clean with creamy sustain",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Swap IR for a warmer, more vintage cabinet voicing to better match Santana's classic Latin Rock sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "vintage 2x12 or 4x12 IR",
+          "reason": "The current UK Vintage 4x12 might be too modern/bright for the warm, vintage Santana tone.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Warmer, rounder low end and mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1937,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

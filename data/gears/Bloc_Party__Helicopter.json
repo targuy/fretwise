@@ -1,0 +1,1139 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1807,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Bloc_Party__Helicopter.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Bloc Party",
+    "title": "Helicopter",
+    "album": "",
+    "year": null,
+    "genre": "indie rock"
+  },
+  "genreClassification": {
+    "genre": "indie rock",
+    "subgenres": [
+      "post-punk",
+      "alternative rock"
+    ],
+    "confidence": "high",
+    "rationale": "Bloc Party's 'Helicopter' is a foundational track of the indie/post-punk genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, punchy indie rock rhythm tone",
+      "signatureElements": [
+        "crunch",
+        "chorus",
+        "delay",
+        "wah",
+        "bright treble"
+      ],
+      "gearHypotheses": [
+        "British-style amp simulation (AC30/Plexi)",
+        "Overdrive pedal (Tube Screamer style) for grit",
+        "Chorus effect for movement"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "dark reverb",
+        "scooped mids"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright angular indie rock crunch with tight chorus and short delay",
+      "mustHave": [
+        "sharp palm-muted attack",
+        "tight crunchy gain",
+        "chorus movement",
+        "short delay"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "dark reverb",
+        "scooped mids"
+      ],
+      "gearClues": [
+        "AC30/Plexi edge",
+        "bridge pickup",
+        "bright cab",
+        "light modulation"
+      ],
+      "corrections": [
+        "drop wah unless clearly audible",
+        "make delay short and subtle",
+        "keep gain tighter than generic crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright angular indie rock crunch with tight chorus and short delay",
+    "mustHave": [
+      "sharp palm-muted attack",
+      "tight crunchy gain",
+      "chorus movement",
+      "short delay"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "dark reverb",
+      "scooped mids"
+    ],
+    "gearClues": [
+      "AC30/Plexi edge",
+      "bridge pickup",
+      "bright cab",
+      "light modulation"
+    ],
+    "corrections": [
+      "drop wah unless clearly audible",
+      "make delay short and subtle",
+      "keep gain tighter than generic crunch"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Indie/Alternative Rock Tone Replication",
+          "bestMatchSummary": "A bright, punchy signal chain utilizing a slight overdrive boost and an AC30-style amp model with Chorus and Digital Delay for the signature angular indie sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and tighten the attack.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the necessary tight, crunchy edge and punch for palm-muted rhythms.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD/OD 9 to maintain a brighter, less aggressive grit suitable for indie rock.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly warmer tone."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the gain tight and focused on the preamp boost rather than heavy distortion.",
+              "matchQuality": "exact",
+              "gap": "The Green OD provides sufficient crunch; adding a dedicated DST unit would muddy the tone or make it too aggressive.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "55%",
+                "Treble": "75%",
+                "Midrange": "60%",
+                "Bass": "50%"
+              },
+              "purpose": "Simulate the bright, articulate sound and Plexi edge required for indie rock.",
+              "matchQuality": "close",
+              "gap": "The AC30 TB is ideal for capturing the classic British chime and brightness without sounding overly vintage or dark.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "Could be used, but AC30 offers a more distinct 'chime' quality."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Bright"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound that complements the AC30 model.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 is selected for its balance of brightness and punch, avoiding scooped mids.",
+              "alternatives": [
+                {
+                  "model": "Mess 4x12",
+                  "reason": "Could be used if a more aggressive modern tone was needed."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "modulation (Chorus)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "35%",
+                "Feedback": "20%"
+              },
+              "purpose": "Add the required subtle chorus movement for the angular indie texture.",
+              "matchQuality": "exact",
+              "gap": "None. Chorus is essential to the target tone.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization (EQ)",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-2 dB",
+                "Midrange Cut": "-3 dB",
+                "Treble Boost": "+2 dB"
+              },
+              "purpose": "Slightly scoop the low-mids and boost high frequencies to enhance clarity and 'air' in the mix.",
+              "matchQuality": "close",
+              "gap": "Used for surgical tone shaping, ensuring the sound remains bright and punchy without excessive bass buildup.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "150 ms",
+                "Feedback": "2",
+                "Mix": "30%"
+              },
+              "purpose": "Implement the required short and subtle delay to add depth without washing out the rhythm.",
+              "matchQuality": "exact",
+              "gap": "The settings are crucial: short time, low feedback, moderate mix for subtlety.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Add a subtle sense of space and dimension without sounding dark or muddy.",
+              "matchQuality": "close",
+              "gap": "A low-mix Room reverb is preferred over Plate/Spring to maintain the dry, punchy indie feel while adding necessary ambience.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could be used if a more polished sound was desired."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a modern indie rock track, requiring a bright and articulate tone rather than classic heavy crunch or vintage warmth."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to enhance high-end clarity and punch for aggressive indie rhythms.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 or 4x12 (e.g., Celestion Greenback/V30 style)",
+              "reason": "The current IR might lack the aggressive high-end bite needed for sharp palm-muting.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After testing GP-180 preset",
+              "expectedGain": "Increased clarity and attack definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Bloc Party - Helicopter - Valeton GP-180",
+        "song": {
+          "artist": "Bloc Party",
+          "title": "Helicopter",
+          "album": "",
+          "year": null,
+          "genre": "indie rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright angular indie rock crunch with tight chorus and short delay",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A bright, punchy signal chain utilizing a slight overdrive boost and an AC30-style amp model with Chorus and Digital Delay for the signature angular indie sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and tighten the attack.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide the necessary tight, crunchy edge and punch for palm-muted rhythms.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen over Blues OD/OD 9 to maintain a brighter, less aggressive grit suitable for indie rock.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly warmer tone."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Keep the gain tight and focused on the preamp boost rather than heavy distortion.",
+            "matchQuality": "exact",
+            "gap": "The Green OD provides sufficient crunch; adding a dedicated DST unit would muddy the tone or make it too aggressive.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "55%",
+              "Treble": "75%",
+              "Midrange": "60%",
+              "Bass": "50%"
+            },
+            "purpose": "Simulate the bright, articulate sound and Plexi edge required for indie rock.",
+            "matchQuality": "close",
+            "gap": "The AC30 TB is ideal for capturing the classic British chime and brightness without sounding overly vintage or dark.",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "Could be used, but AC30 offers a more distinct 'chime' quality."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Bright"
+            },
+            "purpose": "Provide a bright and articulate cabinet sound that complements the AC30 model.",
+            "matchQuality": "close",
+            "gap": "The UK Vintage 4x12 is selected for its balance of brightness and punch, avoiding scooped mids.",
+            "alternatives": [
+              {
+                "model": "Mess 4x12",
+                "reason": "Could be used if a more aggressive modern tone was needed."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "modulation (Chorus)",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "4 Hz",
+              "Depth": "35%",
+              "Feedback": "20%"
+            },
+            "purpose": "Add the required subtle chorus movement for the angular indie texture.",
+            "matchQuality": "exact",
+            "gap": "None. Chorus is essential to the target tone.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization (EQ)",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass Boost": "-2 dB",
+              "Midrange Cut": "-3 dB",
+              "Treble Boost": "+2 dB"
+            },
+            "purpose": "Slightly scoop the low-mids and boost high frequencies to enhance clarity and 'air' in the mix.",
+            "matchQuality": "close",
+            "gap": "Used for surgical tone shaping, ensuring the sound remains bright and punchy without excessive bass buildup.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "delay",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "150 ms",
+              "Feedback": "2",
+              "Mix": "30%"
+            },
+            "purpose": "Implement the required short and subtle delay to add depth without washing out the rhythm.",
+            "matchQuality": "exact",
+            "gap": "The settings are crucial: short time, low feedback, moderate mix for subtlety.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "10%"
+            },
+            "purpose": "Add a subtle sense of space and dimension without sounding dark or muddy.",
+            "matchQuality": "close",
+            "gap": "A low-mix Room reverb is preferred over Plate/Spring to maintain the dry, punchy indie feel while adding necessary ambience.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Could be used if a more polished sound was desired."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright angular indie rock crunch with tight chorus and short delay",
+          "toneProfile": "bright angular indie rock crunch with tight chorus and short delay",
+          "idealSignalChain": "AC30/Plexi edge | bridge pickup | bright cab | light modulation",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "AC30/Plexi edge",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge pickup",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bright cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light modulation",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "sharp palm-muted attack",
+            "tight crunchy gain",
+            "chorus movement",
+            "short delay"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Indie/Alternative Rock Tone Replication",
+          "bestMatchSummary": "A bright, punchy signal chain utilizing a slight overdrive boost and an AC30-style amp model with Chorus and Digital Delay for the signature angular indie sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and tighten the attack.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide the necessary tight, crunchy edge and punch for palm-muted rhythms.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD/OD 9 to maintain a brighter, less aggressive grit suitable for indie rock.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly warmer tone."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Keep the gain tight and focused on the preamp boost rather than heavy distortion.",
+              "matchQuality": "exact",
+              "gap": "The Green OD provides sufficient crunch; adding a dedicated DST unit would muddy the tone or make it too aggressive.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "55%",
+                "Treble": "75%",
+                "Midrange": "60%",
+                "Bass": "50%"
+              },
+              "purpose": "Simulate the bright, articulate sound and Plexi edge required for indie rock.",
+              "matchQuality": "close",
+              "gap": "The AC30 TB is ideal for capturing the classic British chime and brightness without sounding overly vintage or dark.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "Could be used, but AC30 offers a more distinct 'chime' quality."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Bright"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound that complements the AC30 model.",
+              "matchQuality": "close",
+              "gap": "The UK Vintage 4x12 is selected for its balance of brightness and punch, avoiding scooped mids.",
+              "alternatives": [
+                {
+                  "model": "Mess 4x12",
+                  "reason": "Could be used if a more aggressive modern tone was needed."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "modulation (Chorus)",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4 Hz",
+                "Depth": "35%",
+                "Feedback": "20%"
+              },
+              "purpose": "Add the required subtle chorus movement for the angular indie texture.",
+              "matchQuality": "exact",
+              "gap": "None. Chorus is essential to the target tone.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization (EQ)",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass Boost": "-2 dB",
+                "Midrange Cut": "-3 dB",
+                "Treble Boost": "+2 dB"
+              },
+              "purpose": "Slightly scoop the low-mids and boost high frequencies to enhance clarity and 'air' in the mix.",
+              "matchQuality": "close",
+              "gap": "Used for surgical tone shaping, ensuring the sound remains bright and punchy without excessive bass buildup.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "delay",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "150 ms",
+                "Feedback": "2",
+                "Mix": "30%"
+              },
+              "purpose": "Implement the required short and subtle delay to add depth without washing out the rhythm.",
+              "matchQuality": "exact",
+              "gap": "The settings are crucial: short time, low feedback, moderate mix for subtlety.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Add a subtle sense of space and dimension without sounding dark or muddy.",
+              "matchQuality": "close",
+              "gap": "A low-mix Room reverb is preferred over Plate/Spring to maintain the dry, punchy indie feel while adding necessary ambience.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Could be used if a more polished sound was desired."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade the cabinet IR to enhance high-end clarity and punch for aggressive indie rhythms.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright 2x12 or 4x12 (e.g., Celestion Greenback/V30 style)",
+              "reason": "The current IR might lack the aggressive high-end bite needed for sharp palm-muting.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "After testing GP-180 preset",
+              "expectedGain": "Increased clarity and attack definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop wah unless clearly audible",
+          "make delay short and subtle",
+          "keep gain tighter than generic crunch"
+        ],
+        "warnings": [
+          "The source material is a modern indie rock track, requiring a bright and articulate tone rather than classic heavy crunch or vintage warmth."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.572,
+      "prompt_chars": 989,
+      "response_chars": 354,
+      "usage": {
+        "prompt_eval_count": 321,
+        "eval_count": 98,
+        "total_duration": 12556506700,
+        "prompt_eval_duration": 83059000,
+        "eval_duration": 659876000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.768,
+      "prompt_chars": 5283,
+      "response_chars": 533,
+      "usage": {
+        "input_tokens": 1486,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 132,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1618
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 24.923,
+      "prompt_chars": 3595,
+      "response_chars": 6216,
+      "usage": {
+        "prompt_eval_count": 1201,
+        "eval_count": 1715,
+        "total_duration": 24886719600,
+        "prompt_eval_duration": 100301000,
+        "eval_duration": 12460817000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 2.761,
+      "prompt_chars": 8386,
+      "response_chars": 598,
+      "usage": {
+        "prompt_eval_count": 2273,
+        "eval_count": 166,
+        "total_duration": 2734372400,
+        "prompt_eval_duration": 220844000,
+        "eval_duration": 1213762000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.049,
+      "prompt_chars": 2849,
+      "response_chars": 189,
+      "usage": {
+        "prompt_eval_count": 880,
+        "eval_count": 56,
+        "total_duration": 11045201600,
+        "prompt_eval_duration": 170666000,
+        "eval_duration": 383984000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Bloc Party",
+      "title": "Helicopter",
+      "album": "",
+      "year": null,
+      "genre": "indie rock"
+    },
+    "rig": {
+      "rigName": "Bloc Party - Helicopter - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright angular indie rock crunch with tight chorus and short delay",
+      "signalChainSummary": "A bright, punchy signal chain utilizing a slight overdrive boost and an AC30-style amp model with Chorus and Digital Delay for the signature angular indie sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and tighten the attack.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide the necessary tight, crunchy edge and punch for palm-muted rhythms.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen over Blues OD/OD 9 to maintain a brighter, less aggressive grit suitable for indie rock.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly warmer tone."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Keep the gain tight and focused on the preamp boost rather than heavy distortion.",
+          "matchQuality": "exact",
+          "gap": "The Green OD provides sufficient crunch; adding a dedicated DST unit would muddy the tone or make it too aggressive.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "55%",
+            "Treble": "75%",
+            "Midrange": "60%",
+            "Bass": "50%"
+          },
+          "purpose": "Simulate the bright, articulate sound and Plexi edge required for indie rock.",
+          "matchQuality": "close",
+          "gap": "The AC30 TB is ideal for capturing the classic British chime and brightness without sounding overly vintage or dark.",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "Could be used, but AC30 offers a more distinct 'chime' quality."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Bright"
+          },
+          "purpose": "Provide a bright and articulate cabinet sound that complements the AC30 model.",
+          "matchQuality": "close",
+          "gap": "The UK Vintage 4x12 is selected for its balance of brightness and punch, avoiding scooped mids.",
+          "alternatives": [
+            {
+              "model": "Mess 4x12",
+              "reason": "Could be used if a more aggressive modern tone was needed."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "modulation (Chorus)",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "4 Hz",
+            "Depth": "35%",
+            "Feedback": "20%"
+          },
+          "purpose": "Add the required subtle chorus movement for the angular indie texture.",
+          "matchQuality": "exact",
+          "gap": "None. Chorus is essential to the target tone.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization (EQ)",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass Boost": "-2 dB",
+            "Midrange Cut": "-3 dB",
+            "Treble Boost": "+2 dB"
+          },
+          "purpose": "Slightly scoop the low-mids and boost high frequencies to enhance clarity and 'air' in the mix.",
+          "matchQuality": "close",
+          "gap": "Used for surgical tone shaping, ensuring the sound remains bright and punchy without excessive bass buildup.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "delay",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "150 ms",
+            "Feedback": "2",
+            "Mix": "30%"
+          },
+          "purpose": "Implement the required short and subtle delay to add depth without washing out the rhythm.",
+          "matchQuality": "exact",
+          "gap": "The settings are crucial: short time, low feedback, moderate mix for subtlety.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "10%"
+          },
+          "purpose": "Add a subtle sense of space and dimension without sounding dark or muddy.",
+          "matchQuality": "close",
+          "gap": "A low-mix Room reverb is preferred over Plate/Spring to maintain the dry, punchy indie feel while adding necessary ambience.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Could be used if a more polished sound was desired."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright angular indie rock crunch with tight chorus and short delay",
+      "mustHave": [
+        "sharp palm-muted attack",
+        "tight crunchy gain",
+        "chorus movement",
+        "short delay"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "dark reverb",
+        "scooped mids"
+      ],
+      "gearClues": [
+        "AC30/Plexi edge",
+        "bridge pickup",
+        "bright cab",
+        "light modulation"
+      ],
+      "corrections": [
+        "drop wah unless clearly audible",
+        "make delay short and subtle",
+        "keep gain tighter than generic crunch"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "indie rock",
+      "styleTags": [
+        "post-punk",
+        "alternative rock"
+      ],
+      "targetTone": "bright angular indie rock crunch with tight chorus and short delay",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade the cabinet IR to enhance high-end clarity and punch for aggressive indie rhythms.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Bright 2x12 or 4x12 (e.g., Celestion Greenback/V30 style)",
+          "reason": "The current IR might lack the aggressive high-end bite needed for sharp palm-muting.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "After testing GP-180 preset",
+          "expectedGain": "Increased clarity and attack definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1807,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

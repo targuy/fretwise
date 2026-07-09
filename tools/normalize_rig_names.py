@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Normalize artist/title on every rig sheet against the canonical inventory.
 
-Source of truth: ``E:/partitions/songs_index.tsv`` (the original Claude-cowork
-inventory; already cleaner than the rig fields, e.g. AC/DC vs AC_DC). On top of
+Source of truth: the partitions library's ``songs_index.tsv`` (see
+``fretwise.partitions``, root ``FRETWISE_PARTITIONS_ROOT``; already cleaner
+than the rig fields, e.g. AC/DC vs AC_DC). On top of
 it we apply a small curated CORRECTIONS map for the structural breaks the index
 also carries (swaps, concatenated band+title), then strip junk title suffixes.
 

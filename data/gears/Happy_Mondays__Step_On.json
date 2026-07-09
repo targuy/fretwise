@@ -1,0 +1,1240 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1850,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Happy_Mondays__Step_On.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Happy Mondays",
+    "title": "Step On",
+    "album": "",
+    "year": null,
+    "genre": "acid house"
+  },
+  "genreClassification": {
+    "genre": "acid house",
+    "subgenres": [
+      "indie dance",
+      "rave",
+      "pop"
+    ],
+    "confidence": "high",
+    "rationale": "Happy Mondays are associated with acid house and baggy genre sounds."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Gritty, mid-range focused indie rock/dance groove tone",
+      "signatureElements": [
+        "Crunchy rhythm tones",
+        "Wah pedal sweeps (optional)",
+        "Slight chorus or flanger modulation",
+        "Mid-scooped EQ for rhythmic punch"
+      ],
+      "gearHypotheses": [
+        "Overdriven tube amp model (e.g., Plexi, Brit AC30 style)",
+        "Low-gain distortion/overdrive pedal (for grit)",
+        "Wah pedal simulation/model"
+      ],
+      "avoid": [
+        "High-gain metal tones",
+        "Clean ambient delay washes",
+        "Bright chimey clean sounds"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "jangly acid-house indie rhythm with light overdrive and wah color",
+      "mustHave": [
+        "tight rhythmic attack",
+        "slight grit",
+        "wah accents",
+        "dry upfront mix"
+      ],
+      "avoid": [
+        "metal gain",
+        "washy delay",
+        "clean chime only"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "small-to-mid British amp",
+        "light overdrive",
+        "wah pedal"
+      ],
+      "corrections": [
+        "drop chorus/flanger",
+        "keep wah optional but present",
+        "avoid mid-scoop; keep mids forward"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "jangly acid-house indie rhythm with light overdrive and wah color",
+    "mustHave": [
+      "tight rhythmic attack",
+      "slight grit",
+      "wah accents",
+      "dry upfront mix"
+    ],
+    "avoid": [
+      "metal gain",
+      "washy delay",
+      "clean chime only"
+    ],
+    "gearClues": [
+      "single-coil guitar",
+      "small-to-mid British amp",
+      "light overdrive",
+      "wah pedal"
+    ],
+    "corrections": [
+      "drop chorus/flanger",
+      "keep wah optional but present",
+      "avoid mid-scoop; keep mids forward"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, rhythmic tones with controlled grit and wah accents.",
+          "bestMatchSummary": "A tight signal chain using a British clean/crunch amp model (UK 50) combined with light overdrive (Green OD), Chorus for shimmer, and Wah for color, optimized for jangly indie rhythm.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight rhythmic attack.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide slight grit and light overdrive for the jangly texture without sounding muddy.",
+              "matchQuality": "close",
+              "gap": "The Green OD is ideal for subtle, non-aggressive breakup required by indie rock.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more aggressive option if the grit needs to be higher."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "C-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "500 Hz",
+                "Depth": "60%"
+              },
+              "purpose": "Add characteristic wah accents and color to the rhythmic strumming.",
+              "matchQuality": "close",
+              "gap": "The C-Wah is versatile for indie tones, providing a clear sweep without excessive coloration.",
+              "alternatives": [
+                {
+                  "model": "V-Wah",
+                  "reason": "A good alternative if the desired wah sound is more vocal/bright."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. The Green OD provides sufficient grit; no dedicated distortion needed.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "4/10",
+                "Treble": "6/10",
+                "Midrange": "7/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Simulate a small-to-mid British amp for the required bright, upfront, and jangly tone.",
+              "matchQuality": "close",
+              "gap": "The UK 50 captures the classic Britpop/indie sound better than the AC30 or UK 45 for this specific rhythmic context.",
+              "alternatives": [
+                {
+                  "model": "AC30 TB",
+                  "reason": "A good alternative if a slightly more open, British chime is desired."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound that complements the UK 50 amp model.",
+              "matchQuality": "close",
+              "gap": "This IR choice supports the required dry, upfront mix while maintaining clarity for rhythmic guitar work.",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12",
+                  "reason": "A slightly more open and less defined sound."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "40%",
+                "Feedback": "20%"
+              },
+              "purpose": "Add subtle shimmer and width to the jangly rhythm without sounding washy.",
+              "matchQuality": "close",
+              "gap": "Chorus is used sparingly here, as requested by the 'drop chorus' correction, but adds necessary depth for indie texture.",
+              "alternatives": [
+                {
+                  "model": "Tremolo",
+                  "reason": "Only if a more rhythmic pulsing effect was desired."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "delay/time-based",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Avoid washy delay as per the 'avoid' list.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Provide a subtle sense of space and depth without muddying the dry upfront mix.",
+              "matchQuality": "close",
+              "gap": "A small amount of Room reverb is used to give definition, avoiding excessive washiness.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a more controlled, metallic ambience was preferred."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "equalization/tone shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Boost the high end and mids slightly to keep the jangly rhythm upfront and articulate.",
+              "matchQuality": "close",
+              "gap": "Used to counteract potential mid-scooping and enhance the 'jangly' quality of single-coil tones.",
+              "alternatives": [
+                {
+                  "model": "Guitar EQ 1",
+                  "reason": "A simpler alternative if precise frequency control is not needed."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a rock song, but the tone requires an indie/jangly approach. The chain prioritizes clarity and rhythmic articulation over raw power."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for increased brightness and definition to support the jangly, upfront indie tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright British 4x12 (e.g., Vox/AC30 style)",
+              "reason": "Enhance high-end sparkle and definition for jangly rhythm.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and 'sparkle'",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Happy Mondays - Step On - Valeton GP-180",
+        "song": {
+          "artist": "Happy Mondays",
+          "title": "Step On",
+          "album": "",
+          "year": null,
+          "genre": "acid house"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "jangly acid-house indie rhythm with light overdrive and wah color",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight signal chain using a British clean/crunch amp model (UK 50) combined with light overdrive (Green OD), Chorus for shimmer, and Wah for color, optimized for jangly indie rhythm.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 2",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain tight rhythmic attack.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide slight grit and light overdrive for the jangly texture without sounding muddy.",
+            "matchQuality": "close",
+            "gap": "The Green OD is ideal for subtle, non-aggressive breakup required by indie rock.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly more aggressive option if the grit needs to be higher."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "C-Wah",
+            "active": true,
+            "settings": {
+              "Frequency": "500 Hz",
+              "Depth": "60%"
+            },
+            "purpose": "Add characteristic wah accents and color to the rhythmic strumming.",
+            "matchQuality": "close",
+            "gap": "The C-Wah is versatile for indie tones, providing a clear sweep without excessive coloration.",
+            "alternatives": [
+              {
+                "model": "V-Wah",
+                "reason": "A good alternative if the desired wah sound is more vocal/bright."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. The Green OD provides sufficient grit; no dedicated distortion needed.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "4/10",
+              "Treble": "6/10",
+              "Midrange": "7/10",
+              "Bass": "5/10"
+            },
+            "purpose": "Simulate a small-to-mid British amp for the required bright, upfront, and jangly tone.",
+            "matchQuality": "close",
+            "gap": "The UK 50 captures the classic Britpop/indie sound better than the AC30 or UK 45 for this specific rhythmic context.",
+            "alternatives": [
+              {
+                "model": "AC30 TB",
+                "reason": "A good alternative if a slightly more open, British chime is desired."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a bright and articulate cabinet sound that complements the UK 50 amp model.",
+            "matchQuality": "close",
+            "gap": "This IR choice supports the required dry, upfront mix while maintaining clarity for rhythmic guitar work.",
+            "alternatives": [
+              {
+                "model": "UK Basket 4x12",
+                "reason": "A slightly more open and less defined sound."
+              }
+            ]
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "40%",
+              "Feedback": "20%"
+            },
+            "purpose": "Add subtle shimmer and width to the jangly rhythm without sounding washy.",
+            "matchQuality": "close",
+            "gap": "Chorus is used sparingly here, as requested by the 'drop chorus' correction, but adds necessary depth for indie texture.",
+            "alternatives": [
+              {
+                "model": "Tremolo",
+                "reason": "Only if a more rhythmic pulsing effect was desired."
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "delay/time-based",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. Avoid washy delay as per the 'avoid' list.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "15%",
+              "Decay Time": "2.0s"
+            },
+            "purpose": "Provide a subtle sense of space and depth without muddying the dry upfront mix.",
+            "matchQuality": "close",
+            "gap": "A small amount of Room reverb is used to give definition, avoiding excessive washiness.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "If a more controlled, metallic ambience was preferred."
+              }
+            ]
+          },
+          {
+            "order": 10,
+            "role": "equalization/tone shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Midrange": "+1 dB",
+              "Treble": "+3 dB"
+            },
+            "purpose": "Boost the high end and mids slightly to keep the jangly rhythm upfront and articulate.",
+            "matchQuality": "close",
+            "gap": "Used to counteract potential mid-scooping and enhance the 'jangly' quality of single-coil tones.",
+            "alternatives": [
+              {
+                "model": "Guitar EQ 1",
+                "reason": "A simpler alternative if precise frequency control is not needed."
+              }
+            ]
+          },
+          {
+            "order": 11,
+            "role": "volume/master",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "N/A",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "jangly acid-house indie rhythm with light overdrive and wah color",
+          "toneProfile": "jangly acid-house indie rhythm with light overdrive and wah color",
+          "idealSignalChain": "single-coil guitar | small-to-mid British amp | light overdrive | wah pedal",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coil guitar",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small-to-mid British amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light overdrive",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "wah pedal",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight rhythmic attack",
+            "slight grit",
+            "wah accents",
+            "dry upfront mix"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on bright, rhythmic tones with controlled grit and wah accents.",
+          "bestMatchSummary": "A tight signal chain using a British clean/crunch amp model (UK 50) combined with light overdrive (Green OD), Chorus for shimmer, and Wah for color, optimized for jangly indie rhythm.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight rhythmic attack.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide slight grit and light overdrive for the jangly texture without sounding muddy.",
+              "matchQuality": "close",
+              "gap": "The Green OD is ideal for subtle, non-aggressive breakup required by indie rock.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly more aggressive option if the grit needs to be higher."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "C-Wah",
+              "active": true,
+              "settings": {
+                "Frequency": "500 Hz",
+                "Depth": "60%"
+              },
+              "purpose": "Add characteristic wah accents and color to the rhythmic strumming.",
+              "matchQuality": "close",
+              "gap": "The C-Wah is versatile for indie tones, providing a clear sweep without excessive coloration.",
+              "alternatives": [
+                {
+                  "model": "V-Wah",
+                  "reason": "A good alternative if the desired wah sound is more vocal/bright."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. The Green OD provides sufficient grit; no dedicated distortion needed.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "4/10",
+                "Treble": "6/10",
+                "Midrange": "7/10",
+                "Bass": "5/10"
+              },
+              "purpose": "Simulate a small-to-mid British amp for the required bright, upfront, and jangly tone.",
+              "matchQuality": "close",
+              "gap": "The UK 50 captures the classic Britpop/indie sound better than the AC30 or UK 45 for this specific rhythmic context.",
+              "alternatives": [
+                {
+                  "model": "AC30 TB",
+                  "reason": "A good alternative if a slightly more open, British chime is desired."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a bright and articulate cabinet sound that complements the UK 50 amp model.",
+              "matchQuality": "close",
+              "gap": "This IR choice supports the required dry, upfront mix while maintaining clarity for rhythmic guitar work.",
+              "alternatives": [
+                {
+                  "model": "UK Basket 4x12",
+                  "reason": "A slightly more open and less defined sound."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "40%",
+                "Feedback": "20%"
+              },
+              "purpose": "Add subtle shimmer and width to the jangly rhythm without sounding washy.",
+              "matchQuality": "close",
+              "gap": "Chorus is used sparingly here, as requested by the 'drop chorus' correction, but adds necessary depth for indie texture.",
+              "alternatives": [
+                {
+                  "model": "Tremolo",
+                  "reason": "Only if a more rhythmic pulsing effect was desired."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "delay/time-based",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. Avoid washy delay as per the 'avoid' list.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "15%",
+                "Decay Time": "2.0s"
+              },
+              "purpose": "Provide a subtle sense of space and depth without muddying the dry upfront mix.",
+              "matchQuality": "close",
+              "gap": "A small amount of Room reverb is used to give definition, avoiding excessive washiness.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a more controlled, metallic ambience was preferred."
+                }
+              ]
+            },
+            {
+              "order": 10,
+              "role": "equalization/tone shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Midrange": "+1 dB",
+                "Treble": "+3 dB"
+              },
+              "purpose": "Boost the high end and mids slightly to keep the jangly rhythm upfront and articulate.",
+              "matchQuality": "close",
+              "gap": "Used to counteract potential mid-scooping and enhance the 'jangly' quality of single-coil tones.",
+              "alternatives": [
+                {
+                  "model": "Guitar EQ 1",
+                  "reason": "A simpler alternative if precise frequency control is not needed."
+                }
+              ]
+            },
+            {
+              "order": 11,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "N/A",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for increased brightness and definition to support the jangly, upfront indie tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Bright British 4x12 (e.g., Vox/AC30 style)",
+              "reason": "Enhance high-end sparkle and definition for jangly rhythm.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and 'sparkle'",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus/flanger",
+          "keep wah optional but present",
+          "avoid mid-scoop; keep mids forward"
+        ],
+        "warnings": [
+          "The source material is a rock song, but the tone requires an indie/jangly approach. The chain prioritizes clarity and rhythmic articulation over raw power."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 18.434,
+      "prompt_chars": 989,
+      "response_chars": 506,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 131,
+        "total_duration": 18417299000,
+        "prompt_eval_duration": 259944000,
+        "eval_duration": 2410865000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.897,
+      "prompt_chars": 5429,
+      "response_chars": 526,
+      "usage": {
+        "input_tokens": 1517,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 136,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1653
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 38.588,
+      "prompt_chars": 3588,
+      "response_chars": 6907,
+      "usage": {
+        "prompt_eval_count": 1205,
+        "eval_count": 1919,
+        "total_duration": 38578083900,
+        "prompt_eval_duration": 312124000,
+        "eval_duration": 33448449999
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 83.149,
+      "prompt_chars": 9120,
+      "response_chars": 530,
+      "usage": {
+        "prompt_eval_count": 2481,
+        "eval_count": 146,
+        "total_duration": 83126994700,
+        "prompt_eval_duration": 234672000,
+        "eval_duration": 1172881000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 19.227,
+      "prompt_chars": 2931,
+      "response_chars": 175,
+      "usage": {
+        "prompt_eval_count": 922,
+        "eval_count": 47,
+        "total_duration": 19222509300,
+        "prompt_eval_duration": 300997000,
+        "eval_duration": 1001096000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Happy Mondays",
+      "title": "Step On",
+      "album": "",
+      "year": null,
+      "genre": "acid house"
+    },
+    "rig": {
+      "rigName": "Happy Mondays - Step On - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "jangly acid-house indie rhythm with light overdrive and wah color",
+      "signalChainSummary": "A tight signal chain using a British clean/crunch amp model (UK 50) combined with light overdrive (Green OD), Chorus for shimmer, and Wah for color, optimized for jangly indie rhythm.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 2",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain tight rhythmic attack.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide slight grit and light overdrive for the jangly texture without sounding muddy.",
+          "matchQuality": "close",
+          "gap": "The Green OD is ideal for subtle, non-aggressive breakup required by indie rock.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly more aggressive option if the grit needs to be higher."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "C-Wah",
+          "active": true,
+          "settings": {
+            "Frequency": "500 Hz",
+            "Depth": "60%"
+          },
+          "purpose": "Add characteristic wah accents and color to the rhythmic strumming.",
+          "matchQuality": "close",
+          "gap": "The C-Wah is versatile for indie tones, providing a clear sweep without excessive coloration.",
+          "alternatives": [
+            {
+              "model": "V-Wah",
+              "reason": "A good alternative if the desired wah sound is more vocal/bright."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. The Green OD provides sufficient grit; no dedicated distortion needed.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "4/10",
+            "Treble": "6/10",
+            "Midrange": "7/10",
+            "Bass": "5/10"
+          },
+          "purpose": "Simulate a small-to-mid British amp for the required bright, upfront, and jangly tone.",
+          "matchQuality": "close",
+          "gap": "The UK 50 captures the classic Britpop/indie sound better than the AC30 or UK 45 for this specific rhythmic context.",
+          "alternatives": [
+            {
+              "model": "AC30 TB",
+              "reason": "A good alternative if a slightly more open, British chime is desired."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a bright and articulate cabinet sound that complements the UK 50 amp model.",
+          "matchQuality": "close",
+          "gap": "This IR choice supports the required dry, upfront mix while maintaining clarity for rhythmic guitar work.",
+          "alternatives": [
+            {
+              "model": "UK Basket 4x12",
+              "reason": "A slightly more open and less defined sound."
+            }
+          ]
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "40%",
+            "Feedback": "20%"
+          },
+          "purpose": "Add subtle shimmer and width to the jangly rhythm without sounding washy.",
+          "matchQuality": "close",
+          "gap": "Chorus is used sparingly here, as requested by the 'drop chorus' correction, but adds necessary depth for indie texture.",
+          "alternatives": [
+            {
+              "model": "Tremolo",
+              "reason": "Only if a more rhythmic pulsing effect was desired."
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "delay/time-based",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. Avoid washy delay as per the 'avoid' list.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "15%",
+            "Decay Time": "2.0s"
+          },
+          "purpose": "Provide a subtle sense of space and depth without muddying the dry upfront mix.",
+          "matchQuality": "close",
+          "gap": "A small amount of Room reverb is used to give definition, avoiding excessive washiness.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If a more controlled, metallic ambience was preferred."
+            }
+          ]
+        },
+        {
+          "order": 10,
+          "role": "equalization/tone shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Midrange": "+1 dB",
+            "Treble": "+3 dB"
+          },
+          "purpose": "Boost the high end and mids slightly to keep the jangly rhythm upfront and articulate.",
+          "matchQuality": "close",
+          "gap": "Used to counteract potential mid-scooping and enhance the 'jangly' quality of single-coil tones.",
+          "alternatives": [
+            {
+              "model": "Guitar EQ 1",
+              "reason": "A simpler alternative if precise frequency control is not needed."
+            }
+          ]
+        },
+        {
+          "order": 11,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "N/A",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "jangly acid-house indie rhythm with light overdrive and wah color",
+      "mustHave": [
+        "tight rhythmic attack",
+        "slight grit",
+        "wah accents",
+        "dry upfront mix"
+      ],
+      "avoid": [
+        "metal gain",
+        "washy delay",
+        "clean chime only"
+      ],
+      "gearClues": [
+        "single-coil guitar",
+        "small-to-mid British amp",
+        "light overdrive",
+        "wah pedal"
+      ],
+      "corrections": [
+        "drop chorus/flanger",
+        "keep wah optional but present",
+        "avoid mid-scoop; keep mids forward"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "acid house",
+      "styleTags": [
+        "indie dance",
+        "rave",
+        "pop"
+      ],
+      "targetTone": "jangly acid-house indie rhythm with light overdrive and wah color",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for increased brightness and definition to support the jangly, upfront indie tone.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Bright British 4x12 (e.g., Vox/AC30 style)",
+          "reason": "Enhance high-end sparkle and definition for jangly rhythm.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and 'sparkle'",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1850,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

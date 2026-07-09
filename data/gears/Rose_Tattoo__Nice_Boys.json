@@ -1,0 +1,956 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1932,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Rose_Tattoo__Nice_Boys.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Rose Tattoo",
+    "title": "Nice Boys",
+    "album": "",
+    "year": null,
+    "genre": "pub rock"
+  },
+  "genreClassification": {
+    "genre": "pub rock",
+    "subgenres": [
+      "australian pub rock",
+      "rock and roll",
+      "blues-rock"
+    ],
+    "confidence": "high",
+    "rationale": "The tone profile, artist (Rose Tattoo), and gear clues point directly to raw Australian pub rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, gritty rock tone with a slight nasal bite.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slight fuzz character",
+        "Punchy attack",
+        "Rock grit"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Tube Screamer variant)",
+        "British style amp simulation (Marshall/Vox family)"
+      ],
+      "avoid": [
+        "Clean tones",
+        "Heavy modulation effects",
+        "Deep reverb tails"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "raw Aussie pub-rock crunch with slight fuzz bite",
+      "mustHave": [
+        "mid-forward crunch",
+        "nasal bite",
+        "punchy attack",
+        "slight fuzz",
+        "dry room"
+      ],
+      "avoid": [
+        "clean sheen",
+        "heavy modulation",
+        "deep reverb",
+        "polite overdrive"
+      ],
+      "gearClues": [
+        "Marshall/Plexi",
+        "4x12",
+        "hot bridge humbucker",
+        "fuzz-leaning OD"
+      ],
+      "corrections": [
+        "raise fuzz edge",
+        "reduce generic overdrive",
+        "keep it dry and rude"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "raw Aussie pub-rock crunch with slight fuzz bite",
+    "mustHave": [
+      "mid-forward crunch",
+      "nasal bite",
+      "punchy attack",
+      "slight fuzz",
+      "dry room"
+    ],
+    "avoid": [
+      "clean sheen",
+      "heavy modulation",
+      "deep reverb",
+      "polite overdrive"
+    ],
+    "gearClues": [
+      "Marshall/Plexi",
+      "4x12",
+      "hot bridge humbucker",
+      "fuzz-leaning OD"
+    ],
+    "corrections": [
+      "raise fuzz edge",
+      "reduce generic overdrive",
+      "keep it dry and rude"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize raw, mid-focused crunch and aggressive tone shaping.",
+          "bestMatchSummary": "A high-gain, mid-forward signal chain using a fuzz/OD boost into an AC30-style amp, paired with a 4x12 cabinet and minimal room ambience for that classic pub-rock grit.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise inherent in raw rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/dirt",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "7",
+                "Level": "8"
+              },
+              "purpose": "Provide the initial aggressive, mid-forward crunch and fuzz bite required for pub-rock grit.",
+              "matchQuality": "close",
+              "gap": "The 'fuzz-leaning OD' clue suggests a dedicated fuzz pedal (like Red Haze), but Green OD offers better control over the specific mid-punch needed here.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/saturation",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add the required 'slight fuzz' bite and saturation edge without becoming overly muddy or losing definition.",
+              "matchQuality": "close",
+              "gap": "The Red Haze is used to layer a controlled amount of fuzz on top of the OD boost, fulfilling the 'raise fuzz edge' correction.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi sound, providing mid-forward punch and British rock character.",
+              "matchQuality": "close",
+              "gap": "None. This amp model is ideal for pub-rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet sound and necessary mid-range punch.",
+              "matchQuality": "close",
+              "gap": "None. Standard choice for this genre.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1",
+                "Mid": "3",
+                "Treble": "1"
+              },
+              "purpose": "Fine-tune the tone by slightly scooping the bass and boosting the mids for maximum 'nasal bite' and punch.",
+              "matchQuality": "close",
+              "gap": "None. Essential for surgical tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay": "1.5s"
+              },
+              "purpose": "Add a subtle 'dry room' ambience as requested, keeping the tone grounded and non-sheen.",
+              "matchQuality": "close",
+              "gap": "The requirement is for minimal ambiance; Room reverb is better than deep reverb or plate/spring for this specific dry pub-rock feel.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic pub-rock track, requiring aggressive and raw tones. The chain prioritizes grit over polish."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to ground the raw tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance grit and punch for pub-rock feel.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Punchier low-mids",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "high",
+          "needsReview": false
+        },
+        "warnings": [],
+        "confidence": "medium",
+        "needsReview": true
+      },
+      "rig": {
+        "rigName": "Rose Tattoo - Nice Boys - Valeton GP-180",
+        "song": {
+          "artist": "Rose Tattoo",
+          "title": "Nice Boys",
+          "album": "",
+          "year": null,
+          "genre": "pub rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "raw Aussie pub-rock crunch with slight fuzz bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A high-gain, mid-forward signal chain using a fuzz/OD boost into an AC30-style amp, paired with a 4x12 cabinet and minimal room ambience for that classic pub-rock grit.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise inherent in raw rock tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/dirt",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "6",
+              "Tone": "7",
+              "Level": "8"
+            },
+            "purpose": "Provide the initial aggressive, mid-forward crunch and fuzz bite required for pub-rock grit.",
+            "matchQuality": "close",
+            "gap": "The 'fuzz-leaning OD' clue suggests a dedicated fuzz pedal (like Red Haze), but Green OD offers better control over the specific mid-punch needed here.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "distortion/saturation",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": true,
+            "settings": {
+              "Drive": "5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Add the required 'slight fuzz' bite and saturation edge without becoming overly muddy or losing definition.",
+            "matchQuality": "close",
+            "gap": "The Red Haze is used to layer a controlled amount of fuzz on top of the OD boost, fulfilling the 'raise fuzz edge' correction.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "AC30 TB",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Mid": "8",
+              "Bass": "5"
+            },
+            "purpose": "Simulate the classic Marshall/Plexi sound, providing mid-forward punch and British rock character.",
+            "matchQuality": "close",
+            "gap": "None. This amp model is ideal for pub-rock tones.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide the classic British rock cabinet sound and necessary mid-range punch.",
+            "matchQuality": "close",
+            "gap": "None. Standard choice for this genre.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-1",
+              "Mid": "3",
+              "Treble": "1"
+            },
+            "purpose": "Fine-tune the tone by slightly scooping the bass and boosting the mids for maximum 'nasal bite' and punch.",
+            "matchQuality": "close",
+            "gap": "None. Essential for surgical tone shaping.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/effect",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "20%",
+              "Decay": "1.5s"
+            },
+            "purpose": "Add a subtle 'dry room' ambience as requested, keeping the tone grounded and non-sheen.",
+            "matchQuality": "close",
+            "gap": "The requirement is for minimal ambiance; Room reverb is better than deep reverb or plate/spring for this specific dry pub-rock feel.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "volume control",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "raw Aussie pub-rock crunch with slight fuzz bite",
+          "toneProfile": "raw Aussie pub-rock crunch with slight fuzz bite",
+          "idealSignalChain": "Marshall/Plexi | 4x12 | hot bridge humbucker | fuzz-leaning OD",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "hot bridge humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "fuzz-leaning OD",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "mid-forward crunch",
+            "nasal bite",
+            "punchy attack",
+            "slight fuzz",
+            "dry room"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Prioritize raw, mid-focused crunch and aggressive tone shaping.",
+          "bestMatchSummary": "A high-gain, mid-forward signal chain using a fuzz/OD boost into an AC30-style amp, paired with a 4x12 cabinet and minimal room ambience for that classic pub-rock grit.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise inherent in raw rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/dirt",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "6",
+                "Tone": "7",
+                "Level": "8"
+              },
+              "purpose": "Provide the initial aggressive, mid-forward crunch and fuzz bite required for pub-rock grit.",
+              "matchQuality": "close",
+              "gap": "The 'fuzz-leaning OD' clue suggests a dedicated fuzz pedal (like Red Haze), but Green OD offers better control over the specific mid-punch needed here.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "distortion/saturation",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": true,
+              "settings": {
+                "Drive": "5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Add the required 'slight fuzz' bite and saturation edge without becoming overly muddy or losing definition.",
+              "matchQuality": "close",
+              "gap": "The Red Haze is used to layer a controlled amount of fuzz on top of the OD boost, fulfilling the 'raise fuzz edge' correction.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "AC30 TB",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Mid": "8",
+                "Bass": "5"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi sound, providing mid-forward punch and British rock character.",
+              "matchQuality": "close",
+              "gap": "None. This amp model is ideal for pub-rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide the classic British rock cabinet sound and necessary mid-range punch.",
+              "matchQuality": "close",
+              "gap": "None. Standard choice for this genre.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1",
+                "Mid": "3",
+                "Treble": "1"
+              },
+              "purpose": "Fine-tune the tone by slightly scooping the bass and boosting the mids for maximum 'nasal bite' and punch.",
+              "matchQuality": "close",
+              "gap": "None. Essential for surgical tone shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/effect",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "20%",
+                "Decay": "1.5s"
+              },
+              "purpose": "Add a subtle 'dry room' ambience as requested, keeping the tone grounded and non-sheen.",
+              "matchQuality": "close",
+              "gap": "The requirement is for minimal ambiance; Room reverb is better than deep reverb or plate/spring for this specific dry pub-rock feel.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "volume control",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to ground the raw tone.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR",
+              "reason": "Enhance grit and punch for pub-rock feel.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Punchier low-mids",
+              "requiredIfGp180Gap": false
+            }
+          ],
+          "warnings": [],
+          "confidence": "high",
+          "needsReview": false
+        },
+        "assumptions": [
+          "raise fuzz edge",
+          "reduce generic overdrive",
+          "keep it dry and rude"
+        ],
+        "warnings": [
+          "The source material is a classic pub-rock track, requiring aggressive and raw tones. The chain prioritizes grit over polish."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 18.465,
+      "prompt_chars": 989,
+      "response_chars": 412,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 105,
+        "total_duration": 18460678500,
+        "prompt_eval_duration": 64976000,
+        "eval_duration": 792668000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.537,
+      "prompt_chars": 5329,
+      "response_chars": 498,
+      "usage": {
+        "input_tokens": 1487,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 139,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1626
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 85.043,
+      "prompt_chars": 3574,
+      "response_chars": 4671,
+      "usage": {
+        "prompt_eval_count": 1211,
+        "eval_count": 1336,
+        "total_duration": 85037207500,
+        "prompt_eval_duration": 125921000,
+        "eval_duration": 9677948000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 20.491,
+      "prompt_chars": 6722,
+      "response_chars": 452,
+      "usage": {
+        "prompt_eval_count": 1904,
+        "eval_count": 131,
+        "total_duration": 20474263500,
+        "prompt_eval_duration": 188404000,
+        "eval_duration": 1003204000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 21.241,
+      "prompt_chars": 2645,
+      "response_chars": 226,
+      "usage": {
+        "prompt_eval_count": 856,
+        "eval_count": 60,
+        "total_duration": 21236449200,
+        "prompt_eval_duration": 119301000,
+        "eval_duration": 436142000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Rose Tattoo",
+      "title": "Nice Boys",
+      "album": "",
+      "year": null,
+      "genre": "pub rock"
+    },
+    "rig": {
+      "rigName": "Rose Tattoo - Nice Boys - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "raw Aussie pub-rock crunch with slight fuzz bite",
+      "signalChainSummary": "A high-gain, mid-forward signal chain using a fuzz/OD boost into an AC30-style amp, paired with a 4x12 cabinet and minimal room ambience for that classic pub-rock grit.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise inherent in raw rock tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/dirt",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "6",
+            "Tone": "7",
+            "Level": "8"
+          },
+          "purpose": "Provide the initial aggressive, mid-forward crunch and fuzz bite required for pub-rock grit.",
+          "matchQuality": "close",
+          "gap": "The 'fuzz-leaning OD' clue suggests a dedicated fuzz pedal (like Red Haze), but Green OD offers better control over the specific mid-punch needed here.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "distortion/saturation",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": true,
+          "settings": {
+            "Drive": "5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Add the required 'slight fuzz' bite and saturation edge without becoming overly muddy or losing definition.",
+          "matchQuality": "close",
+          "gap": "The Red Haze is used to layer a controlled amount of fuzz on top of the OD boost, fulfilling the 'raise fuzz edge' correction.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "AC30 TB",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Mid": "8",
+            "Bass": "5"
+          },
+          "purpose": "Simulate the classic Marshall/Plexi sound, providing mid-forward punch and British rock character.",
+          "matchQuality": "close",
+          "gap": "None. This amp model is ideal for pub-rock tones.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide the classic British rock cabinet sound and necessary mid-range punch.",
+          "matchQuality": "close",
+          "gap": "None. Standard choice for this genre.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-1",
+            "Mid": "3",
+            "Treble": "1"
+          },
+          "purpose": "Fine-tune the tone by slightly scooping the bass and boosting the mids for maximum 'nasal bite' and punch.",
+          "matchQuality": "close",
+          "gap": "None. Essential for surgical tone shaping.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/effect",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "20%",
+            "Decay": "1.5s"
+          },
+          "purpose": "Add a subtle 'dry room' ambience as requested, keeping the tone grounded and non-sheen.",
+          "matchQuality": "close",
+          "gap": "The requirement is for minimal ambiance; Room reverb is better than deep reverb or plate/spring for this specific dry pub-rock feel.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "raw Aussie pub-rock crunch with slight fuzz bite",
+      "mustHave": [
+        "mid-forward crunch",
+        "nasal bite",
+        "punchy attack",
+        "slight fuzz",
+        "dry room"
+      ],
+      "avoid": [
+        "clean sheen",
+        "heavy modulation",
+        "deep reverb",
+        "polite overdrive"
+      ],
+      "gearClues": [
+        "Marshall/Plexi",
+        "4x12",
+        "hot bridge humbucker",
+        "fuzz-leaning OD"
+      ],
+      "corrections": [
+        "raise fuzz edge",
+        "reduce generic overdrive",
+        "keep it dry and rude"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pub rock",
+      "styleTags": [
+        "australian pub rock",
+        "rock and roll",
+        "blues-rock"
+      ],
+      "targetTone": "raw Aussie pub-rock crunch with slight fuzz bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to ground the raw tone.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR",
+          "reason": "Enhance grit and punch for pub-rock feel.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Punchier low-mids",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1932,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

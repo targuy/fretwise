@@ -1,0 +1,1099 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1954,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\The_Angels__Am_I_Ever_Gonna_See_Your_Face_Again.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "The Angels",
+    "title": "Am I Ever Gonna See Your Face Again",
+    "album": "",
+    "year": null,
+    "genre": "pub rock"
+  },
+  "genreClassification": {
+    "genre": "pub rock",
+    "subgenres": [
+      "hard rock",
+      "australian rock"
+    ],
+    "confidence": "high",
+    "rationale": "The song is a classic example of high-energy Australian pub/hard rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, punchy rock tone with a slight grit and pronounced mid-range bite.",
+      "signatureElements": [
+        "Crunch overdrive (mid-focused)",
+        "Slight chorus/vibrato modulation",
+        "Punchy bass response"
+      ],
+      "gearHypotheses": [
+        "Overdrive pedal (e.g., Ibanez Tube Screamer style)",
+        "Amp simulation with scooped mids capability (for contrast)"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Deep reverb tails",
+        "Clean, glassy tones"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright Aussie hard-rock crunch with raw mid bite",
+      "mustHave": [
+        "tight crunch",
+        "upper-mid bite",
+        "dry attack",
+        "punchy low end"
+      ],
+      "avoid": [
+        "chorus",
+        "heavy fuzz",
+        "lush reverb",
+        "clean glassy tone"
+      ],
+      "gearClues": [
+        "Marshall/Plexi style",
+        "bridge humbucker",
+        "4x12 cab",
+        "edge-of-breakup"
+      ],
+      "corrections": [
+        "drop chorus",
+        "keep it drier",
+        "favor Marshall bite over TS smoothness"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright Aussie hard-rock crunch with raw mid bite",
+    "mustHave": [
+      "tight crunch",
+      "upper-mid bite",
+      "dry attack",
+      "punchy low end"
+    ],
+    "avoid": [
+      "chorus",
+      "heavy fuzz",
+      "lush reverb",
+      "clean glassy tone"
+    ],
+    "gearClues": [
+      "Marshall/Plexi style",
+      "bridge humbucker",
+      "4x12 cab",
+      "edge-of-breakup"
+    ],
+    "corrections": [
+      "drop chorus",
+      "keep it drier",
+      "favor Marshall bite over TS smoothness"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Bright, punchy Aussie hard rock crunch with Marshall Plexi tones.",
+          "bestMatchSummary": "A tight signal chain using a Green OD boost for bite, followed by the UK 45 amp model and UK Vintage 4x12 cab, emphasizing upper-mids and controlled breakup.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and stray noise inherent in high-gain rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary upper-mid bite and aggressive crunch (favoring Marshall bite over TS smoothness).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Good for general rock, but Green OD is better for the specific 'bite' requested."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": false,
+              "settings": {},
+              "purpose": "Used as a secondary gain stage if the Green OD isn't enough, but kept off to maintain clarity and focus on amp breakup.",
+              "matchQuality": "close",
+              "gap": "The primary crunch comes from the preamp/amp model; this is an optional safety layer.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "7",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi tone required for Aussie hard rock, providing natural breakup.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Similar, but UK 45 is the quintessential Plexi sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the required '4x12 cab' and provide a punchy, defined low end.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1.5 dB",
+                "Mid": "+2.0 dB",
+                "High": "+1.0 dB"
+              },
+              "purpose": "Boost the upper-mids for maximum bite and punchy low end definition without sounding muddy.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter (optional)",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {},
+              "purpose": "Kept inactive as the target tone is aggressive crunch, not wah sweeps.",
+              "matchQuality": "close",
+              "gap": "None (included for completeness but disabled).",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/time effect",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Explicitly avoided by the user ('drop chorus').",
+              "matchQuality": "perfect",
+              "gap": "None (included for completeness but disabled).",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Kept off to maintain a dry attack and raw feel.",
+              "matchQuality": "perfect",
+              "gap": "None (included for completeness but disabled).",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoided ('keep it drier') to maintain the raw, punchy hard rock sound.",
+              "matchQuality": "perfect",
+              "gap": "None (included for completeness but disabled).",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7.5"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a classic hard rock track. The rig focuses on maximizing the 'Marshall bite' and 'crunch' while minimizing ambience (reverb, delay) to achieve a raw, punchy sound."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for increased cabinet realism and definition.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., Celestion Greenback 4x12)",
+              "reason": "Enhance the classic Plexi/Marshall sound with more defined mid-range bite.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and punch in the upper mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "The Angels - Am I Ever Gonna See Your Face Again - Valeton GP-180",
+        "song": {
+          "artist": "The Angels",
+          "title": "Am I Ever Gonna See Your Face Again",
+          "album": "",
+          "year": null,
+          "genre": "pub rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright Aussie hard-rock crunch with raw mid bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight signal chain using a Green OD boost for bite, followed by the UK 45 amp model and UK Vintage 4x12 cab, emphasizing upper-mids and controlled breakup.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and stray noise inherent in high-gain rock tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the necessary upper-mid bite and aggressive crunch (favoring Marshall bite over TS smoothness).",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Good for general rock, but Green OD is better for the specific 'bite' requested."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": false,
+            "settings": {},
+            "purpose": "Used as a secondary gain stage if the Green OD isn't enough, but kept off to maintain clarity and focus on amp breakup.",
+            "matchQuality": "close",
+            "gap": "The primary crunch comes from the preamp/amp model; this is an optional safety layer.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6.5",
+              "Treble": "7",
+              "Mid": "7",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the classic Marshall/Plexi tone required for Aussie hard rock, providing natural breakup.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "UK 50",
+                "reason": "Similar, but UK 45 is the quintessential Plexi sound."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Match the required '4x12 cab' and provide a punchy, defined low end.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low": "-1.5 dB",
+              "Mid": "+2.0 dB",
+              "High": "+1.0 dB"
+            },
+            "purpose": "Boost the upper-mids for maximum bite and punchy low end definition without sounding muddy.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter (optional)",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": false,
+            "settings": {},
+            "purpose": "Kept inactive as the target tone is aggressive crunch, not wah sweeps.",
+            "matchQuality": "close",
+            "gap": "None (included for completeness but disabled).",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/time effect",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {},
+            "purpose": "Explicitly avoided by the user ('drop chorus').",
+            "matchQuality": "perfect",
+            "gap": "None (included for completeness but disabled).",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {},
+            "purpose": "Kept off to maintain a dry attack and raw feel.",
+            "matchQuality": "perfect",
+            "gap": "None (included for completeness but disabled).",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": false,
+            "settings": {},
+            "purpose": "Avoided ('keep it drier') to maintain the raw, punchy hard rock sound.",
+            "matchQuality": "perfect",
+            "gap": "None (included for completeness but disabled).",
+            "alternatives": []
+          },
+          {
+            "order": 11,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "7.5"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright Aussie hard-rock crunch with raw mid bite",
+          "toneProfile": "bright Aussie hard-rock crunch with raw mid bite",
+          "idealSignalChain": "Marshall/Plexi style | bridge humbucker | 4x12 cab | edge-of-breakup",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi style",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "bridge humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "edge-of-breakup",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight crunch",
+            "upper-mid bite",
+            "dry attack",
+            "punchy low end"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Bright, punchy Aussie hard rock crunch with Marshall Plexi tones.",
+          "bestMatchSummary": "A tight signal chain using a Green OD boost for bite, followed by the UK 45 amp model and UK Vintage 4x12 cab, emphasizing upper-mids and controlled breakup.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and stray noise inherent in high-gain rock tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary upper-mid bite and aggressive crunch (favoring Marshall bite over TS smoothness).",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Good for general rock, but Green OD is better for the specific 'bite' requested."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": false,
+              "settings": {},
+              "purpose": "Used as a secondary gain stage if the Green OD isn't enough, but kept off to maintain clarity and focus on amp breakup.",
+              "matchQuality": "close",
+              "gap": "The primary crunch comes from the preamp/amp model; this is an optional safety layer.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.5",
+                "Treble": "7",
+                "Mid": "7",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the classic Marshall/Plexi tone required for Aussie hard rock, providing natural breakup.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "UK 50",
+                  "reason": "Similar, but UK 45 is the quintessential Plexi sound."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Match the required '4x12 cab' and provide a punchy, defined low end.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1.5 dB",
+                "Mid": "+2.0 dB",
+                "High": "+1.0 dB"
+              },
+              "purpose": "Boost the upper-mids for maximum bite and punchy low end definition without sounding muddy.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter (optional)",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {},
+              "purpose": "Kept inactive as the target tone is aggressive crunch, not wah sweeps.",
+              "matchQuality": "close",
+              "gap": "None (included for completeness but disabled).",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/time effect",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {},
+              "purpose": "Explicitly avoided by the user ('drop chorus').",
+              "matchQuality": "perfect",
+              "gap": "None (included for completeness but disabled).",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {},
+              "purpose": "Kept off to maintain a dry attack and raw feel.",
+              "matchQuality": "perfect",
+              "gap": "None (included for completeness but disabled).",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": false,
+              "settings": {},
+              "purpose": "Avoided ('keep it drier') to maintain the raw, punchy hard rock sound.",
+              "matchQuality": "perfect",
+              "gap": "None (included for completeness but disabled).",
+              "alternatives": []
+            },
+            {
+              "order": 11,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "7.5"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for increased cabinet realism and definition.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., Celestion Greenback 4x12)",
+              "reason": "Enhance the classic Plexi/Marshall sound with more defined mid-range bite.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and punch in the upper mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop chorus",
+          "keep it drier",
+          "favor Marshall bite over TS smoothness"
+        ],
+        "warnings": [
+          "The source material is a classic hard rock track. The rig focuses on maximizing the 'Marshall bite' and 'crunch' while minimizing ambience (reverb, delay) to achieve a raw, punchy sound."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 19.27,
+      "prompt_chars": 1014,
+      "response_chars": 436,
+      "usage": {
+        "prompt_eval_count": 326,
+        "eval_count": 110,
+        "total_duration": 19266758100,
+        "prompt_eval_duration": 61519000,
+        "eval_duration": 898629000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.677,
+      "prompt_chars": 5372,
+      "response_chars": 484,
+      "usage": {
+        "input_tokens": 1497,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 135,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1632
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 92.392,
+      "prompt_chars": 3578,
+      "response_chars": 5625,
+      "usage": {
+        "prompt_eval_count": 1212,
+        "eval_count": 1612,
+        "total_duration": 92385180700,
+        "prompt_eval_duration": 136366000,
+        "eval_duration": 13357552000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 22.936,
+      "prompt_chars": 7758,
+      "response_chars": 555,
+      "usage": {
+        "prompt_eval_count": 2181,
+        "eval_count": 151,
+        "total_duration": 22929316900,
+        "prompt_eval_duration": 243635000,
+        "eval_duration": 1258112000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 17.364,
+      "prompt_chars": 2948,
+      "response_chars": 177,
+      "usage": {
+        "prompt_eval_count": 942,
+        "eval_count": 49,
+        "total_duration": 17339452200,
+        "prompt_eval_duration": 136481000,
+        "eval_duration": 386775000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "The Angels",
+      "title": "Am I Ever Gonna See Your Face Again",
+      "album": "",
+      "year": null,
+      "genre": "pub rock"
+    },
+    "rig": {
+      "rigName": "The Angels - Am I Ever Gonna See Your Face Again - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright Aussie hard-rock crunch with raw mid bite",
+      "signalChainSummary": "A tight signal chain using a Green OD boost for bite, followed by the UK 45 amp model and UK Vintage 4x12 cab, emphasizing upper-mids and controlled breakup.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and stray noise inherent in high-gain rock tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the necessary upper-mid bite and aggressive crunch (favoring Marshall bite over TS smoothness).",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Good for general rock, but Green OD is better for the specific 'bite' requested."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": false,
+          "settings": {},
+          "purpose": "Used as a secondary gain stage if the Green OD isn't enough, but kept off to maintain clarity and focus on amp breakup.",
+          "matchQuality": "close",
+          "gap": "The primary crunch comes from the preamp/amp model; this is an optional safety layer.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6.5",
+            "Treble": "7",
+            "Mid": "7",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the classic Marshall/Plexi tone required for Aussie hard rock, providing natural breakup.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "UK 50",
+              "reason": "Similar, but UK 45 is the quintessential Plexi sound."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Match the required '4x12 cab' and provide a punchy, defined low end.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low": "-1.5 dB",
+            "Mid": "+2.0 dB",
+            "High": "+1.0 dB"
+          },
+          "purpose": "Boost the upper-mids for maximum bite and punchy low end definition without sounding muddy.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter (optional)",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": false,
+          "settings": {},
+          "purpose": "Kept inactive as the target tone is aggressive crunch, not wah sweeps.",
+          "matchQuality": "close",
+          "gap": "None (included for completeness but disabled).",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/time effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {},
+          "purpose": "Explicitly avoided by the user ('drop chorus').",
+          "matchQuality": "exact",
+          "gap": "None (included for completeness but disabled).",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {},
+          "purpose": "Kept off to maintain a dry attack and raw feel.",
+          "matchQuality": "exact",
+          "gap": "None (included for completeness but disabled).",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": false,
+          "settings": {},
+          "purpose": "Avoided ('keep it drier') to maintain the raw, punchy hard rock sound.",
+          "matchQuality": "exact",
+          "gap": "None (included for completeness but disabled).",
+          "alternatives": []
+        },
+        {
+          "order": 11,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "7.5"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright Aussie hard-rock crunch with raw mid bite",
+      "mustHave": [
+        "tight crunch",
+        "upper-mid bite",
+        "dry attack",
+        "punchy low end"
+      ],
+      "avoid": [
+        "chorus",
+        "heavy fuzz",
+        "lush reverb",
+        "clean glassy tone"
+      ],
+      "gearClues": [
+        "Marshall/Plexi style",
+        "bridge humbucker",
+        "4x12 cab",
+        "edge-of-breakup"
+      ],
+      "corrections": [
+        "drop chorus",
+        "keep it drier",
+        "favor Marshall bite over TS smoothness"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "pub rock",
+      "styleTags": [
+        "hard rock",
+        "australian rock"
+      ],
+      "targetTone": "bright Aussie hard-rock crunch with raw mid bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for increased cabinet realism and definition.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR (e.g., Celestion Greenback 4x12)",
+          "reason": "Enhance the classic Plexi/Marshall sound with more defined mid-range bite.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and punch in the upper mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1954,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

@@ -1,0 +1,1156 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1801,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Barao_Vermelho__Bete_Balanco.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Barão Vermelho",
+    "title": "Bete Balanço",
+    "album": "",
+    "year": null,
+    "genre": "brazilian rock"
+  },
+  "genreClassification": {
+    "genre": "brazilian rock",
+    "subgenres": [
+      "pop rock",
+      "rock and roll"
+    ],
+    "confidence": "high",
+    "rationale": "Barão Vermelho is a foundational band in Brazilian rock, known for pop-infused rock sounds."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly crunchy rock tone with pronounced mid-range bite and a touch of chorus/modulation.",
+      "signatureElements": [
+        "Chorus/Vibrato modulation",
+        "Slightly overdriven crunch (mid-focused)",
+        "Punchy attack"
+      ],
+      "gearHypotheses": [
+        "Modeling amp head (e.g., Fender Twin/Vox AC30 style) for clean foundation",
+        "Overdrive pedal (for grit and mid-hump)",
+        "Chorus effect unit"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "Deep scooped bass tones",
+        "High gain metal saturation"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright Brazilian rock crunch with chorus sheen",
+      "mustHave": [
+        "chorus sheen",
+        "mid bite",
+        "tight crunch",
+        "punchy attack"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "metal gain",
+        "scooped lows",
+        "clean only"
+      ],
+      "gearClues": [
+        "single-coils or humbuckers",
+        "Marshall/Vox-style crunch",
+        "chorus pedal",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "make chorus more explicit",
+        "raise crunch edge",
+        "keep it bright"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright Brazilian rock crunch with chorus sheen",
+    "mustHave": [
+      "chorus sheen",
+      "mid bite",
+      "tight crunch",
+      "punchy attack"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "metal gain",
+      "scooped lows",
+      "clean only"
+    ],
+    "gearClues": [
+      "single-coils or humbuckers",
+      "Marshall/Vox-style crunch",
+      "chorus pedal",
+      "2x12 or 4x12"
+    ],
+    "corrections": [
+      "make chorus more explicit",
+      "raise crunch edge",
+      "keep it bright"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Brazilian rock crunch with chorus sheen, emphasizing mid-range bite and punchy attack.",
+          "bestMatchSummary": "A bright, crunchy signal chain using a Vox/Marshall style amp simulation (UK 45) combined with Chorus for the required sheen, ensuring strong mids and tight dynamics.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight dynamics.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the initial 'crunch' and punchy attack required for Brazilian rock.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD/OD 9 to provide a slightly brighter, more mid-focused grit suitable for the genre.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Good general crunch alternative."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "chorus effect",
+              "module": "Chorus",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4.0 Hz",
+                "Depth": "5.0",
+                "Feedback": "3.0"
+              },
+              "purpose": "Add the explicit 'chorus sheen' and width to the tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": false,
+              "settings": {
+                "Drive": "2.0",
+                "Tone": "5.0",
+                "Level": "6.0"
+              },
+              "purpose": "Used as a subtle secondary gain stage to enhance the 'crunch edge' without heavy fuzz.",
+              "matchQuality": "close",
+              "gap": "The Red Haze is set at low drive to act more like an aggressive EQ boost/grit enhancer rather than a full distortion pedal, meeting the 'tight crunch' requirement.",
+              "alternatives": [
+                {
+                  "model": "None",
+                  "reason": "Could be bypassed entirely if Green OD provides enough grit."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Treble": "7.0",
+                "Midrange": "8.0",
+                "Bass": "5.0"
+              },
+              "purpose": "Simulate the classic Marshall/Vox-style crunch and provide necessary mid-bite.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is ideal for bright, punchy rock tones that emphasize mids.",
+              "alternatives": [
+                {
+                  "model": "UK SLP",
+                  "reason": "A good alternative if a slightly more aggressive British tone is desired."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the required 'Marshall/Vox-style' cabinet tone and punchy projection.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1.0",
+                "Midrange": "+2.0",
+                "Treble": "+1.5"
+              },
+              "purpose": "Fine-tune the tone by boosting mids and highs to achieve maximum 'mid bite' and brightness.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "Room",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Size": "Medium",
+                "Reverb Time": "2.0s"
+              },
+              "purpose": "Add subtle depth and ambience without muddying the tight crunch.",
+              "matchQuality": "close",
+              "gap": "Room reverb is chosen over Plate/Spring to provide a natural, open space feel suitable for Brazilian rock.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A more controlled, metallic ambience alternative."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "Digital Delay",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2.0",
+                "Mix": "2.5"
+              },
+              "purpose": "Optional rhythmic echo for added dimension (kept off by default to maintain tightness).",
+              "matchQuality": "close",
+              "gap": "The delay is kept low/off unless specific solos require it, prioritizing the core crunch tone.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "Volume",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a rock song, so the rig focuses on aggressive crunch and sheen rather than clean tones."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the punchy, mid-focused sound of Brazilian rock.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., 4x12 British)",
+              "reason": "Enhance the tight, punchy projection needed for the genre's crunch.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased definition and mid-range focus",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Barão Vermelho - Bete Balanço - Valeton GP-180",
+        "song": {
+          "artist": "Barão Vermelho",
+          "title": "Bete Balanço",
+          "album": "",
+          "year": null,
+          "genre": "brazilian rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright Brazilian rock crunch with chorus sheen",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A bright, crunchy signal chain using a Vox/Marshall style amp simulation (UK 45) combined with Chorus for the required sheen, ensuring strong mids and tight dynamics.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and maintain tight dynamics.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/drive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "3.5",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the initial 'crunch' and punchy attack required for Brazilian rock.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen over Blues OD/OD 9 to provide a slightly brighter, more mid-focused grit suitable for the genre.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Good general crunch alternative."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "chorus effect",
+            "module": "Chorus",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "4.0 Hz",
+              "Depth": "5.0",
+              "Feedback": "3.0"
+            },
+            "purpose": "Add the explicit 'chorus sheen' and width to the tone.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "Red Haze",
+            "active": false,
+            "settings": {
+              "Drive": "2.0",
+              "Tone": "5.0",
+              "Level": "6.0"
+            },
+            "purpose": "Used as a subtle secondary gain stage to enhance the 'crunch edge' without heavy fuzz.",
+            "matchQuality": "close",
+            "gap": "The Red Haze is set at low drive to act more like an aggressive EQ boost/grit enhancer rather than a full distortion pedal, meeting the 'tight crunch' requirement.",
+            "alternatives": [
+              {
+                "model": "None",
+                "reason": "Could be bypassed entirely if Green OD provides enough grit."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6.0",
+              "Treble": "7.0",
+              "Midrange": "8.0",
+              "Bass": "5.0"
+            },
+            "purpose": "Simulate the classic Marshall/Vox-style crunch and provide necessary mid-bite.",
+            "matchQuality": "close",
+            "gap": "The UK 45 is ideal for bright, punchy rock tones that emphasize mids.",
+            "alternatives": [
+              {
+                "model": "UK SLP",
+                "reason": "A good alternative if a slightly more aggressive British tone is desired."
+              }
+            ]
+          },
+          {
+            "order": 6,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Balanced"
+            },
+            "purpose": "Provide the required 'Marshall/Vox-style' cabinet tone and punchy projection.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "-1.0",
+              "Midrange": "+2.0",
+              "Treble": "+1.5"
+            },
+            "purpose": "Fine-tune the tone by boosting mids and highs to achieve maximum 'mid bite' and brightness.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/ambience",
+            "module": "Room",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Size": "Medium",
+              "Reverb Time": "2.0s"
+            },
+            "purpose": "Add subtle depth and ambience without muddying the tight crunch.",
+            "matchQuality": "close",
+            "gap": "Room reverb is chosen over Plate/Spring to provide a natural, open space feel suitable for Brazilian rock.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "A more controlled, metallic ambience alternative."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "delay/time effect",
+            "module": "Digital Delay",
+            "model": "Digital Delay",
+            "active": false,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2.0",
+              "Mix": "2.5"
+            },
+            "purpose": "Optional rhythmic echo for added dimension (kept off by default to maintain tightness).",
+            "matchQuality": "close",
+            "gap": "The delay is kept low/off unless specific solos require it, prioritizing the core crunch tone.",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "Volume",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "exact",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright Brazilian rock crunch with chorus sheen",
+          "toneProfile": "bright Brazilian rock crunch with chorus sheen",
+          "idealSignalChain": "single-coils or humbuckers | Marshall/Vox-style crunch | chorus pedal | 2x12 or 4x12",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "single-coils or humbuckers",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall/Vox-style crunch",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "chorus pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "chorus sheen",
+            "mid bite",
+            "tight crunch",
+            "punchy attack"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Brazilian rock crunch with chorus sheen, emphasizing mid-range bite and punchy attack.",
+          "bestMatchSummary": "A bright, crunchy signal chain using a Vox/Marshall style amp simulation (UK 45) combined with Chorus for the required sheen, ensuring strong mids and tight dynamics.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and maintain tight dynamics.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/drive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "3.5",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the initial 'crunch' and punchy attack required for Brazilian rock.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD/OD 9 to provide a slightly brighter, more mid-focused grit suitable for the genre.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Good general crunch alternative."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "chorus effect",
+              "module": "Chorus",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "4.0 Hz",
+                "Depth": "5.0",
+                "Feedback": "3.0"
+              },
+              "purpose": "Add the explicit 'chorus sheen' and width to the tone.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "Red Haze",
+              "active": false,
+              "settings": {
+                "Drive": "2.0",
+                "Tone": "5.0",
+                "Level": "6.0"
+              },
+              "purpose": "Used as a subtle secondary gain stage to enhance the 'crunch edge' without heavy fuzz.",
+              "matchQuality": "close",
+              "gap": "The Red Haze is set at low drive to act more like an aggressive EQ boost/grit enhancer rather than a full distortion pedal, meeting the 'tight crunch' requirement.",
+              "alternatives": [
+                {
+                  "model": "None",
+                  "reason": "Could be bypassed entirely if Green OD provides enough grit."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6.0",
+                "Treble": "7.0",
+                "Midrange": "8.0",
+                "Bass": "5.0"
+              },
+              "purpose": "Simulate the classic Marshall/Vox-style crunch and provide necessary mid-bite.",
+              "matchQuality": "close",
+              "gap": "The UK 45 is ideal for bright, punchy rock tones that emphasize mids.",
+              "alternatives": [
+                {
+                  "model": "UK SLP",
+                  "reason": "A good alternative if a slightly more aggressive British tone is desired."
+                }
+              ]
+            },
+            {
+              "order": 6,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the required 'Marshall/Vox-style' cabinet tone and punchy projection.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "-1.0",
+                "Midrange": "+2.0",
+                "Treble": "+1.5"
+              },
+              "purpose": "Fine-tune the tone by boosting mids and highs to achieve maximum 'mid bite' and brightness.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/ambience",
+              "module": "Room",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Size": "Medium",
+                "Reverb Time": "2.0s"
+              },
+              "purpose": "Add subtle depth and ambience without muddying the tight crunch.",
+              "matchQuality": "close",
+              "gap": "Room reverb is chosen over Plate/Spring to provide a natural, open space feel suitable for Brazilian rock.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "A more controlled, metallic ambience alternative."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "delay/time effect",
+              "module": "Digital Delay",
+              "model": "Digital Delay",
+              "active": false,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2.0",
+                "Mix": "2.5"
+              },
+              "purpose": "Optional rhythmic echo for added dimension (kept off by default to maintain tightness).",
+              "matchQuality": "close",
+              "gap": "The delay is kept low/off unless specific solos require it, prioritizing the core crunch tone.",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "Volume",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "exact",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better capture the punchy, mid-focused sound of Brazilian rock.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., 4x12 British)",
+              "reason": "Enhance the tight, punchy projection needed for the genre's crunch.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased definition and mid-range focus",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "make chorus more explicit",
+          "raise crunch edge",
+          "keep it bright"
+        ],
+        "warnings": [
+          "The source material is a rock song, so the rig focuses on aggressive crunch and sheen rather than clean tones."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.043,
+      "prompt_chars": 995,
+      "response_chars": 498,
+      "usage": {
+        "prompt_eval_count": 324,
+        "eval_count": 128,
+        "total_duration": 12030163300,
+        "prompt_eval_duration": 182463000,
+        "eval_duration": 914189000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.677,
+      "prompt_chars": 5421,
+      "response_chars": 485,
+      "usage": {
+        "input_tokens": 1515,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 134,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1649
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.54,
+      "prompt_chars": 3560,
+      "response_chars": 6070,
+      "usage": {
+        "prompt_eval_count": 1210,
+        "eval_count": 1705,
+        "total_duration": 12516918800,
+        "prompt_eval_duration": 185718000,
+        "eval_duration": 11885676000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.523,
+      "prompt_chars": 8213,
+      "response_chars": 564,
+      "usage": {
+        "prompt_eval_count": 2272,
+        "eval_count": 155,
+        "total_duration": 11500082300,
+        "prompt_eval_duration": 193570000,
+        "eval_duration": 1101343000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.614,
+      "prompt_chars": 2823,
+      "response_chars": 201,
+      "usage": {
+        "prompt_eval_count": 881,
+        "eval_count": 53,
+        "total_duration": 12597003500,
+        "prompt_eval_duration": 98584000,
+        "eval_duration": 363550000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Barão Vermelho",
+      "title": "Bete Balanço",
+      "album": "",
+      "year": null,
+      "genre": "brazilian rock"
+    },
+    "rig": {
+      "rigName": "Barão Vermelho - Bete Balanço - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright Brazilian rock crunch with chorus sheen",
+      "signalChainSummary": "A bright, crunchy signal chain using a Vox/Marshall style amp simulation (UK 45) combined with Chorus for the required sheen, ensuring strong mids and tight dynamics.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and maintain tight dynamics.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/drive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "3.5",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the initial 'crunch' and punchy attack required for Brazilian rock.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen over Blues OD/OD 9 to provide a slightly brighter, more mid-focused grit suitable for the genre.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Good general crunch alternative."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "chorus effect",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "4.0 Hz",
+            "Depth": "5.0",
+            "Feedback": "3.0"
+          },
+          "purpose": "Add the explicit 'chorus sheen' and width to the tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "Red Haze",
+          "active": false,
+          "settings": {
+            "Drive": "2.0",
+            "Tone": "5.0",
+            "Level": "6.0"
+          },
+          "purpose": "Used as a subtle secondary gain stage to enhance the 'crunch edge' without heavy fuzz.",
+          "matchQuality": "close",
+          "gap": "The Red Haze is set at low drive to act more like an aggressive EQ boost/grit enhancer rather than a full distortion pedal, meeting the 'tight crunch' requirement.",
+          "alternatives": [
+            {
+              "model": "None",
+              "reason": "Could be bypassed entirely if Green OD provides enough grit."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6.0",
+            "Treble": "7.0",
+            "Midrange": "8.0",
+            "Bass": "5.0"
+          },
+          "purpose": "Simulate the classic Marshall/Vox-style crunch and provide necessary mid-bite.",
+          "matchQuality": "close",
+          "gap": "The UK 45 is ideal for bright, punchy rock tones that emphasize mids.",
+          "alternatives": [
+            {
+              "model": "UK SLP",
+              "reason": "A good alternative if a slightly more aggressive British tone is desired."
+            }
+          ]
+        },
+        {
+          "order": 6,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Balanced"
+          },
+          "purpose": "Provide the required 'Marshall/Vox-style' cabinet tone and punchy projection.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "-1.0",
+            "Midrange": "+2.0",
+            "Treble": "+1.5"
+          },
+          "purpose": "Fine-tune the tone by boosting mids and highs to achieve maximum 'mid bite' and brightness.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Size": "Medium",
+            "Reverb Time": "2.0s"
+          },
+          "purpose": "Add subtle depth and ambience without muddying the tight crunch.",
+          "matchQuality": "close",
+          "gap": "Room reverb is chosen over Plate/Spring to provide a natural, open space feel suitable for Brazilian rock.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "A more controlled, metallic ambience alternative."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": false,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2.0",
+            "Mix": "2.5"
+          },
+          "purpose": "Optional rhythmic echo for added dimension (kept off by default to maintain tightness).",
+          "matchQuality": "close",
+          "gap": "The delay is kept low/off unless specific solos require it, prioritizing the core crunch tone.",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright Brazilian rock crunch with chorus sheen",
+      "mustHave": [
+        "chorus sheen",
+        "mid bite",
+        "tight crunch",
+        "punchy attack"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "metal gain",
+        "scooped lows",
+        "clean only"
+      ],
+      "gearClues": [
+        "single-coils or humbuckers",
+        "Marshall/Vox-style crunch",
+        "chorus pedal",
+        "2x12 or 4x12"
+      ],
+      "corrections": [
+        "make chorus more explicit",
+        "raise crunch edge",
+        "keep it bright"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "brazilian rock",
+      "styleTags": [
+        "pop rock",
+        "rock and roll"
+      ],
+      "targetTone": "bright Brazilian rock crunch with chorus sheen",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better capture the punchy, mid-focused sound of Brazilian rock.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR (e.g., 4x12 British)",
+          "reason": "Enhance the tight, punchy projection needed for the genre's crunch.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased definition and mid-range focus",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1801,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

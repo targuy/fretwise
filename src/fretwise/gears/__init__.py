@@ -12,16 +12,21 @@ from fretwise.gears.adapter import song_output_to_view
 from fretwise.gears.naming import (
     GEARS_KEY_SEP,
     gears_filename,
+    gears_filename_for_rig,
     gears_key,
     gears_key_from_filename,
     slugify,
 )
+from fretwise.gears.verify import build_gear_verification_prompt, validate_gear_v2
 
 __all__ = [
     "GEARS_KEY_SEP",
+    "build_gear_verification_prompt",
     "gears_filename",
+    "gears_filename_for_rig",
     "gears_key",
     "gears_key_from_filename",
     "slugify",
     "song_output_to_view",
+    "validate_gear_v2",
 ]

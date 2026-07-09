@@ -1,0 +1,1136 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1938,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Seether__Fake_It.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Seether",
+    "title": "Fake It",
+    "album": "",
+    "year": null,
+    "genre": "alt rock"
+  },
+  "genreClassification": {
+    "genre": "alt rock",
+    "subgenres": [
+      "post grunge",
+      "hard rock"
+    ],
+    "confidence": "high",
+    "rationale": "Seether's sound is characterized by crunchy, mid-gain alt-rock and post-grunge tones."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, crunchy rock tone with a slight fuzz edge and scooped mids.",
+      "signatureElements": [
+        "Crunch/Overdrive (main rhythm)",
+        "Slight Fuzz texture on leads",
+        "Moderate delay for atmosphere",
+        "Punchy bass response"
+      ],
+      "gearHypotheses": [
+        "High-gain digital amp model (e.g., Mesa Boogie or Marshall style)",
+        "Overdrive pedal simulation (for grit)"
+      ],
+      "avoid": [
+        "Clean tones (unless arpeggiated)",
+        "Excessive modulation (chorus/flanger)"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "mid-gain alt-rock crunch with slight fuzz bite",
+      "mustHave": [
+        "tight crunchy rhythm",
+        "slight fuzz on leads",
+        "moderate delay",
+        "punchy low end"
+      ],
+      "avoid": [
+        "clean tone",
+        "chorus",
+        "flanger",
+        "big scoop"
+      ],
+      "gearClues": [
+        "Marshall or Mesa amp",
+        "overdrive into amp",
+        "single-coil or humbucker electric",
+        "FRFR preset"
+      ],
+      "corrections": [
+        "Replace scooped mids with focused upper mids",
+        "Keep fuzz subtle, not full fuzz",
+        "Delay should be light, not ambient"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "mid-gain alt-rock crunch with slight fuzz bite",
+    "mustHave": [
+      "tight crunchy rhythm",
+      "slight fuzz on leads",
+      "moderate delay",
+      "punchy low end"
+    ],
+    "avoid": [
+      "clean tone",
+      "chorus",
+      "flanger",
+      "big scoop"
+    ],
+    "gearClues": [
+      "Marshall or Mesa amp",
+      "overdrive into amp",
+      "single-coil or humbucker electric",
+      "FRFR preset"
+    ],
+    "corrections": [
+      "Replace scooped mids with focused upper mids",
+      "Keep fuzz subtle, not full fuzz",
+      "Delay should be light, not ambient"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Alt-rock crunch with focused mids and subtle fuzz.",
+          "bestMatchSummary": "A tight, mid-gain signal chain using an OD boost into a UK 45/UK 50 style amp, complemented by a light delay for rhythm support.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from high-gain rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for aggressive rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary mid-hump and grit for alt-rock crunch without excessive distortion.",
+              "matchQuality": "close",
+              "gap": "The 'Green OD' is chosen to emulate a classic British overdrive (like an early Marshall/Vox) which fits the required focused upper mids.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly cleaner option, but Green OD provides more grit for alt-rock."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz bite",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Add the required subtle fuzz bite for leads and rhythm accents without sounding like full psychedelic fuzz.",
+              "matchQuality": "close",
+              "gap": "The RAT-style is versatile enough to be dialed back to a subtle grit, fulfilling the 'slight fuzz on leads' requirement.",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "Too aggressive for the required subtlety."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the punchy, mid-focused British tone (Marshall/Vox style) required for alt-rock rhythm.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is ideal for classic rock tones that emphasize upper mids and tightness.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "Very similar, but the UK 50 often provides a slightly punchier mid-range focus."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the classic British cabinet sound that complements the UK 50 amp model.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard pairing for this genre/amp type.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization (mid focus)",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1",
+                "Mid": "+3",
+                "High": "+1"
+              },
+              "purpose": "Boost the upper mids specifically to counteract any perceived scoop and enhance vocal presence in the mix.",
+              "matchQuality": "close",
+              "gap": "Used to manually correct the frequency response, as requested by 'Replace scooped mids with focused upper mids'.",
+              "alternatives": [
+                {
+                  "model": "Guitar EQ 1",
+                  "reason": "EQ 2 offers a slightly more precise control curve for targeted mid-range boosts."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "modulation/time effect (delay)",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Add a light, rhythmic delay to enhance the rhythm without sounding ambient or wash-out.",
+              "matchQuality": "close",
+              "gap": "The settings are kept moderate (low feedback/mix) to meet the 'Delay should be light, not ambient' requirement.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Too warm and less precise for a modern alt-rock rhythm delay."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "room ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle space and depth to the overall tone without muddying the punchy rhythm.",
+              "matchQuality": "close",
+              "gap": "A moderate Room reverb is used for general ambience, avoiding excessive plate or spring which can sound too artificial.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Can sometimes be too bright and metallic for this specific alt-rock tone."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment to ensure the tone is punchy and present in the mix.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material (Seether) is rock, so a guitar imitation rig was appropriate."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and overall punch by swapping the IR for a more modern/aggressive British cab simulation.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Modern UK 4x12 (e.g., Celestion Greenback or similar)",
+              "reason": "The current IR is too vintage; a modern, punchier cab will enhance the alt-rock aggression.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and bite in upper mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Seether - Fake It - Valeton GP-180",
+        "song": {
+          "artist": "Seether",
+          "title": "Fake It",
+          "album": "",
+          "year": null,
+          "genre": "alt rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "mid-gain alt-rock crunch with slight fuzz bite",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, mid-gain signal chain using an OD boost into a UK 45/UK 50 style amp, complemented by a light delay for rhythm support.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and unwanted noise from high-gain rhythm playing.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for aggressive rock tones.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "4",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide the necessary mid-hump and grit for alt-rock crunch without excessive distortion.",
+            "matchQuality": "close",
+            "gap": "The 'Green OD' is chosen to emulate a classic British overdrive (like an early Marshall/Vox) which fits the required focused upper mids.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "A slightly cleaner option, but Green OD provides more grit for alt-rock."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz bite",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "3",
+              "Tone": "5",
+              "Level": "6"
+            },
+            "purpose": "Add the required subtle fuzz bite for leads and rhythm accents without sounding like full psychedelic fuzz.",
+            "matchQuality": "close",
+            "gap": "The RAT-style is versatile enough to be dialed back to a subtle grit, fulfilling the 'slight fuzz on leads' requirement.",
+            "alternatives": [
+              {
+                "model": "Red Haze",
+                "reason": "Too aggressive for the required subtlety."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 50",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Midrange": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the punchy, mid-focused British tone (Marshall/Vox style) required for alt-rock rhythm.",
+            "matchQuality": "close",
+            "gap": "The UK 50 is ideal for classic rock tones that emphasize upper mids and tightness.",
+            "alternatives": [
+              {
+                "model": "UK 45",
+                "reason": "Very similar, but the UK 50 often provides a slightly punchier mid-range focus."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Balanced"
+            },
+            "purpose": "Provide the classic British cabinet sound that complements the UK 50 amp model.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard pairing for this genre/amp type.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization (mid focus)",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low": "-1",
+              "Mid": "+3",
+              "High": "+1"
+            },
+            "purpose": "Boost the upper mids specifically to counteract any perceived scoop and enhance vocal presence in the mix.",
+            "matchQuality": "close",
+            "gap": "Used to manually correct the frequency response, as requested by 'Replace scooped mids with focused upper mids'.",
+            "alternatives": [
+              {
+                "model": "Guitar EQ 1",
+                "reason": "EQ 2 offers a slightly more precise control curve for targeted mid-range boosts."
+              }
+            ]
+          },
+          {
+            "order": 7,
+            "role": "modulation/time effect (delay)",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "3"
+            },
+            "purpose": "Add a light, rhythmic delay to enhance the rhythm without sounding ambient or wash-out.",
+            "matchQuality": "close",
+            "gap": "The settings are kept moderate (low feedback/mix) to meet the 'Delay should be light, not ambient' requirement.",
+            "alternatives": [
+              {
+                "model": "Tape",
+                "reason": "Too warm and less precise for a modern alt-rock rhythm delay."
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "room ambience/reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Add subtle space and depth to the overall tone without muddying the punchy rhythm.",
+            "matchQuality": "close",
+            "gap": "A moderate Room reverb is used for general ambience, avoiding excessive plate or spring which can sound too artificial.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "Can sometimes be too bright and metallic for this specific alt-rock tone."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level adjustment to ensure the tone is punchy and present in the mix.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard final stage control.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "mid-gain alt-rock crunch with slight fuzz bite",
+          "toneProfile": "mid-gain alt-rock crunch with slight fuzz bite",
+          "idealSignalChain": "Marshall or Mesa amp | overdrive into amp | single-coil or humbucker electric | FRFR preset",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall or Mesa amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "overdrive into amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "single-coil or humbucker electric",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "FRFR preset",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "tight crunchy rhythm",
+            "slight fuzz on leads",
+            "moderate delay",
+            "punchy low end"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Alt-rock crunch with focused mids and subtle fuzz.",
+          "bestMatchSummary": "A tight, mid-gain signal chain using an OD boost into a UK 45/UK 50 style amp, complemented by a light delay for rhythm support.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and unwanted noise from high-gain rhythm playing.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for aggressive rock tones.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide the necessary mid-hump and grit for alt-rock crunch without excessive distortion.",
+              "matchQuality": "close",
+              "gap": "The 'Green OD' is chosen to emulate a classic British overdrive (like an early Marshall/Vox) which fits the required focused upper mids.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "A slightly cleaner option, but Green OD provides more grit for alt-rock."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz bite",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "3",
+                "Tone": "5",
+                "Level": "6"
+              },
+              "purpose": "Add the required subtle fuzz bite for leads and rhythm accents without sounding like full psychedelic fuzz.",
+              "matchQuality": "close",
+              "gap": "The RAT-style is versatile enough to be dialed back to a subtle grit, fulfilling the 'slight fuzz on leads' requirement.",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "Too aggressive for the required subtlety."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 50",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the punchy, mid-focused British tone (Marshall/Vox style) required for alt-rock rhythm.",
+              "matchQuality": "close",
+              "gap": "The UK 50 is ideal for classic rock tones that emphasize upper mids and tightness.",
+              "alternatives": [
+                {
+                  "model": "UK 45",
+                  "reason": "Very similar, but the UK 50 often provides a slightly punchier mid-range focus."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the classic British cabinet sound that complements the UK 50 amp model.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard pairing for this genre/amp type.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization (mid focus)",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1",
+                "Mid": "+3",
+                "High": "+1"
+              },
+              "purpose": "Boost the upper mids specifically to counteract any perceived scoop and enhance vocal presence in the mix.",
+              "matchQuality": "close",
+              "gap": "Used to manually correct the frequency response, as requested by 'Replace scooped mids with focused upper mids'.",
+              "alternatives": [
+                {
+                  "model": "Guitar EQ 1",
+                  "reason": "EQ 2 offers a slightly more precise control curve for targeted mid-range boosts."
+                }
+              ]
+            },
+            {
+              "order": 7,
+              "role": "modulation/time effect (delay)",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Add a light, rhythmic delay to enhance the rhythm without sounding ambient or wash-out.",
+              "matchQuality": "close",
+              "gap": "The settings are kept moderate (low feedback/mix) to meet the 'Delay should be light, not ambient' requirement.",
+              "alternatives": [
+                {
+                  "model": "Tape",
+                  "reason": "Too warm and less precise for a modern alt-rock rhythm delay."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "room ambience/reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Add subtle space and depth to the overall tone without muddying the punchy rhythm.",
+              "matchQuality": "close",
+              "gap": "A moderate Room reverb is used for general ambience, avoiding excessive plate or spring which can sound too artificial.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "Can sometimes be too bright and metallic for this specific alt-rock tone."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level adjustment to ensure the tone is punchy and present in the mix.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage control.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and overall punch by swapping the IR for a more modern/aggressive British cab simulation.",
+          "proposals": [
+            {
+              "priority": "P2",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Modern UK 4x12 (e.g., Celestion Greenback or similar)",
+              "reason": "The current IR is too vintage; a modern, punchier cab will enhance the alt-rock aggression.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "Always",
+              "expectedGain": "Increased clarity and bite in upper mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "Replace scooped mids with focused upper mids",
+          "Keep fuzz subtle, not full fuzz",
+          "Delay should be light, not ambient"
+        ],
+        "warnings": [
+          "The source material (Seether) is rock, so a guitar imitation rig was appropriate."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 16.034,
+      "prompt_chars": 983,
+      "response_chars": 473,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 121,
+        "total_duration": 16030542900,
+        "prompt_eval_duration": 84338000,
+        "eval_duration": 869692000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.996,
+      "prompt_chars": 5378,
+      "response_chars": 558,
+      "usage": {
+        "input_tokens": 1503,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 148,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1651
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 122.511,
+      "prompt_chars": 3621,
+      "response_chars": 6293,
+      "usage": {
+        "prompt_eval_count": 1278,
+        "eval_count": 1718,
+        "total_duration": 75221528200,
+        "prompt_eval_duration": 169271000,
+        "eval_duration": 15095842000
+      },
+      "attempts": 2,
+      "retryFailures": [
+        {
+          "attempt": 1,
+          "error": "Expecting ',' delimiter: line 43 column 8 (char 1543)"
+        }
+      ]
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 7.843,
+      "prompt_chars": 8485,
+      "response_chars": 604,
+      "usage": {
+        "prompt_eval_count": 2291,
+        "eval_count": 158,
+        "total_duration": 7836466700,
+        "prompt_eval_duration": 246186000,
+        "eval_duration": 1289718000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 16.079,
+      "prompt_chars": 2758,
+      "response_chars": 188,
+      "usage": {
+        "prompt_eval_count": 868,
+        "eval_count": 54,
+        "total_duration": 16075600600,
+        "prompt_eval_duration": 138875000,
+        "eval_duration": 462689000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Seether",
+      "title": "Fake It",
+      "album": "",
+      "year": null,
+      "genre": "alt rock"
+    },
+    "rig": {
+      "rigName": "Seether - Fake It - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "mid-gain alt-rock crunch with slight fuzz bite",
+      "signalChainSummary": "A tight, mid-gain signal chain using an OD boost into a UK 45/UK 50 style amp, complemented by a light delay for rhythm support.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and unwanted noise from high-gain rhythm playing.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for aggressive rock tones.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "4",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide the necessary mid-hump and grit for alt-rock crunch without excessive distortion.",
+          "matchQuality": "close",
+          "gap": "The 'Green OD' is chosen to emulate a classic British overdrive (like an early Marshall/Vox) which fits the required focused upper mids.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "A slightly cleaner option, but Green OD provides more grit for alt-rock."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz bite",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "3",
+            "Tone": "5",
+            "Level": "6"
+          },
+          "purpose": "Add the required subtle fuzz bite for leads and rhythm accents without sounding like full psychedelic fuzz.",
+          "matchQuality": "close",
+          "gap": "The RAT-style is versatile enough to be dialed back to a subtle grit, fulfilling the 'slight fuzz on leads' requirement.",
+          "alternatives": [
+            {
+              "model": "Red Haze",
+              "reason": "Too aggressive for the required subtlety."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 50",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Midrange": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the punchy, mid-focused British tone (Marshall/Vox style) required for alt-rock rhythm.",
+          "matchQuality": "close",
+          "gap": "The UK 50 is ideal for classic rock tones that emphasize upper mids and tightness.",
+          "alternatives": [
+            {
+              "model": "UK 45",
+              "reason": "Very similar, but the UK 50 often provides a slightly punchier mid-range focus."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Balanced"
+          },
+          "purpose": "Provide the classic British cabinet sound that complements the UK 50 amp model.",
+          "matchQuality": "exact",
+          "gap": "None. Standard pairing for this genre/amp type.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization (mid focus)",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low": "-1",
+            "Mid": "+3",
+            "High": "+1"
+          },
+          "purpose": "Boost the upper mids specifically to counteract any perceived scoop and enhance vocal presence in the mix.",
+          "matchQuality": "close",
+          "gap": "Used to manually correct the frequency response, as requested by 'Replace scooped mids with focused upper mids'.",
+          "alternatives": [
+            {
+              "model": "Guitar EQ 1",
+              "reason": "EQ 2 offers a slightly more precise control curve for targeted mid-range boosts."
+            }
+          ]
+        },
+        {
+          "order": 7,
+          "role": "modulation/time effect (delay)",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "3"
+          },
+          "purpose": "Add a light, rhythmic delay to enhance the rhythm without sounding ambient or wash-out.",
+          "matchQuality": "close",
+          "gap": "The settings are kept moderate (low feedback/mix) to meet the 'Delay should be light, not ambient' requirement.",
+          "alternatives": [
+            {
+              "model": "Tape",
+              "reason": "Too warm and less precise for a modern alt-rock rhythm delay."
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "room ambience/reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Add subtle space and depth to the overall tone without muddying the punchy rhythm.",
+          "matchQuality": "close",
+          "gap": "A moderate Room reverb is used for general ambience, avoiding excessive plate or spring which can sound too artificial.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "Can sometimes be too bright and metallic for this specific alt-rock tone."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level adjustment to ensure the tone is punchy and present in the mix.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage control.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "mid-gain alt-rock crunch with slight fuzz bite",
+      "mustHave": [
+        "tight crunchy rhythm",
+        "slight fuzz on leads",
+        "moderate delay",
+        "punchy low end"
+      ],
+      "avoid": [
+        "clean tone",
+        "chorus",
+        "flanger",
+        "big scoop"
+      ],
+      "gearClues": [
+        "Marshall or Mesa amp",
+        "overdrive into amp",
+        "single-coil or humbucker electric",
+        "FRFR preset"
+      ],
+      "corrections": [
+        "Replace scooped mids with focused upper mids",
+        "Keep fuzz subtle, not full fuzz",
+        "Delay should be light, not ambient"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "alt rock",
+      "styleTags": [
+        "post grunge",
+        "hard rock"
+      ],
+      "targetTone": "mid-gain alt-rock crunch with slight fuzz bite",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and overall punch by swapping the IR for a more modern/aggressive British cab simulation.",
+      "proposals": [
+        {
+          "priority": "P2",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Modern UK 4x12 (e.g., Celestion Greenback or similar)",
+          "reason": "The current IR is too vintage; a modern, punchier cab will enhance the alt-rock aggression.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "Always",
+          "expectedGain": "Increased clarity and bite in upper mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1938,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

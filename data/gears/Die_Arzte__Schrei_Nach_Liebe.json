@@ -1,0 +1,1100 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1825,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Die_Arzte__Schrei_Nach_Liebe.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Die Ärzte",
+    "title": "Schrei Nach Liebe",
+    "album": "",
+    "year": null,
+    "genre": "punk rock"
+  },
+  "genreClassification": {
+    "genre": "punk rock",
+    "subgenres": [
+      "german punk",
+      "pop punk"
+    ],
+    "confidence": "high",
+    "rationale": "Die Ärzte are known for their energetic, satirical German punk pop sound."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Aggressive, mid-scooped punk rock rhythm tone",
+      "signatureElements": [
+        "Crunch/Overdrive (Punk)",
+        "Mid-range focus",
+        "Slightly scooped lows"
+      ],
+      "gearHypotheses": [
+        "High-gain overdrive pedal (e.g., Klon style)",
+        "British-style amp simulation (Marshall/Vox)"
+      ],
+      "avoid": [
+        "Deep fuzz",
+        "Clean arpeggios",
+        "Heavy modulation"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "tight dry punk crunch with forward mids",
+      "mustHave": [
+        "aggressive palm-muted rhythm",
+        "tight upper-mid bite",
+        "dry, close-mic feel"
+      ],
+      "avoid": [
+        "mid-scooped metal",
+        "fuzzy saturation",
+        "heavy modulation"
+      ],
+      "gearClues": [
+        "Marshall/Plexi or hot British amp",
+        "2x12 or 4x12",
+        "medium-gain drive"
+      ],
+      "corrections": [
+        "drop Klon hint",
+        "avoid Vox lean",
+        "keep mids present"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "tight dry punk crunch with forward mids",
+    "mustHave": [
+      "aggressive palm-muted rhythm",
+      "tight upper-mid bite",
+      "dry, close-mic feel"
+    ],
+    "avoid": [
+      "mid-scooped metal",
+      "fuzzy saturation",
+      "heavy modulation"
+    ],
+    "gearClues": [
+      "Marshall/Plexi or hot British amp",
+      "2x12 or 4x12",
+      "medium-gain drive"
+    ],
+    "corrections": [
+      "drop Klon hint",
+      "avoid Vox lean",
+      "keep mids present"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Punk/Alternative Rock (Aggressive, Mid-focused)",
+          "bestMatchSummary": "A tight, aggressive punk crunch using a British amp model (UK 45) combined with a Boost and focused EQ to achieve forward mids and palm-muted punch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up aggressive palm-muting and high gain passages.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide a tight, aggressive boost to enhance the upper-mid bite and punch.",
+              "matchQuality": "close",
+              "gap": "The Klon hint suggests an OD pedal (OD 9 or Green OD), but Boost is used here for pure tightening/leveling without color shift, matching the 'dry' requirement.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "If more grit is needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Output": "5"
+              },
+              "purpose": "Provide medium-gain crunch and aggressive bite without sounding overly fuzzy or scooped.",
+              "matchQuality": "close",
+              "gap": "The 'Klon hint' suggests a clean boost/overdrive, but RAT-style provides the necessary punchy aggression for punk rhythm while remaining focused on mids.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Green OD",
+                  "reason": "If a slightly cleaner, British tone is preferred."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the hot British Plexi/Marshall tone required for classic punk aggression and mid-focus.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close",
+                "Distance": "3 inches"
+              },
+              "purpose": "Provide the classic British cabinet sound and simulate a dry, close-mic feel.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1",
+                "Mid": "+3",
+                "High": "+2"
+              },
+              "purpose": "Enhance the forward mids and upper-mid bite while keeping the low end tight.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Cutoff": "100 Hz"
+              },
+              "purpose": "Placeholder. Wah is not needed for this dry punk rhythm tone.",
+              "matchQuality": "none",
+              "gap": "None (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/time",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0",
+                "Depth": "0"
+              },
+              "purpose": "Placeholder. Heavy modulation must be avoided.",
+              "matchQuality": "none",
+              "gap": "None (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/reverb",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Add subtle rhythmic depth without muddying the tight punk sound.",
+              "matchQuality": "close",
+              "gap": "None (Used sparingly)",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "25%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide a subtle sense of space and 'dry' room feel without excessive wash.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is punk/alternative rock, requiring a highly aggressive and mid-focused tone. The rig prioritizes tightness (Boost/RAT) and British grit (UK 45).",
+          "Modulation effects (Chorus, Tremolo) are disabled to adhere to the 'avoid heavy modulation' directive."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for tighter, more aggressive punk punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "close-mic 4x12 (e.g., Ampeg/Marshall)",
+              "reason": "Enhance the tight, dry, close-mic feel needed for punk rhythm.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased punch and definition in upper mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Die Ärzte - Schrei Nach Liebe - Valeton GP-180",
+        "song": {
+          "artist": "Die Ärzte",
+          "title": "Schrei Nach Liebe",
+          "album": "",
+          "year": null,
+          "genre": "punk rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "tight dry punk crunch with forward mids",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A tight, aggressive punk crunch using a British amp model (UK 45) combined with a Boost and focused EQ to achieve forward mids and palm-muted punch.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 2",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up aggressive palm-muting and high gain passages.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/drive",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide a tight, aggressive boost to enhance the upper-mid bite and punch.",
+            "matchQuality": "close",
+            "gap": "The Klon hint suggests an OD pedal (OD 9 or Green OD), but Boost is used here for pure tightening/leveling without color shift, matching the 'dry' requirement.",
+            "alternatives": [
+              {
+                "module": "PRE",
+                "model": "OD 9",
+                "reason": "If more grit is needed."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": true,
+            "settings": {
+              "Drive": "4",
+              "Tone": "6",
+              "Output": "5"
+            },
+            "purpose": "Provide medium-gain crunch and aggressive bite without sounding overly fuzzy or scooped.",
+            "matchQuality": "close",
+            "gap": "The 'Klon hint' suggests a clean boost/overdrive, but RAT-style provides the necessary punchy aggression for punk rhythm while remaining focused on mids.",
+            "alternatives": [
+              {
+                "module": "DST",
+                "model": "Green OD",
+                "reason": "If a slightly cleaner, British tone is preferred."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "7",
+              "Midrange": "8",
+              "Bass": "6"
+            },
+            "purpose": "Simulate the hot British Plexi/Marshall tone required for classic punk aggression and mid-focus.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Close",
+              "Distance": "3 inches"
+            },
+            "purpose": "Provide the classic British cabinet sound and simulate a dry, close-mic feel.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Low": "-1",
+              "Mid": "+3",
+              "High": "+2"
+            },
+            "purpose": "Enhance the forward mids and upper-mid bite while keeping the low end tight.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": false,
+            "settings": {
+              "Cutoff": "100 Hz"
+            },
+            "purpose": "Placeholder. Wah is not needed for this dry punk rhythm tone.",
+            "matchQuality": "none",
+            "gap": "None (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "modulation/time",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "0",
+              "Depth": "0"
+            },
+            "purpose": "Placeholder. Heavy modulation must be avoided.",
+            "matchQuality": "none",
+            "gap": "None (Disabled)",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/reverb",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2"
+            },
+            "purpose": "Add subtle rhythmic depth without muddying the tight punk sound.",
+            "matchQuality": "close",
+            "gap": "None (Used sparingly)",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Mix": "25%",
+              "Decay Time": "1.5s"
+            },
+            "purpose": "Provide a subtle sense of space and 'dry' room feel without excessive wash.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "tight dry punk crunch with forward mids",
+          "toneProfile": "tight dry punk crunch with forward mids",
+          "idealSignalChain": "Marshall/Plexi or hot British amp | 2x12 or 4x12 | medium-gain drive",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi or hot British amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "2x12 or 4x12",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "medium-gain drive",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "aggressive palm-muted rhythm",
+            "tight upper-mid bite",
+            "dry, close-mic feel"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Punk/Alternative Rock (Aggressive, Mid-focused)",
+          "bestMatchSummary": "A tight, aggressive punk crunch using a British amp model (UK 45) combined with a Boost and focused EQ to achieve forward mids and palm-muted punch.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 2",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up aggressive palm-muting and high gain passages.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/drive",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide a tight, aggressive boost to enhance the upper-mid bite and punch.",
+              "matchQuality": "close",
+              "gap": "The Klon hint suggests an OD pedal (OD 9 or Green OD), but Boost is used here for pure tightening/leveling without color shift, matching the 'dry' requirement.",
+              "alternatives": [
+                {
+                  "module": "PRE",
+                  "model": "OD 9",
+                  "reason": "If more grit is needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": true,
+              "settings": {
+                "Drive": "4",
+                "Tone": "6",
+                "Output": "5"
+              },
+              "purpose": "Provide medium-gain crunch and aggressive bite without sounding overly fuzzy or scooped.",
+              "matchQuality": "close",
+              "gap": "The 'Klon hint' suggests a clean boost/overdrive, but RAT-style provides the necessary punchy aggression for punk rhythm while remaining focused on mids.",
+              "alternatives": [
+                {
+                  "module": "DST",
+                  "model": "Green OD",
+                  "reason": "If a slightly cleaner, British tone is preferred."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "7",
+                "Midrange": "8",
+                "Bass": "6"
+              },
+              "purpose": "Simulate the hot British Plexi/Marshall tone required for classic punk aggression and mid-focus.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Close",
+                "Distance": "3 inches"
+              },
+              "purpose": "Provide the classic British cabinet sound and simulate a dry, close-mic feel.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Low": "-1",
+                "Mid": "+3",
+                "High": "+2"
+              },
+              "purpose": "Enhance the forward mids and upper-mid bite while keeping the low end tight.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Cutoff": "100 Hz"
+              },
+              "purpose": "Placeholder. Wah is not needed for this dry punk rhythm tone.",
+              "matchQuality": "none",
+              "gap": "None (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "modulation/time",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "0",
+                "Depth": "0"
+              },
+              "purpose": "Placeholder. Heavy modulation must be avoided.",
+              "matchQuality": "none",
+              "gap": "None (Disabled)",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/reverb",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2"
+              },
+              "purpose": "Add subtle rhythmic depth without muddying the tight punk sound.",
+              "matchQuality": "close",
+              "gap": "None (Used sparingly)",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Mix": "25%",
+                "Decay Time": "1.5s"
+              },
+              "purpose": "Provide a subtle sense of space and 'dry' room feel without excessive wash.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for tighter, more aggressive punk punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "close-mic 4x12 (e.g., Ampeg/Marshall)",
+              "reason": "Enhance the tight, dry, close-mic feel needed for punk rhythm.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased punch and definition in upper mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop Klon hint",
+          "avoid Vox lean",
+          "keep mids present"
+        ],
+        "warnings": [
+          "The source material is punk/alternative rock, requiring a highly aggressive and mid-focused tone. The rig prioritizes tightness (Boost/RAT) and British grit (UK 45).",
+          "Modulation effects (Chorus, Tremolo) are disabled to adhere to the 'avoid heavy modulation' directive."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.131,
+      "prompt_chars": 995,
+      "response_chars": 357,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 100,
+        "total_duration": 12104934000,
+        "prompt_eval_duration": 74369000,
+        "eval_duration": 696059000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.103,
+      "prompt_chars": 5274,
+      "response_chars": 474,
+      "usage": {
+        "input_tokens": 1483,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 132,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1615
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 20.024,
+      "prompt_chars": 3528,
+      "response_chars": 5583,
+      "usage": {
+        "prompt_eval_count": 1198,
+        "eval_count": 1606,
+        "total_duration": 20004353400,
+        "prompt_eval_duration": 105291000,
+        "eval_duration": 11204040000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 2.62,
+      "prompt_chars": 7676,
+      "response_chars": 522,
+      "usage": {
+        "prompt_eval_count": 2161,
+        "eval_count": 149,
+        "total_duration": 2589209900,
+        "prompt_eval_duration": 228522000,
+        "eval_duration": 1045244999
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.412,
+      "prompt_chars": 2692,
+      "response_chars": 176,
+      "usage": {
+        "prompt_eval_count": 866,
+        "eval_count": 46,
+        "total_duration": 11394114800,
+        "prompt_eval_duration": 93445000,
+        "eval_duration": 308678000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Die Ärzte",
+      "title": "Schrei Nach Liebe",
+      "album": "",
+      "year": null,
+      "genre": "punk rock"
+    },
+    "rig": {
+      "rigName": "Die Ärzte - Schrei Nach Liebe - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "tight dry punk crunch with forward mids",
+      "signalChainSummary": "A tight, aggressive punk crunch using a British amp model (UK 45) combined with a Boost and focused EQ to achieve forward mids and palm-muted punch.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 2",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up aggressive palm-muting and high gain passages.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/drive",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide a tight, aggressive boost to enhance the upper-mid bite and punch.",
+          "matchQuality": "close",
+          "gap": "The Klon hint suggests an OD pedal (OD 9 or Green OD), but Boost is used here for pure tightening/leveling without color shift, matching the 'dry' requirement.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "If more grit is needed."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": true,
+          "settings": {
+            "Drive": "4",
+            "Tone": "6",
+            "Output": "5"
+          },
+          "purpose": "Provide medium-gain crunch and aggressive bite without sounding overly fuzzy or scooped.",
+          "matchQuality": "close",
+          "gap": "The 'Klon hint' suggests a clean boost/overdrive, but RAT-style provides the necessary punchy aggression for punk rhythm while remaining focused on mids.",
+          "alternatives": [
+            {
+              "model": "Green OD",
+              "reason": "If a slightly cleaner, British tone is preferred."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "7",
+            "Midrange": "8",
+            "Bass": "6"
+          },
+          "purpose": "Simulate the hot British Plexi/Marshall tone required for classic punk aggression and mid-focus.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Close",
+            "Distance": "3 inches"
+          },
+          "purpose": "Provide the classic British cabinet sound and simulate a dry, close-mic feel.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Low": "-1",
+            "Mid": "+3",
+            "High": "+2"
+          },
+          "purpose": "Enhance the forward mids and upper-mid bite while keeping the low end tight.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": false,
+          "settings": {
+            "Cutoff": "100 Hz"
+          },
+          "purpose": "Placeholder. Wah is not needed for this dry punk rhythm tone.",
+          "matchQuality": "fallback",
+          "gap": "None (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "modulation/time",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "0",
+            "Depth": "0"
+          },
+          "purpose": "Placeholder. Heavy modulation must be avoided.",
+          "matchQuality": "fallback",
+          "gap": "None (Disabled)",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/reverb",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2"
+          },
+          "purpose": "Add subtle rhythmic depth without muddying the tight punk sound.",
+          "matchQuality": "close",
+          "gap": "None (Used sparingly)",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Mix": "25%",
+            "Decay Time": "1.5s"
+          },
+          "purpose": "Provide a subtle sense of space and 'dry' room feel without excessive wash.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "tight dry punk crunch with forward mids",
+      "mustHave": [
+        "aggressive palm-muted rhythm",
+        "tight upper-mid bite",
+        "dry, close-mic feel"
+      ],
+      "avoid": [
+        "mid-scooped metal",
+        "fuzzy saturation",
+        "heavy modulation"
+      ],
+      "gearClues": [
+        "Marshall/Plexi or hot British amp",
+        "2x12 or 4x12",
+        "medium-gain drive"
+      ],
+      "corrections": [
+        "drop Klon hint",
+        "avoid Vox lean",
+        "keep mids present"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "punk rock",
+      "styleTags": [
+        "german punk",
+        "pop punk"
+      ],
+      "targetTone": "tight dry punk crunch with forward mids",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for tighter, more aggressive punk punch.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "close-mic 4x12 (e.g., Ampeg/Marshall)",
+          "reason": "Enhance the tight, dry, close-mic feel needed for punk rhythm.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased punch and definition in upper mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1825,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

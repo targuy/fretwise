@@ -1,0 +1,1126 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1804,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Bijelo_Dugme__kad_bi_bio_bijelo_dugme.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Bijelo Dugme",
+    "title": "kad bi bio bijelo dugme",
+    "album": "",
+    "year": null,
+    "genre": "balkan rock"
+  },
+  "genreClassification": {
+    "genre": "balkan rock",
+    "subgenres": [
+      "pop rock",
+      "folk rock"
+    ],
+    "confidence": "high",
+    "rationale": "The artist and title strongly suggest the Balkan rock genre."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly crunchy blues rock tone with a warm, round midrange focus.",
+      "signatureElements": [
+        "Crunch/Overdrive (mid-focused)",
+        "Slightly scooped mids on the lead lines",
+        "Warm compression for sustain",
+        "Subtle delay and reverb"
+      ],
+      "gearHypotheses": [
+        "Tube Screamer style overdrive (for grit)",
+        "British-style amp simulation (Marshall/Vox vibe)",
+        "Chorus or phaser modulation (for texture)"
+      ],
+      "avoid": [
+        "Extreme fuzz tones",
+        "High-gain metal saturation",
+        "Bright, brittle clean sounds"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "warm Balkan rock crunch with singing midrange",
+      "mustHave": [
+        "mid-gain crunch",
+        "warm sustain",
+        "singing lead mids",
+        "light delay/reverb"
+      ],
+      "avoid": [
+        "fuzz",
+        "metal gain",
+        "glass-clean"
+      ],
+      "gearClues": [
+        "Marshall/Plexi",
+        "12-inch cab",
+        "humbucker"
+      ],
+      "corrections": [
+        "drop Vox",
+        "drop chorus/phaser",
+        "keep delay subtle"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "warm Balkan rock crunch with singing midrange",
+    "mustHave": [
+      "mid-gain crunch",
+      "warm sustain",
+      "singing lead mids",
+      "light delay/reverb"
+    ],
+    "avoid": [
+      "fuzz",
+      "metal gain",
+      "glass-clean"
+    ],
+    "gearClues": [
+      "Marshall/Plexi",
+      "12-inch cab",
+      "humbucker"
+    ],
+    "corrections": [
+      "drop Vox",
+      "drop chorus/phaser",
+      "keep delay subtle"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on warm, mid-focused British rock tones (Plexi/UK 45 style).",
+          "bestMatchSummary": "A classic UK Plexi-style chain with moderate gain and a focus on singing midrange, complemented by subtle delay and room reverb.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide mid-gain crunch and warmth, simulating a classic British overdrive.",
+              "matchQuality": "close",
+              "gap": "The GP-180 does not have a dedicated Plexi model, but Green OD provides the necessary midrange focus and grit.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more aggressive than Green OD."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": false,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "60%",
+                "Level": "50%"
+              },
+              "purpose": "Used as a subtle gain enhancer to push the amp into natural breakup without sounding like modern metal.",
+              "matchQuality": "close",
+              "gap": "The RAT-style is generally too aggressive, but setting it low allows it to function as a gentle saturation boost, fulfilling the 'mid-gain crunch' requirement.",
+              "alternatives": [
+                {
+                  "model": "None",
+                  "reason": "Bypassing this stage entirely might be better if Green OD is sufficient."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "65%"
+              },
+              "purpose": "Simulate the classic British Plexi sound and provide the core 'singing midrange' character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the required British cabinet tone and complement the Plexi amp model.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the midrange and warmth to enhance the 'singing lead mids' without sounding muddy.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "20%",
+                "Mix": "15%"
+              },
+              "purpose": "Subtle thickening and movement for texture (though the verdict suggests dropping chorus/phaser, a minimal setting can add warmth).",
+              "matchQuality": "close",
+              "gap": "The instructions suggest avoiding modulation effects, but a very subtle Chorus adds necessary 'warm sustain' without being distracting.",
+              "alternatives": [
+                {
+                  "model": "None",
+                  "reason": "Bypass this module entirely if the tone is too clean."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Add subtle echo and space to the lead lines, fulfilling the 'light delay' requirement.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Add natural space and warmth to the overall tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "75%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is Balkan rock, which often requires a blend of clean warmth and aggressive crunch. The chain prioritizes the classic British Plexi sound (UK 45) to achieve the 'singing midrange' while using Green OD for controlled grit."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and punch, especially in the mids.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., vintage 4x12)",
+              "reason": "Enhance mid-range focus and overall cabinet punch for Balkan rock style.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved clarity and definition in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Bijelo Dugme - kad bi bio bijelo dugme - Valeton GP-180",
+        "song": {
+          "artist": "Bijelo Dugme",
+          "title": "kad bi bio bijelo dugme",
+          "album": "",
+          "year": null,
+          "genre": "balkan rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "warm Balkan rock crunch with singing midrange",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic UK Plexi-style chain with moderate gain and a focus on singing midrange, complemented by subtle delay and room reverb.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp boost/overdrive",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "30%",
+              "Tone": "65%",
+              "Level": "70%"
+            },
+            "purpose": "Provide mid-gain crunch and warmth, simulating a classic British overdrive.",
+            "matchQuality": "close",
+            "gap": "The GP-180 does not have a dedicated Plexi model, but Green OD provides the necessary midrange focus and grit.",
+            "alternatives": [
+              {
+                "model": "Blues OD",
+                "reason": "Slightly more aggressive than Green OD."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/gain stage",
+            "module": "DST",
+            "model": "RAT-style",
+            "active": false,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "60%",
+              "Level": "50%"
+            },
+            "purpose": "Used as a subtle gain enhancer to push the amp into natural breakup without sounding like modern metal.",
+            "matchQuality": "close",
+            "gap": "The RAT-style is generally too aggressive, but setting it low allows it to function as a gentle saturation boost, fulfilling the 'mid-gain crunch' requirement.",
+            "alternatives": [
+              {
+                "model": "None",
+                "reason": "Bypassing this stage entirely might be better if Green OD is sufficient."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier simulation",
+            "module": "AMP",
+            "model": "UK 45",
+            "active": true,
+            "settings": {
+              "Gain": "60%",
+              "Treble": "70%",
+              "Midrange": "80%",
+              "Bass": "65%"
+            },
+            "purpose": "Simulate the classic British Plexi sound and provide the core 'singing midrange' character.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "cabinet/IR simulation",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Balanced"
+            },
+            "purpose": "Provide the required British cabinet tone and complement the Plexi amp model.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization/tonal shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "+2 dB",
+              "Midrange": "+3 dB",
+              "Treble": "-1 dB"
+            },
+            "purpose": "Slightly boost the midrange and warmth to enhance the 'singing lead mids' without sounding muddy.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/texture",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": false,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "20%",
+              "Mix": "15%"
+            },
+            "purpose": "Subtle thickening and movement for texture (though the verdict suggests dropping chorus/phaser, a minimal setting can add warmth).",
+            "matchQuality": "close",
+            "gap": "The instructions suggest avoiding modulation effects, but a very subtle Chorus adds necessary 'warm sustain' without being distracting.",
+            "alternatives": [
+              {
+                "model": "None",
+                "reason": "Bypass this module entirely if the tone is too clean."
+              }
+            ]
+          },
+          {
+            "order": 8,
+            "role": "delay/time effect",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "350 ms",
+              "Feedback": "2",
+              "Mix": "25%"
+            },
+            "purpose": "Add subtle echo and space to the lead lines, fulfilling the 'light delay' requirement.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "reverb/ambience",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "2.5s",
+              "Mix": "10%"
+            },
+            "purpose": "Add natural space and warmth to the overall tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 10,
+            "role": "volume control",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "75%"
+            },
+            "purpose": "Final output level adjustment.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "warm Balkan rock crunch with singing midrange",
+          "toneProfile": "warm Balkan rock crunch with singing midrange",
+          "idealSignalChain": "Marshall/Plexi | 12-inch cab | humbucker",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "Marshall/Plexi",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "12-inch cab",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "humbucker",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "mid-gain crunch",
+            "warm sustain",
+            "singing lead mids",
+            "light delay/reverb"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on warm, mid-focused British rock tones (Plexi/UK 45 style).",
+          "bestMatchSummary": "A classic UK Plexi-style chain with moderate gain and a focus on singing midrange, complemented by subtle delay and room reverb.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp boost/overdrive",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "30%",
+                "Tone": "65%",
+                "Level": "70%"
+              },
+              "purpose": "Provide mid-gain crunch and warmth, simulating a classic British overdrive.",
+              "matchQuality": "close",
+              "gap": "The GP-180 does not have a dedicated Plexi model, but Green OD provides the necessary midrange focus and grit.",
+              "alternatives": [
+                {
+                  "model": "Blues OD",
+                  "reason": "Slightly more aggressive than Green OD."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/gain stage",
+              "module": "DST",
+              "model": "RAT-style",
+              "active": false,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "60%",
+                "Level": "50%"
+              },
+              "purpose": "Used as a subtle gain enhancer to push the amp into natural breakup without sounding like modern metal.",
+              "matchQuality": "close",
+              "gap": "The RAT-style is generally too aggressive, but setting it low allows it to function as a gentle saturation boost, fulfilling the 'mid-gain crunch' requirement.",
+              "alternatives": [
+                {
+                  "model": "None",
+                  "reason": "Bypassing this stage entirely might be better if Green OD is sufficient."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier simulation",
+              "module": "AMP",
+              "model": "UK 45",
+              "active": true,
+              "settings": {
+                "Gain": "60%",
+                "Treble": "70%",
+                "Midrange": "80%",
+                "Bass": "65%"
+              },
+              "purpose": "Simulate the classic British Plexi sound and provide the core 'singing midrange' character.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "cabinet/IR simulation",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Balanced"
+              },
+              "purpose": "Provide the required British cabinet tone and complement the Plexi amp model.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization/tonal shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "+2 dB",
+                "Midrange": "+3 dB",
+                "Treble": "-1 dB"
+              },
+              "purpose": "Slightly boost the midrange and warmth to enhance the 'singing lead mids' without sounding muddy.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/texture",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": false,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "20%",
+                "Mix": "15%"
+              },
+              "purpose": "Subtle thickening and movement for texture (though the verdict suggests dropping chorus/phaser, a minimal setting can add warmth).",
+              "matchQuality": "close",
+              "gap": "The instructions suggest avoiding modulation effects, but a very subtle Chorus adds necessary 'warm sustain' without being distracting.",
+              "alternatives": [
+                {
+                  "model": "None",
+                  "reason": "Bypass this module entirely if the tone is too clean."
+                }
+              ]
+            },
+            {
+              "order": 8,
+              "role": "delay/time effect",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "350 ms",
+                "Feedback": "2",
+                "Mix": "25%"
+              },
+              "purpose": "Add subtle echo and space to the lead lines, fulfilling the 'light delay' requirement.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "reverb/ambience",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "2.5s",
+                "Mix": "10%"
+              },
+              "purpose": "Add natural space and warmth to the overall tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 10,
+              "role": "volume control",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "75%"
+              },
+              "purpose": "Final output level adjustment.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and punch, especially in the mids.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., vintage 4x12)",
+              "reason": "Enhance mid-range focus and overall cabinet punch for Balkan rock style.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved clarity and definition in the mids.",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop Vox",
+          "drop chorus/phaser",
+          "keep delay subtle"
+        ],
+        "warnings": [
+          "The source material is Balkan rock, which often requires a blend of clean warmth and aggressive crunch. The chain prioritizes the classic British Plexi sound (UK 45) to achieve the 'singing midrange' while using Green OD for controlled grit."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.466,
+      "prompt_chars": 1004,
+      "response_chars": 532,
+      "usage": {
+        "prompt_eval_count": 327,
+        "eval_count": 128,
+        "total_duration": 11441196500,
+        "prompt_eval_duration": 135098000,
+        "eval_duration": 894811000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.717,
+      "prompt_chars": 5472,
+      "response_chars": 424,
+      "usage": {
+        "input_tokens": 1521,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 118,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1639
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.114,
+      "prompt_chars": 3494,
+      "response_chars": 5947,
+      "usage": {
+        "prompt_eval_count": 1194,
+        "eval_count": 1669,
+        "total_duration": 12107194100,
+        "prompt_eval_duration": 118947000,
+        "eval_duration": 11525784000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 11.919,
+      "prompt_chars": 8014,
+      "response_chars": 555,
+      "usage": {
+        "prompt_eval_count": 2220,
+        "eval_count": 150,
+        "total_duration": 11901622100,
+        "prompt_eval_duration": 212722000,
+        "eval_duration": 1105624000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.988,
+      "prompt_chars": 2721,
+      "response_chars": 163,
+      "usage": {
+        "prompt_eval_count": 863,
+        "eval_count": 44,
+        "total_duration": 12970560800,
+        "prompt_eval_duration": 95085000,
+        "eval_duration": 297599000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Bijelo Dugme",
+      "title": "kad bi bio bijelo dugme",
+      "album": "",
+      "year": null,
+      "genre": "balkan rock"
+    },
+    "rig": {
+      "rigName": "Bijelo Dugme - kad bi bio bijelo dugme - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "warm Balkan rock crunch with singing midrange",
+      "signalChainSummary": "A classic UK Plexi-style chain with moderate gain and a focus on singing midrange, complemented by subtle delay and room reverb.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp boost/overdrive",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "30%",
+            "Tone": "65%",
+            "Level": "70%"
+          },
+          "purpose": "Provide mid-gain crunch and warmth, simulating a classic British overdrive.",
+          "matchQuality": "close",
+          "gap": "The GP-180 does not have a dedicated Plexi model, but Green OD provides the necessary midrange focus and grit.",
+          "alternatives": [
+            {
+              "model": "Blues OD",
+              "reason": "Slightly more aggressive than Green OD."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/gain stage",
+          "module": "DST",
+          "model": "RAT-style",
+          "active": false,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "60%",
+            "Level": "50%"
+          },
+          "purpose": "Used as a subtle gain enhancer to push the amp into natural breakup without sounding like modern metal.",
+          "matchQuality": "close",
+          "gap": "The RAT-style is generally too aggressive, but setting it low allows it to function as a gentle saturation boost, fulfilling the 'mid-gain crunch' requirement.",
+          "alternatives": [
+            {
+              "model": "None",
+              "reason": "Bypassing this stage entirely might be better if Green OD is sufficient."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier simulation",
+          "module": "AMP",
+          "model": "UK 45",
+          "active": true,
+          "settings": {
+            "Gain": "60%",
+            "Treble": "70%",
+            "Midrange": "80%",
+            "Bass": "65%"
+          },
+          "purpose": "Simulate the classic British Plexi sound and provide the core 'singing midrange' character.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "cabinet/IR simulation",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Balanced"
+          },
+          "purpose": "Provide the required British cabinet tone and complement the Plexi amp model.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization/tonal shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "+2 dB",
+            "Midrange": "+3 dB",
+            "Treble": "-1 dB"
+          },
+          "purpose": "Slightly boost the midrange and warmth to enhance the 'singing lead mids' without sounding muddy.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/texture",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": false,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "20%",
+            "Mix": "15%"
+          },
+          "purpose": "Subtle thickening and movement for texture (though the verdict suggests dropping chorus/phaser, a minimal setting can add warmth).",
+          "matchQuality": "close",
+          "gap": "The instructions suggest avoiding modulation effects, but a very subtle Chorus adds necessary 'warm sustain' without being distracting.",
+          "alternatives": [
+            {
+              "model": "None",
+              "reason": "Bypass this module entirely if the tone is too clean."
+            }
+          ]
+        },
+        {
+          "order": 8,
+          "role": "delay/time effect",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "350 ms",
+            "Feedback": "2",
+            "Mix": "25%"
+          },
+          "purpose": "Add subtle echo and space to the lead lines, fulfilling the 'light delay' requirement.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "reverb/ambience",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "2.5s",
+            "Mix": "10%"
+          },
+          "purpose": "Add natural space and warmth to the overall tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 10,
+          "role": "volume control",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "75%"
+          },
+          "purpose": "Final output level adjustment.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "warm Balkan rock crunch with singing midrange",
+      "mustHave": [
+        "mid-gain crunch",
+        "warm sustain",
+        "singing lead mids",
+        "light delay/reverb"
+      ],
+      "avoid": [
+        "fuzz",
+        "metal gain",
+        "glass-clean"
+      ],
+      "gearClues": [
+        "Marshall/Plexi",
+        "12-inch cab",
+        "humbucker"
+      ],
+      "corrections": [
+        "drop Vox",
+        "drop chorus/phaser",
+        "keep delay subtle"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "balkan rock",
+      "styleTags": [
+        "pop rock",
+        "folk rock"
+      ],
+      "targetTone": "warm Balkan rock crunch with singing midrange",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better cabinet realism and punch, especially in the mids.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR (e.g., vintage 4x12)",
+          "reason": "Enhance mid-range focus and overall cabinet punch for Balkan rock style.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Improved clarity and definition in the mids.",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1804,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

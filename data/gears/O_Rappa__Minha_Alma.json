@@ -1,0 +1,988 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1908,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\O_Rappa__Minha_Alma.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "O Rappa",
+    "title": "Minha Alma",
+    "album": "",
+    "year": null,
+    "genre": "rock"
+  },
+  "genreClassification": {
+    "genre": "rock",
+    "subgenres": [
+      "pop rock",
+      "alternative rock",
+      "brazilian rock"
+    ],
+    "confidence": "high",
+    "rationale": "O Rappa is a prominent Brazilian band known for alternative and pop-infused rock."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-gain, slightly crunchy rhythm tone with pronounced mid-range focus and a touch of chorus/modulation.",
+      "signatureElements": [
+        "Chorus/Vibrato modulation",
+        "Slight crunch (low gain)",
+        "Punchy mids",
+        "Clean attack"
+      ],
+      "gearHypotheses": [
+        "Amp simulation favoring Fender or British clean tones",
+        "Modulation effect (Chorus/Tremolo) for texture",
+        "Overdrive/Boost pedal for grit and punch"
+      ],
+      "avoid": [
+        "Heavy fuzz",
+        "High-gain distortion",
+        "Deep scooped bass"
+      ],
+      "confidence": "medium"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "clean-mid crunch with chorus shimmer",
+      "mustHave": [
+        "chorus modulation",
+        "clean attack",
+        "slight crunch",
+        "punchy mids"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "high gain",
+        "scooped bass"
+      ],
+      "gearClues": [
+        "British clean amp",
+        "Fender clean amp",
+        "light OD",
+        "chorus pedal"
+      ],
+      "corrections": [
+        "name chorus as key texture",
+        "keep gain mild",
+        "avoid generic mid-gain wording"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "clean-mid crunch with chorus shimmer",
+    "mustHave": [
+      "chorus modulation",
+      "clean attack",
+      "slight crunch",
+      "punchy mids"
+    ],
+    "avoid": [
+      "heavy fuzz",
+      "high gain",
+      "scooped bass"
+    ],
+    "gearClues": [
+      "British clean amp",
+      "Fender clean amp",
+      "light OD",
+      "chorus pedal"
+    ],
+    "corrections": [
+      "name chorus as key texture",
+      "keep gain mild",
+      "avoid generic mid-gain wording"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean British tones with chorus and light overdrive for punchy mids.",
+          "bestMatchSummary": "A classic, chimey setup using a UK-style amp foundation, enhanced by Chorus and a mild OD pedal to achieve the desired clean-mid crunch texture.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide light, transparent overdrive for the 'crunch' element and punchy mids.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD/OD 9 to maintain a vintage, non-aggressive clean tone while adding necessary grit.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (Not needed for this clean texture).",
+              "matchQuality": "perfect",
+              "gap": "The target tone does not require a wah effect.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": true,
+              "settings": {},
+              "purpose": "Bypass (The Green OD handles the necessary light gain).",
+              "matchQuality": "perfect",
+              "gap": "Using the PRE section for controlled gain is better than a dedicated DST block.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Mid": "7",
+                "Bass": "5"
+              },
+              "purpose": "Simulate a classic British clean amp foundation (Fender/British Clean vibe) with punchy mids.",
+              "matchQuality": "close",
+              "gap": "UK SLP is the best fit for 'British clean' and avoiding high gain, though US Deluxe might also work. UK SLP offers better mid-focus.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic, articulate British cabinet sound.",
+              "matchQuality": "close",
+              "gap": "None. This complements the UK SLP amp model well.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/chorus",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "4",
+                "Feedback": "2"
+              },
+              "purpose": "Add the required 'chorus shimmer' and key texture to the clean tone.",
+              "matchQuality": "perfect",
+              "gap": "None. This is a core requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "EQ/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Fine-tune the frequency response to emphasize punchy mids and clarity.",
+              "matchQuality": "close",
+              "gap": "None. Used for final tonal shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Add subtle depth and shimmer without muddying the clean tone.",
+              "matchQuality": "close",
+              "gap": "A light delay adds dimension, complementing the chorus shimmer.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is not explicitly defined as a guitar track. The rig assumes the role of providing a clean, melodic lead/rhythm texture suitable for pop/rock accompaniment."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism to better match the British clean amp foundation and enhance mid-range punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British 2x12 or 4x10 IR",
+              "reason": "Enhance articulation and midrange focus for the clean British tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and punch in mids",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "O Rappa - Minha Alma - Valeton GP-180",
+        "song": {
+          "artist": "O Rappa",
+          "title": "Minha Alma",
+          "album": "",
+          "year": null,
+          "genre": "rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "clean-mid crunch with chorus shimmer",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A classic, chimey setup using a UK-style amp foundation, enhanced by Chorus and a mild OD pedal to achieve the desired clean-mid crunch texture.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up ambient noise and hum.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Green OD",
+            "active": true,
+            "settings": {
+              "Drive": "20%",
+              "Tone": "6",
+              "Level": "7"
+            },
+            "purpose": "Provide light, transparent overdrive for the 'crunch' element and punchy mids.",
+            "matchQuality": "close",
+            "gap": "The Green OD is chosen over Blues OD/OD 9 to maintain a vintage, non-aggressive clean tone while adding necessary grit.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass (Not needed for this clean texture).",
+            "matchQuality": "perfect",
+            "gap": "The target tone does not require a wah effect.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/gain",
+            "module": "DST",
+            "model": "None",
+            "active": true,
+            "settings": {},
+            "purpose": "Bypass (The Green OD handles the necessary light gain).",
+            "matchQuality": "perfect",
+            "gap": "Using the PRE section for controlled gain is better than a dedicated DST block.",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK SLP",
+            "active": true,
+            "settings": {
+              "Gain": "4",
+              "Treble": "6",
+              "Mid": "7",
+              "Bass": "5"
+            },
+            "purpose": "Simulate a classic British clean amp foundation (Fender/British Clean vibe) with punchy mids.",
+            "matchQuality": "close",
+            "gap": "UK SLP is the best fit for 'British clean' and avoiding high gain, though US Deluxe might also work. UK SLP offers better mid-focus.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provide a classic, articulate British cabinet sound.",
+            "matchQuality": "close",
+            "gap": "None. This complements the UK SLP amp model well.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "modulation/chorus",
+            "module": "MOD",
+            "model": "Chorus",
+            "active": true,
+            "settings": {
+              "Rate": "3 Hz",
+              "Depth": "4",
+              "Feedback": "2"
+            },
+            "purpose": "Add the required 'chorus shimmer' and key texture to the clean tone.",
+            "matchQuality": "perfect",
+            "gap": "None. This is a core requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "EQ/shaping",
+            "module": "EQ",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Bass": "-2 dB",
+              "Mid": "+3 dB",
+              "Treble": "+1 dB"
+            },
+            "purpose": "Fine-tune the frequency response to emphasize punchy mids and clarity.",
+            "matchQuality": "close",
+            "gap": "None. Used for final tonal shaping.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "delay/ambience",
+            "module": "DLY",
+            "model": "Digital Delay",
+            "active": true,
+            "settings": {
+              "Time": "300 ms",
+              "Feedback": "2",
+              "Mix": "3"
+            },
+            "purpose": "Add subtle depth and shimmer without muddying the clean tone.",
+            "matchQuality": "close",
+            "gap": "A light delay adds dimension, complementing the chorus shimmer.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "clean-mid crunch with chorus shimmer",
+          "toneProfile": "clean-mid crunch with chorus shimmer",
+          "idealSignalChain": "British clean amp | Fender clean amp | light OD | chorus pedal",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "British clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Fender clean amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "light OD",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "chorus pedal",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "chorus modulation",
+            "clean attack",
+            "slight crunch",
+            "punchy mids"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Focus on clean British tones with chorus and light overdrive for punchy mids.",
+          "bestMatchSummary": "A classic, chimey setup using a UK-style amp foundation, enhanced by Chorus and a mild OD pedal to achieve the desired clean-mid crunch texture.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up ambient noise and hum.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Green OD",
+              "active": true,
+              "settings": {
+                "Drive": "20%",
+                "Tone": "6",
+                "Level": "7"
+              },
+              "purpose": "Provide light, transparent overdrive for the 'crunch' element and punchy mids.",
+              "matchQuality": "close",
+              "gap": "The Green OD is chosen over Blues OD/OD 9 to maintain a vintage, non-aggressive clean tone while adding necessary grit.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass (Not needed for this clean texture).",
+              "matchQuality": "perfect",
+              "gap": "The target tone does not require a wah effect.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/gain",
+              "module": "DST",
+              "model": "None",
+              "active": true,
+              "settings": {},
+              "purpose": "Bypass (The Green OD handles the necessary light gain).",
+              "matchQuality": "perfect",
+              "gap": "Using the PRE section for controlled gain is better than a dedicated DST block.",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK SLP",
+              "active": true,
+              "settings": {
+                "Gain": "4",
+                "Treble": "6",
+                "Mid": "7",
+                "Bass": "5"
+              },
+              "purpose": "Simulate a classic British clean amp foundation (Fender/British Clean vibe) with punchy mids.",
+              "matchQuality": "close",
+              "gap": "UK SLP is the best fit for 'British clean' and avoiding high gain, though US Deluxe might also work. UK SLP offers better mid-focus.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provide a classic, articulate British cabinet sound.",
+              "matchQuality": "close",
+              "gap": "None. This complements the UK SLP amp model well.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "modulation/chorus",
+              "module": "MOD",
+              "model": "Chorus",
+              "active": true,
+              "settings": {
+                "Rate": "3 Hz",
+                "Depth": "4",
+                "Feedback": "2"
+              },
+              "purpose": "Add the required 'chorus shimmer' and key texture to the clean tone.",
+              "matchQuality": "perfect",
+              "gap": "None. This is a core requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "EQ/shaping",
+              "module": "EQ",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Bass": "-2 dB",
+                "Mid": "+3 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Fine-tune the frequency response to emphasize punchy mids and clarity.",
+              "matchQuality": "close",
+              "gap": "None. Used for final tonal shaping.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "delay/ambience",
+              "module": "DLY",
+              "model": "Digital Delay",
+              "active": true,
+              "settings": {
+                "Time": "300 ms",
+                "Feedback": "2",
+                "Mix": "3"
+              },
+              "purpose": "Add subtle depth and shimmer without muddying the clean tone.",
+              "matchQuality": "close",
+              "gap": "A light delay adds dimension, complementing the chorus shimmer.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism to better match the British clean amp foundation and enhance mid-range punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "British 2x12 or 4x10 IR",
+              "reason": "Enhance articulation and midrange focus for the clean British tone.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Increased clarity and punch in mids",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "name chorus as key texture",
+          "keep gain mild",
+          "avoid generic mid-gain wording"
+        ],
+        "warnings": [
+          "The source material is not explicitly defined as a guitar track. The rig assumes the role of providing a clean, melodic lead/rhythm texture suitable for pop/rock accompaniment."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 15.652,
+      "prompt_chars": 986,
+      "response_chars": 498,
+      "usage": {
+        "prompt_eval_count": 322,
+        "eval_count": 121,
+        "total_duration": 15630118600,
+        "prompt_eval_duration": 76790000,
+        "eval_duration": 826278000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 1.548,
+      "prompt_chars": 5418,
+      "response_chars": 461,
+      "usage": {
+        "input_tokens": 1508,
+        "input_tokens_details": {
+          "cached_tokens": 1280
+        },
+        "output_tokens": 124,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1632
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 54.829,
+      "prompt_chars": 3520,
+      "response_chars": 4808,
+      "usage": {
+        "prompt_eval_count": 1192,
+        "eval_count": 1365,
+        "total_duration": 54803393300,
+        "prompt_eval_duration": 124732000,
+        "eval_duration": 9516550000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 37.94,
+      "prompt_chars": 6827,
+      "response_chars": 553,
+      "usage": {
+        "prompt_eval_count": 1914,
+        "eval_count": 149,
+        "total_duration": 37912527300,
+        "prompt_eval_duration": 170806000,
+        "eval_duration": 1082449000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 18.622,
+      "prompt_chars": 2585,
+      "response_chars": 228,
+      "usage": {
+        "prompt_eval_count": 825,
+        "eval_count": 72,
+        "total_duration": 18603716000,
+        "prompt_eval_duration": 130500000,
+        "eval_duration": 585936000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "O Rappa",
+      "title": "Minha Alma",
+      "album": "",
+      "year": null,
+      "genre": "rock"
+    },
+    "rig": {
+      "rigName": "O Rappa - Minha Alma - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "clean-mid crunch with chorus shimmer",
+      "signalChainSummary": "A classic, chimey setup using a UK-style amp foundation, enhanced by Chorus and a mild OD pedal to achieve the desired clean-mid crunch texture.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up ambient noise and hum.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Green OD",
+          "active": true,
+          "settings": {
+            "Drive": "20%",
+            "Tone": "6",
+            "Level": "7"
+          },
+          "purpose": "Provide light, transparent overdrive for the 'crunch' element and punchy mids.",
+          "matchQuality": "close",
+          "gap": "The Green OD is chosen over Blues OD/OD 9 to maintain a vintage, non-aggressive clean tone while adding necessary grit.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass (Not needed for this clean texture).",
+          "matchQuality": "exact",
+          "gap": "The target tone does not require a wah effect.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/gain",
+          "module": "DST",
+          "model": "None",
+          "active": true,
+          "settings": {},
+          "purpose": "Bypass (The Green OD handles the necessary light gain).",
+          "matchQuality": "exact",
+          "gap": "Using the PRE section for controlled gain is better than a dedicated DST block.",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK SLP",
+          "active": true,
+          "settings": {
+            "Gain": "4",
+            "Treble": "6",
+            "Mid": "7",
+            "Bass": "5"
+          },
+          "purpose": "Simulate a classic British clean amp foundation (Fender/British Clean vibe) with punchy mids.",
+          "matchQuality": "close",
+          "gap": "UK SLP is the best fit for 'British clean' and avoiding high gain, though US Deluxe might also work. UK SLP offers better mid-focus.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provide a classic, articulate British cabinet sound.",
+          "matchQuality": "close",
+          "gap": "None. This complements the UK SLP amp model well.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "modulation/chorus",
+          "module": "MOD",
+          "model": "Chorus",
+          "active": true,
+          "settings": {
+            "Rate": "3 Hz",
+            "Depth": "4",
+            "Feedback": "2"
+          },
+          "purpose": "Add the required 'chorus shimmer' and key texture to the clean tone.",
+          "matchQuality": "exact",
+          "gap": "None. This is a core requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "EQ/shaping",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Bass": "-2 dB",
+            "Mid": "+3 dB",
+            "Treble": "+1 dB"
+          },
+          "purpose": "Fine-tune the frequency response to emphasize punchy mids and clarity.",
+          "matchQuality": "close",
+          "gap": "None. Used for final tonal shaping.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "delay/ambience",
+          "module": "DLY",
+          "model": "Digital Delay",
+          "active": true,
+          "settings": {
+            "Time": "300 ms",
+            "Feedback": "2",
+            "Mix": "3"
+          },
+          "purpose": "Add subtle depth and shimmer without muddying the clean tone.",
+          "matchQuality": "close",
+          "gap": "A light delay adds dimension, complementing the chorus shimmer.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "clean-mid crunch with chorus shimmer",
+      "mustHave": [
+        "chorus modulation",
+        "clean attack",
+        "slight crunch",
+        "punchy mids"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "high gain",
+        "scooped bass"
+      ],
+      "gearClues": [
+        "British clean amp",
+        "Fender clean amp",
+        "light OD",
+        "chorus pedal"
+      ],
+      "corrections": [
+        "name chorus as key texture",
+        "keep gain mild",
+        "avoid generic mid-gain wording"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "rock",
+      "styleTags": [
+        "pop rock",
+        "alternative rock",
+        "brazilian rock"
+      ],
+      "targetTone": "clean-mid crunch with chorus shimmer",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism to better match the British clean amp foundation and enhance mid-range punch.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "British 2x12 or 4x10 IR",
+          "reason": "Enhance articulation and midrange focus for the clean British tone.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Increased clarity and punch in mids",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1908,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

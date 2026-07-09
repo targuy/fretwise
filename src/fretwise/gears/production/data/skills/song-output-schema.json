@@ -1,0 +1,146 @@
+{
+  "type": "object",
+  "required": [
+    "rigName",
+    "song",
+    "status",
+    "confidence",
+    "general",
+    "gp180",
+    "improvements",
+    "assumptions",
+    "warnings",
+    "sources",
+    "createdFrom",
+    "needsReview"
+  ],
+  "properties": {
+    "rigName": { "type": "string" },
+    "song": {
+      "type": "object",
+      "required": ["title", "artist"],
+      "properties": {
+        "title": { "type": "string" },
+        "artist": { "type": "string" },
+        "album": { "type": "string" },
+        "year": { "type": ["integer", "null"] },
+        "genre": { "type": "string" }
+      }
+    },
+    "status": { "type": "string", "enum": ["draft", "tested", "validated", "deprecated", "archived", "legacy"] },
+    "confidence": { "type": "string", "enum": ["high", "medium/high", "medium", "low", "unknown"] },
+    "general": {
+      "type": "object",
+      "required": ["targetSound", "toneProfile", "idealSignalChain", "bestPossibleEquipment"],
+      "properties": {
+        "targetSound": { "type": "string" },
+        "toneProfile": { "type": "string" },
+        "referenceArtists": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "referenceTracks": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "idealSignalChain": { "type": "string" },
+        "bestPossibleEquipment": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["role", "model", "reason"],
+            "properties": {
+              "role": { "type": "string" },
+              "model": { "type": "string" },
+              "reason": { "type": "string" }
+            }
+          }
+        },
+        "productionNotes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "gp180": {
+      "type": "object",
+      "required": ["equipment", "guitar", "output", "choicePolicy", "bestMatchSummary", "blocks"],
+      "properties": {
+        "equipment": {
+          "type": "object",
+          "required": ["model"],
+          "properties": {
+            "model": { "type": "string" },
+            "ownedItem": { "type": "string" }
+          }
+        },
+        "guitar": { "type": "string" },
+        "output": { "type": "string" },
+        "choicePolicy": { "type": "string" },
+        "bestMatchSummary": { "type": "string" },
+        "blocks": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["order", "role", "module", "model", "active", "settings"],
+            "properties": {
+              "order": { "type": "integer" },
+              "role": { "type": "string" },
+              "module": { "type": "string" },
+              "model": { "type": "string" },
+              "active": { "type": "boolean" },
+              "settings": { "type": "object" },
+              "purpose": { "type": "string" },
+              "targetReference": { "type": "string" },
+              "matchQuality": { "type": "string", "enum": ["exact", "close", "acceptable", "fallback"] },
+              "gap": { "type": "string" },
+              "alternatives": {
+                "type": "array",
+                "items": { "type": "string" }
+              }
+            }
+          }
+        }
+      }
+    },
+    "improvements": {
+      "type": "object",
+      "required": ["summary", "proposals"],
+      "properties": {
+        "summary": { "type": "string" },
+        "proposals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["priority", "type", "target", "recommendedAsset", "reason"],
+            "properties": {
+              "priority": { "type": "string", "enum": ["P1", "P2", "P3", "none"] },
+              "type": { "type": "string", "enum": ["NAM", "SnapTone", "IR", "NAM+IR", "none"] },
+              "target": { "type": "string" },
+              "replacesBlockOrder": { "type": ["integer", "null"] },
+              "recommendedAsset": { "type": "string" },
+              "reason": { "type": "string" },
+              "whenToUse": { "type": "string" },
+              "expectedGain": { "type": "string" },
+              "requiredIfGp180Gap": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "assumptions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "sources": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "createdFrom": { "type": "string", "enum": ["manual", "generated", "imported", "converted", "legacy"] },
+    "needsReview": { "type": "boolean" }
+  }
+}

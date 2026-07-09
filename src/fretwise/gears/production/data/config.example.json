@@ -1,0 +1,114 @@
+{
+  "paths": {
+    "skill_prompt": "skills/song-tone-system.md",
+    "skill_chain": [
+      {
+        "id": "general_rig",
+        "label": "General song / artist / genre gear setting",
+        "role": "Concevoir la partie generale de la fiche chanson, artiste ou genre sans verrouiller un equipement unique.",
+        "path": "skills/song-tone-system.md",
+        "enabled": true,
+        "required": true
+      },
+      {
+        "id": "gp180_translation",
+        "label": "Valeton GP-180 translation",
+        "role": "Transposer la partie generale en rig Valeton GP-180 avec modules et reglages.",
+        "path": "skills/gp180-translation.md",
+        "enabled": true,
+        "required": false
+      },
+      {
+        "id": "nam_ir_replacement",
+        "label": "NAM / IR replacement",
+        "role": "Proposer des NAM/SnapTone et IR en remplacement total ou partiel du preset GP-180.",
+        "path": "skills/nam-ir-replacement.md",
+        "enabled": true,
+        "required": false
+      }
+    ],
+    "schema": "skills/song-output-schema.json",
+    "run_dir": "sample_run"
+  },
+  "llm": {
+    "provider": "mock",
+    "model": "mock-song-v1",
+    "ollama_url": "http://localhost:11434/api/generate",
+    "temperature": 0.2,
+    "max_tokens": 2200
+  },
+  "batch": {
+    "limit": 5,
+    "skip_existing": true
+  },
+  "notion": {
+    "mode": "dry_run",
+    "api_version": "2026-03-11",
+    "parent_type": "data_source_id",
+    "parent_id": "replace-with-notion-data-source-or-database-id",
+    "template": {
+      "enabled": false,
+      "template_id": "",
+      "timezone": "Europe/Paris",
+      "append_generated_blocks": true,
+      "append_delay_seconds": 2
+    },
+    "property_map": {
+      "title": {
+        "property": "Rig Name",
+        "type": "title",
+        "template": "{rigName}"
+      },
+      "artist": {
+        "property": "Artist",
+        "type": "rich_text",
+        "path": "song.artist"
+      },
+      "song_title": {
+        "property": "Song",
+        "type": "rich_text",
+        "path": "song.title"
+      },
+      "album": {
+        "property": "Album",
+        "type": "rich_text",
+        "path": "song.album"
+      },
+      "year": {
+        "property": "Year",
+        "type": "number",
+        "path": "song.year"
+      },
+      "status": {
+        "property": "Status",
+        "type": "select",
+        "path": "status"
+      },
+      "confidence": {
+        "property": "Confidence",
+        "type": "select",
+        "path": "confidence"
+      },
+      "review": {
+        "property": "Needs Review",
+        "type": "checkbox",
+        "path": "needsReview"
+      },
+      "equipment": {
+        "property": "Equipment",
+        "type": "rich_text",
+        "path": "equipment.model"
+      },
+      "guitar": {
+        "property": "Guitar",
+        "type": "rich_text",
+        "path": "guitar"
+      },
+      "output": {
+        "property": "Output",
+        "type": "rich_text",
+        "path": "output"
+      }
+    }
+  }
+}

@@ -1,0 +1,1030 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1787,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Al_Di_Meola_Mediterranean_Sundance_Live_at_Warfield_Theatre_San_Francisco_CA__December_5_1980.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 2,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Al Di Meola-Mediterranean Sundance (Live at Warfield Theatre, San Francisco, CA",
+    "title": "December 5, 1980)",
+    "album": "",
+    "year": null,
+    "genre": "flamenco"
+  },
+  "genreClassification": {
+    "genre": "flamenco",
+    "subgenres": [
+      "acoustic",
+      "latin",
+      "spanish"
+    ],
+    "confidence": "high",
+    "rationale": "Al Di Meola is famous for flamenco-influenced acoustic guitar playing."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Bright, articulate, slightly overdriven clean tone",
+      "signatureElements": [
+        "clean",
+        "delay",
+        "reverb",
+        "wah",
+        "modulation"
+      ],
+      "gearHypotheses": [
+        "Delay unit (digital/analog)",
+        "Reverb unit",
+        "Wah pedal",
+        "Overdrive/Boost pedal",
+        "Clean amp simulation"
+      ],
+      "avoid": [
+        "heavy fuzz",
+        "high gain distortion",
+        "crunchy rock tone"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "bright nylon-flamenco acoustic with live stereo space",
+      "mustHave": [
+        "fast nylon attack",
+        "percussive runs",
+        "clear fingerstyle",
+        "light room reverb",
+        "very little gain"
+      ],
+      "avoid": [
+        "wah",
+        "modulation",
+        "delay-heavy electric sheen",
+        "distortion",
+        "fuzz"
+      ],
+      "gearClues": [
+        "nylon-string acoustic",
+        "piezo or mic",
+        "small room reverb",
+        "frFr clean"
+      ],
+      "corrections": [
+        "drop wah",
+        "drop modulation",
+        "drop overdrive",
+        "shift to acoustic nylon texture"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "bright nylon-flamenco acoustic with live stereo space",
+    "mustHave": [
+      "fast nylon attack",
+      "percussive runs",
+      "clear fingerstyle",
+      "light room reverb",
+      "very little gain"
+    ],
+    "avoid": [
+      "wah",
+      "modulation",
+      "delay-heavy electric sheen",
+      "distortion",
+      "fuzz"
+    ],
+    "gearClues": [
+      "nylon-string acoustic",
+      "piezo or mic",
+      "small room reverb",
+      "frFr clean"
+    ],
+    "corrections": [
+      "drop wah",
+      "drop modulation",
+      "drop overdrive",
+      "shift to acoustic nylon texture"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar (simulating acoustic pickup)",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the target is a bright nylon-flamenco acoustic sound, we will use clean preamps and an acoustic-friendly amp/cab combination to simulate the required texture while maintaining the GP-180's electric guitar focus.",
+          "bestMatchSummary": "A pristine, highly articulate signal chain focusing on compression for attack definition, a clean preamp boost, and a bright, open cabinet with minimal reverb to capture the nylon acoustic sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-70 dB"
+              },
+              "purpose": "Clean up ambient noise and finger squeaks.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean acoustic simulation.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Enhance the percussive attack and sustain of nylon strings.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for fingerstyle clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "2-3 dB",
+                "Tone": "Bright"
+              },
+              "purpose": "Provide a subtle lift and brightness to the signal without adding grit.",
+              "matchQuality": "close",
+              "gap": "The Boost module is general; we rely on its clean nature for acoustic enhancement.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No distortion or grit is required.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled).",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+2 dB",
+                "Bass": "-1 dB",
+                "Mids": "Flat"
+              },
+              "purpose": "Select a clean, articulate, and bright tone suitable for fingerstyle playing.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is generally versatile; we are using its cleanest settings to mimic an acoustic preamp.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Bright"
+              },
+              "purpose": "Provide a focused, open sound that complements the nylon acoustic texture.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is chosen for its clarity and smaller footprint, ideal for intimate recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low Cut": "80 Hz",
+                "High Boost": "+2 dB",
+                "Mid Scoop": "-1 dB"
+              },
+              "purpose": "Fine-tune the frequency response to emphasize high harmonics and clarity.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard EQ shaping for acoustic brightness.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%",
+                "Tone": "Warm"
+              },
+              "purpose": "Add a light, natural room ambiance without muddying the fast attack.",
+              "matchQuality": "perfect",
+              "gap": "None. Required for 'live stereo space'.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume/master",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage module.",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The GP-180 is an electric guitar modeler. The resulting sound simulates a nylon acoustic pickup/preamp chain, requiring careful settings to avoid sounding artificial."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Improve cabinet realism and frequency focus for the bright nylon-flamenco sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Acoustic/Nylon IR (e.g., small room mic'd acoustic)",
+              "reason": "The US 2x12 is too generic; a dedicated acoustic IR will improve the nylon texture.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and clarity",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Al Di Meola-Mediterranean Sundance (Live at Warfield Theatre, San Francisco, CA - December 5, 1980) - Valeton GP-180",
+        "song": {
+          "artist": "Al Di Meola-Mediterranean Sundance (Live at Warfield Theatre, San Francisco, CA",
+          "title": "December 5, 1980)",
+          "album": "",
+          "year": null,
+          "genre": "flamenco"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar (simulating acoustic pickup)",
+        "output": "FRFR / headphones",
+        "toneProfile": "bright nylon-flamenco acoustic with live stereo space",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "A pristine, highly articulate signal chain focusing on compression for attack definition, a clean preamp boost, and a bright, open cabinet with minimal reverb to capture the nylon acoustic sound.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-70 dB"
+            },
+            "purpose": "Clean up ambient noise and finger squeaks.",
+            "matchQuality": "close",
+            "gap": "None. Standard practice for clean acoustic simulation.",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/dynamics",
+            "module": "PRE",
+            "model": "Comp",
+            "active": true,
+            "settings": {
+              "Threshold": "-15 dB",
+              "Ratio": "3:1",
+              "Attack": "Medium",
+              "Release": "Fast"
+            },
+            "purpose": "Enhance the percussive attack and sustain of nylon strings.",
+            "matchQuality": "perfect",
+            "gap": "None. Essential for fingerstyle clarity.",
+            "alternatives": []
+          },
+          {
+            "order": 3,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "2-3 dB",
+              "Tone": "Bright"
+            },
+            "purpose": "Provide a subtle lift and brightness to the signal without adding grit.",
+            "matchQuality": "close",
+            "gap": "The Boost module is general; we rely on its clean nature for acoustic enhancement.",
+            "alternatives": []
+          },
+          {
+            "order": 4,
+            "role": "distortion/drive",
+            "module": "DST",
+            "model": "None",
+            "active": false,
+            "settings": {},
+            "purpose": "Bypass. No distortion or grit is required.",
+            "matchQuality": "perfect",
+            "gap": "N/A (Disabled).",
+            "alternatives": []
+          },
+          {
+            "order": 5,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "US Deluxe",
+            "active": true,
+            "settings": {
+              "Gain": "Low",
+              "Treble": "+2 dB",
+              "Bass": "-1 dB",
+              "Mids": "Flat"
+            },
+            "purpose": "Select a clean, articulate, and bright tone suitable for fingerstyle playing.",
+            "matchQuality": "close",
+            "gap": "The US Deluxe is generally versatile; we are using its cleanest settings to mimic an acoustic preamp.",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "US 2x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center",
+              "EQ": "Bright"
+            },
+            "purpose": "Provide a focused, open sound that complements the nylon acoustic texture.",
+            "matchQuality": "close",
+            "gap": "The US 2x12 is chosen for its clarity and smaller footprint, ideal for intimate recordings.",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "equalization",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Guitar EQ 1",
+            "active": true,
+            "settings": {
+              "Low Cut": "80 Hz",
+              "High Boost": "+2 dB",
+              "Mid Scoop": "-1 dB"
+            },
+            "purpose": "Fine-tune the frequency response to emphasize high harmonics and clarity.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard EQ shaping for acoustic brightness.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%",
+              "Tone": "Warm"
+            },
+            "purpose": "Add a light, natural room ambiance without muddying the fast attack.",
+            "matchQuality": "perfect",
+            "gap": "None. Required for 'live stereo space'.",
+            "alternatives": []
+          },
+          {
+            "order": 9,
+            "role": "volume/master",
+            "module": "EQ/MOD/DLY/RVB/VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None. Standard final stage module.",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "bright nylon-flamenco acoustic with live stereo space",
+          "toneProfile": "bright nylon-flamenco acoustic with live stereo space",
+          "idealSignalChain": "nylon-string acoustic | piezo or mic | small room reverb | frFr clean",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "nylon-string acoustic",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "piezo or mic",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "small room reverb",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "frFr clean",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fast nylon attack",
+            "percussive runs",
+            "clear fingerstyle",
+            "light room reverb",
+            "very little gain"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar (simulating acoustic pickup)",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Since the target is a bright nylon-flamenco acoustic sound, we will use clean preamps and an acoustic-friendly amp/cab combination to simulate the required texture while maintaining the GP-180's electric guitar focus.",
+          "bestMatchSummary": "A pristine, highly articulate signal chain focusing on compression for attack definition, a clean preamp boost, and a bright, open cabinet with minimal reverb to capture the nylon acoustic sound.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-70 dB"
+              },
+              "purpose": "Clean up ambient noise and finger squeaks.",
+              "matchQuality": "close",
+              "gap": "None. Standard practice for clean acoustic simulation.",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/dynamics",
+              "module": "PRE",
+              "model": "Comp",
+              "active": true,
+              "settings": {
+                "Threshold": "-15 dB",
+                "Ratio": "3:1",
+                "Attack": "Medium",
+                "Release": "Fast"
+              },
+              "purpose": "Enhance the percussive attack and sustain of nylon strings.",
+              "matchQuality": "perfect",
+              "gap": "None. Essential for fingerstyle clarity.",
+              "alternatives": []
+            },
+            {
+              "order": 3,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "2-3 dB",
+                "Tone": "Bright"
+              },
+              "purpose": "Provide a subtle lift and brightness to the signal without adding grit.",
+              "matchQuality": "close",
+              "gap": "The Boost module is general; we rely on its clean nature for acoustic enhancement.",
+              "alternatives": []
+            },
+            {
+              "order": 4,
+              "role": "distortion/drive",
+              "module": "DST",
+              "model": "None",
+              "active": false,
+              "settings": {},
+              "purpose": "Bypass. No distortion or grit is required.",
+              "matchQuality": "perfect",
+              "gap": "N/A (Disabled).",
+              "alternatives": []
+            },
+            {
+              "order": 5,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "US Deluxe",
+              "active": true,
+              "settings": {
+                "Gain": "Low",
+                "Treble": "+2 dB",
+                "Bass": "-1 dB",
+                "Mids": "Flat"
+              },
+              "purpose": "Select a clean, articulate, and bright tone suitable for fingerstyle playing.",
+              "matchQuality": "close",
+              "gap": "The US Deluxe is generally versatile; we are using its cleanest settings to mimic an acoustic preamp.",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "US 2x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center",
+                "EQ": "Bright"
+              },
+              "purpose": "Provide a focused, open sound that complements the nylon acoustic texture.",
+              "matchQuality": "close",
+              "gap": "The US 2x12 is chosen for its clarity and smaller footprint, ideal for intimate recordings.",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "equalization",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Guitar EQ 1",
+              "active": true,
+              "settings": {
+                "Low Cut": "80 Hz",
+                "High Boost": "+2 dB",
+                "Mid Scoop": "-1 dB"
+              },
+              "purpose": "Fine-tune the frequency response to emphasize high harmonics and clarity.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard EQ shaping for acoustic brightness.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%",
+                "Tone": "Warm"
+              },
+              "purpose": "Add a light, natural room ambiance without muddying the fast attack.",
+              "matchQuality": "perfect",
+              "gap": "None. Required for 'live stereo space'.",
+              "alternatives": []
+            },
+            {
+              "order": 9,
+              "role": "volume/master",
+              "module": "EQ/MOD/DLY/RVB/VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None. Standard final stage module.",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Improve cabinet realism and frequency focus for the bright nylon-flamenco sound.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "Acoustic/Nylon IR (e.g., small room mic'd acoustic)",
+              "reason": "The US 2x12 is too generic; a dedicated acoustic IR will improve the nylon texture.",
+              "replacesBlockOrder": 6,
+              "whenToUse": "Always",
+              "expectedGain": "Increased realism and clarity",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop wah",
+          "drop modulation",
+          "drop overdrive",
+          "shift to acoustic nylon texture"
+        ],
+        "warnings": [
+          "The GP-180 is an electric guitar modeler. The resulting sound simulates a nylon acoustic pickup/preamp chain, requiring careful settings to avoid sounding artificial."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 577.705,
+      "prompt_chars": 1065,
+      "response_chars": 360,
+      "usage": {
+        "prompt_eval_count": 459,
+        "eval_count": 95,
+        "total_duration": 16398440700,
+        "prompt_eval_duration": 191739000,
+        "eval_duration": 689508000
+      },
+      "attempts": 4,
+      "retryFailures": [
+        {
+          "attempt": 1,
+          "error": "HTTP 500 from http://localhost:11434/api/generate: {\"error\":\"llama-server process has terminated: exit status 0xc0000409: The system detected an overrun of a stack-based buffer in this application. This overrun could potentially allow a malicious user to gain control of this application.: GGML_ASSERT(n_inputs \\u003c GGML_SCHED_MAX_SPLIT_INPUTS) failed\"}"
+        },
+        {
+          "attempt": 2,
+          "error": "HTTP 500 from http://localhost:11434/api/generate: {\"error\":\"llama-server process has terminated: exit status 0xc0000409: The system detected an overrun of a stack-based buffer in this application. This overrun could potentially allow a malicious user to gain control of this application.: GGML_ASSERT(n_inputs \\u003c GGML_SCHED_MAX_SPLIT_INPUTS) failed\"}"
+        },
+        {
+          "attempt": 3,
+          "error": "HTTP 500 from http://localhost:11434/api/generate: {\"error\":\"llama-server process has terminated: exit status 0xc0000409: The system detected an overrun of a stack-based buffer in this application. This overrun could potentially allow a malicious user to gain control of this application.\"}"
+        }
+      ]
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 2.109,
+      "prompt_chars": 5377,
+      "response_chars": 546,
+      "usage": {
+        "input_tokens": 1509,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 141,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1650
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 13.706,
+      "prompt_chars": 3712,
+      "response_chars": 5092,
+      "usage": {
+        "prompt_eval_count": 1241,
+        "eval_count": 1426,
+        "total_duration": 13675141500,
+        "prompt_eval_duration": 146474000,
+        "eval_duration": 9823088000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 13.423,
+      "prompt_chars": 7309,
+      "response_chars": 549,
+      "usage": {
+        "prompt_eval_count": 2024,
+        "eval_count": 151,
+        "total_duration": 13384205300,
+        "prompt_eval_duration": 185983000,
+        "eval_duration": 1069444000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 12.982,
+      "prompt_chars": 2870,
+      "response_chars": 177,
+      "usage": {
+        "prompt_eval_count": 901,
+        "eval_count": 48,
+        "total_duration": 12970286000,
+        "prompt_eval_duration": 211884000,
+        "eval_duration": 360690000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Al Di Meola-Mediterranean Sundance (Live at Warfield Theatre, San Francisco, CA",
+      "title": "December 5, 1980)",
+      "album": "",
+      "year": null,
+      "genre": "flamenco"
+    },
+    "rig": {
+      "rigName": "Al Di Meola-Mediterranean Sundance (Live at Warfield Theatre, San Francisco, CA - December 5, 1980) - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar (simulating acoustic pickup)",
+      "output": "FRFR / headphones",
+      "toneProfile": "bright nylon-flamenco acoustic with live stereo space",
+      "signalChainSummary": "A pristine, highly articulate signal chain focusing on compression for attack definition, a clean preamp boost, and a bright, open cabinet with minimal reverb to capture the nylon acoustic sound.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-70 dB"
+          },
+          "purpose": "Clean up ambient noise and finger squeaks.",
+          "matchQuality": "close",
+          "gap": "None. Standard practice for clean acoustic simulation.",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/dynamics",
+          "module": "PRE",
+          "model": "Comp",
+          "active": true,
+          "settings": {
+            "Threshold": "-15 dB",
+            "Ratio": "3:1",
+            "Attack": "Medium",
+            "Release": "Fast"
+          },
+          "purpose": "Enhance the percussive attack and sustain of nylon strings.",
+          "matchQuality": "exact",
+          "gap": "None. Essential for fingerstyle clarity.",
+          "alternatives": []
+        },
+        {
+          "order": 3,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "2-3 dB",
+            "Tone": "Bright"
+          },
+          "purpose": "Provide a subtle lift and brightness to the signal without adding grit.",
+          "matchQuality": "close",
+          "gap": "The Boost module is general; we rely on its clean nature for acoustic enhancement.",
+          "alternatives": []
+        },
+        {
+          "order": 4,
+          "role": "distortion/drive",
+          "module": "DST",
+          "model": "None",
+          "active": false,
+          "settings": {},
+          "purpose": "Bypass. No distortion or grit is required.",
+          "matchQuality": "exact",
+          "gap": "N/A (Disabled).",
+          "alternatives": []
+        },
+        {
+          "order": 5,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "US Deluxe",
+          "active": true,
+          "settings": {
+            "Gain": "Low",
+            "Treble": "+2 dB",
+            "Bass": "-1 dB",
+            "Mids": "Flat"
+          },
+          "purpose": "Select a clean, articulate, and bright tone suitable for fingerstyle playing.",
+          "matchQuality": "close",
+          "gap": "The US Deluxe is generally versatile; we are using its cleanest settings to mimic an acoustic preamp.",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "US 2x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center",
+            "EQ": "Bright"
+          },
+          "purpose": "Provide a focused, open sound that complements the nylon acoustic texture.",
+          "matchQuality": "close",
+          "gap": "The US 2x12 is chosen for its clarity and smaller footprint, ideal for intimate recordings.",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 1",
+          "active": true,
+          "settings": {
+            "Low Cut": "80 Hz",
+            "High Boost": "+2 dB",
+            "Mid Scoop": "-1 dB"
+          },
+          "purpose": "Fine-tune the frequency response to emphasize high harmonics and clarity.",
+          "matchQuality": "exact",
+          "gap": "None. Standard EQ shaping for acoustic brightness.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%",
+            "Tone": "Warm"
+          },
+          "purpose": "Add a light, natural room ambiance without muddying the fast attack.",
+          "matchQuality": "exact",
+          "gap": "None. Required for 'live stereo space'.",
+          "alternatives": []
+        },
+        {
+          "order": 9,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None. Standard final stage module.",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "bright nylon-flamenco acoustic with live stereo space",
+      "mustHave": [
+        "fast nylon attack",
+        "percussive runs",
+        "clear fingerstyle",
+        "light room reverb",
+        "very little gain"
+      ],
+      "avoid": [
+        "wah",
+        "modulation",
+        "delay-heavy electric sheen",
+        "distortion",
+        "fuzz"
+      ],
+      "gearClues": [
+        "nylon-string acoustic",
+        "piezo or mic",
+        "small room reverb",
+        "frFr clean"
+      ],
+      "corrections": [
+        "drop wah",
+        "drop modulation",
+        "drop overdrive",
+        "shift to acoustic nylon texture"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "flamenco",
+      "styleTags": [
+        "acoustic",
+        "latin",
+        "spanish"
+      ],
+      "targetTone": "bright nylon-flamenco acoustic with live stereo space",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Improve cabinet realism and frequency focus for the bright nylon-flamenco sound.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "Acoustic/Nylon IR (e.g., small room mic'd acoustic)",
+          "reason": "The US 2x12 is too generic; a dedicated acoustic IR will improve the nylon texture.",
+          "replacesBlockOrder": 6,
+          "whenToUse": "Always",
+          "expectedGain": "Increased realism and clarity",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1787,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}

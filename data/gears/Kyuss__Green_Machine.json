@@ -1,0 +1,1092 @@
+{
+  "metadata": {
+    "workflow": "economic_production_v1",
+    "sourceIndex": 1873,
+    "outputPath": "D:\\DocumentsBenoit\\pythonProject\\SongsGear\\SongsGears\\Output\\Final\\OllamaOpenAIClaude\\Songs\\Kyuss__Green_Machine.json",
+    "models": {
+      "ollama": "gemma4:latest",
+      "openaiJudge": "gpt-5.4-mini",
+      "claudeFallback": "claude-sonnet-4-5"
+    },
+    "finalVerdictSource": "openai",
+    "openaiAction": "repair",
+    "forcedEscalationReasons": [],
+    "usedLocalGp180Fallback": false,
+    "usedLocalImprovementsFallback": false,
+    "workerId": 1,
+    "ollamaUrl": "http://localhost:11434/api/generate",
+    "workerEndpoint": "localhost:11434",
+    "workerNumCtx": 65536
+  },
+  "song": {
+    "artist": "Kyuss",
+    "title": "Green Machine",
+    "album": "",
+    "year": null,
+    "genre": "stoner rock"
+  },
+  "genreClassification": {
+    "genre": "stoner rock",
+    "subgenres": [
+      "doom metal",
+      "desert rock",
+      "heavy psych"
+    ],
+    "confidence": "high",
+    "rationale": "Kyuss is a foundational band in the stoner and desert rock genres."
+  },
+  "musicDraft": {
+    "Ollama": {
+      "targetTone": "Mid-scooped, fuzzy stoner rock tone with a thick, saturated crunch.",
+      "signatureElements": [
+        "Fuzz/Overdrive (thick saturation)",
+        "Crunch (mid-heavy)",
+        "Wah pedal use",
+        "Heavy reverb/delay"
+      ],
+      "gearHypotheses": [
+        "High-gain fuzz emulation",
+        "British style amp model (Marshall/Vox type)",
+        "Cabinet simulation with scooped mids"
+      ],
+      "avoid": [
+        "Bright, chimey clean tones",
+        "Thin, aggressive distortion",
+        "Overly modulated sounds"
+      ],
+      "confidence": "high"
+    }
+  },
+  "openaiJudge": {
+    "action": "repair",
+    "finalVerdict": {
+      "targetTone": "fuzzy stoner riff with scooped mids and big sustain",
+      "mustHave": [
+        "fuzz saturation",
+        "thick low end",
+        "scooped mids",
+        "sustained riff",
+        "slight room"
+      ],
+      "avoid": [
+        "clean chime",
+        "thin distortion",
+        "lush reverb",
+        "delay wash",
+        "heavy modulation"
+      ],
+      "gearClues": [
+        "fuzz pedal",
+        "thick humbucker",
+        "Marshall-type amp",
+        "4x12 cab"
+      ],
+      "corrections": [
+        "drop wah",
+        "drop heavy delay",
+        "keep reverb minimal",
+        "favor fuzz over overdrive"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "escalationReasons": []
+  },
+  "claudeFallback": null,
+  "finalVerdict": {
+    "targetTone": "fuzzy stoner riff with scooped mids and big sustain",
+    "mustHave": [
+      "fuzz saturation",
+      "thick low end",
+      "scooped mids",
+      "sustained riff",
+      "slight room"
+    ],
+    "avoid": [
+      "clean chime",
+      "thin distortion",
+      "lush reverb",
+      "delay wash",
+      "heavy modulation"
+    ],
+    "gearClues": [
+      "fuzz pedal",
+      "thick humbucker",
+      "Marshall-type amp",
+      "4x12 cab"
+    ],
+    "corrections": [
+      "drop wah",
+      "drop heavy delay",
+      "keep reverb minimal",
+      "favor fuzz over overdrive"
+    ],
+    "confidence": "medium",
+    "needsManualReview": false
+  },
+  "generated": {
+    "Ollama": {
+      "gp180": {
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Stoner/Desert Rock Tone Emulation",
+          "bestMatchSummary": "Fuzz -> Boost -> Distortion (for grit) -> Amp (UK 800) -> Cab (4x12) -> EQ -> Room Reverb. Focus on thick, saturated low end and scooped mids.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and noise inherent in high-gain fuzz tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6"
+              },
+              "purpose": "Slight boost to push the fuzz stage and maintain sustain.",
+              "matchQuality": "close",
+              "gap": "Using Boost for general tone shaping rather than a specific OD/Boost pedal.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "If more aggressive pre-gain is needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "8",
+                "Tone": "5",
+                "Level": "7"
+              },
+              "purpose": "Primary source of saturated, thick stoner fuzz tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "If a more aggressive, biting fuzz is desired."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 800",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "5",
+                "Mid": "3",
+                "Bass": "7"
+              },
+              "purpose": "Simulates a powerful Marshall-type amp head suitable for heavy riffing.",
+              "matchQuality": "close",
+              "gap": "The UK 800 is chosen to emulate the classic high-gain British rock sound associated with Kyuss's era, though specific vintage models might vary.",
+              "alternatives": [
+                {
+                  "model": "UK SLP",
+                  "reason": "If a slightly more scooped/modern hard rock tone is preferred."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provides the classic British rock cabinet sound required for thick low end.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "+3 dB",
+                "Mid": "-4 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Aggressively scoop the mids and boost the low end for the characteristic stoner/desert rock tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Frequency": "500 Hz"
+              },
+              "purpose": "Included as a potential option for riffing variation, but kept inactive per 'drop wah' instruction.",
+              "matchQuality": "close",
+              "gap": "The V-Wah is the most versatile choice, though it will be bypassed to meet the 'drop wah' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Adds a minimal amount of space and depth without sounding lush or washed out.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is preferred over Plate/Spring to provide natural, subtle ambience as requested.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a slightly more controlled decay is needed."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "warnings": [
+          "The source material is a heavy, riff-based rock track. The rig is optimized for maximum saturation and low-end punch.",
+          "Due to the 'drop wah' instruction, the V-Wah module is included but set to inactive (bypass) in the signal chain."
+        ],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "improvements": {
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and low-end punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., vintage 4x12)",
+              "reason": "Enhance the thick, natural sound required for stoner rock.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved low end and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "warnings": [],
+        "confidence": "high",
+        "needsReview": false
+      },
+      "rig": {
+        "rigName": "Kyuss - Green Machine - Valeton GP-180",
+        "song": {
+          "artist": "Kyuss",
+          "title": "Green Machine",
+          "album": "",
+          "year": null,
+          "genre": "stoner rock"
+        },
+        "equipment": {
+          "model": "Valeton GP-180"
+        },
+        "guitar": "Default electric guitar",
+        "output": "FRFR / headphones",
+        "toneProfile": "fuzzy stoner riff with scooped mids and big sustain",
+        "status": "draft",
+        "confidence": "medium",
+        "signalChainSummary": "Fuzz -> Boost -> Distortion (for grit) -> Amp (UK 800) -> Cab (4x12) -> EQ -> Room Reverb. Focus on thick, saturated low end and scooped mids.",
+        "blocks": [
+          {
+            "order": 1,
+            "role": "noise reduction",
+            "module": "NR",
+            "model": "Gate 1",
+            "active": true,
+            "settings": {
+              "Threshold": "-65 dB"
+            },
+            "purpose": "Clean up hum and noise inherent in high-gain fuzz tones.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 2,
+            "role": "preamp/boost",
+            "module": "PRE",
+            "model": "Boost",
+            "active": true,
+            "settings": {
+              "Gain": "3",
+              "Tone": "6"
+            },
+            "purpose": "Slight boost to push the fuzz stage and maintain sustain.",
+            "matchQuality": "close",
+            "gap": "Using Boost for general tone shaping rather than a specific OD/Boost pedal.",
+            "alternatives": [
+              {
+                "model": "OD 9",
+                "reason": "If more aggressive pre-gain is needed."
+              }
+            ]
+          },
+          {
+            "order": 3,
+            "role": "distortion/fuzz",
+            "module": "DST",
+            "model": "Fuzz",
+            "active": true,
+            "settings": {
+              "Drive": "8",
+              "Tone": "5",
+              "Level": "7"
+            },
+            "purpose": "Primary source of saturated, thick stoner fuzz tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": [
+              {
+                "model": "Red Haze",
+                "reason": "If a more aggressive, biting fuzz is desired."
+              }
+            ]
+          },
+          {
+            "order": 4,
+            "role": "amplifier",
+            "module": "AMP",
+            "model": "UK 800",
+            "active": true,
+            "settings": {
+              "Gain": "6",
+              "Treble": "5",
+              "Mid": "3",
+              "Bass": "7"
+            },
+            "purpose": "Simulates a powerful Marshall-type amp head suitable for heavy riffing.",
+            "matchQuality": "close",
+            "gap": "The UK 800 is chosen to emulate the classic high-gain British rock sound associated with Kyuss's era, though specific vintage models might vary.",
+            "alternatives": [
+              {
+                "model": "UK SLP",
+                "reason": "If a slightly more scooped/modern hard rock tone is preferred."
+              }
+            ]
+          },
+          {
+            "order": 5,
+            "role": "cabinet/ir",
+            "module": "CAB/IR",
+            "model": "UK Vintage 4x12",
+            "active": true,
+            "settings": {
+              "Mic Position": "Center"
+            },
+            "purpose": "Provides the classic British rock cabinet sound required for thick low end.",
+            "matchQuality": "close",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 6,
+            "role": "equalization",
+            "module": "EQ",
+            "model": "Guitar EQ 2",
+            "active": true,
+            "settings": {
+              "Bass": "+3 dB",
+              "Mid": "-4 dB",
+              "Treble": "+1 dB"
+            },
+            "purpose": "Aggressively scoop the mids and boost the low end for the characteristic stoner/desert rock tone.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          },
+          {
+            "order": 7,
+            "role": "wah/filter",
+            "module": "WAH",
+            "model": "V-Wah",
+            "active": false,
+            "settings": {
+              "Frequency": "500 Hz"
+            },
+            "purpose": "Included as a potential option for riffing variation, but kept inactive per 'drop wah' instruction.",
+            "matchQuality": "close",
+            "gap": "The V-Wah is the most versatile choice, though it will be bypassed to meet the 'drop wah' requirement.",
+            "alternatives": []
+          },
+          {
+            "order": 8,
+            "role": "reverb",
+            "module": "RVB",
+            "model": "Room",
+            "active": true,
+            "settings": {
+              "Decay Time": "1.5s",
+              "Mix": "20%"
+            },
+            "purpose": "Adds a minimal amount of space and depth without sounding lush or washed out.",
+            "matchQuality": "close",
+            "gap": "The Room reverb is preferred over Plate/Spring to provide natural, subtle ambience as requested.",
+            "alternatives": [
+              {
+                "model": "Plate",
+                "reason": "If a slightly more controlled decay is needed."
+              }
+            ]
+          },
+          {
+            "order": 9,
+            "role": "volume/master",
+            "module": "VOL",
+            "model": "Volume",
+            "active": true,
+            "settings": {
+              "Level": "100%"
+            },
+            "purpose": "Final output level control.",
+            "matchQuality": "perfect",
+            "gap": "None",
+            "alternatives": []
+          }
+        ],
+        "general": {
+          "targetSound": "fuzzy stoner riff with scooped mids and big sustain",
+          "toneProfile": "fuzzy stoner riff with scooped mids and big sustain",
+          "idealSignalChain": "fuzz pedal | thick humbucker | Marshall-type amp | 4x12 cab",
+          "bestPossibleEquipment": [
+            {
+              "role": "signature",
+              "model": "fuzz pedal",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "thick humbucker",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "Marshall-type amp",
+              "reason": "Claude musical arbitration"
+            },
+            {
+              "role": "signature",
+              "model": "4x12 cab",
+              "reason": "Claude musical arbitration"
+            }
+          ],
+          "productionNotes": [
+            "fuzz saturation",
+            "thick low end",
+            "scooped mids",
+            "sustained riff",
+            "slight room"
+          ]
+        },
+        "gp180": {
+          "equipment": {
+            "model": "Valeton GP-180"
+          },
+          "guitar": "Default electric guitar",
+          "output": "FRFR / headphones",
+          "choicePolicy": "Stoner/Desert Rock Tone Emulation",
+          "bestMatchSummary": "Fuzz -> Boost -> Distortion (for grit) -> Amp (UK 800) -> Cab (4x12) -> EQ -> Room Reverb. Focus on thick, saturated low end and scooped mids.",
+          "blocks": [
+            {
+              "order": 1,
+              "role": "noise reduction",
+              "module": "NR",
+              "model": "Gate 1",
+              "active": true,
+              "settings": {
+                "Threshold": "-65 dB"
+              },
+              "purpose": "Clean up hum and noise inherent in high-gain fuzz tones.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 2,
+              "role": "preamp/boost",
+              "module": "PRE",
+              "model": "Boost",
+              "active": true,
+              "settings": {
+                "Gain": "3",
+                "Tone": "6"
+              },
+              "purpose": "Slight boost to push the fuzz stage and maintain sustain.",
+              "matchQuality": "close",
+              "gap": "Using Boost for general tone shaping rather than a specific OD/Boost pedal.",
+              "alternatives": [
+                {
+                  "model": "OD 9",
+                  "reason": "If more aggressive pre-gain is needed."
+                }
+              ]
+            },
+            {
+              "order": 3,
+              "role": "distortion/fuzz",
+              "module": "DST",
+              "model": "Fuzz",
+              "active": true,
+              "settings": {
+                "Drive": "8",
+                "Tone": "5",
+                "Level": "7"
+              },
+              "purpose": "Primary source of saturated, thick stoner fuzz tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": [
+                {
+                  "model": "Red Haze",
+                  "reason": "If a more aggressive, biting fuzz is desired."
+                }
+              ]
+            },
+            {
+              "order": 4,
+              "role": "amplifier",
+              "module": "AMP",
+              "model": "UK 800",
+              "active": true,
+              "settings": {
+                "Gain": "6",
+                "Treble": "5",
+                "Mid": "3",
+                "Bass": "7"
+              },
+              "purpose": "Simulates a powerful Marshall-type amp head suitable for heavy riffing.",
+              "matchQuality": "close",
+              "gap": "The UK 800 is chosen to emulate the classic high-gain British rock sound associated with Kyuss's era, though specific vintage models might vary.",
+              "alternatives": [
+                {
+                  "model": "UK SLP",
+                  "reason": "If a slightly more scooped/modern hard rock tone is preferred."
+                }
+              ]
+            },
+            {
+              "order": 5,
+              "role": "cabinet/ir",
+              "module": "CAB/IR",
+              "model": "UK Vintage 4x12",
+              "active": true,
+              "settings": {
+                "Mic Position": "Center"
+              },
+              "purpose": "Provides the classic British rock cabinet sound required for thick low end.",
+              "matchQuality": "close",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 6,
+              "role": "equalization",
+              "module": "EQ",
+              "model": "Guitar EQ 2",
+              "active": true,
+              "settings": {
+                "Bass": "+3 dB",
+                "Mid": "-4 dB",
+                "Treble": "+1 dB"
+              },
+              "purpose": "Aggressively scoop the mids and boost the low end for the characteristic stoner/desert rock tone.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            },
+            {
+              "order": 7,
+              "role": "wah/filter",
+              "module": "WAH",
+              "model": "V-Wah",
+              "active": false,
+              "settings": {
+                "Frequency": "500 Hz"
+              },
+              "purpose": "Included as a potential option for riffing variation, but kept inactive per 'drop wah' instruction.",
+              "matchQuality": "close",
+              "gap": "The V-Wah is the most versatile choice, though it will be bypassed to meet the 'drop wah' requirement.",
+              "alternatives": []
+            },
+            {
+              "order": 8,
+              "role": "reverb",
+              "module": "RVB",
+              "model": "Room",
+              "active": true,
+              "settings": {
+                "Decay Time": "1.5s",
+                "Mix": "20%"
+              },
+              "purpose": "Adds a minimal amount of space and depth without sounding lush or washed out.",
+              "matchQuality": "close",
+              "gap": "The Room reverb is preferred over Plate/Spring to provide natural, subtle ambience as requested.",
+              "alternatives": [
+                {
+                  "model": "Plate",
+                  "reason": "If a slightly more controlled decay is needed."
+                }
+              ]
+            },
+            {
+              "order": 9,
+              "role": "volume/master",
+              "module": "VOL",
+              "model": "Volume",
+              "active": true,
+              "settings": {
+                "Level": "100%"
+              },
+              "purpose": "Final output level control.",
+              "matchQuality": "perfect",
+              "gap": "None",
+              "alternatives": []
+            }
+          ]
+        },
+        "improvements": {
+          "summary": "Upgrade IR for better cabinet realism and low-end punch.",
+          "proposals": [
+            {
+              "priority": "P3",
+              "type": "IR",
+              "target": "Cabinet realism",
+              "recommendedAsset": "song-appropriate IR (e.g., vintage 4x12)",
+              "reason": "Enhance the thick, natural sound required for stoner rock.",
+              "replacesBlockOrder": 5,
+              "whenToUse": "after testing GP-180 preset",
+              "expectedGain": "Improved low end and definition",
+              "requiredIfGp180Gap": false
+            }
+          ]
+        },
+        "assumptions": [
+          "drop wah",
+          "drop heavy delay",
+          "keep reverb minimal",
+          "favor fuzz over overdrive"
+        ],
+        "warnings": [
+          "The source material is a heavy, riff-based rock track. The rig is optimized for maximum saturation and low-end punch.",
+          "Due to the 'drop wah' instruction, the V-Wah module is included but set to inactive (bypass) in the signal chain."
+        ],
+        "sources": [
+          "openai music verdict",
+          "Ollama music draft"
+        ],
+        "createdFrom": "generated",
+        "needsReview": true
+      }
+    }
+  },
+  "validation": {
+    "ok": true,
+    "errors": [],
+    "warnings": []
+  },
+  "timings": [
+    {
+      "stage": "ollama_music_draft",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 24.477,
+      "prompt_chars": 987,
+      "response_chars": 461,
+      "usage": {
+        "prompt_eval_count": 320,
+        "eval_count": 115,
+        "total_duration": 24473184700,
+        "prompt_eval_duration": 118625000,
+        "eval_duration": 2064440000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "openai_music_judge",
+      "provider": "openai",
+      "model": "gpt-5.4-mini",
+      "ollamaUrl": null,
+      "seconds": 16.548,
+      "prompt_chars": 5383,
+      "response_chars": 527,
+      "usage": {
+        "input_tokens": 1506,
+        "input_tokens_details": {
+          "cached_tokens": 0
+        },
+        "output_tokens": 147,
+        "output_tokens_details": {
+          "reasoning_tokens": 0
+        },
+        "total_tokens": 1653
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_gp180",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 177.399,
+      "prompt_chars": 3615,
+      "response_chars": 5308,
+      "usage": {
+        "prompt_eval_count": 1218,
+        "eval_count": 1524,
+        "total_duration": 177390804000,
+        "prompt_eval_duration": 353793000,
+        "eval_duration": 25098174000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_improvements",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 23.799,
+      "prompt_chars": 7468,
+      "response_chars": 512,
+      "usage": {
+        "prompt_eval_count": 2099,
+        "eval_count": 144,
+        "total_duration": 23791137400,
+        "prompt_eval_duration": 480227000,
+        "eval_duration": 2643287000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    },
+    {
+      "stage": "ollama_genre_classification",
+      "provider": "ollama",
+      "model": "gemma4:latest",
+      "ollamaUrl": "http://localhost:11434/api/generate",
+      "seconds": 22.522,
+      "prompt_chars": 2672,
+      "response_chars": 188,
+      "usage": {
+        "prompt_eval_count": 866,
+        "eval_count": 52,
+        "total_duration": 22518717200,
+        "prompt_eval_duration": 242549000,
+        "eval_duration": 993799000
+      },
+      "attempts": 1,
+      "retryFailures": []
+    }
+  ],
+  "schemaVersion": "songsgear.fretwise.rig.v1",
+  "fretwiseExport": {
+    "schemaVersion": "songsgear.fretwise.rig.v1",
+    "exportKind": "rig",
+    "song": {
+      "artist": "Kyuss",
+      "title": "Green Machine",
+      "album": "",
+      "year": null,
+      "genre": "stoner rock"
+    },
+    "rig": {
+      "rigName": "Kyuss - Green Machine - Valeton GP-180",
+      "status": "draft",
+      "confidence": "medium",
+      "needsReview": true,
+      "equipment": {
+        "model": "Valeton GP-180"
+      },
+      "guitar": "Default electric guitar",
+      "output": "FRFR / headphones",
+      "toneProfile": "fuzzy stoner riff with scooped mids and big sustain",
+      "signalChainSummary": "Fuzz -> Boost -> Distortion (for grit) -> Amp (UK 800) -> Cab (4x12) -> EQ -> Room Reverb. Focus on thick, saturated low end and scooped mids.",
+      "blocks": [
+        {
+          "order": 1,
+          "role": "noise reduction",
+          "module": "NR",
+          "model": "Gate 1",
+          "active": true,
+          "settings": {
+            "Threshold": "-65 dB"
+          },
+          "purpose": "Clean up hum and noise inherent in high-gain fuzz tones.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 2,
+          "role": "preamp/boost",
+          "module": "PRE",
+          "model": "Boost",
+          "active": true,
+          "settings": {
+            "Gain": "3",
+            "Tone": "6"
+          },
+          "purpose": "Slight boost to push the fuzz stage and maintain sustain.",
+          "matchQuality": "close",
+          "gap": "Using Boost for general tone shaping rather than a specific OD/Boost pedal.",
+          "alternatives": [
+            {
+              "model": "OD 9",
+              "reason": "If more aggressive pre-gain is needed."
+            }
+          ]
+        },
+        {
+          "order": 3,
+          "role": "distortion/fuzz",
+          "module": "DST",
+          "model": "Fuzz",
+          "active": true,
+          "settings": {
+            "Drive": "8",
+            "Tone": "5",
+            "Level": "7"
+          },
+          "purpose": "Primary source of saturated, thick stoner fuzz tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": [
+            {
+              "model": "Red Haze",
+              "reason": "If a more aggressive, biting fuzz is desired."
+            }
+          ]
+        },
+        {
+          "order": 4,
+          "role": "amplifier",
+          "module": "AMP",
+          "model": "UK 800",
+          "active": true,
+          "settings": {
+            "Gain": "6",
+            "Treble": "5",
+            "Mid": "3",
+            "Bass": "7"
+          },
+          "purpose": "Simulates a powerful Marshall-type amp head suitable for heavy riffing.",
+          "matchQuality": "close",
+          "gap": "The UK 800 is chosen to emulate the classic high-gain British rock sound associated with Kyuss's era, though specific vintage models might vary.",
+          "alternatives": [
+            {
+              "model": "UK SLP",
+              "reason": "If a slightly more scooped/modern hard rock tone is preferred."
+            }
+          ]
+        },
+        {
+          "order": 5,
+          "role": "cabinet/ir",
+          "module": "CAB/IR",
+          "model": "UK Vintage 4x12",
+          "active": true,
+          "settings": {
+            "Mic Position": "Center"
+          },
+          "purpose": "Provides the classic British rock cabinet sound required for thick low end.",
+          "matchQuality": "close",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 6,
+          "role": "equalization",
+          "module": "EQ",
+          "model": "Guitar EQ 2",
+          "active": true,
+          "settings": {
+            "Bass": "+3 dB",
+            "Mid": "-4 dB",
+            "Treble": "+1 dB"
+          },
+          "purpose": "Aggressively scoop the mids and boost the low end for the characteristic stoner/desert rock tone.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        },
+        {
+          "order": 7,
+          "role": "wah/filter",
+          "module": "WAH",
+          "model": "V-Wah",
+          "active": false,
+          "settings": {
+            "Frequency": "500 Hz"
+          },
+          "purpose": "Included as a potential option for riffing variation, but kept inactive per 'drop wah' instruction.",
+          "matchQuality": "close",
+          "gap": "The V-Wah is the most versatile choice, though it will be bypassed to meet the 'drop wah' requirement.",
+          "alternatives": []
+        },
+        {
+          "order": 8,
+          "role": "reverb",
+          "module": "RVB",
+          "model": "Room",
+          "active": true,
+          "settings": {
+            "Decay Time": "1.5s",
+            "Mix": "20%"
+          },
+          "purpose": "Adds a minimal amount of space and depth without sounding lush or washed out.",
+          "matchQuality": "close",
+          "gap": "The Room reverb is preferred over Plate/Spring to provide natural, subtle ambience as requested.",
+          "alternatives": [
+            {
+              "model": "Plate",
+              "reason": "If a slightly more controlled decay is needed."
+            }
+          ]
+        },
+        {
+          "order": 9,
+          "role": "volume/master",
+          "module": "VOL",
+          "model": "Volume",
+          "active": true,
+          "settings": {
+            "Level": "100%"
+          },
+          "purpose": "Final output level control.",
+          "matchQuality": "exact",
+          "gap": "None",
+          "alternatives": []
+        }
+      ]
+    },
+    "musicalVerdict": {
+      "targetTone": "fuzzy stoner riff with scooped mids and big sustain",
+      "mustHave": [
+        "fuzz saturation",
+        "thick low end",
+        "scooped mids",
+        "sustained riff",
+        "slight room"
+      ],
+      "avoid": [
+        "clean chime",
+        "thin distortion",
+        "lush reverb",
+        "delay wash",
+        "heavy modulation"
+      ],
+      "gearClues": [
+        "fuzz pedal",
+        "thick humbucker",
+        "Marshall-type amp",
+        "4x12 cab"
+      ],
+      "corrections": [
+        "drop wah",
+        "drop heavy delay",
+        "keep reverb minimal",
+        "favor fuzz over overdrive"
+      ],
+      "confidence": "medium",
+      "needsManualReview": false
+    },
+    "musicalContext": {
+      "primaryGenre": "stoner rock",
+      "styleTags": [
+        "doom metal",
+        "desert rock",
+        "heavy psych"
+      ],
+      "targetTone": "fuzzy stoner riff with scooped mids and big sustain",
+      "confidence": "high"
+    },
+    "improvements": {
+      "summary": "Upgrade IR for better cabinet realism and low-end punch.",
+      "proposals": [
+        {
+          "priority": "P3",
+          "type": "IR",
+          "target": "Cabinet realism",
+          "recommendedAsset": "song-appropriate IR (e.g., vintage 4x12)",
+          "reason": "Enhance the thick, natural sound required for stoner rock.",
+          "replacesBlockOrder": 5,
+          "whenToUse": "after testing GP-180 preset",
+          "expectedGain": "Improved low end and definition",
+          "requiredIfGp180Gap": false
+        }
+      ]
+    },
+    "validation": {
+      "ok": true,
+      "errors": [],
+      "warnings": []
+    },
+    "source": {
+      "workflow": "economic_production_v1",
+      "sourceIndex": 1873,
+      "models": {
+        "ollama": "gemma4:latest",
+        "openaiJudge": "gpt-5.4-mini",
+        "claudeFallback": "claude-sonnet-4-5"
+      },
+      "finalVerdictSource": "openai",
+      "openaiAction": "repair",
+      "usedLocalGp180Fallback": false,
+      "usedLocalImprovementsFallback": false
+    }
+  }
+}
