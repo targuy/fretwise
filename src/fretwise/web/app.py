@@ -834,6 +834,7 @@ def _register_routes(app: FastAPI) -> None:
             "tempo": tempo,
             "beats_per_measure": beats_per_measure,
             "measure_beats": _measure_beats_array(adapter, events),
+            "measure_tempos": _measure_tempo_array(adapter, events),
             "results": serialized_results,
         }
 
@@ -905,6 +906,7 @@ def _register_routes(app: FastAPI) -> None:
                     getattr(adapter, "beats_per_measure", 4.0)
                 ),
                 "measure_beats": _measure_beats_array(adapter, events),
+                "measure_tempos": _measure_tempo_array(adapter, events),
             }
             _legacy_cache_put(base_key, base)
 
@@ -1057,6 +1059,7 @@ def _register_routes(app: FastAPI) -> None:
             "tempo": base["tempo"],
             "beats_per_measure": base["beats_per_measure"],
             "measure_beats": base.get("measure_beats", []),
+            "measure_tempos": base.get("measure_tempos", []),
             "section_markers": base["section_markers"],
             "chord_diagrams": base["chord_diagrams"],
             "chord_markers": base["chord_markers"],
@@ -1788,11 +1791,10 @@ def _register_routes(app: FastAPI) -> None:
                     sf_path = active_path
 
         if sf_path is None and sf_dir.exists():
-            sf_path = next(
-                (p for p in sorted(sf_dir.iterdir())
-                 if p.suffix.lower() in {".sf2", ".sf3", ".dls"}),
-                None,
-            )
+            sf_path = _prefer_gm_bank([
+                p for p in sorted(sf_dir.iterdir())
+                if p.suffix.lower() in {".sf2", ".sf3", ".dls"}
+            ])
 
         if sf_path is None or not sf_path.exists():
             raise HTTPException(404, "No soundfont available")
@@ -2840,6 +2842,74 @@ def _measure_beats_array(adapter: Any, events: list[NoteEvent]) -> list[float]:
             numerator, denominator = ts
             if numerator > 0 and denominator > 0:
                 last = numerator * 4.0 / denominator
+        out.append(last)
+    return out
+
+
+_GM_BANK_HINT = re.compile(
+    r"general|(?:^|[^a-z])gm(?:[^a-z]|$)|sgm|fluid|arachno|timbres|musescore",
+    re.IGNORECASE,
+)
+
+
+def _prefer_gm_bank(banks: list[Path]) -> Path | None:
+    """Pick the default soundfont, preferring a General MIDI bank.
+
+    Falling back to the alphabetically-first file picks a non-GM bank (e.g. a
+    "…Guitar Samples Collection" or an arcade pack) that lacks GM programs for
+    bass/drums/keys — the browser synth then collapses every track onto preset 0
+    (often DRUMS), so tabs sound wrong regardless of which soundfont the user
+    later tries. A GM-looking filename ("general", "gm", "sgm", "fluid",
+    "arachno", …) is the safe default; otherwise keep the first available.
+
+    Args:
+        banks: Candidate soundfont paths (already filtered to sf2/sf3/dls),
+               ideally pre-sorted for a deterministic fallback.
+
+    Returns:
+        The preferred bank, or ``None`` when the list is empty.
+    """
+    for bank in banks:
+        if _GM_BANK_HINT.search(bank.stem):
+            return bank
+    return banks[0] if banks else None
+
+
+def _measure_tempo_array(adapter: Any, events: list[NoteEvent]) -> list[float]:
+    """Per-measure tempo in BPM, 0-based (index i = measure i+1).
+
+    Built from the per-note ``tempo`` carried by every :class:`NoteEvent`, taking
+    the tempo in force at the start of each measure and carrying the last seen
+    value forward across rest bars. Returns ``[]`` when no per-note tempo is
+    available, so the player keeps its single scalar ``tempo`` fallback.
+
+    Why this exists: the player used to reconstruct the whole timeline from one
+    scalar tempo (``events[0].tempo``). Any mid-song tempo change (a
+    ritardando, a faster chorus) then desynced the cursor and the audio from the
+    real music — the dominant cause of the tracks drifting apart on songs that
+    change tempo. Shipping the real per-measure tempo lets the player place every
+    measure at its true wall-clock time.
+    """
+    if not events:
+        return []
+    by_measure: dict[int, float] = {}
+    for ev in events:
+        mi = ev.measure_index or 0
+        tempo = float(getattr(ev, "tempo", 0.0) or 0.0)
+        if mi <= 0 or tempo <= 0:
+            continue
+        # First event of the measure wins (tempo in force at the downbeat).
+        if mi not in by_measure:
+            by_measure[mi] = tempo
+    if not by_measure:
+        return []
+    max_measure = max(by_measure.keys())
+    default = float(getattr(events[0], "tempo", 120.0) or 120.0)
+    out: list[float] = []
+    last = default
+    for measure in range(1, max_measure + 1):
+        if measure in by_measure:
+            last = by_measure[measure]
         out.append(last)
     return out
 

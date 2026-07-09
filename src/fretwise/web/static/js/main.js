@@ -2258,6 +2258,9 @@ function initRenderer(data) {
     // Real per-measure beat counts → meter-aware playback timeline (keeps the
     // cursor, audio and all tracks aligned across meter changes / pickup bars).
     measureBeats: Array.isArray(data.measure_beats) ? data.measure_beats : null,
+    // Real per-measure tempo → tempo-aware timeline (a mid-song tempo change no
+    // longer desyncs the cursor and audio from the music).
+    measureTempos: Array.isArray(data.measure_tempos) ? data.measure_tempos : null,
   };
   if (playback) {
     playback.rebind(renderer, engineOpts);
@@ -2304,6 +2307,12 @@ function initRenderer(data) {
     if (frac != null && totalMB) {
       _synthTask.message(`Chargement de l'instrument… ${loadedMB} / ${totalMB} Mo`);
     }
+  };
+  // Advisory when the active soundfont is not a full General MIDI bank: non-guitar
+  // tracks can't map and everything collapses onto one timbre. Surface it once so
+  // the user knows to switch banks (Réglages) rather than blaming the tab.
+  playback.onSoundfontWarning = (message) => {
+    try { notifyTask('Soundfont').error(message); } catch (_) { /* notices optional */ }
   };
   // Enable audio immediately (muting is handled per-track in the multi-track bar)
   playback.enableAudio();
@@ -2723,7 +2732,7 @@ async function _toggleSecondaryTrack(trackId, trackName, btn) {
       );
       _notesCache.set(cacheKey, notesData);
     }
-    playback.addSecondaryChannel(trackId, trackName, notesData.results, notesData.beats_per_measure, notesData.midi_program);
+    playback.addSecondaryChannel(trackId, trackName, notesData.results, notesData.beats_per_measure, notesData.midi_program, notesData.kind);
     _mutedSecondaryTracks.get(currentTrackId)?.delete(trackId);
     btn.className = 'mt-track-btn mt-active';
     if (iconSpan) { iconSpan.textContent = '🔈'; iconSpan.title = `Muter ${sanitize(trackName)}`; }
