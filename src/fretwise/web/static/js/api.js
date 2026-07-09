@@ -464,6 +464,38 @@ export async function importSongMetadata(jsonBody) {
   return res.json();
 }
 
+/**
+ * Fetch the copy-paste prompt asking an external LLM to (re-)verify a song's
+ * gear/rig sheet. Grounded in the existing sheet when one exists. Returns the
+ * prompt text (Markdown).
+ */
+export async function fetchGearVerificationPrompt(filename) {
+  const res = await fetch(`/api/gears/${encodeURIComponent(filename)}/prompt`, { cache: 'no-store' });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Failed to fetch prompt' }));
+    throw new Error(err.detail || 'Failed to fetch prompt');
+  }
+  return res.text();
+}
+
+/**
+ * Save a gear.v2 JSON document pasted back from an LLM. Overwrites the song's
+ * existing sheet in place, or creates a new one. Returns
+ * `{ saved, warnings, view }` where `view` is the refreshed rig view dict.
+ */
+export async function saveGearSheet(filename, gear) {
+  const res = await fetch(`/api/gears/${encodeURIComponent(filename)}/save`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ gear }),
+  });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Save failed' }));
+    throw new Error(err.detail || 'Save failed');
+  }
+  return res.json();
+}
+
 // ── Fingering review & continuous improvement ───────────────────────────────
 
 /** Fetch the ranked list of fingerings to review for a track. */

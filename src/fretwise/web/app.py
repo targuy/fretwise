@@ -64,7 +64,13 @@ from fretwise.pdf_conformance import (
     legacy_shadow_pdf_conformance_report,
 )
 from fretwise.pipeline import PipelineResult, run_pipeline, run_pipeline_with_guard_report
-from fretwise.gears import gears_key_from_filename, song_output_to_view
+from fretwise.gears import (
+    build_gear_verification_prompt,
+    gears_key_from_filename,
+    song_output_to_view,
+    validate_gear_v2,
+)
+from fretwise.gears.naming import gears_filename as _gears_filename
 from fretwise.gears.naming import gears_key as _gears_key
 from fretwise.rig import (
     build_rig_index,
@@ -700,6 +706,75 @@ def _register_routes(app: FastAPI) -> None:
         md = rig_view_to_markdown(rig, date=_date.today().strftime("%m-%d-%Y"))
         target.write_text(md, encoding="utf-8")
         return JSONResponse({"saved": target.name, "backup": backup_name})
+
+    @app.get("/api/gears/{filename}/prompt")
+    async def get_gear_verification_prompt(filename: str) -> Response:
+        """Serve a copy-paste prompt for an external LLM to (re-)verify a gear sheet.
+
+        Grounds the prompt in the song's existing ``gear.v2``/rig JSON when one
+        exists (so the LLM double-checks/corrects it rather than starting from
+        scratch), falling back to the song catalog / filename for artist+title
+        when no sheet exists yet.
+        """
+        existing = _gears_raw_doc_for(filename)
+        existing_song = existing.get("song") if isinstance(existing, dict) else None
+        existing_song = existing_song if isinstance(existing_song, dict) else {}
+        artist = str(existing_song.get("artist") or (existing or {}).get("artist") or "").strip()
+        title = str(existing_song.get("title") or "").strip()
+        if not artist or not title:
+            catalog = _load_catalog(app)
+            stem = Path(filename).stem
+            info = dict(catalog.get(filename) or catalog.get(stem) or {})
+            if not info:
+                info = parse_filename_metadata(filename)
+            artist = artist or str(info.get("artist") or "")
+            title = title or str(info.get("title") or "")
+
+        prompt = build_gear_verification_prompt(artist, title, existing=existing)
+        return Response(
+            content=prompt,
+            media_type="text/markdown",
+            headers={
+                "Content-Disposition": 'inline; filename="fretwise-gear-prompt.md"',
+            },
+        )
+
+    @app.post("/api/gears/{filename}/save")
+    async def save_gear_sheet(filename: str, request: Request) -> JSONResponse:
+        """Validate a pasted ``gear.v2`` JSON and write it to ``data/gears/``.
+
+        Body: ``{"gear": {...}}`` — the JSON an external LLM returned for the
+        ``/api/gears/{filename}/prompt`` prompt. Overwrites the song's existing
+        sheet in place when one is already tracked for this score (matched the
+        same way ``GET /api/rig/{filename}`` resolves it); otherwise creates a
+        new file at the canonical ``<artist>__<title>.json`` path. Returns the
+        refreshed view so the frontend can re-render without a second fetch.
+        """
+        try:
+            body = await request.json()
+        except Exception:
+            raise HTTPException(400, "Invalid JSON body")
+        gear = body.get("gear") if isinstance(body, dict) else None
+        if not isinstance(gear, dict):
+            raise HTTPException(400, "'gear' (object) is required")
+
+        result = validate_gear_v2(gear)
+        if not result["ok"]:
+            raise HTTPException(400, "Invalid gear.v2 document: " + "; ".join(result["errors"]))
+
+        song = gear.get("song") if isinstance(gear.get("song"), dict) else {}
+        artist = str(song.get("artist") or "").strip()
+        title = str(song.get("title") or "").strip()
+
+        target = _gears_resolve_path(filename) or (_gears_root() / _gears_filename(artist, title))
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text(_json.dumps(gear, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        return JSONResponse({
+            "saved": target.name,
+            "warnings": result["warnings"],
+            "view": song_output_to_view(gear),
+        })
 
     @app.get("/api/rig-image/{image_name}")
     async def get_rig_image(image_name: str) -> Response:
@@ -2635,8 +2710,8 @@ def _gears_index(root: Path) -> dict[str, Path]:
     return index
 
 
-def _gears_view_for(filename: str) -> dict | None:
-    """Load the new-format gears sheet for a score filename, or None if absent.
+def _gears_resolve_path(filename: str) -> Path | None:
+    """Resolve a score filename to its gears sheet path, or None if absent.
 
     Resolves by the canonical ``artist__title`` key (naming-style agnostic);
     falls back to a title-slug-only match so a song whose score file omits the
@@ -2655,9 +2730,26 @@ def _gears_view_for(filename: str) -> dict | None:
         if len(matches) != 1:
             return None
         candidate = matches[0]
+    return candidate
+
+
+def _gears_raw_doc_for(filename: str) -> dict | None:
+    """Load the raw JSON gears document for a score filename, or None if absent."""
+
+    candidate = _gears_resolve_path(filename)
+    if candidate is None:
+        return None
     try:
-        doc = _json.loads(candidate.read_text(encoding="utf-8"))
+        return _json.loads(candidate.read_text(encoding="utf-8"))
     except (OSError, _json.JSONDecodeError):
+        return None
+
+
+def _gears_view_for(filename: str) -> dict | None:
+    """Load the new-format gears sheet for a score filename, or None if absent."""
+
+    doc = _gears_raw_doc_for(filename)
+    if doc is None:
         return None
     return song_output_to_view(doc)
 
