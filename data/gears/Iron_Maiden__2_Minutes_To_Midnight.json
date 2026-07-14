@@ -1,1 +1,199 @@
-{"schemaVersion":"songsgear.fretwise.gear.v2","id":"Iron_Maiden__2_Minutes_To_Midnight","song":{"artist":"Iron Maiden","title":"2 Minutes To Midnight","genre":"heavy metal","subgenres":["nwobhm","hard rock"],"genreConfidence":"high"},"credits":{"guitar":{"guitaristsText":"Dave Murray / Adrian Smith / Janick Gers","guitarists":["Dave Murray","Adrian Smith","Janick Gers"],"type":"Solid-body electric","modelsText":"Fender Stratocaster (Murray & Smith signature models) / Gibson Les Paul (Gers)","models":["Fender Stratocaster (Murray & Smith signature models)","Gibson Les Paul (Gers)"],"confidence":"medium","evidence":"Dave Murray and Adrian Smith both have Fender Stratocaster signature models; well documented for a 3-guitarist lineup.","notes":"Original entry reasonable, kept.","source":"songs_guitar_enriched_audited.json (artist-level gear research audit)"}},"tone":{"target":"bright NWOBHM Marshall crunch with tight bite","profile":"bright NWOBHM Marshall crunch with tight bite","summary":"A high-gain, crunchy rhythm tone achieved with an OD boost into a UK 45/UK Vintage 4x12 setup, emphasizing upper mids and tightness.","mustHave":["fast palm-mute attack","bright upper mids","tight low end","dry rhythm crunch"],"avoid":["fuzzy texture","modern metal saturation","heavy scoop"],"gearClues":["Marshall/Plexi style amp","overdrive boost","4x12 cab","bridge humbucker"],"corrections":["drop fuzz","raise presence","keep gain crunchy, not saturated"],"confidence":"high","needsReview":true},"rig":{"name":"Iron Maiden - 2 Minutes To Midnight - Valeton GP-180","confidence":"high","equipment":{"model":"Valeton GP-180"},"output":"FRFR / headphones","blocks":[{"order":1,"role":"noise reduction","module":"NR","model":"Gate 1","active":true,"settings":{"Threshold":"-65 dB"},"purpose":"Clean up pick noise and hum during fast palm-muting.","matchQuality":"close","gap":"None"},{"order":2,"role":"preamp boost/overdrive","module":"PRE","model":"Green OD","active":true,"settings":{"Drive":"3","Tone":"6","Level":"7"},"purpose":"Provide the necessary grit and boost for tight rhythm crunch without excessive fuzz.","matchQuality":"close","gap":"The Green OD is chosen over Blues OD/OD 9 as it typically offers a more aggressive, mid-focused bite suitable for NWOBHM.","alternatives":[{"model":"Blues OD"}]},{"order":3,"role":"distortion","module":"DST","model":"RAT-style","active":true,"settings":{"Drive":"4","Tone":"5","Output":"6"},"purpose":"Add aggressive bite and sustain to the rhythm tone while keeping it focused (not overly saturated).","matchQuality":"close","gap":"While not strictly necessary, a light RAT-style distortion helps solidify the 'crunch' requirement without adding modern metal saturation.","alternatives":[{"model":"Distortion"}]},{"order":4,"role":"amplifier","module":"AMP","model":"UK 45","active":true,"settings":{"Gain":"6","Treble":"7","Midrange":"8","Bass":"6"},"purpose":"Simulate the classic Marshall Plexi sound required for NWOBHM.","matchQuality":"exact","gap":"None","alternatives":[{"model":"UK 50"}]},{"order":5,"role":"cabinet/ir","module":"CAB/IR","model":"UK Vintage 4x12","active":true,"settings":{"Mic Position":"Center"},"purpose":"Provide the classic British cabinet sound matching the Marshall amp model.","matchQuality":"exact","gap":"None","alternatives":[{"model":"UK Basket 4x12"}]},{"order":6,"role":"equalization","module":"EQ","model":"Guitar EQ 2","active":true,"settings":{"Bass":"-1","Midrange":"+2","Treble":"+1"},"purpose":"Enhance the upper mids and presence for 'bright bite' while maintaining tight low end.","matchQuality":"close","gap":"Using EQ 2 allows for more precise mid-range sculpting than a simple tone knob.","alternatives":[{"model":"Guitar EQ 1"}]},{"order":7,"role":"modulation/chorus","module":"MOD","model":"Chorus","active":false,"settings":{"Rate":"2 Hz","Depth":"3","Feedback":"1"},"purpose":"Optional subtle thickening for rhythm parts (kept off by default).","matchQuality":"close","gap":"Chorus is generally not needed for pure rhythm crunch, but it's included as a versatile option."},{"order":8,"role":"delay","module":"DLY","model":"Digital Delay","active":true,"settings":{"Time":"300 ms","Feedback":"2","Mix":"3"},"purpose":"Add subtle rhythmic depth and space to the overall tone.","matchQuality":"close","gap":"A moderate delay helps fill out the sound without distracting from the fast rhythm work.","alternatives":[{"model":"Tape"}]},{"order":9,"role":"reverb","module":"RVB","model":"Room","active":true,"settings":{"Decay Time":"2.5s","Mix":"1"},"purpose":"Provide a natural, non-muddy ambience to ground the aggressive crunch.","matchQuality":"close","gap":"Room reverb is preferred over Plate/Spring for its natural, less artificial decay suitable for classic rock.","alternatives":[{"model":"Plate"}]},{"order":10,"role":"volume control","module":"VOL","model":"Volume","active":true,"settings":{"Level":"7"},"purpose":"Final output level adjustment.","matchQuality":"exact","gap":"None"}]},"improvements":{"summary":"Upgrade IR for better cabinet realism and bite.","proposals":[{"priority":"P3","type":"IR","target":"Cabinet realism","recommendedAsset":"Marshall 4x12 (UK)","reason":"Enhance the classic Marshall sound with a more authentic, biting cab simulation.","replacesBlockOrder":5,"whenToUse":"Always","expectedGain":"Increased clarity and bite","requiredIfGp180Gap":false}]},"audit":{"workflow":"economic_production_v1","sourceIndex":625,"models":{"ollama":"gemma4:latest","openaiJudge":"gpt-5.4-mini","claudeFallback":"claude-sonnet-4-5"},"finalVerdictSource":"openai","openaiAction":"repair","fallbacks":{"gp180":false,"improvements":false},"sourceFile":"Iron_Maiden__2_Minutes_To_Midnight.json","validation":{"ok":true}}}
+{
+  "schemaVersion": "songsgear.fretwise.gear.v2",
+  "song": {
+    "artist": "Iron Maiden",
+    "title": "2 Minutes To Midnight",
+    "album": "Powerslave",
+    "year": 1984,
+    "genre": "heavy metal",
+    "subgenres": [
+      "nwobhm",
+      "traditional heavy metal"
+    ],
+    "genreConfidence": "high"
+  },
+  "credits": {
+    "guitar": {
+      "guitaristsText": "Dave Murray / Adrian Smith",
+      "type": "Solid-body electric guitars with humbuckers",
+      "modelsText": "Dave Murray: modified 1957 Fender Stratocaster with DiMarzio humbuckers; Adrian Smith: Lado Earth",
+      "confidence": "medium/high",
+      "evidence": "The studio recording features Dave Murray and Adrian Smith, not Janick Gers. Smith directly confirms Lado guitars, a 100-watt Marshall and possibly an Ibanez Tube Screamer for Powerslave. Murray's modified 1957 Stratocaster was used across the first eight Iron Maiden albums. Both guitar parts use bridge-humbucker-style tones.",
+      "notes": "Target is the 1984 Powerslave studio recording. Standard E tuning is strongly supported by transcription and Iron Maiden's documented tuning practice, but no session statement specific to this song was found. Exact guitar assignment for every rhythm overdub is undocumented.",
+      "source": "Guitar World, Adrian Smith on the making of Iron Maiden's Powerslave: https://www.guitarworld.com/features/iron-maiden-adrian-smith-on-powerslave ; Guitar World, Adrian Smith and Dave Murray 1983 interview: https://www.guitarworld.com/artists/interview-iron-maidens-adrian-smith-and-dave-murray-their-first-guitar-world-feature-1983 ; Powerslave original EMI liner notes"
+    }
+  },
+  "tone": {
+    "target": "1984 Powerslave studio recording, core rhythm guitar",
+    "profile": "Layered British valve crunch with firm mids, controlled gain and clear pick attack",
+    "summary": "A bridge-humbucker guitar into a lightly boosted 100-watt Marshall-style amplifier. The sound is crunchy and layered rather than highly saturated.",
+    "mustHave": [
+      "firm palm-mute attack",
+      "strong British midrange",
+      "clear chord definition",
+      "controlled low end",
+      "moderate power-amp crunch"
+    ],
+    "avoid": [
+      "RAT-style distortion",
+      "modern high-gain saturation",
+      "deep mid scoop",
+      "audible delay on rhythm parts",
+      "heavy reverb"
+    ],
+    "gearClues": [
+      "100-watt Marshall amplifier",
+      "Ibanez Tube Screamer possible",
+      "British 4x12 cabinet",
+      "bridge humbucker",
+      "multiple rhythm-guitar layers"
+    ],
+    "corrections": [
+      "remove Janick Gers",
+      "replace signature guitars with period instruments",
+      "replace UK 45 with UK SLP",
+      "replace Green OD with OD 9",
+      "remove RAT-style distortion",
+      "remove delay",
+      "remove reverb",
+      "omit inactive chorus",
+      "use 0-100 settings"
+    ],
+    "confidence": "medium/high",
+    "needsReview": false
+  },
+  "rig": {
+    "name": "Iron Maiden - 2 Minutes To Midnight - 1984 Studio Rhythm",
+    "confidence": "medium/high",
+    "equipment": {
+      "model": "Valeton GP-180"
+    },
+    "recommendedGuitar": "Solid-body guitar with a medium-to-high-output bridge humbucker; use standard E tuning",
+    "output": "FRFR / headphones",
+    "blocks": [
+      {
+        "module": "NR",
+        "model": "Gate 1",
+        "active": true,
+        "settings": {
+          "threshold": 32,
+          "release": 48
+        },
+        "purpose": "Practical noise control without cutting sustained chords.",
+        "matchQuality": "acceptable",
+        "gap": "Noise reduction is a GP-180 adaptation, not documented studio equipment.",
+        "alternatives": [
+          {
+            "model": "Gate 2",
+            "reason": "Use only when the guitar or monitoring system produces more noise."
+          }
+        ]
+      },
+      {
+        "module": "PRE",
+        "model": "OD 9",
+        "active": true,
+        "settings": {
+          "drive": 12,
+          "tone": 55,
+          "level": 70
+        },
+        "purpose": "Approximate Smith's possible Tube Screamer and tighten the amplifier input.",
+        "matchQuality": "close",
+        "gap": "Smith described the Tube Screamer as possible rather than certain. Murray used different boost and distortion devices in the same era.",
+        "alternatives": [
+          {
+            "model": "Boost",
+            "reason": "Use for a less colored interpretation of Murray's boosted Marshall tone."
+          }
+        ]
+      },
+      {
+        "module": "AMP",
+        "model": "UK SLP",
+        "active": true,
+        "settings": {
+          "gain": 58,
+          "bass": 43,
+          "middle": 68,
+          "treble": 61,
+          "presence": 57,
+          "level": 62
+        },
+        "purpose": "Reproduce the documented 100-watt Marshall foundation with open British crunch.",
+        "matchQuality": "close",
+        "gap": "The exact Marshall head model and historical control positions are undocumented.",
+        "alternatives": [
+          {
+            "model": "UK 50",
+            "reason": "Use for a slightly softer and more compressed Murray-style response."
+          },
+          {
+            "model": "UK 800",
+            "reason": "Use only when the GP-180 UK SLP lacks enough gain at practical output levels."
+          }
+        ]
+      },
+      {
+        "module": "CAB/IR",
+        "model": "UK Vintage 4x12",
+        "active": true,
+        "settings": {
+          "lowCut": 20,
+          "highCut": 67,
+          "micPosition": 58,
+          "level": 55
+        },
+        "purpose": "Provide the broad British 4x12 response required by the studio tone.",
+        "matchQuality": "close",
+        "gap": "The precise Powerslave cabinet speakers, microphones and placements are not reliably documented.",
+        "alternatives": [
+          {
+            "model": "UK Basket 4x12",
+            "reason": "Use when a tighter and more focused upper-mid response is preferred."
+          },
+          {
+            "model": "UK 30 4x12",
+            "reason": "Use when more upper-mid texture and speaker breakup are needed."
+          }
+        ]
+      },
+      {
+        "module": "EQ",
+        "model": "Guitar EQ 1",
+        "active": true,
+        "settings": {
+          "low": 43,
+          "lowMiddle": 54,
+          "middle": 61,
+          "highMiddle": 58,
+          "high": 52,
+          "level": 50
+        },
+        "purpose": "Practical compensation for FRFR playback and separation from the bass guitar.",
+        "matchQuality": "acceptable",
+        "gap": "This EQ curve is a starting point, not a historical studio setting.",
+        "alternatives": [
+          {
+            "model": "Guitar EQ 2",
+            "reason": "Use when its available frequency bands better match the guitar and speaker system."
+          }
+        ]
+      }
+    ]
+  },
+  "improvements": {
+    "summary": "The stock rig covers the essential tone. A well-matched British cabinet IR offers the clearest upgrade.",
+    "proposals": [
+      {
+        "priority": "P2",
+        "type": "IR",
+        "target": "British cabinet realism",
+        "recommendedAsset": "Marshall-style 4x12 IR with a balanced dynamic-microphone position",
+        "reason": "A quality IR can improve chord separation, upper-mid texture and microphone realism.",
+        "whenToUse": "Use with FRFR, headphones or direct recording when the stock cabinet sounds harsh or flat.",
+        "expectedGain": "More realistic speaker response and better layered-rhythm definition"
+      }
+    ]
+  }
+}
