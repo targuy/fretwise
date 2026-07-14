@@ -14,9 +14,9 @@ from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
 from pathlib import Path
-from typing import Literal, Protocol
+from typing import Literal, Protocol, cast
 
-from fretwise.rig import _normalize
+from fretwise.rig import GP180_CHAIN, _canon_effect, _normalize
 
 RIG_BANK_SCHEMA_VERSION = "fretwise_rig_bank_v1"
 DEFAULT_RIG_BANK_NAME = "rig_bank.json"
@@ -32,6 +32,7 @@ RigSelectionSource = Literal[
     "artist_match",
     "genre_match",
     "tag_match",
+    "module_match",
     "fallback",
 ]
 
@@ -136,6 +137,54 @@ class RigBankError(Exception):
 
 
 @dataclass(frozen=True)
+class RigModule:
+    """One effect model stored in a GP-180 preset profile.
+
+    ``active=False`` is accepted for lossless imports and UI editing, but only
+    active modules participate in preset recommendation.
+    """
+
+    module: str
+    model: str
+    active: bool = True
+
+    def __post_init__(self) -> None:
+        canonical_module = _canon_effect(self.module)
+        if canonical_module not in GP180_CHAIN:
+            raise RigBankError(f"unsupported GP-180 module: {self.module}")
+        if self.active and not self.model.strip():
+            raise RigBankError(f"active GP-180 module {canonical_module} requires a model")
+        object.__setattr__(self, "module", canonical_module)
+        object.__setattr__(self, "model", self.model.strip())
+
+    @property
+    def match_key(self) -> tuple[str, str] | None:
+        """Return normalized active ``(module, model)`` key, or ``None``."""
+
+        if not self.active or not self.model:
+            return None
+        return self.module, _normalize(self.model)
+
+    def to_json(self) -> dict[str, object]:
+        """Serialize module metadata for ``rig_bank.json``."""
+
+        return {"module": self.module, "model": self.model, "active": self.active}
+
+    @classmethod
+    def from_json(cls, data: Mapping[str, object]) -> RigModule:
+        """Build module metadata from one rig-bank object."""
+
+        active_obj = data.get("active", True)
+        if not isinstance(active_obj, bool):
+            raise RigBankError("rig module 'active' must be a boolean")
+        return cls(
+            module=_str_field(data, "module"),
+            model=_str_field(data, "model", default=""),
+            active=active_obj,
+        )
+
+
+@dataclass(frozen=True)
 class RigProfile:
     """A Valeton preset slot that FretWise can select.
 
@@ -152,6 +201,7 @@ class RigProfile:
         tags: Free tags for search/filtering.
         source: Where the preset came from (manual, device, Valeton Suite, etc.).
         notes: Free-form operator notes.
+        modules: Effect models currently active in this stored preset.
     """
 
     id: str
@@ -166,6 +216,7 @@ class RigProfile:
     tags: tuple[str, ...] = field(default_factory=tuple)
     source: str = "manual"
     notes: str = ""
+    modules: tuple[RigModule, ...] = field(default_factory=tuple)
 
     def __post_init__(self) -> None:
         if not self.id.strip():
@@ -178,6 +229,11 @@ class RigProfile:
             _validate_midi_range("bank_msb", self.bank_msb)
         if self.bank_lsb is not None:
             _validate_midi_range("bank_lsb", self.bank_lsb)
+        seen_modules: set[str] = set()
+        for module in self.modules:
+            if module.module in seen_modules:
+                raise RigBankError(f"duplicate GP-180 module in profile: {module.module}")
+            seen_modules.add(module.module)
 
     @property
     def display_program(self) -> int:
@@ -225,6 +281,7 @@ class RigProfile:
             "tags": list(self.tags),
             "source": self.source,
             "notes": self.notes,
+            "modules": [module.to_json() for module in self.modules],
         }
         if self.bank_msb is not None:
             data["bank_msb"] = self.bank_msb
@@ -244,6 +301,12 @@ class RigProfile:
         artist = _optional_str_field(data, "artist")
         tags = tuple(_str_list_field(data, "tags"))
         notes = _str_field(data, "notes", default="")
+        modules_obj = data.get("modules", [])
+        if not isinstance(modules_obj, list):
+            raise RigBankError("rig profile 'modules' must be a list")
+        modules = tuple(
+            RigModule.from_json(_object_item(item, "module")) for item in modules_obj
+        )
         genre = _optional_str_field(data, "genre") or infer_rig_profile_genre(
             name=name,
             artist=artist,
@@ -263,6 +326,7 @@ class RigProfile:
             tags=tags,
             source=_str_field(data, "source", default="manual"),
             notes=notes,
+            modules=modules,
         )
 
 
@@ -301,7 +365,7 @@ class RigBinding:
         if scope not in ("song", "artist", "genre"):
             raise RigBankError(f"unsupported rig binding scope: {scope}")
         return cls(
-            scope=scope,
+            scope=cast(RigBindingScope, scope),
             key=_str_field(data, "key"),
             profile_id=_str_field(data, "profile_id"),
         )
@@ -335,11 +399,16 @@ class RigRecommendation:
     score: int
     reasons: tuple[str, ...]
     matched_key: str = ""
+    active_target_count: int = 0
+    active_profile_count: int = 0
+    positive_matches: int = 0
+    matched_modules: tuple[str, ...] = field(default_factory=tuple)
+    unmatched_target_modules: tuple[str, ...] = field(default_factory=tuple)
 
     def to_json(self) -> dict[str, object]:
         """Serialize for API/UI output."""
 
-        return {
+        payload: dict[str, object] = {
             "source": self.source,
             "score": self.score,
             "matched_key": self.matched_key,
@@ -347,6 +416,16 @@ class RigRecommendation:
             "profile": self.profile.to_json(),
             "midi": [list(message) for message in self.profile.midi_bytes()],
         }
+        if self.active_target_count:
+            payload["module_match"] = {
+                "active_target_count": self.active_target_count,
+                "active_profile_count": self.active_profile_count,
+                "positive_matches": self.positive_matches,
+                "coverage": round(self.positive_matches / self.active_target_count, 3),
+                "matched_modules": list(self.matched_modules),
+                "unmatched_target_modules": list(self.unmatched_target_modules),
+            }
+        return payload
 
 
 @dataclass(frozen=True)
@@ -424,11 +503,14 @@ class RigBank:
                 raise RigBankError(f"unknown rig profile id: {profile_id}")
             return RigResolution(profile, "explicit", profile_id)
 
-        for scope, key, source in (
+        resolution_candidates: tuple[
+            tuple[RigBindingScope, str | None, RigSelectionSource], ...
+        ] = (
             ("song", song, "song_binding"),
             ("artist", artist, "artist_binding"),
             ("genre", genre, "genre_binding"),
-        ):
+        )
+        for scope, key, source in resolution_candidates:
             if not key:
                 continue
             resolution = self._resolve_binding(scope, key, source)
@@ -454,6 +536,7 @@ class RigBank:
         artist: str | None = None,
         genre: str | None = None,
         profile_id: str | None = None,
+        target_modules: Iterable[RigModule] = (),
     ) -> RigRecommendation | None:
         """Recommend the closest GP-180 profile for song metadata.
 
@@ -462,12 +545,40 @@ class RigBank:
         get a playable starting point.
         """
 
-        resolution = self.resolve(
+        resolution = self.resolve(profile_id=profile_id) if profile_id else None
+        if resolution is not None:
+            reason = _resolution_reason(resolution.source, resolution.matched_key)
+            return RigRecommendation(
+                profile=resolution.profile,
+                source=resolution.source,
+                score=100,
+                reasons=(reason,),
+                matched_key=resolution.matched_key,
+            )
+
+        song_resolution = (
+            self._resolve_binding("song", song, "song_binding") if song else None
+        )
+        if song_resolution is not None:
+            return RigRecommendation(
+                profile=song_resolution.profile,
+                source=song_resolution.source,
+                score=100,
+                reasons=(_resolution_reason(song_resolution.source, song_resolution.matched_key),),
+                matched_key=song_resolution.matched_key,
+            )
+
+        active_targets = _active_module_map(target_modules)
+        module_recommendation = self._recommend_by_modules(
+            active_targets,
             song=song,
             artist=artist,
             genre=genre,
-            profile_id=profile_id,
         )
+        if module_recommendation is not None:
+            return module_recommendation
+
+        resolution = self.resolve(song=song, artist=artist, genre=genre)
         if resolution is not None:
             reason = _resolution_reason(resolution.source, resolution.matched_key)
             return RigRecommendation(
@@ -504,6 +615,64 @@ class RigBank:
                 reasons=("Aucun artiste ou genre exploitable : profil neutre de départ.",),
             )
         return None
+
+    def _recommend_by_modules(
+        self,
+        active_targets: Mapping[str, str],
+        *,
+        song: str | None,
+        artist: str | None,
+        genre: str | None,
+    ) -> RigRecommendation | None:
+        """Return best positive active-module match, or ``None`` for legacy fallback."""
+
+        if not active_targets:
+            return None
+        ranked: list[tuple[int, float, int, int, RigRecommendation]] = []
+        for profile in self.profiles:
+            active_profile = _active_module_map(profile.modules)
+            matched = tuple(
+                module
+                for module, model in active_targets.items()
+                if active_profile.get(module) == model
+            )
+            if not matched:
+                continue
+            unmatched = tuple(module for module in active_targets if module not in matched)
+            context_score, context_reasons, _, _ = _score_profile(
+                profile,
+                song,
+                artist,
+                genre,
+            )
+            coverage = len(matched) / len(active_targets)
+            module_labels = tuple(
+                f"{module}={_display_module_model(profile, module)}" for module in matched
+            )
+            reasons = (
+                f"{len(matched)}/{len(active_targets)} module(s) actif(s) correspondent : "
+                + ", ".join(module_labels)
+                + ".",
+                *context_reasons,
+            )
+            recommendation = RigRecommendation(
+                profile=profile,
+                source="module_match",
+                score=round(coverage * 100),
+                reasons=reasons,
+                matched_key=", ".join(module_labels),
+                active_target_count=len(active_targets),
+                active_profile_count=len(active_profile),
+                positive_matches=len(matched),
+                matched_modules=module_labels,
+                unmatched_target_modules=unmatched,
+            )
+            ranked.append(
+                (len(matched), coverage, context_score, -profile.program, recommendation)
+            )
+        if not ranked:
+            return None
+        return max(ranked, key=lambda item: item[:4])[4]
 
     def _resolve_binding(
         self,
@@ -659,6 +828,26 @@ def read_valeton_suite_effect_catalog(paths: Iterable[Path]) -> dict[str, list[s
                 if title:
                     bucket.add(title)
     return {module: sorted(names) for module, names in sorted(catalog.items())}
+
+
+def _active_module_map(modules: Iterable[RigModule]) -> dict[str, str]:
+    """Return canonical active slot to normalized model mapping."""
+
+    active: dict[str, str] = {}
+    for module in modules:
+        key = module.match_key
+        if key is not None:
+            active[key[0]] = key[1]
+    return active
+
+
+def _display_module_model(profile: RigProfile, module_name: str) -> str:
+    """Return stored model label for one active profile module."""
+
+    for module in profile.modules:
+        if module.active and module.module == module_name:
+            return module.model
+    return "?"
 
 
 def _resolution_reason(source: RigSelectionSource, matched_key: str) -> str:
