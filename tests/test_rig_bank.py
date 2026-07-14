@@ -13,6 +13,7 @@ from fretwise.rig_bank import (
     RigBinding,
     RigModule,
     RigProfile,
+    _match_model,
     load_rig_bank,
     read_valeton_suite_effect_catalog,
     save_rig_bank,
@@ -535,8 +536,9 @@ def test_rig_bank_recommendation_prefers_most_positive_active_module_matches() -
     assert recommendation is not None
     assert recommendation.profile.id == "closest-chain"
     assert recommendation.source == "module_match"
-    assert recommendation.positive_matches == 2
-    assert recommendation.to_json()["module_match"]["coverage"] == 0.667
+    assert recommendation.positive_matches == 1
+    assert recommendation.to_json()["module_match"]["coverage"] == 0.5
+    assert recommendation.to_json()["module_match"]["amp_match_module"] == "AMP"
 
 
 def test_rig_bank_recommendation_module_matching_falls_back_when_no_positive_match() -> None:
@@ -561,6 +563,233 @@ def test_rig_bank_recommendation_module_matching_falls_back_when_no_positive_mat
     assert recommendation is not None
     assert recommendation.profile.id == "hard"
     assert recommendation.source == "profile_genre"
+    assert "Rapprochement par style et nom" in recommendation.reasons[0]
+
+
+def test_rig_bank_recommendation_requires_amp_gate_before_secondary_modules() -> None:
+    bank = RigBank(
+        profiles=(
+            RigProfile(
+                id="wrong-amp-wet",
+                name="Wrong Amp Wet",
+                program=1,
+                genre="rock",
+                modules=(
+                    RigModule(module="AMP", model="US Twin"),
+                    RigModule(module="CAB/IR", model="UK 4x12"),
+                    RigModule(module="DLY", model="Tape"),
+                    RigModule(module="RVB", model="Hall"),
+                ),
+            ),
+            RigProfile(
+                id="right-amp-dry",
+                name="Right Amp Dry",
+                program=2,
+                genre="rock",
+                modules=(
+                    RigModule(module="AMP", model="UK 50"),
+                    RigModule(module="DLY", model="Tape"),
+                ),
+            ),
+        )
+    )
+
+    recommendation = bank.recommend(
+        genre="rock",
+        target_modules=(
+            RigModule(module="AMP", model="UK 50"),
+            RigModule(module="CAB/IR", model="UK 4x12"),
+            RigModule(module="DLY", model="Tape"),
+            RigModule(module="RVB", model="Hall"),
+        ),
+    )
+
+    assert recommendation is not None
+    assert recommendation.profile.id == "right-amp-dry"
+    assert recommendation.positive_matches == 1
+
+
+def test_rig_bank_recommendation_accepts_ns_as_amp_gate() -> None:
+    bank = RigBank(
+        profiles=(
+            RigProfile(
+                id="ns-amp",
+                name="N-S Amp",
+                program=1,
+                modules=(
+                    RigModule(module="N→S", model="UK 50"),
+                    RigModule(module="DLY", model="Tape"),
+                ),
+            ),
+        )
+    )
+
+    recommendation = bank.recommend(
+        target_modules=(
+            RigModule(module="AMP", model="UK 50"),
+            RigModule(module="DLY", model="Tape"),
+        )
+    )
+
+    assert recommendation is not None
+    assert recommendation.source == "module_match"
+    assert recommendation.to_json()["module_match"]["amp_match_module"] == "N→S"
+
+
+def test_rig_bank_recommendation_ignores_nr_eq_and_vol_in_module_score() -> None:
+    bank = RigBank(
+        profiles=(
+            RigProfile(
+                id="utility-only",
+                name="Utility Only",
+                program=1,
+                modules=(
+                    RigModule(module="AMP", model="UK 50"),
+                    RigModule(module="NR", model="Gate 3"),
+                    RigModule(module="EQ", model="Guitar EQ 1"),
+                    RigModule(module="VOL", model="Volume"),
+                ),
+            ),
+            RigProfile(
+                id="tone-match",
+                name="Tone Match",
+                program=2,
+                modules=(
+                    RigModule(module="AMP", model="UK 50"),
+                    RigModule(module="RVB", model="Hall"),
+                ),
+            ),
+        )
+    )
+
+    recommendation = bank.recommend(
+        target_modules=(
+            RigModule(module="AMP", model="UK 50"),
+            RigModule(module="NR", model="Gate 3"),
+            RigModule(module="EQ", model="Guitar EQ 1"),
+            RigModule(module="VOL", model="Volume"),
+            RigModule(module="RVB", model="Hall"),
+        )
+    )
+
+    assert recommendation is not None
+    assert recommendation.profile.id == "tone-match"
+    assert recommendation.positive_matches == 1
+    assert recommendation.to_json()["module_match"]["active_target_count"] == 1
+
+
+def test_rig_bank_recommendation_without_target_amp_falls_back_by_style_and_name() -> None:
+    bank = RigBank(
+        profiles=(RigProfile(id="ambient", name="Ambient Clean", program=1, genre="ambient"),)
+    )
+
+    recommendation = bank.recommend(
+        genre="ambient",
+        target_modules=(RigModule(module="DLY", model="Tape"),),
+    )
+
+    assert recommendation is not None
+    assert recommendation.source == "profile_genre"
+    assert recommendation.reasons[0] == (
+        "Rapprochement par style et nom : rig conseillé sans ampli AMP/N→S actif."
+    )
+
+
+@pytest.mark.parametrize(
+    ("module", "valeton_name", "reference_name"),
+    (
+        ("AMP", "Foxy 30TB", "Vox AC30 Top Boost"),
+        ("AMP", "Foxy 30TB", "Vox AC30"),
+        ("AMP", "EV 51", "EVH 5150"),
+        ("AMP", "UK 800", "Marshall JCM800"),
+        ("AMP", "Mess DualM", "Mesa Dual Rectifier"),
+        ("CAB/IR", "UK 30 4x12", "Marshall V30 4x12"),
+        ("DST", "Green OD", "Ibanez Tube Screamer"),
+        ("MOD", "C-Chorus", "Chorus"),
+        ("DLY", "BBD Delay S", "Bucket Brigade Delay"),
+        ("RVB", "Plate", "Plate Reverb"),
+    ),
+)
+def test_gp180_model_match_resolves_slot_specific_clone_aliases(
+    module: str, valeton_name: str, reference_name: str
+) -> None:
+    match = _match_model(module, valeton_name, reference_name)
+
+    assert match.matched is True
+    assert match.method == "alias"
+
+
+@pytest.mark.parametrize(
+    ("module", "left", "right"),
+    (
+        ("AMP", "Foxy 30N", "Vox AC30 Top Boost"),
+        ("AMP", "UK 800", "Marshall JCM900"),
+        ("AMP", "Mess 2C+ 1", "Mesa Dual Rectifier"),
+        ("AMP", "EVH 5150", "Peavey 6505"),
+        ("CAB/IR", "Foxy 1x12", "Vox 2x12"),
+        ("CAB/IR", "UK 30 4x12", "Mesa 4x12"),
+        ("PRE", "COMP4", "Compressor"),
+        ("MOD", "C-Chorus", "Bass Chorus"),
+        ("RVB", "Tube Spring", "Spring"),
+    ),
+)
+def test_gp180_model_match_rejects_nearby_but_distinct_models(
+    module: str, left: str, right: str
+) -> None:
+    assert _match_model(module, left, right).matched is False
+
+
+def test_gp180_model_match_accepts_typo_not_model_change() -> None:
+    typo = _match_model("AMP", "Marshal JCM800", "Marshall JCM800")
+
+    assert typo.matched is True
+    assert typo.method == "typo"
+    assert _match_model("AMP", "Marshall JCM800", "Marshall JCM900").matched is False
+
+
+def test_rig_bank_recommendation_uses_aliases_after_amp_gate() -> None:
+    bank = RigBank(
+        profiles=(
+            RigProfile(
+                id="wrong-amp",
+                name="Wrong but wet",
+                program=1,
+                modules=(
+                    RigModule(module="AMP", model="UK 800"),
+                    RigModule(module="CAB/IR", model="UK 30 4x12"),
+                    RigModule(module="DLY", model="BBD Delay S"),
+                ),
+            ),
+            RigProfile(
+                id="ac30-chain",
+                name="AC30 chain",
+                program=2,
+                modules=(
+                    RigModule(module="AMP", model="Foxy 30TB"),
+                    RigModule(module="CAB/IR", model="UK 30 4x12"),
+                    RigModule(module="DLY", model="BBD Delay S"),
+                ),
+            ),
+        )
+    )
+
+    recommendation = bank.recommend(
+        target_modules=(
+            RigModule(module="AMP", model="Vox AC30 Top Boost"),
+            RigModule(module="CAB/IR", model="Marshall V30 4x12"),
+            RigModule(module="DLY", model="Bucket Brigade Delay"),
+        )
+    )
+
+    assert recommendation is not None
+    assert recommendation.profile.id == "ac30-chain"
+    assert recommendation.positive_matches == 2
+    assert recommendation.amp_match_method == "alias"
+    assert "[alias]" in recommendation.reasons[0]
+    assert recommendation.to_json()["module_match"]["matched_module_methods"] == [
+        "CAB/IR=alias",
+        "DLY=alias",
+    ]
 
 
 def test_rig_profile_from_json_infers_missing_genre_for_settings() -> None:

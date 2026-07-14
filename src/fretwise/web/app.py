@@ -749,6 +749,7 @@ def _register_routes(app: FastAPI) -> None:
             headers={
                 "Content-Disposition": 'inline; filename="fretwise-gear-prompt.md"',
                 "X-FretWise-Gear-Prompt-Mode": prompt_mode,
+                "Cache-Control": "no-store",
             },
         )
 

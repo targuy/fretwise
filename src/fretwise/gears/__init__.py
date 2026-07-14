@@ -17,10 +17,15 @@ from fretwise.gears.naming import (
     gears_key_from_filename,
     slugify,
 )
-from fretwise.gears.verify import build_gear_verification_prompt, validate_gear_v2
+from fretwise.gears.verify import (
+    build_gear_creation_prompt,
+    build_gear_verification_prompt,
+    validate_gear_v2,
+)
 
 __all__ = [
     "GEARS_KEY_SEP",
+    "build_gear_creation_prompt",
     "build_gear_verification_prompt",
     "gears_filename",
     "gears_filename_for_rig",

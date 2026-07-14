@@ -2,7 +2,11 @@
 
 from __future__ import annotations
 
-from fretwise.gears import build_gear_verification_prompt, validate_gear_v2
+from fretwise.gears import (
+    build_gear_creation_prompt,
+    build_gear_verification_prompt,
+    validate_gear_v2,
+)
 from fretwise.gears.verify import _catalog_block
 
 
@@ -85,6 +89,24 @@ def test_prompt_includes_song_identity_and_schema():
     assert "Valeton GP-180" in prompt
 
 
+def test_prompt_states_manual_workflow_and_recommended_model():
+    prompt = build_gear_verification_prompt("AC/DC", "Highway to Hell")
+
+    assert "aucun appel API n'est fait par FretWise" in prompt
+    assert "GPT-5.6 Sol" in prompt
+    assert "recherche Web activée" in prompt
+
+
+def test_prompt_requires_real_gear_to_gp180_clone_translation():
+    prompt = build_gear_verification_prompt("AC/DC", "Highway to Hell")
+
+    assert "referenceModel" in prompt
+    assert "Vox AC30 → Foxy 30TB/Foxy 30N" in prompt
+    assert "EVH 5150 → EV 51" in prompt
+    assert "Marshall → UK" in prompt
+    assert "Mesa/Boogie → Mess" in prompt
+
+
 def test_prompt_lists_every_gp180_chain_slot():
     prompt = build_gear_verification_prompt("Metallica", "Enter Sandman")
     for slot in ("NR", "PRE", "WAH", "DST", "AMP", "CAB/IR", "EQ", "MOD", "DLY", "RVB", "VOL"):
@@ -100,7 +122,17 @@ def test_prompt_embeds_existing_sheet_for_review():
 
 def test_prompt_without_existing_sheet_has_no_review_section():
     prompt = build_gear_verification_prompt("AC/DC", "Highway to Hell")
-    assert "Une fiche existe déjà" not in prompt
+    assert "Aucune fiche fournie" in prompt
+
+
+def test_creation_prompt_is_distinct_and_requests_compact_active_blocks():
+    prompt = build_gear_creation_prompt("AC/DC", "Highway to Hell")
+
+    assert "# Création fiche gear FretWise" in prompt
+    assert "Crée une fiche factuelle" in prompt
+    assert "Modules inactifs omis" in prompt
+    assert "songsgear.fretwise.gear.v2" in prompt
+    assert "UK 50" in prompt
 
 
 def test_catalog_block_groups_models_under_every_slot():
