@@ -314,17 +314,9 @@ const btnHeaderMusicXml = $('#btn-header-musicxml');
 const btnLegend     = $('#btn-legend');
 const legendOverlay = $('#legend-overlay');
 const legendClose   = $('#legend-close');
-const btnHandViz           = $('#btn-hand-viz');
 const btnInsertFingerings  = $('#btn-insert-fingerings');
 const btnRig               = $('#btn-rig');
 const rigPanel             = $('#rig-panel');
-const handVizPanel  = $('#hand-viz-panel');
-const handVizFrame  = $('#hand-viz-frame');
-const handVizClose  = $('#hand-viz-close');
-const handVizResync = $('#hand-viz-resync');
-const handVizPopout = $('#hand-viz-popout');
-const handVizDrag   = $('#hand-viz-drag');
-let handVizPopupWindow = null;
 let _hand3dFrameLoaded = false;
 const HAND_VIZ_SEEK_POST_MS = 1000 / 60;
 let _lastHandVizSeekPostMs = 0;
@@ -1528,17 +1520,11 @@ function _applyTrackKindLock() {
     }
   });
 
-  // Fingering button + fretboard / hand-overlay panel make no sense without
-  // fingering data. Hide them entirely for non-guitar tracks.
-  const fingeringControls = [btnFingering, btnHandViz, btnInsertFingerings];
+  // Fingering button + insert-fingerings make no sense without fingering
+  // data. Hide them entirely for non-guitar tracks.
+  const fingeringControls = [btnFingering, btnInsertFingerings];
   for (const el of fingeringControls) {
     if (el) el.style.display = guitar ? '' : 'none';
-  }
-  // Close the floating fretboard panel if it was left open from a guitar
-  // track — it has nothing to show for a non-guitar one.
-  if (!guitar && handVizPanel && handVizPanel.style.display !== 'none') {
-    handVizPanel.style.display = 'none';
-    if (btnHandViz) btnHandViz.classList.remove('tb-btn-active');
   }
 }
 
@@ -2277,15 +2263,12 @@ function initRenderer(data) {
     stopCursorLoop();
     _postHandVizTime(true);
   };
-  // Feed the floating hand-viz panel with the current playhead time on every
+  // Feed the dedicated 3D-hand iframe with the current playhead time on every
   // tick (sub-measure precision). Cheap: it is just one postMessage / frame.
   playback.onTimeChange = (sec) => {
     if (tcCurrent) tcCurrent.textContent = _fmtTime(sec);
     _slopeRenderer?.setPlaybackTime(sec, playback);
-    const panelVisible = handVizPanel && handVizPanel.style.display !== 'none';
-    const popupVisible = handVizPopupWindow && !handVizPopupWindow.closed;
-    const hand3dVisible = getSelectedRepresentationMode() === MODES.HAND_3D;
-    if (panelVisible || popupVisible || hand3dVisible) _postHandVizTime();
+    if (getSelectedRepresentationMode() === MODES.HAND_3D) _postHandVizTime();
   };
   // Surface soundfont loading so a big bank (StrixGuitarPack 186 MB, East_West
   // 426 MB) doesn't look like a freeze. Must be wired BEFORE enableAudio() so the
@@ -3949,27 +3932,14 @@ function _postHandVizData() {
   if (_isHand3dViewVisible() && _ensureHand3dViewFrame() && hand3dViewFrame.contentWindow) {
     hand3dViewFrame.contentWindow.postMessage(message, '*');
   }
-  if (handVizFrame && handVizFrame.contentWindow) {
-    handVizFrame.contentWindow.postMessage(message, '*');
-  }
-  if (handVizPopupWindow && !handVizPopupWindow.closed) {
-    handVizPopupWindow.postMessage(message, '*');
-  }
   // After reinstalling data, also push current time so the iframe starts
   // at the right place instead of t=0.
   _postHandVizTime(true);
 }
 
-function _reloadHandVizFrame() {
-  if (!handVizFrame) return;
-  handVizFrame.src = `/static/hand_viz.html?v=${Date.now()}`;
-}
-
 function _postHandVizTime(force = false) {
-  const panelVisible = handVizPanel && handVizPanel.style.display !== 'none';
-  const popupVisible = handVizPopupWindow && !handVizPopupWindow.closed;
   const hand3dVisible = _isHand3dViewVisible() && _ensureHand3dViewFrame();
-  if (!panelVisible && !popupVisible && !hand3dVisible) return;
+  if (!hand3dVisible) return;
   if (!playback || typeof playback.getCurrentTimeSec !== 'function') return;
   const now = performance.now();
   if (!force && playback.isPlaying && now - _lastHandVizSeekPostMs < HAND_VIZ_SEEK_POST_MS) {
@@ -3981,73 +3951,9 @@ function _postHandVizTime(force = false) {
     t: playback.getCurrentTimeSec(),
     playing: !!playback.isPlaying,
   };
-  if (hand3dVisible && hand3dViewFrame.contentWindow) {
+  if (hand3dViewFrame.contentWindow) {
     hand3dViewFrame.contentWindow.postMessage(message, '*');
   }
-  if (panelVisible && handVizFrame && handVizFrame.contentWindow) {
-    handVizFrame.contentWindow.postMessage(message, '*');
-  }
-  if (popupVisible) handVizPopupWindow.postMessage(message, '*');
-}
-
-function _openHandVizPopup() {
-  const features = 'popup=yes,width=760,height=680,left=80,top=40,resizable=yes,scrollbars=yes';
-  if (!handVizPopupWindow || handVizPopupWindow.closed) {
-    handVizPopupWindow = window.open(`/static/hand_viz.html?v=${Date.now()}`, 'fretwise-hand-viz', features);
-  } else {
-    handVizPopupWindow.focus();
-  }
-  setTimeout(_postHandVizData, 350);
-  setTimeout(() => _postHandVizTime(true), 450);
-}
-
-function _toggleHandViz() {
-  if (!handVizPanel) return;
-  const visible = handVizPanel.style.display !== 'none';
-  handVizPanel.style.display = visible ? 'none' : 'flex';
-  if (btnHandViz) btnHandViz.classList.toggle('tb-btn-active', !visible);
-  if (!visible) {
-    _reloadHandVizFrame();
-    setTimeout(_postHandVizData, 250);
-  }
-}
-
-if (btnHandViz) btnHandViz.addEventListener('click', _toggleHandViz);
-
-
-if (handVizClose) {
-  handVizClose.addEventListener('click', () => {
-    if (handVizPanel) handVizPanel.style.display = 'none';
-    if (btnHandViz) btnHandViz.classList.remove('tb-btn-active');
-  });
-}
-if (handVizResync) handVizResync.addEventListener('click', () => {
-  _reloadHandVizFrame();
-  setTimeout(_postHandVizData, 250);
-});
-if (handVizPopout) handVizPopout.addEventListener('click', _openHandVizPopup);
-
-// Make the panel draggable by its header.
-if (handVizDrag && handVizPanel) {
-  let drag = null;
-  handVizDrag.addEventListener('mousedown', (e) => {
-    // Skip clicks on the header buttons themselves.
-    if (e.target.closest('.floating-panel-btn')) return;
-    const rect = handVizPanel.getBoundingClientRect();
-    drag = { dx: e.clientX - rect.left, dy: e.clientY - rect.top };
-    e.preventDefault();
-  });
-  window.addEventListener('mousemove', (e) => {
-    if (!drag) return;
-    const rect = handVizPanel.getBoundingClientRect();
-    const x = Math.max(12 - rect.width, Math.min(window.innerWidth - 48, e.clientX - drag.dx));
-    const y = Math.max(4, Math.min(window.innerHeight - 48, e.clientY - drag.dy));
-    handVizPanel.style.left   = x + 'px';
-    handVizPanel.style.top    = y + 'px';
-    handVizPanel.style.right  = 'auto';
-    handVizPanel.style.bottom = 'auto';
-  });
-  window.addEventListener('mouseup', () => { drag = null; });
 }
 
 // Repush whenever the iframe signals it is ready.

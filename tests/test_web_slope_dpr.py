@@ -1,0 +1,68 @@
+"""Guard tests for the Slope view's text-sharpness fix (S-1/S-2/S-3, T-P3).
+
+The Slope renderer draws text (fret digits, note names, chord labels) that
+glides continuously with playback. Sub-pixel positions and non-integer font
+sizes read as "blur" while moving, even though the canvas itself is high-DPI.
+These guards assert the fix's mechanics are present in the shipped source —
+there is no headless WebGL/canvas here, so behavior is verified by presence
+of the snapping helpers and their use at the actual draw call sites (mirrors
+the other test_web_*.py smoke tests in this suite).
+"""
+from __future__ import annotations
+
+from pathlib import Path
+
+_STATIC_DIR = Path(__file__).parents[1] / "src" / "fretwise" / "web" / "static"
+_SLOPE_JS = _STATIC_DIR / "js" / "slope-renderer.js"
+
+
+def _slope_js() -> str:
+    return _SLOPE_JS.read_text(encoding="utf-8")
+
+
+def test_slope_backing_store_matches_client_size_times_dpr() -> None:
+    """resize() sizes the canvas backing store from clientWidth/Height * dpr."""
+    js = _slope_js()
+    assert "this.canvas.width = Math.max(1, Math.floor(rect.width * this.dpr));" in js
+    assert "this.canvas.height = Math.max(1, Math.floor(rect.height * this.dpr));" in js
+    assert "this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);" in js
+
+
+def test_slope_canvas_has_no_css_transform_scale() -> None:
+    """A CSS transform:scale on the canvas would resample already-sharp pixels."""
+    css = (_STATIC_DIR / "css" / "style.css").read_text(encoding="utf-8")
+    start = css.index("#slope-canvas {")
+    end = css.index("}", start)
+    rule = css[start:end]
+    assert "transform" not in rule
+
+
+def test_slope_text_snapping_helpers_present() -> None:
+    """T-P3.1/T-P3.2: device-pixel position snap + integer font-size floors."""
+    js = _slope_js()
+    assert "_snapPx(v)" in js
+    assert "_snapFontSizeClamped(cssSize, floorDevicePx)" in js
+    assert "_snapFontSizeOrNull(cssSize, floorDevicePx)" in js
+
+
+def test_fret_disc_uses_snapped_positions_and_floored_fonts() -> None:
+    """_drawFretDisc (the moving fret-number label) must use the snap helpers,
+    not raw fillText(point.x, point.y) with unclamped font sizes."""
+    js = _slope_js()
+    disc_start = js.index("_drawFretDisc(ctx, note, point, radius, meta, showText = true) {")
+    disc_end = js.index("\n  }", disc_start)
+    body = js[disc_start:disc_end]
+    assert "this._snapPx(point.x)" in body
+    assert "this._snapFontSizeClamped(fretSizeRaw, 11)" in body
+    assert "this._snapFontSizeOrNull(" in body
+    # Fret digit is never optional — it must always be drawn.
+    assert "ctx.fillText(String(note.fret)" in body
+
+
+def test_chord_label_uses_snapped_position() -> None:
+    """The chord label glides with the fold geometry like the note bars do."""
+    js = _slope_js()
+    label_start = js.index("_drawChordLabel(chord) {")
+    label_end = js.index("\n  }", label_start)
+    body = js[label_start:label_end]
+    assert "ctx.fillText(chord.label, this._snapPx(x), this._snapPx(y));" in body

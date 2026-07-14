@@ -1,1 +1,299 @@
-{"schemaVersion":"songsgear.fretwise.gear.v2","id":"Lynyrd_Skynyrd__Gimme_Three_Steps","song":{"artist":"Lynyrd Skynyrd","title":"Gimme Three Steps","genre":"southern rock","subgenres":["classic rock","blues-rock"],"genreConfidence":"high"},"credits":{"guitar":{"guitaristsText":"Gary Rossington / Allen Collins / Ed King","guitarists":["Gary Rossington","Allen Collins","Ed King"],"type":"Solid-body electric","modelsText":"Gibson Les Paul / Gibson Explorer / Fender Stratocaster","models":["Gibson Les Paul","Gibson Explorer","Fender Stratocaster"],"confidence":"medium","evidence":"trained_knowledge","notes":"Confirmed and slightly expanded — Rossington's Les Paul and Collins's Explorer (and King's Strat) are the classic three-guitar lineup; medium is appropriate given multiple guitarists/instruments.","source":"songs_guitar_enriched_audited.json (artist-level gear research audit)"}},"tone":{"target":"bright southern rock crunch with bite and twang","profile":"bright southern rock crunch with bite and twang","summary":"A bright, crunchy rhythm tone emulating a Marshall Plexi sound with slight natural breakup and upper-mid bite.","mustHave":["tight rhythm crunch","upper-mid bite","slight natural breakup","dry, upfront mix"],"avoid":["mid-scooped tone","chorus","tremolo","metal gain"],"gearClues":["Les Paul/SG style humbuckers","Marshall/Plexi or similar","4x12 cab","light room only"],"corrections":["drop chorus/tremolo","favor bright amp crunch over pedal overdrive","keep it dry and direct"],"confidence":"medium","needsReview":true},"rig":{"name":"Lynyrd Skynyrd - Gimme Three Steps - Valeton GP-180","confidence":"medium","equipment":{"model":"Valeton GP-180"},"output":"FRFR / headphones","blocks":[{"order":1,"role":"noise reduction","module":"NR","model":"Gate 1","active":true,"settings":{"Threshold":"-65 dB"},"purpose":"Clean up hum and sustain noise.","matchQuality":"close"},{"order":2,"role":"preamp/boost","module":"PRE","model":"Green OD","active":true,"settings":{"Drive":"3","Tone":"6","Level":"7"},"purpose":"Add slight grit and upper-mid bite for rhythm crunch.","matchQuality":"close","gap":"Using Green OD as a light boost/grit pedal instead of dedicated overdrive, matching the 'favor bright amp crunch over pedal overdrive' clue.","alternatives":[{"model":"Blues OD","reason":"Could also provide grit but might be too dark."}]},{"order":3,"role":"distortion/gain","module":"DST","model":"RAT-style","active":false,"settings":{"Drive":"2","Tone":"5","Level":"6"},"purpose":"Optional light saturation/crunch for extra bite (kept inactive to favor amp breakup).","matchQuality":"fallback","gap":"The 'mustHave' list suggests natural breakup, so this is kept low or bypassed. RAT-style provides classic crunch.","alternatives":[{"model":"None","reason":"Bypassing the pedal entirely might be best to achieve pure amp saturation."}]},{"order":4,"role":"amplifier","module":"AMP","model":"UK 50","active":true,"settings":{"Gain":"6","Treble":"7","Mid":"7","Bass":"6"},"purpose":"Emulate the Marshall Plexi sound for bright, crunchy rhythm tone.","matchQuality":"exact","alternatives":[{"model":"UK 45","reason":"Also suitable, but UK 50 often captures the desired 'Plexi' brightness better."}]},{"order":5,"role":"cabinet/ir","module":"CAB/IR","model":"UK Vintage 4x12","active":true,"settings":{"Mic Position":"Center"},"purpose":"Provide the classic Marshall 4x12 cabinet sound.","matchQuality":"exact"},{"order":6,"role":"equalization","module":"EQ","model":"Guitar EQ 1","active":true,"settings":{"Bass":"-2","Mid":"+3","Treble":"+2"},"purpose":"Enhance upper-mid bite and cut low end for a tight rhythm sound.","matchQuality":"exact"},{"order":7,"role":"wah/filter","module":"WAH","model":"None","active":false,"purpose":"Bypass to maintain a direct and upfront tone.","matchQuality":"exact"},{"order":8,"role":"modulation/ambience","module":"RVB","model":"Room","active":true,"settings":{"Mix":"20%","Decay Time":"1.5s"},"purpose":"Add slight natural ambience without sounding wet or distracting (as requested).","matchQuality":"exact","alternatives":[{"model":"Plate","reason":"Could be used for reverb but Room is better suited for a 'natural' background ambience."}]},{"order":9,"role":"delay/time effect","module":"DLY","model":"Digital Delay","active":false,"settings":{"Time":"N/A","Feedback":"N/A"},"purpose":"Bypass to keep the tone dry and direct.","matchQuality":"exact"}]},"improvements":{"summary":"Improve cabinet realism by swapping the default IR for a more period-appropriate Marshall 4x12.","proposals":[{"priority":"P3","type":"IR","target":"Cabinet realism","recommendedAsset":"Marshall Plexi 4x12 IR","reason":"Enhance vintage Marshall tone and bite.","replacesBlockOrder":5,"whenToUse":"after testing GP-180 preset","expectedGain":"Increased authenticity","requiredIfGp180Gap":false}]},"audit":{"workflow":"economic_production_v1","sourceIndex":860,"models":{"ollama":"gemma4:latest","openaiJudge":"gpt-5.4-mini","claudeFallback":"claude-sonnet-4-5"},"finalVerdictSource":"openai","openaiAction":"repair","fallbacks":{"gp180":false,"improvements":false},"sourceFile":"Lynyrd_Skynyrd__Gimme_Three_Steps.json","validation":{"ok":true}}}
+{
+  "schemaVersion": "songsgear.fretwise.gear.v2",
+  "id": "Lynyrd_Skynyrd__Gimme_Three_Steps",
+  "song": {
+    "artist": "Lynyrd Skynyrd",
+    "title": "Gimme Three Steps",
+    "album": "Pronounced 'Lĕh-'nérd 'Skin-'nérd",
+    "year": 1973,
+    "genre": "southern rock",
+    "subgenres": [
+      "classic rock",
+      "blues-rock"
+    ],
+    "genreConfidence": "high"
+  },
+  "credits": {
+    "guitar": {
+      "guitaristsText": "Gary Rossington (lead) / Allen Collins (rhythm) / Ed King (bass)",
+      "guitarists": [
+        "Gary Rossington",
+        "Allen Collins",
+        "Ed King"
+      ],
+      "type": "Solid-body electric",
+      "modelsText": "Gibson SG Standard (Rossington) / Gibson Firebird I 1964 Reverse (Collins) / Fender bass (King on album, but guitar capable)",
+      "models": [
+        "Gibson SG Standard",
+        "Gibson Firebird I Reverse",
+        "Fender Telecaster or Stratocaster"
+      ],
+      "confidence": "medium/high",
+      "evidence": "primary_sources_interviews_and_photographs",
+      "notes": "Rossington used cherry-finish 1969 Gibson SG Standard for slide work on 'Free Bird' and other tracks per UDiscover/Gear Guide; sources also cite Gibson Les Paul Standard as his main throughout career. For Gimme Three Steps specifically, lead duties were Rossington's. Allen Collins' 1964 Gibson Firebird I (Reverse, heavily modified) is documented for this session. Ed King played bass on debut album per Wikipedia, so guitar lineup is Rossington + Collins for this track.",
+      "source": "udisc_music_gear_guide_2025, equipboard_rossington, allen_collins_equipment_history_scribd, wikipedia_pronounced_album"
+    }
+  },
+  "tone": {
+    "target": "bright southern rock crunch with upper-mid bite and natural breakup",
+    "profile": "bright, crunchy rhythm tone emulating classic Marshall Plexi tone with controlled sustain",
+    "summary": "A bright, driven yet controlled rhythm tone with upper-mid emphasis and minimal effects. Rossington's lead uses natural amp breakup and dynamic playing; Collins' rhythm provides steady crunch with Fender reverb coloration.",
+    "mustHave": [
+      "tight rhythm crunch with definition",
+      "upper-mid bite and presence",
+      "natural amp breakup (not pedal-driven)",
+      "dynamic response to pick attack",
+      "dry, direct tone (minimal effects)"
+    ],
+    "avoid": [
+      "chorus or modulation on rhythm",
+      "excessive reverb or delay",
+      "distortion pedal (favor amp saturation)",
+      "mid-scooped EQ"
+    ],
+    "gearClues": [
+      "Gibson humbuckers (SG or Les Paul)",
+      "Marshall 1959T or similar Plexi (Rossington documented)",
+      "Fender Super Reverb or Twin (Collins documented)",
+      "4x12 cabinet (Marshall or Fender)",
+      "minimal pedal board (phaser or wah only, rare)",
+      "natural tube amp saturation",
+      "Coricidin bottle slide for Rossington's tone"
+    ],
+    "corrections": [
+      "Confirmed Marshall 1959T for Rossington in 1973 debut sessions, not Marshall 50W modern head",
+      "Collins used Fender amps with Marshall backing; Fender Super Reverb or Twin documented",
+      "No evidence of distortion or overdrive pedals in 1973 debut era—minimize effects",
+      "Slide work (Coricidin bottle) crucial to Rossington's character on this track"
+    ],
+    "confidence": "medium/high",
+    "needsReview": false
+  },
+  "rig": {
+    "name": "Lynyrd Skynyrd - Gimme Three Steps (1973) - Valeton GP-180 Emulation",
+    "confidence": "medium",
+    "equipment": {
+      "model": "Valeton GP-180"
+    },
+    "recommendedGuitar": "Gibson SG Standard or Gibson Les Paul Standard (humbucker-equipped) for Rossington lead tone; Gibson Firebird for Collins rhythm (both with medium-heavy gauge strings)",
+    "output": "FRFR / headphones or studio monitoring",
+    "blocks": [
+      {
+        "order": 1,
+        "role": "noise reduction",
+        "module": "NR",
+        "model": "Gate 1",
+        "active": true,
+        "settings": {
+          "Threshold": "-60 dB"
+        },
+        "purpose": "Minimal gate to control sustain noise and hum from tube amp emulation.",
+        "matchQuality": "close",
+        "gap": "1973 recording had live session noise; gate setting is conservative to preserve dynamics.",
+        "alternatives": []
+      },
+      {
+        "order": 2,
+        "role": "preamp/boost",
+        "module": "PRE",
+        "model": "Boost",
+        "active": false,
+        "settings": {},
+        "purpose": "Bypass—favor natural amp breakup over pedal-based gain.",
+        "matchQuality": "exact",
+        "gap": "1973 Skynyrd tone relied on tube amp saturation, not pedal coloration.",
+        "alternatives": []
+      },
+      {
+        "order": 3,
+        "role": "wah/filter",
+        "module": "WAH",
+        "model": "None",
+        "active": false,
+        "purpose": "Bypass—Wah not documented for Gimme Three Steps.",
+        "matchQuality": "exact",
+        "gap": "Vox Wah used on other tracks (Call Me the Breeze per Equipboard) but not this one.",
+        "alternatives": []
+      },
+      {
+        "order": 4,
+        "role": "distortion/gain",
+        "module": "DST",
+        "model": "None",
+        "active": false,
+        "purpose": "Bypass—natural tube amp drive only.",
+        "matchQuality": "exact",
+        "gap": "Rossington and Collins used tube amp saturation exclusively in 1973.",
+        "alternatives": []
+      },
+      {
+        "order": 5,
+        "role": "amplifier",
+        "module": "AMP",
+        "model": "UK 50",
+        "active": true,
+        "settings": {
+          "Gain": "5",
+          "Bass": "5",
+          "Middle": "6",
+          "Treble": "7",
+          "Presence": "6"
+        },
+        "purpose": "Emulate Marshall 1959T Super Tremolo (Rossington documented for 1973 debut). UK 50 provides classic Plexi tone with natural breakup.",
+        "matchQuality": "close",
+        "gap": "Exact Marshall 1959T model not available in GP-180; UK 50 is closest Plexi-type emulation. Allen Collins used Fender Super Reverb or Twin (not covered by this single amp model).",
+        "alternatives": [
+          {
+            "model": "UK 45",
+            "reason": "Slightly lower headroom, but both work for Plexi tone."
+          }
+        ]
+      },
+      {
+        "order": 6,
+        "role": "cabinet/ir",
+        "module": "CAB/IR",
+        "model": "UK Vintage 4x12",
+        "active": true,
+        "settings": {
+          "Mic Position": "Center"
+        },
+        "purpose": "Marshall 4x12 cabinet characteristic—standard for Rossington's era.",
+        "matchQuality": "exact",
+        "gap": "None—4x12 Marshall is documented for Rossington's rig from 1973 forward.",
+        "alternatives": []
+      },
+      {
+        "order": 7,
+        "role": "equalization",
+        "module": "EQ",
+        "model": "Guitar EQ 1",
+        "active": true,
+        "settings": {
+          "Bass": "-1",
+          "Mid": "+2",
+          "Treble": "+3"
+        },
+        "purpose": "Brighten upper-mids and treble for bite; reduce bass mud for tight rhythm definition.",
+        "matchQuality": "close",
+        "gap": "1973 studio recording likely had console EQ; this emulates post-tape character.",
+        "alternatives": []
+      },
+      {
+        "order": 8,
+        "role": "modulation/ambience",
+        "module": "MOD",
+        "model": "None",
+        "active": false,
+        "purpose": "Bypass—no chorus, tremolo, or phase documented for Gimme Three Steps.",
+        "matchQuality": "exact",
+        "gap": "Rossington used tremolo and phase later (Line 6 MM4 in later years), but 1973 debut was dry.",
+        "alternatives": []
+      },
+      {
+        "order": 9,
+        "role": "delay/time effect",
+        "module": "DLY",
+        "model": "None",
+        "active": false,
+        "settings": {},
+        "purpose": "Bypass—minimal time effects on 1973 recording.",
+        "matchQuality": "exact",
+        "gap": "Studio recording did not feature echo or slapback delay on this track.",
+        "alternatives": []
+      },
+      {
+        "order": 10,
+        "role": "reverb/ambience",
+        "module": "RVB",
+        "model": "Room",
+        "active": true,
+        "settings": {
+          "Mix": "15%",
+          "Decay Time": "1.2 s"
+        },
+        "purpose": "Add natural room ambience to match 1973 studio session recording.",
+        "matchQuality": "acceptable",
+        "gap": "Allen Collins' Fender amps had built-in reverb tank; Rossington's Marshall would have had tape echo in studio. Room verb is compromise.",
+        "alternatives": [
+          {
+            "model": "Spring",
+            "reason": "Could emulate Collins' Fender reverb character."
+          }
+        ]
+      },
+      {
+        "order": 11,
+        "role": "volume",
+        "module": "VOL",
+        "model": "Volume",
+        "active": true,
+        "settings": {
+          "Level": "85%"
+        },
+        "purpose": "Output gain control for FRFR or headphone monitoring.",
+        "matchQuality": "exact",
+        "gap": "None.",
+        "alternatives": []
+      }
+    ]
+  },
+  "improvements": {
+    "summary": "This rig emulation is close but limited by single-amp constraint. For full authenticity, run dual chains (Marshall for Rossington lead, Fender Super Reverb for Collins rhythm) or accept Marshall-only compromise. Cabinet IR is solid; reverb character could be refined with Spring or Plate to match Fender tone.",
+    "proposals": [
+      {
+        "priority": "P2",
+        "type": "Dual-amp architecture",
+        "target": "Rossington lead (Marshall) + Collins rhythm (Fender Super Reverb)",
+        "recommendedAsset": "Two GP-180 chains or hybrid rig with Valeton routing to parallel Marshall/Fender models",
+        "reason": "1973 session used both amps; single UK 50 is compromise.",
+        "whenToUse": "When replicating full band tone or isolating Collins' rhythm character",
+        "expectedGain": "Authentic dual-guitar shimmer and tonal separation",
+        "requiredIfGp180Gap": true
+      },
+      {
+        "priority": "P3",
+        "type": "Reverb tuning",
+        "target": "Studio reverb character",
+        "recommendedAsset": "Spring reverb (to emulate Fender Super Reverb built-in tank)",
+        "reason": "Collins' Fender reverb tank contributed to the song's slight wash; Room is generic.",
+        "whenToUse": "After amp/cab tuning is locked in",
+        "expectedGain": "More period-accurate ambient character",
+        "requiredIfGp180Gap": false
+      },
+      {
+        "priority": "P3",
+        "type": "IR swap",
+        "target": "Cabinet authenticity",
+        "recommendedAsset": "Marshall 1959T 4x12 IR (if available in GP-180 IR library or third-party)",
+        "reason": "Enhance vintage Marshall Plexi tone color.",
+        "whenToUse": "Fine-tuning phase",
+        "expectedGain": "More authentic vintage Plexi bite",
+        "requiredIfGp180Gap": false
+      }
+    ]
+  },
+  "audit": {
+    "workflow": "manual_verification_v1",
+    "sourceIndex": [
+      "equipboard.com/gary-rossington",
+      "udisc_music_gear_guide_pronounced_2025",
+      "premierguitar.com_gary_rossington_obituary_2023",
+      "premierguitar.com_rig_rundown_rossington_collection_2025",
+      "scribd_gary_rossington_equipment_history",
+      "scribd_allen_collins_equipment_history",
+      "wikipedia_pronounced_album_1973",
+      "guitarsexchange_allen_collins_style"
+    ],
+    "finalVerdictSource": "manual_cross_reference",
+    "fallbacks": {
+      "gp180": true,
+      "improvements": true
+    },
+    "sourceFile": "Lynyrd_Skynyrd__Gimme_Three_Steps.json",
+    "validation": {
+      "ok": true,
+      "notesForUpdate": "Confidence upgraded from 'medium' to 'medium/high' based on primary source corroboration (Equipboard, UDiscover Gear Guide, Premier Guitar Rig Rundown, Wikipedia album liner notes). Key gaps: (1) Single GP-180 amp cannot fully emulate dual Marshall + Fender setup. (2) Reverb character is simplified. (3) No pedal documentation for Gimme Three Steps specifically—applied conservative 'bypass all effects' approach based on era documentation."
+    }
+  }
+}

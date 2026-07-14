@@ -1578,7 +1578,41 @@ export class PlaybackEngine {
     }
   }
 
+  /** Sounding duration (seconds) from the backend's phrasing engine (P1), or
+   *  null when the note carries no `perf` block (legacy/staff-only fallback —
+   *  caller then falls back to _expressionForNote). `perf.dur_beats` already
+   *  encodes articulation scaling AND let-ring look-ahead to the next note on
+   *  the same string (computed track-wide in Python, not measure-locally). */
+  _perfDurationSec(note, secPerBeat) {
+    const beats = note?.perf?.dur_beats;
+    return Number.isFinite(beats) ? Math.max(0.03, beats * secPerBeat) : null;
+  }
+
+  /** Final MIDI velocity from the backend's phrasing engine, or null. */
+  _perfVelocity(note) {
+    const v = note?.perf?.velocity;
+    return Number.isInteger(v) ? v : null;
+  }
+
+  /** Schedule a note's pitch-bend/slide/vibrato from the backend's dense
+   *  `perf.bend` curve (P1) — smooth glide instead of the old sparse
+   *  corner-point stair-step. Returns true if it scheduled anything, so the
+   *  caller can fall back to the legacy in-browser curve otherwise. */
+  _schedulePitchAutomationPerf(channel, note, when, secPerBeat) {
+    const curve = note?.perf?.bend;
+    if (!this._spessa || !Array.isArray(curve) || !curve.length) return false;
+    this._ensurePitchBendRange(channel);
+    this._sendPitchWheel(channel, 0, Math.max(0, when - 0.004));
+    for (const [beatOffset, semitones] of curve) {
+      this._sendPitchWheel(channel, semitones, when + beatOffset * secPerBeat);
+    }
+    return true;
+  }
+
   _hasPitchExpression(note) {
+    // Prefer the backend's resolution (P1): it already worked out slide
+    // targets etc. from the whole track, not just the current measure.
+    if (note?.perf) return !!note.perf.bend;
     // Number.isFinite (no coercion) — see the comment in _pitchSamplesForNote.
     // The bug this guards against: Number(null) === 0, so wrapping in Number()
     // made every un-bent note (bend_value === null, the overwhelming majority)
@@ -1723,15 +1757,23 @@ export class PlaybackEngine {
           const playbackPitch = this._playbackPitch(note);
           const strumOffset = this._strumOffsetSec(note, notes, secPerBeat);
           const when = base + noteOffsetInMeasure + strumOffset;
-          const expr = this._expressionForNote(note, Math.max(0.04, note.duration * secPerBeat - 0.025));
+          const perfDur = this._perfDurationSec(note, secPerBeat);
+          const expr = perfDur == null
+            ? this._expressionForNote(note, Math.max(0.04, note.duration * secPerBeat - 0.025))
+            : { duration: perfDur, velocityScale: 1 };
           const nextSame = this._nextSamePitchOffsetSec(
             note, notes, measureOnset, secPerBeat, playbackPitch, noteOffsetInMeasure);
           const dur = this._capSamePitchDuration(expr.duration, when, base, nextSame);
-          const velocity = this._clampVelocity(this._dynamicToVelocity(note.dynamic) * expr.velocityScale);
+          const perfVel = this._perfVelocity(note);
+          const velocity = perfVel != null
+            ? perfVel
+            : this._clampVelocity(this._dynamicToVelocity(note.dynamic) * expr.velocityScale);
           const pitchChannel = pitchChannelFor(note, notes, when, dur);
           const playChannel = Number.isInteger(pitchChannel) ? pitchChannel : 0;
           if (Number.isInteger(pitchChannel)) {
-            this._schedulePitchAutomation(pitchChannel, note, notes, when, dur);
+            if (!this._schedulePitchAutomationPerf(pitchChannel, note, when, secPerBeat)) {
+              this._schedulePitchAutomation(pitchChannel, note, notes, when, dur);
+            }
           }
           // v3 SpessaSynth API: 4th arg is an options object ({ time }), NOT a
           // (debug, startTime) pair. Passing a boolean makes the lib do
@@ -1749,11 +1791,17 @@ export class PlaybackEngine {
           const playbackPitch = this._playbackPitch(note);
           const strumOffset = this._strumOffsetSec(note, notes, secPerBeat);
           const when = base + noteOffsetInMeasure + strumOffset;
-          const expr = this._expressionForNote(note, Math.max(0.04, note.duration * secPerBeat - 0.025));
+          const perfDur = this._perfDurationSec(note, secPerBeat);
+          const expr = perfDur == null
+            ? this._expressionForNote(note, Math.max(0.04, note.duration * secPerBeat - 0.025))
+            : { duration: perfDur, velocityScale: 1 };
           const nextSame = this._nextSamePitchOffsetSec(
             note, notes, measureOnset, secPerBeat, playbackPitch, noteOffsetInMeasure);
           const dur = this._capSamePitchDuration(expr.duration, when, base, nextSame);
-          const gain = Math.min(1, (this._dynamicToVelocity(note.dynamic) / 127) * expr.velocityScale);
+          const perfVel = this._perfVelocity(note);
+          const gain = perfVel != null
+            ? Math.min(1, perfVel / 127)
+            : Math.min(1, (this._dynamicToVelocity(note.dynamic) / 127) * expr.velocityScale);
           for (const attack of this._noteAttacks(note, when, dur, secPerBeat)) {
             this._synth.play(playbackPitch, attack.when, { duration: attack.duration, gain });
           }
@@ -1818,7 +1866,10 @@ export class PlaybackEngine {
         const playbackPitch = this._playbackPitch(note);
         const strumOffset = this._strumOffsetSec(note, chNotes, chSpb);
         const when = base + noteOffsetInMeasure + strumOffset;
-        const expr = this._expressionForNote(note, Math.max(0.04, note.duration * chSpb - 0.025));
+        const perfDur = this._perfDurationSec(note, chSpb);
+        const expr = perfDur == null
+          ? this._expressionForNote(note, Math.max(0.04, note.duration * chSpb - 0.025))
+          : { duration: perfDur, velocityScale: 1 };
         const nextSame = this._nextSamePitchOffsetSec(
           note, chNotes, chMeasureOnset, chSpb, playbackPitch, noteOffsetInMeasure);
         // Drums (channel 9) restrike the same GM key constantly (hi-hat, snare);
@@ -1828,11 +1879,16 @@ export class PlaybackEngine {
           : this._capSamePitchDuration(expr.duration, when, base, nextSame);
         // ch.gain is applied as CC7 channel volume (see _loadChannelInstrument);
         // velocity carries only dynamics × expression so it is not double-counted.
-        const velocity = this._clampVelocity(this._dynamicToVelocity(note.dynamic) * expr.velocityScale);
+        const perfVel = this._perfVelocity(note);
+        const velocity = perfVel != null
+          ? perfVel
+          : this._clampVelocity(this._dynamicToVelocity(note.dynamic) * expr.velocityScale);
         const pitchChannel = pitchChannelFor(note, chNotes, when, dur);
         const playChannel = Number.isInteger(pitchChannel) ? pitchChannel : ch.midiChannel;
         if (Number.isInteger(pitchChannel)) {
-          this._schedulePitchAutomation(pitchChannel, note, chNotes, when, dur);
+          if (!this._schedulePitchAutomationPerf(pitchChannel, note, when, chSpb)) {
+            this._schedulePitchAutomation(pitchChannel, note, chNotes, when, dur);
+          }
         }
         for (const attack of this._noteAttacks(note, when, dur, chSpb)) {
           this._spessa.noteOn(playChannel, playbackPitch, velocity, { time: attack.when });
@@ -1848,8 +1904,14 @@ export class PlaybackEngine {
       const playbackPitch = this._playbackPitch(note);
       const strumOffset = this._strumOffsetSec(note, chNotes, chSpb);
       const when = base + noteOffsetInMeasure + strumOffset;
-      const expr = this._expressionForNote(note, Math.max(0.04, note.duration * chSpb - 0.025));
-      const gain = Math.min(1, (this._dynamicToVelocity(note.dynamic) / 127) * ch.gain * expr.velocityScale);
+      const perfDur = this._perfDurationSec(note, chSpb);
+      const expr = perfDur == null
+        ? this._expressionForNote(note, Math.max(0.04, note.duration * chSpb - 0.025))
+        : { duration: perfDur, velocityScale: 1 };
+      const perfVel = this._perfVelocity(note);
+      const gain = perfVel != null
+        ? Math.min(1, (perfVel / 127) * ch.gain)
+        : Math.min(1, (this._dynamicToVelocity(note.dynamic) / 127) * ch.gain * expr.velocityScale);
       for (const attack of this._noteAttacks(note, when, expr.duration, chSpb)) {
         ch.synth.play(playbackPitch, attack.when, { duration: attack.duration, gain });
       }
