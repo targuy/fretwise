@@ -3246,6 +3246,7 @@ async function _loadRigBankControl(filename, rigData) {
       song: rigData?.song || null,
       artist: rigData?.artist || null,
       genre: rigData?.genre || null,
+      rig_modules: _activeRigModules(rigData),
     };
     const recommendation = await recommendRigProfile(body);
     const orderedProfiles = _sortRigProfilesForRecommendation(profiles, recommendation, rigData);
@@ -3266,6 +3267,18 @@ async function _loadRigBankControl(filename, rigData) {
     status.textContent = `Banque GP-180 indisponible : ${err.message || err}`;
     wrap.style.display = '';
   }
+}
+
+function _activeRigModules(rigData) {
+  const settings = rigData?.reglages;
+  if (!settings || typeof settings !== 'object') return [];
+  return Object.entries(settings)
+    .filter(([, value]) => value?.active === true && String(value?.preset || '').trim())
+    .map(([module, value]) => ({
+      module,
+      model: String(value.preset).trim(),
+      active: true,
+    }));
 }
 
 function _renderRigProfileOptions(select, profiles) {
@@ -3445,6 +3458,15 @@ async function _activateSelectedRigProfile() {
 }
 
 function _renderRig(data) {
+  const gearVerifyBtn = document.getElementById('rig-verify-ai-btn');
+  if (gearVerifyBtn) {
+    const hasGearSheet = data?.is_gears === true;
+    gearVerifyBtn.dataset.mode = hasGearSheet ? 'verify' : 'create';
+    gearVerifyBtn.textContent = hasGearSheet ? '✨ Vérifier avec IA' : "✨ Créer avec l'IA";
+    gearVerifyBtn.title = hasGearSheet
+      ? 'Vérifier et corriger cette fiche avec une IA…'
+      : 'Créer une fiche avec une IA…';
+  }
   const generated = data.is_generated === true;
   const title = document.getElementById('rig-panel-title');
   if (title) title.textContent = `Rig GP-180${generated ? ' (IA)' : ''} — ${data.artist || '?'} · ${data.song || '?'}`;
@@ -3620,6 +3642,8 @@ if (btnRig) btnRig.addEventListener('click', _toggleRig);
   const gearVerifyPanel = document.getElementById('gear-verify-panel');
   const gearVerifyClose = document.getElementById('gear-verify-close');
   const gearVerifyPromptEl = document.getElementById('gear-verify-prompt');
+  const gearVerifyTitleEl = document.getElementById('gear-verify-title');
+  const gearVerifyHintEl = document.getElementById('gear-verify-hint');
   const gearVerifyPasteEl = document.getElementById('gear-verify-paste');
   const gearVerifyStatusEl = document.getElementById('gear-verify-status');
   const gearVerifyCopyBtn = document.getElementById('gear-verify-copy-btn');
@@ -3633,6 +3657,18 @@ if (btnRig) btnRig.addEventListener('click', _toggleRig);
 
   if (gearVerifyBtn) gearVerifyBtn.addEventListener('click', async () => {
     if (!gearVerifyPanel || !_lastRigFile) return;
+    const createMode = gearVerifyBtn.dataset.mode === 'create';
+    if (gearVerifyTitleEl) {
+      gearVerifyTitleEl.textContent = createMode ? 'Créer avec une IA' : 'Vérifier avec une IA';
+    }
+    if (gearVerifyHintEl) {
+      gearVerifyHintEl.textContent = createMode
+        ? "Copiez le prompt dans un LLM connecté, collez sa réponse JSON, puis créez la fiche."
+        : "Copiez le prompt dans un LLM connecté, collez sa réponse JSON, puis mettez la fiche à jour.";
+    }
+    if (gearVerifySaveBtn) {
+      gearVerifySaveBtn.textContent = createMode ? 'Créer et enregistrer' : 'Valider et enregistrer';
+    }
     gearVerifyPanel.style.display = 'flex';
     if (gearVerifyPasteEl) gearVerifyPasteEl.value = '';
     _setGearVerifyStatus('');
@@ -3677,7 +3713,7 @@ if (btnRig) btnRig.addEventListener('click', _toggleRig);
       _lastRig = result.view;
       _renderRig(result.view);
       const warn = (result.warnings || []).length ? ` (${result.warnings.length} avertissement(s))` : '';
-      _setGearVerifyStatus(`Fiche enregistrée${warn}.`);
+      _setGearVerifyStatus(`${createMode ? 'Fiche créée' : 'Fiche mise à jour'}${warn}.`);
       if (gearVerifyPanel) setTimeout(() => { gearVerifyPanel.style.display = 'none'; }, 1200);
     } catch (e) {
       _setGearVerifyStatus(e.message || "Échec de l'enregistrement", true);
@@ -4856,6 +4892,66 @@ async function initSettingsPage() {
   }
 }
 
+const _GP180_PROFILE_MODULES = ['NR', 'PRE', 'WAH', 'DST', 'N→S', 'AMP', 'CAB/IR', 'EQ', 'MOD', 'DLY', 'RVB', 'VOL'];
+
+function _fillRigModuleEditor(modules = []) {
+  const container = $('#set-rig-profile-modules');
+  if (!container) return;
+  const bySlot = new Map(
+    (Array.isArray(modules) ? modules : []).map((item) => [String(item?.module || '').toUpperCase(), item]),
+  );
+  container.innerHTML = '';
+  for (const slot of _GP180_PROFILE_MODULES) {
+    const item = bySlot.get(slot.toUpperCase()) || null;
+    const row = document.createElement('div');
+    row.className = 'rig-module-row';
+    row.dataset.module = slot;
+    const active = document.createElement('input');
+    active.type = 'checkbox';
+    active.className = 'rig-module-active';
+    active.checked = item?.active === true;
+    active.setAttribute('aria-label', `Activer ${slot}`);
+    const label = document.createElement('label');
+    label.textContent = slot;
+    const model = document.createElement('input');
+    model.type = 'text';
+    model.className = 'settings-text-input rig-module-model';
+    model.value = String(item?.model || '');
+    model.placeholder = 'Modèle exact';
+    model.disabled = !active.checked;
+    const warning = document.createElement('span');
+    warning.className = 'rig-module-warning';
+    warning.hidden = true;
+    const refreshWarning = () => {
+      const tapeInReverb = slot === 'RVB' && /\btape(?: delay)?\b/i.test(model.value);
+      warning.hidden = !tapeInReverb;
+      warning.textContent = tapeInReverb
+        ? 'Manuel firmware 1.0.0: Tape Delay appartient à DLY, pas RVB. Valeur conservée.'
+        : '';
+    };
+    active.addEventListener('change', () => {
+      model.disabled = !active.checked;
+      if (active.checked) model.focus();
+      refreshWarning();
+    });
+    model.addEventListener('input', refreshWarning);
+    row.append(active, label, model, warning);
+    container.appendChild(row);
+    refreshWarning();
+  }
+}
+
+function _rigModulesFromSettingsForm() {
+  const rows = [...document.querySelectorAll('#set-rig-profile-modules .rig-module-row')];
+  return rows.flatMap((row) => {
+    const active = row.querySelector('.rig-module-active')?.checked === true;
+    if (!active) return [];
+    const model = row.querySelector('.rig-module-model')?.value?.trim() || '';
+    if (!model) throw new Error(`Active module ${row.dataset.module} requires a model.`);
+    return [{ module: row.dataset.module, model, active: true }];
+  });
+}
+
 async function _loadRigProfileEditor(selectedId = null) {
   const select = $('#set-rig-profile-select');
   const bindingProfile = $('#set-rig-binding-profile');
@@ -4903,6 +4999,7 @@ function _fillRigProfileForm(profile) {
   set('#set-rig-profile-genre', profile?.genre || '');
   set('#set-rig-profile-tags', Array.isArray(profile?.tags) ? profile.tags.join(', ') : '');
   set('#set-rig-profile-notes', profile?.notes || '');
+  _fillRigModuleEditor(profile?.modules || []);
 }
 
 function _rigProfileFromSettingsForm() {
@@ -4917,6 +5014,7 @@ function _rigProfileFromSettingsForm() {
     .map((tag) => tag.trim())
     .filter(Boolean);
   const notes = $('#set-rig-profile-notes')?.value?.trim() || '';
+  const modules = _rigModulesFromSettingsForm();
   if (!id || !name || !Number.isInteger(program) || !Number.isInteger(midiChannel)) {
     throw new Error('Profile id, name, program and MIDI channel are required.');
   }
@@ -4930,6 +5028,7 @@ function _rigProfileFromSettingsForm() {
     tags,
     source: 'settings',
     notes,
+    modules,
   };
 }
 

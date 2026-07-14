@@ -19,13 +19,13 @@ from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
 
 from fretwise.audit import audit_score
-from fretwise.biomechanics import NON_ACTIONABLE_CODES
 from fretwise.auth.accounts import LocalAccountStore
 from fretwise.auth.config import load_auth_config
 from fretwise.auth.resolver import StorageNotConfigured, resolve_user_storage
 from fretwise.auth.secrets import UserSecretsStore
 from fretwise.auth.users import UserStore
 from fretwise.auth.web import current_request_user, setup_auth
+from fretwise.biomechanics import NON_ACTIONABLE_CODES
 from fretwise.config import config as _fw_config
 from fretwise.control_surface import (
     build_gp180_control_surface_catalog,
@@ -44,6 +44,15 @@ from fretwise.export.gp_writer import (
 )
 from fretwise.export.musicxml_writer import render_musicxml, render_musicxml_multi
 from fretwise.export.pdf_tab import render_pdf_tab
+from fretwise.gears import (
+    build_gear_creation_prompt,
+    build_gear_verification_prompt,
+    gears_key_from_filename,
+    song_output_to_view,
+    validate_gear_v2,
+)
+from fretwise.gears.naming import gears_filename as _gears_filename
+from fretwise.gears.naming import gears_key as _gears_key
 from fretwise.generator import StateGenerator
 from fretwise.models import (
     ChordDiagram,
@@ -65,20 +74,11 @@ from fretwise.pdf_conformance import (
 )
 from fretwise.pipeline import PipelineResult, run_pipeline, run_pipeline_with_guard_report
 from fretwise.playback import build_performance
-from fretwise.gears import (
-    build_gear_verification_prompt,
-    gears_key_from_filename,
-    song_output_to_view,
-    validate_gear_v2,
-)
-from fretwise.gears.naming import gears_filename as _gears_filename
-from fretwise.gears.naming import gears_key as _gears_key
 from fretwise.rig import (
     build_rig_index,
     default_rig_path,
     find_rig,
     find_rigs_dir,
-    generated_rig_to_view,
     parse_rig,
     partition_has_rig,
     rig_view_to_markdown,
@@ -87,6 +87,7 @@ from fretwise.rig_bank import (
     RigBank,
     RigBankError,
     RigBinding,
+    RigModule,
     RigProfile,
     RigResolution,
     list_midi_output_names,
@@ -497,13 +498,18 @@ def _register_routes(app: FastAPI) -> None:
         try:
             body = await request.json()
             bank, context = _rig_bank_context_from_request(app, body)
-            recommendation = bank.recommend(**context)
+            target_modules = _target_rig_modules_from_request(body)
+            if not target_modules:
+                filename = _body_text(body, "filename")
+                if filename:
+                    target_modules = _target_rig_modules_from_view(_gears_view_for(filename))
+            recommendation = bank.recommend(**context, target_modules=target_modules)
         except (_json.JSONDecodeError, RigBankError, OSError, TypeError) as exc:
             raise HTTPException(400, str(exc))
         if recommendation is None:
             raise HTTPException(404, "No GP-180 profile available")
         payload = recommendation.to_json()
-        payload["context"] = context
+        payload["context"] = {**context, "active_module_count": len(target_modules)}
         return JSONResponse(payload)
 
     @app.get("/api/rig-bank/midi-outputs")
@@ -731,12 +737,18 @@ def _register_routes(app: FastAPI) -> None:
             artist = artist or str(info.get("artist") or "")
             title = title or str(info.get("title") or "")
 
-        prompt = build_gear_verification_prompt(artist, title, existing=existing)
+        if existing:
+            prompt = build_gear_verification_prompt(artist, title, existing=existing)
+            prompt_mode = "verify"
+        else:
+            prompt = build_gear_creation_prompt(artist, title)
+            prompt_mode = "create"
         return Response(
             content=prompt,
             media_type="text/markdown",
             headers={
                 "Content-Disposition": 'inline; filename="fretwise-gear-prompt.md"',
+                "X-FretWise-Gear-Prompt-Mode": prompt_mode,
             },
         )
 
@@ -2772,7 +2784,11 @@ def _gears_song_info_for(filename: str) -> dict[str, Any]:
         "genre": view.get("genre"),
         "year": view.get("year"),
         "guitarists": research.get("guitarist"),
-        "original_guitar": research.get("guitar_model") or research.get("guitar_type") or view.get("guitare_originale"),
+        "original_guitar": (
+            research.get("guitar_model")
+            or research.get("guitar_type")
+            or view.get("guitare_originale")
+        ),
         "guitar_type": research.get("guitar_type"),
         "gear_confidence": research.get("confidence") or view.get("confidence"),
         "target_tone": view.get("comments"),
@@ -2838,6 +2854,40 @@ def _body_text(body: Mapping[str, object], key: str) -> str:
     if raw is None:
         return ""
     return str(raw).strip()
+
+
+def _target_rig_modules_from_request(body: Mapping[str, object]) -> tuple[RigModule, ...]:
+    """Parse optional active rig modules supplied by the recommendation client."""
+
+    raw_modules = body.get("rig_modules")
+    if raw_modules is None:
+        return ()
+    if not isinstance(raw_modules, list):
+        raise RigBankError("rig_modules must be a list")
+    modules: list[RigModule] = []
+    for item in raw_modules:
+        if not isinstance(item, dict):
+            raise RigBankError("each rig_modules item must be an object")
+        modules.append(RigModule.from_json(item))
+    return tuple(modules)
+
+
+def _target_rig_modules_from_view(view: Mapping[str, object] | None) -> tuple[RigModule, ...]:
+    """Extract active module/model pairs from a rendered AI gear sheet."""
+
+    if not isinstance(view, dict):
+        return ()
+    settings = view.get("reglages")
+    if not isinstance(settings, dict):
+        return ()
+    modules: list[RigModule] = []
+    for module_name, raw_setting in settings.items():
+        if not isinstance(raw_setting, dict) or raw_setting.get("active") is not True:
+            continue
+        model = str(raw_setting.get("preset") or "").strip()
+        if model:
+            modules.append(RigModule(module=str(module_name), model=model))
+    return tuple(modules)
 
 
 def _resolve_file(app: FastAPI, filename: str) -> Path:

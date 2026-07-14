@@ -159,6 +159,46 @@ def test_rig_bank_recommend_uses_catalog_genre(tmp_path: Path, monkeypatch) -> N
     assert payload["reasons"]
 
 
+def test_rig_bank_recommend_uses_active_ai_rig_modules(tmp_path: Path, monkeypatch) -> None:
+    client = _client(tmp_path, monkeypatch)
+    for profile in (
+        {
+            "id": "one-match",
+            "name": "One Match",
+            "program": 3,
+            "modules": [{"module": "AMP", "model": "UK 50", "active": True}],
+        },
+        {
+            "id": "two-matches",
+            "name": "Two Matches",
+            "program": 4,
+            "modules": [
+                {"module": "AMP", "model": "UK 50", "active": True},
+                {"module": "DLY", "model": "Tape", "active": True},
+            ],
+        },
+    ):
+        assert client.post("/api/rig-bank/profile", json=profile).status_code == 200
+
+    res = client.post(
+        "/api/rig-bank/recommend",
+        json={
+            "artist": "Unknown",
+            "rig_modules": [
+                {"module": "AMP", "model": "UK 50", "active": True},
+                {"module": "DLY", "model": "Tape", "active": True},
+            ],
+        },
+    )
+
+    assert res.status_code == 200
+    payload = res.json()
+    assert payload["source"] == "module_match"
+    assert payload["profile"]["id"] == "two-matches"
+    assert payload["module_match"]["positive_matches"] == 2
+    assert payload["context"]["active_module_count"] == 2
+
+
 def test_rig_bank_resolve_returns_404_when_no_profile_matches(tmp_path: Path, monkeypatch) -> None:
     client = _client(tmp_path, monkeypatch)
 
