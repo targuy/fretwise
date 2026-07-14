@@ -1050,8 +1050,12 @@ async function selectTrack(trackId, trackName) {
       updatePlayButton(false);
       stopCursorLoop();
     }
+    // Save the GLOBAL 1-based measure number, not the renderer slot index:
+    // tracks that render different measure ranges (a voice entering at bar 16
+    // renders slots starting there) would otherwise land on a different bar.
+    const slot = playback.renderer?.cursorMeasure ?? 0;
     restorePos = {
-      measure: playback.renderer?.cursorMeasure ?? 0,
+      globalMeasure: playback.renderer?.measureNumbers?.[slot] ?? (slot + 1),
       subMeasureSec: playback._resumeSubMeasureSec || 0,
       wasPlaying,
     };
@@ -1132,9 +1136,24 @@ async function selectTrack(trackId, trackName) {
     // Clamp to the new track's measure count to handle tracks of different
     // lengths. Resume playback if it was playing before the switch.
     if (restorePos && playback) {
+      // Map the saved global measure number back to a slot on the NEW track's
+      // renderer. With the shared 1..N grid this is the identity; the nearest-
+      // slot fallback covers renderers without measureNumbers (slope/3D) and
+      // tracks whose range differs (MusicXML/MIDI fallback grouping).
+      const nums = playback.renderer?.measureNumbers || null;
+      let slot;
+      if (nums && nums.length) {
+        slot = nums.indexOf(restorePos.globalMeasure);
+        if (slot < 0) {
+          slot = nums.findIndex((n) => n >= restorePos.globalMeasure);
+          if (slot < 0) slot = nums.length - 1;
+        }
+      } else {
+        slot = restorePos.globalMeasure - 1;
+      }
       const clamped = Math.max(
         0,
-        Math.min(restorePos.measure, (playback.totalMeasures || 1) - 1),
+        Math.min(slot, (playback.totalMeasures || 1) - 1),
       );
       if (playback.renderer) playback.renderer.cursorMeasure = clamped;
       playback._resumeSubMeasureSec = restorePos.subMeasureSec;

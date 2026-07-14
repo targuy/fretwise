@@ -287,7 +287,14 @@ export class TabRenderer {
       byMeasure.get(mi).push(n);
     }
     const keys = [...byMeasure.keys()].sort((a, b) => a - b);
-    const minM = keys[0], maxM = keys[keys.length - 1];
+    // Global grid: when the backend ships per-measure beat counts (index i =
+    // measure i+1), every track renders the same slot range 1..N. Slot i then
+    // means the same measure on every voice, so measure numbering, navigation
+    // and playback stay aligned when switching tracks. Without that array
+    // (MusicXML/MIDI), fall back to the track's own note range.
+    const globalN = (this.measureBeats && this.measureBeats.length) ? this.measureBeats.length : 0;
+    const minM = globalN ? 1 : keys[0];
+    const maxM = Math.max(globalN, keys[keys.length - 1]);
     const measures = [];
     const measureNumbers = []; // parallel array: actual 1-based measure number for each slot
     for (let m = minM; m <= maxM; m++) {
