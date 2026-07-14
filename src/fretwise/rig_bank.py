@@ -10,6 +10,7 @@ human-readable view, while this JSON bank is the actionable index.
 from __future__ import annotations
 
 import json
+import re
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
@@ -58,6 +59,111 @@ _TOKEN_STOPWORDS = frozenset(
         "une",
     }
 )
+
+# Preset similarity is anchored to the amp voice.  NR, EQ, and VOL are utility
+# blocks, not tone identity, so they must never influence recommendation.
+_AMP_GATE_MODULES = ("AMP", "N→S")
+_SCORED_TONE_MODULES = ("CAB/IR", "PRE", "WAH", "DST", "MOD", "DLY", "RVB")
+
+_ModelMatchMethod = Literal["exact", "alias", "typo", "none"]
+
+
+@dataclass(frozen=True)
+class _ModelMatch:
+    """Result of one same-slot GP-180 model comparison."""
+
+    matched: bool
+    method: _ModelMatchMethod
+
+
+# Valeton names avoid trademarked product names.  These aliases are deliberately
+# per slot and per model family: do not turn a broad brand resemblance into a
+# false positive (for example UK 800 must not match UK 900).
+_MODEL_ALIAS_GROUPS: dict[str, tuple[tuple[str, ...], ...]] = {
+    "AMP": (
+        (
+            "Foxy 30TB",
+            "Voxy 30TB",
+            "Vox AC30",
+            "AC30",
+            "Vox AC30 TB",
+            "Vox AC30 Top Boost",
+            "AC30 TB",
+        ),
+        ("Foxy 30N", "Voxy 30N", "Vox AC30 Normal", "AC30 Normal"),
+        ("EV 51", "EV51", "EVH 5150", "5150"),
+        ("UK 45", "UK 45+", "UK 45JP", "Marshall JTM45", "JTM45", "Marshall 45"),
+        ("UK 50", "UK 50+", "UK 50JP", "Marshall Plexi 50", "Marshall 50"),
+        ("UK 800", "Marshall JCM800", "JCM800"),
+        ("UK 900", "Marshall JCM900", "JCM900"),
+        ("Mess DualM", "Mess DualV", "Mesa Dual Rectifier", "Mesa Rectifier"),
+        ("Mess 2C+ 1", "Mess 2C+ 2", "Mess 2C+ 3", "Mesa Mark IIC+", "Mesa 2C+"),
+        ("Dark Twin", "Fender Twin", "Fender Twin Reverb"),
+        ("Bellman 59B", "Bassman 59", "Fender Bassman 59"),
+        ("Tweed", "Fender Tweed"),
+        ("Flagman 1", "Friedman BE-100"),
+        ("Dizz VH", "Diezel VH4"),
+    ),
+    "CAB/IR": (
+        ("Foxy 1x12", "Voxy 1x12", "Vox 1x12", "Vox AC30 1x12"),
+        ("Foxy 2x12", "Voxy 2x12", "Vox 2x12", "Vox AC30 2x12"),
+        ("UK 30 4x12", "Marshall V30 4x12", "Marshall 4x12 V30"),
+        ("UK Vintage 4x12", "Marshall Vintage 4x12"),
+        ("UK Basket 4x12", "Marshall Basketweave 4x12"),
+        ("Mess 4x12", "Mesa 4x12", "Mesa Rectifier 4x12"),
+        ("Dizz 4x12", "Diezel 4x12"),
+        ("Flagman 4x12", "Friedman 4x12"),
+        ("Twin 2x12", "Fender Twin 2x12"),
+        ("LUX 1x12", "Fender Deluxe 1x12"),
+    ),
+    "PRE": (
+        ("COMP", "Compressor"),
+        ("COMP4", "Compressor 4"),
+        ("Boost", "Clean Boost"),
+        ("B-Boost", "Blues Boost"),
+        ("OCTA", "Octave"),
+        ("Pitch", "Pitch Shifter"),
+    ),
+    "WAH": (
+        ("V-Wah", "Vox Wah"),
+        ("B-Wah", "Bass Wah"),
+        ("C-Wah", "Cry Wah"),
+        ("T-Wah", "Touch Wah"),
+    ),
+    "DST": (
+        ("Green OD", "Tube Screamer", "Ibanez Tube Screamer", "TS9"),
+        ("OD 9", "OD9", "Maxon OD9"),
+        ("Super OD", "SD-1", "Super Overdrive"),
+        ("Red Haze", "Fuzz Face"),
+        ("Tube Clipper", "Tube Clipper Drive"),
+    ),
+    "MOD": (
+        ("C-Chorus", "Chorus"),
+        ("G-Chorus", "Guitar Chorus"),
+        ("O-Phase", "Phaser"),
+        ("O-Trem", "Tremolo"),
+        ("V-Roto", "Rotary"),
+        ("Vibe", "Uni-Vibe", "Univibe"),
+        ("Jet", "Flanger"),
+    ),
+    "DLY": (
+        ("Digital Delay S", "Digital Delay"),
+        ("BBD Delay S", "BBD Delay", "Bucket Brigade Delay", "Analog Delay"),
+        ("Tape", "Tape Delay", "Tape Echo"),
+        ("Dual Echo", "Dual Delay"),
+        ("Ping Pong", "Ping Pong Delay"),
+    ),
+    "RVB": (
+        ("Room", "Room Reverb"),
+        ("Hall", "Hall Reverb"),
+        ("Plate", "Plate Reverb"),
+        ("Spring", "Spring Reverb"),
+        ("Church", "Church Reverb"),
+        ("Shimmer", "Shimmer Reverb"),
+        ("N-Star", "North Star Reverb"),
+        ("Sweet Space", "Space Reverb"),
+    ),
+}
 
 _GENRE_KEYWORDS: tuple[tuple[str, tuple[str, ...]], ...] = (
     ("progressive metal", ("progressive metal", "dream theater", "petrucci")),
@@ -141,7 +247,9 @@ class RigModule:
     """One effect model stored in a GP-180 preset profile.
 
     ``active=False`` is accepted for lossless imports and UI editing, but only
-    active modules participate in preset recommendation.
+    active modules participate in preset recommendation. ``model`` preserves
+    supplied GP-180 or real-world label; comparison resolves approved Valeton
+    clone aliases only at recommendation time.
     """
 
     module: str
@@ -404,6 +512,10 @@ class RigRecommendation:
     positive_matches: int = 0
     matched_modules: tuple[str, ...] = field(default_factory=tuple)
     unmatched_target_modules: tuple[str, ...] = field(default_factory=tuple)
+    amp_target: str = ""
+    amp_match_module: str = ""
+    amp_match_method: _ModelMatchMethod = "none"
+    matched_module_methods: tuple[str, ...] = field(default_factory=tuple)
 
     def to_json(self) -> dict[str, object]:
         """Serialize for API/UI output."""
@@ -416,14 +528,23 @@ class RigRecommendation:
             "profile": self.profile.to_json(),
             "midi": [list(message) for message in self.profile.midi_bytes()],
         }
-        if self.active_target_count:
+        if self.active_target_count or self.amp_target:
             payload["module_match"] = {
                 "active_target_count": self.active_target_count,
                 "active_profile_count": self.active_profile_count,
                 "positive_matches": self.positive_matches,
-                "coverage": round(self.positive_matches / self.active_target_count, 3),
+                "coverage": round(
+                    self.positive_matches / self.active_target_count
+                    if self.active_target_count
+                    else 1.0,
+                    3,
+                ),
                 "matched_modules": list(self.matched_modules),
                 "unmatched_target_modules": list(self.unmatched_target_modules),
+                "amp_target": self.amp_target,
+                "amp_match_module": self.amp_match_module,
+                "amp_match_method": self.amp_match_method,
+                "matched_module_methods": list(self.matched_module_methods),
             }
         return payload
 
@@ -540,9 +661,9 @@ class RigBank:
     ) -> RigRecommendation | None:
         """Recommend the closest GP-180 profile for song metadata.
 
-        Exact bindings still win, but unlike :meth:`resolve`, this also returns
-        an approximate match based on artist/genre/profile tags so every song can
-        get a playable starting point.
+        An explicit profile still wins. Otherwise, an AMP/N→S match is mandatory
+        before secondary tone modules are compared. No amp match falls back to
+        the existing artist/genre/name search with an explicit explanation.
         """
 
         resolution = self.resolve(profile_id=profile_id) if profile_id else None
@@ -556,6 +677,21 @@ class RigBank:
                 matched_key=resolution.matched_key,
             )
 
+        target_modules = tuple(target_modules)
+        active_targets = _active_module_map(target_modules)
+        target_labels = _active_module_label_map(target_modules)
+        module_recommendation = self._recommend_by_modules(
+            active_targets,
+            target_labels=target_labels,
+            song=song,
+            artist=artist,
+            genre=genre,
+        )
+        if module_recommendation is not None:
+            return module_recommendation
+
+        module_fallback_reason = _module_fallback_reason(active_targets, target_labels)
+
         song_resolution = (
             self._resolve_binding("song", song, "song_binding") if song else None
         )
@@ -564,19 +700,12 @@ class RigBank:
                 profile=song_resolution.profile,
                 source=song_resolution.source,
                 score=100,
-                reasons=(_resolution_reason(song_resolution.source, song_resolution.matched_key),),
+                reasons=_with_module_fallback_reason(
+                    module_fallback_reason,
+                    _resolution_reason(song_resolution.source, song_resolution.matched_key),
+                ),
                 matched_key=song_resolution.matched_key,
             )
-
-        active_targets = _active_module_map(target_modules)
-        module_recommendation = self._recommend_by_modules(
-            active_targets,
-            song=song,
-            artist=artist,
-            genre=genre,
-        )
-        if module_recommendation is not None:
-            return module_recommendation
 
         resolution = self.resolve(song=song, artist=artist, genre=genre)
         if resolution is not None:
@@ -585,7 +714,7 @@ class RigBank:
                 profile=resolution.profile,
                 source=resolution.source,
                 score=100,
-                reasons=(reason,),
+                reasons=_with_module_fallback_reason(module_fallback_reason, reason),
                 matched_key=resolution.matched_key,
             )
 
@@ -598,7 +727,7 @@ class RigBank:
                 profile=profile,
                 source=source,
                 score=score,
-                reasons=tuple(reasons),
+                reasons=_with_module_fallback_reason(module_fallback_reason, *reasons),
                 matched_key=matched_key,
             )
             if best is None or recommendation.score > best.score:
@@ -612,7 +741,10 @@ class RigBank:
                 profile=profile,
                 source="fallback",
                 score=1,
-                reasons=("Aucun artiste ou genre exploitable : profil neutre de départ.",),
+                reasons=_with_module_fallback_reason(
+                    module_fallback_reason,
+                    "Aucun artiste ou genre exploitable : profil neutre de départ.",
+                ),
             )
         return None
 
@@ -620,52 +752,86 @@ class RigBank:
         self,
         active_targets: Mapping[str, str],
         *,
+        target_labels: Mapping[str, str],
         song: str | None,
         artist: str | None,
         genre: str | None,
     ) -> RigRecommendation | None:
-        """Return best positive active-module match, or ``None`` for legacy fallback."""
+        """Return an amp-gated tone match, or ``None`` for style/name fallback."""
 
-        if not active_targets:
+        target_amp = next(
+            (active_targets[module] for module in _AMP_GATE_MODULES if module in active_targets),
+            None,
+        )
+        if target_amp is None:
             return None
+        scored_targets = {
+            module: active_targets[module]
+            for module in _SCORED_TONE_MODULES
+            if module in active_targets
+        }
         ranked: list[tuple[int, float, int, int, RigRecommendation]] = []
         for profile in self.profiles:
             active_profile = _active_module_map(profile.modules)
-            matched = tuple(
-                module
-                for module, model in active_targets.items()
-                if active_profile.get(module) == model
+            amp_match = next(
+                (
+                    (module, _match_model("AMP", target_amp, active_profile[module]))
+                    for module in _AMP_GATE_MODULES
+                    if module in active_profile
+                    and _match_model("AMP", target_amp, active_profile[module]).matched
+                ),
+                None,
             )
-            if not matched:
+            if amp_match is None:
                 continue
-            unmatched = tuple(module for module in active_targets if module not in matched)
+            amp_match_module, amp_model_match = amp_match
+            module_matches = tuple(
+                (module, _match_model(module, model, active_profile[module]))
+                for module, model in scored_targets.items()
+                if module in active_profile
+            )
+            matched = tuple(module for module, match in module_matches if match.matched)
+            unmatched = tuple(module for module in scored_targets if module not in matched)
             context_score, context_reasons, _, _ = _score_profile(
                 profile,
                 song,
                 artist,
                 genre,
             )
-            coverage = len(matched) / len(active_targets)
+            coverage = len(matched) / len(scored_targets) if scored_targets else 1.0
             module_labels = tuple(
-                f"{module}={_display_module_model(profile, module)}" for module in matched
+                f"{module}={_display_module_model(profile, module)} [{match.method}]"
+                for module, match in module_matches
+                if match.matched
             )
+            amp_label = _display_module_model(profile, amp_match_module)
             reasons = (
-                f"{len(matched)}/{len(active_targets)} module(s) actif(s) correspondent : "
-                + ", ".join(module_labels)
+                "Ampli requis correspondant : "
+                f"{amp_match_module}={amp_label} [{amp_model_match.method}].",
+                f"{len(matched)}/{len(scored_targets)} module(s) de tonalité correspondent : "
+                + (", ".join(module_labels) if module_labels else "aucun module complémentaire")
                 + ".",
                 *context_reasons,
             )
             recommendation = RigRecommendation(
                 profile=profile,
                 source="module_match",
-                score=round(coverage * 100),
+                score=round(50 + coverage * 50),
                 reasons=reasons,
-                matched_key=", ".join(module_labels),
-                active_target_count=len(active_targets),
+                matched_key=f"{amp_match_module}={amp_label}",
+                active_target_count=len(scored_targets),
                 active_profile_count=len(active_profile),
                 positive_matches=len(matched),
                 matched_modules=module_labels,
                 unmatched_target_modules=unmatched,
+                amp_target=target_labels.get("AMP") or target_labels.get("N→S") or target_amp,
+                amp_match_module=amp_match_module,
+                amp_match_method=amp_model_match.method,
+                matched_module_methods=tuple(
+                    f"{module}={match.method}"
+                    for module, match in module_matches
+                    if match.matched
+                ),
             )
             ranked.append(
                 (len(matched), coverage, context_score, -profile.program, recommendation)
@@ -839,6 +1005,118 @@ def _active_module_map(modules: Iterable[RigModule]) -> dict[str, str]:
         if key is not None:
             active[key[0]] = key[1]
     return active
+
+
+def _match_model(module: str, target: str, candidate: str) -> _ModelMatch:
+    """Compare same-slot model labels without broad brand/fuzzy guesses.
+
+    Stored values may be real equipment names (``Vox AC30 TB``) or Valeton's
+    clone label (``Foxy 30TB``). Exact normalization wins, curated same-slot
+    families handle known clones, then a typo-only rule handles spelling drift.
+    """
+
+    canonical_module = _canon_effect(module)
+    target_normalized = _normalize_model_label(target)
+    candidate_normalized = _normalize_model_label(candidate)
+    if not target_normalized or not candidate_normalized:
+        return _ModelMatch(False, "none")
+    if target_normalized == candidate_normalized:
+        return _ModelMatch(True, "exact")
+
+    target_group = _model_alias_group(canonical_module, target_normalized)
+    candidate_group = _model_alias_group(canonical_module, candidate_normalized)
+    if target_group is not None and target_group == candidate_group:
+        return _ModelMatch(True, "alias")
+    if target_group is not None and candidate_group is not None:
+        return _ModelMatch(False, "none")
+
+    if _is_typo_only_match(target_normalized, candidate_normalized):
+        return _ModelMatch(True, "typo")
+    return _ModelMatch(False, "none")
+
+
+def _model_alias_group(module: str, normalized_model: str) -> int | None:
+    """Return curated clone family index for one canonical slot, if known."""
+
+    for index, names in enumerate(_MODEL_ALIAS_GROUPS.get(module, ())):
+        if normalized_model in {_normalize_model_label(name) for name in names}:
+            return index
+    return None
+
+
+def _normalize_model_label(value: str) -> str:
+    """Normalize raw labels and already-normalized rig-bank values identically."""
+
+    return _normalize(value.replace("_", " "))
+
+
+def _is_typo_only_match(target: str, candidate: str) -> bool:
+    """Allow only near-identical spelling variants after alias lookup."""
+
+    target_compact = target.replace("_", "")
+    candidate_compact = candidate.replace("_", "")
+    if min(len(target_compact), len(candidate_compact)) < 6:
+        return False
+    if abs(len(target_compact) - len(candidate_compact)) > 2:
+        return False
+    if _model_numbers(target) != _model_numbers(candidate):
+        return False
+    if SequenceMatcher(None, target_compact, candidate_compact).ratio() < 0.94:
+        return False
+    shared_prefix = _shared_prefix_length(target_compact, candidate_compact)
+    shared_tokens = set(target.split("_")) & set(candidate.split("_"))
+    return shared_prefix >= 4 or any(len(token) >= 4 for token in shared_tokens)
+
+
+def _model_numbers(value: str) -> tuple[str, ...]:
+    """Return numeric/dimension tokens so 800 never matches 900 or 1x12/2x12."""
+
+    return tuple(re.findall(r"\d+(?:x\d+)?", value))
+
+
+def _shared_prefix_length(left: str, right: str) -> int:
+    """Return length of common compact prefix."""
+
+    length = 0
+    for left_char, right_char in zip(left, right):
+        if left_char != right_char:
+            break
+        length += 1
+    return length
+
+
+def _active_module_label_map(modules: Iterable[RigModule]) -> dict[str, str]:
+    """Return active slot to user-readable model labels."""
+
+    return {module.module: module.model for module in modules if module.match_key is not None}
+
+
+def _module_fallback_reason(
+    active_targets: Mapping[str, str], target_labels: Mapping[str, str]
+) -> str | None:
+    """Explain why similarity scoring deferred to metadata search."""
+
+    if not active_targets:
+        return None
+    target_amp = next(
+        (module for module in _AMP_GATE_MODULES if module in active_targets),
+        None,
+    )
+    if target_amp is None:
+        return "Rapprochement par style et nom : rig conseillé sans ampli AMP/N→S actif."
+    amp_name = target_labels.get(target_amp) or active_targets[target_amp]
+    return (
+        "Rapprochement par style et nom : aucun preset ne correspond à l'ampli recommandé "
+        f"« {amp_name} » via AMP ou N→S."
+    )
+
+
+def _with_module_fallback_reason(
+    fallback_reason: str | None, *reasons: str
+) -> tuple[str, ...]:
+    """Prefix fallback evidence only when a module comparison was attempted."""
+
+    return ((fallback_reason,) if fallback_reason else ()) + tuple(reasons)
 
 
 def _display_module_model(profile: RigProfile, module_name: str) -> str:

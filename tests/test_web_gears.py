@@ -33,7 +33,8 @@ def _doc(artist: str, title: str, confidence: str = "high") -> dict:
         "musicalContext": {"primaryGenre": "hard rock", "styleTags": [], "targetTone": "Crunch.",
                            "confidence": confidence},
         "improvements": {"summary": "ok", "proposals": [
-            {"priority": "P1", "type": "IR", "target": "Cabinet", "recommendedAsset": "Greenback IR",
+            {"priority": "P1", "type": "IR", "target": "Cabinet",
+             "recommendedAsset": "Greenback IR",
              "reason": "x", "replacesBlockOrder": 7, "whenToUse": "always", "expectedGain": "high",
              "requiredIfGp180Gap": True}]},
         "validation": {"ok": True, "errors": [], "warnings": []},
@@ -54,7 +55,10 @@ def _doc_v2(artist: str, title: str, confidence: str = "high") -> dict:
                 "confidence": "high",
             }
         },
-        "tone": {"target": "Crunch.", "profile": "Crunch.", "summary": "UK SLP.", "confidence": confidence},
+        "tone": {
+            "target": "Crunch.", "profile": "Crunch.",
+            "summary": "UK SLP.", "confidence": confidence,
+        },
         "rig": {
             "name": f"{artist} - {title} - Valeton GP-180",
             "confidence": confidence,
@@ -83,7 +87,13 @@ Réglages GP-180 :
 """
 
 
-def _client(tmp_path: Path, monkeypatch, *, with_md: bool = False, with_json: bool = False) -> TestClient:
+def _client(
+    tmp_path: Path,
+    monkeypatch,
+    *,
+    with_md: bool = False,
+    with_json: bool = False,
+) -> TestClient:
     monkeypatch.setattr(web_settings, "_CONFIG_DIR", tmp_path / ".fretwise")
     monkeypatch.setattr(web_settings, "_CONFIG_FILE", tmp_path / ".fretwise" / "config.json")
     rigs = tmp_path / "rigs"
@@ -165,17 +175,22 @@ def test_gear_prompt_grounds_in_existing_sheet(tmp_path: Path, monkeypatch) -> N
     res = client.get("/api/gears/AC_DC - Highway to Hell.gp5/prompt")
     assert res.status_code == 200
     assert res.headers["content-type"].startswith("text/markdown")
+    assert res.headers["x-fretwise-gear-prompt-mode"] == "verify"
     body = res.text
     assert "AC/DC" in body
     assert "Highway to Hell" in body
     assert "songsgear.fretwise.gear.v2" in body
     assert '"UK SLP"' in body  # the existing sheet's AMP model is echoed back for review
+    assert "GPT-5.6 Sol" in body
+    assert res.headers["cache-control"] == "no-store"
 
 
 def test_gear_prompt_falls_back_to_filename_when_no_sheet(tmp_path: Path, monkeypatch) -> None:
     client = _client(tmp_path, monkeypatch)
     res = client.get("/api/gears/AC_DC - Highway to Hell.gp5/prompt")
     assert res.status_code == 200
+    assert res.headers["x-fretwise-gear-prompt-mode"] == "create"
+    assert "# Création fiche gear FretWise" in res.text
     assert "AC_DC" in res.text
     assert "Highway to Hell" in res.text
 
@@ -217,9 +232,30 @@ def test_save_gear_sheet_creates_canonical_file_when_absent(tmp_path: Path, monk
 
 def test_save_gear_sheet_rejects_invalid_document(tmp_path: Path, monkeypatch) -> None:
     client = _client(tmp_path, monkeypatch)
-    bad = {"schemaVersion": "songsgear.fretwise.gear.v2", "song": {"artist": "X"}}  # no title, no blocks
+    bad = {
+        "schemaVersion": "songsgear.fretwise.gear.v2",
+        "song": {"artist": "X"},
+    }
 
     res = client.post("/api/gears/X - Y.gp5/save", json={"gear": bad})
 
     assert res.status_code == 400
     assert "song.title" in res.text
+
+
+def test_gear_ai_panel_keeps_mode_for_save_callback() -> None:
+    """Prevent the save handler from reading click-local ``createMode``."""
+
+    project_root = Path(__file__).resolve().parents[1]
+    main_js = (project_root / "src" / "fretwise" / "web" / "static" / "js" / "main.js").read_text(
+        encoding="utf-8"
+    )
+    index_html = (project_root / "src" / "fretwise" / "web" / "static" / "index.html").read_text(
+        encoding="utf-8"
+    )
+
+    assert "let gearVerifyCreateMode = false;" in main_js
+    assert "gearVerifyPanel.dataset.mode = gearVerifyCreateMode ? 'create' : 'verify';" in main_js
+    assert "${gearVerifyCreateMode ? 'Fiche créée' : 'Fiche mise à jour'}${warn}." in main_js
+    assert "createMode ? 'Fiche créée'" not in main_js
+    assert 'id="gear-verify-model"' in index_html

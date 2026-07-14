@@ -195,7 +195,8 @@ def test_rig_bank_recommend_uses_active_ai_rig_modules(tmp_path: Path, monkeypat
     payload = res.json()
     assert payload["source"] == "module_match"
     assert payload["profile"]["id"] == "two-matches"
-    assert payload["module_match"]["positive_matches"] == 2
+    assert payload["module_match"]["positive_matches"] == 1
+    assert payload["module_match"]["amp_match_module"] == "AMP"
     assert payload["context"]["active_module_count"] == 2
 
 

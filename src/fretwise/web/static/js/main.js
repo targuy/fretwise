@@ -3644,10 +3644,12 @@ if (btnRig) btnRig.addEventListener('click', _toggleRig);
   const gearVerifyPromptEl = document.getElementById('gear-verify-prompt');
   const gearVerifyTitleEl = document.getElementById('gear-verify-title');
   const gearVerifyHintEl = document.getElementById('gear-verify-hint');
+  const gearVerifyModelEl = document.getElementById('gear-verify-model');
   const gearVerifyPasteEl = document.getElementById('gear-verify-paste');
   const gearVerifyStatusEl = document.getElementById('gear-verify-status');
   const gearVerifyCopyBtn = document.getElementById('gear-verify-copy-btn');
   const gearVerifySaveBtn = document.getElementById('gear-verify-save-btn');
+  let gearVerifyCreateMode = false;
 
   function _setGearVerifyStatus(msg, isError = false) {
     if (!gearVerifyStatusEl) return;
@@ -3657,17 +3659,21 @@ if (btnRig) btnRig.addEventListener('click', _toggleRig);
 
   if (gearVerifyBtn) gearVerifyBtn.addEventListener('click', async () => {
     if (!gearVerifyPanel || !_lastRigFile) return;
-    const createMode = gearVerifyBtn.dataset.mode === 'create';
+    gearVerifyCreateMode = gearVerifyBtn.dataset.mode === 'create';
+    gearVerifyPanel.dataset.mode = gearVerifyCreateMode ? 'create' : 'verify';
     if (gearVerifyTitleEl) {
-      gearVerifyTitleEl.textContent = createMode ? 'Créer avec une IA' : 'Vérifier avec une IA';
+      gearVerifyTitleEl.textContent = gearVerifyCreateMode ? 'Créer avec une IA' : 'Vérifier avec une IA';
     }
     if (gearVerifyHintEl) {
-      gearVerifyHintEl.textContent = createMode
+      gearVerifyHintEl.textContent = gearVerifyCreateMode
         ? "Copiez le prompt dans un LLM connecté, collez sa réponse JSON, puis créez la fiche."
         : "Copiez le prompt dans un LLM connecté, collez sa réponse JSON, puis mettez la fiche à jour.";
     }
+    if (gearVerifyModelEl) {
+      gearVerifyModelEl.textContent = 'Modèle conseillé : GPT-5.6 Sol · raisonnement élevé · recherche Web activée.';
+    }
     if (gearVerifySaveBtn) {
-      gearVerifySaveBtn.textContent = createMode ? 'Créer et enregistrer' : 'Valider et enregistrer';
+      gearVerifySaveBtn.textContent = gearVerifyCreateMode ? 'Créer et enregistrer' : 'Valider et enregistrer';
     }
     gearVerifyPanel.style.display = 'flex';
     if (gearVerifyPasteEl) gearVerifyPasteEl.value = '';
@@ -3713,7 +3719,7 @@ if (btnRig) btnRig.addEventListener('click', _toggleRig);
       _lastRig = result.view;
       _renderRig(result.view);
       const warn = (result.warnings || []).length ? ` (${result.warnings.length} avertissement(s))` : '';
-      _setGearVerifyStatus(`${createMode ? 'Fiche créée' : 'Fiche mise à jour'}${warn}.`);
+      _setGearVerifyStatus(`${gearVerifyCreateMode ? 'Fiche créée' : 'Fiche mise à jour'}${warn}.`);
       if (gearVerifyPanel) setTimeout(() => { gearVerifyPanel.style.display = 'none'; }, 1200);
     } catch (e) {
       _setGearVerifyStatus(e.message || "Échec de l'enregistrement", true);
