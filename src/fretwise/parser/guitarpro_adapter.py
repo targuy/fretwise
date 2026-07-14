@@ -224,10 +224,10 @@ def _extract_note_events(
 
                 beat_onset += beat_duration
 
-            voice_duration = beat_onset - measure_onset
-            if voice_duration > 0.0:
-                measure_duration = max(measure_duration, voice_duration)
-
+        # The measure grid is defined by the (global) time signature headers.
+        # Never stretch a measure to fit an overfull voice: every track of the
+        # song must advance by the same amount per measure, or the tracks
+        # desync from one another (playback, cursor, navigation).
         onset = measure_onset + measure_duration
 
     return sorted(events, key=lambda e: (e.onset, e.voice_hint or 0))
@@ -301,9 +301,8 @@ def _extract_beat_chord_markers(
                     if name.strip():
                         markers[f"{beat_onset:.6f}"] = name.strip()
                 beat_onset += beat_duration
-            voice_duration = beat_onset - measure_onset
-            if voice_duration > 0.0:
-                measure_duration = max(measure_duration, voice_duration)
+        # Same global-grid rule as _extract_note_events: advance strictly by the
+        # header time signature so chord markers stay aligned across tracks.
         onset = measure_onset + measure_duration
     return markers
 

@@ -497,3 +497,56 @@ class TestOpenStringPitches:
         track.strings = mock_strings
         result = _open_string_pitches(track)
         assert result == [64, 59, 55, 50, 45, 40]
+
+
+# ---------------------------------------------------------------------------
+# Global measure grid — measures advance by the header time signature only
+# ---------------------------------------------------------------------------
+
+
+class TestMeasureGridIsGlobal:
+    """The measure grid must never be stretched by an overfull voice.
+
+    Every track of a song advances by the same amount per measure (the header
+    time signature). Stretching a measure to fit extra beats desyncs that track
+    from all the others: playback, cursor and navigation land on different bars
+    depending on the voice (measure-misalignment bug between voices).
+    """
+
+    @patch("fretwise.parser.guitarpro_adapter.guitarpro.parse")
+    def test_overfull_voice_does_not_shift_next_measure(
+        self, mock_parse: MagicMock, tmp_path: Path
+    ) -> None:
+        """Six quarter notes in a 4-beat bar: measure 2 still starts at beat 4."""
+        beats_m1 = [_make_mock_beat([_make_mock_note(string=1, fret=0)]) for _ in range(6)]
+        beats_m2 = [_make_mock_beat([_make_mock_note(string=1, fret=1)])]
+        song = _make_mock_song(beats_per_measure=[beats_m1, beats_m2])
+        mock_parse.return_value = song
+
+        gp_file = tmp_path / "overfull.gp5"
+        gp_file.touch()
+        events = GuitarProAdapter().parse(gp_file)
+
+        m2 = [e for e in events if e.measure_index == 2]
+        assert m2, "measure 2 must contain the second-note event"
+        assert m2[0].onset == pytest.approx(4.0), (
+            "measure 2 must start on the nominal 4/4 grid (beat 4), "
+            "not after the overfull voice (beat 6)"
+        )
+
+    @patch("fretwise.parser.guitarpro_adapter.guitarpro.parse")
+    def test_overfull_voice_keeps_tracks_aligned(
+        self, mock_parse: MagicMock, tmp_path: Path
+    ) -> None:
+        """A normal track parsed from the same grid yields the same measure onsets."""
+        beats_m1 = [_make_mock_beat([_make_mock_note(string=1, fret=0)]) for _ in range(4)]
+        beats_m2 = [_make_mock_beat([_make_mock_note(string=1, fret=1)])]
+        song = _make_mock_song(beats_per_measure=[beats_m1, beats_m2])
+        mock_parse.return_value = song
+
+        gp_file = tmp_path / "normal.gp5"
+        gp_file.touch()
+        events = GuitarProAdapter().parse(gp_file)
+
+        m2 = [e for e in events if e.measure_index == 2]
+        assert m2[0].onset == pytest.approx(4.0)
