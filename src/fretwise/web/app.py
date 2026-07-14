@@ -64,6 +64,7 @@ from fretwise.pdf_conformance import (
     legacy_shadow_pdf_conformance_report,
 )
 from fretwise.pipeline import PipelineResult, run_pipeline, run_pipeline_with_guard_report
+from fretwise.playback import build_performance
 from fretwise.gears import (
     build_gear_verification_prompt,
     gears_key_from_filename,
@@ -900,6 +901,7 @@ def _register_routes(app: FastAPI) -> None:
         midi_program: int = getattr(adapter, "midi_program", -1)
         tempo = events[0].tempo if events else 120.0
         beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0))
+        build_performance(serialized_results, default_tempo=tempo)
 
         return {
             "track_name": track_name,
@@ -1115,6 +1117,7 @@ def _register_routes(app: FastAPI) -> None:
         serialized_results = _annotate_serialized_review_status(
             serialized_results, audit,
         )
+        build_performance(serialized_results, default_tempo=base["tempo"])
 
         payload: dict[str, Any] = {
             "title": auto_title,

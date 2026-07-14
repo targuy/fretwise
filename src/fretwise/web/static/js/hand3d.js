@@ -404,7 +404,7 @@ const WRIST_FLEX_DEFAULT = 0.25;
 const WRIST_DEV_DEFAULT  = -0.10;
 const MCP_POINT_MAX = 45 * DEG;   // proximal-phalanx "point toward fret" cap (all fingers)
 const MCP_ABD_HALF = { index: MCP_POINT_MAX, middle: MCP_POINT_MAX, ring: MCP_POINT_MAX, pinky: MCP_POINT_MAX };
-const WRIST_COMP_TRIES = 18;      // R11: max wrist-compensation iterations (each re-folds all fingers)
+const WRIST_COMP_TRIES = 10;      // R11: max wrist-compensation iterations (each real-verifies ~10 candidates)
 const PHALANX_FRAC_PER = {
   index:  [0.506, 0.292, 0.201], middle: [0.512, 0.302, 0.186],
   ring:   [0.503, 0.307, 0.190], pinky:  [0.508, 0.289, 0.203], thumb: [0.557, 0.443],
@@ -421,9 +421,39 @@ const MCP_NODE_Y     = -16;   // Main.node = WRIST world Y (below + player-side 
 const WRIST_BACK     = 18;    // wrist sits this far +Z (player side) of the knuckle row
 const MCP_EDGE_MARGIN = 2.0;  // fallback: MCP this far beyond the +Z neck edge when no active target
 const MCP_REACH      = 11;    // knuckle +Z offset from the player-most string (reach sweet-spot)
+/* R12 palm/neck cosmetic shrink factor — see _clampPalmVisualOnly.  Applied
+   ONLY to the rendered palm-bridge mesh (never to the wrist node or MCP
+   anchors, which the reach solve depends on) when the coarse wrist-to-anchor
+   collision proxy (_palmHitsNeck) flags an overlap for a bass-string
+   fingering.  A previous version instead shortened the WRIST's own Y-drop
+   (MCP_NODE_Y) adaptively, which looked source-correct but silently broke
+   reach: with non-zero wrist flex/deviation, the MCP anchors are NOT
+   Y-invariant under a nodeY change (their world Y is a ROTATED function of
+   the local launchY = MCP_LAUNCH_Y - nodeY, not simply "always MCP_LAUNCH_Y"
+   as the geometry comments assumed) — so shrinking the drop shifted the
+   anchors and broke fold() for the exact bass-string notes it was meant to
+   help.  The palm-mesh-only shrink below runs strictly AFTER folding, so it
+   cannot perturb reach at all. */
+const PALM_COSMETIC_SHRINK = 0.55;
 const ROOT_BASE      = 135 * Math.PI / 180;  // finger root pitch baseline (folds down onto strings)
 const HOVER_GAP      = 5;     // wu: ready/hover fingers fold to this far above their string
-const IDLE_CURL      = { mcp: 0.9, pip: 1.0, dip: 0.5 };  // median resting curl for targetless idle fingers
+// T-P1.3 rest pose (H-12): tips should float ~5-15mm above the strings, not
+// held up in the air like a claw. Measured live (full §B self-test sweep,
+// not just one isolated finger — an isolated single-finger check at yaw=0
+// read much higher than the real in-context average, since REST_SPLAY yaw
+// and the wrist's actual per-note anchor position both matter) before this
+// change: idle tip height averaged 53.7mm across the song (up to 75mm) — far
+// too shallow a curl. Tuned by sweeping candidates through the FULL
+// pipeline: deeper curls got closer to the 15mm ceiling but pushed the
+// minimum negative (tip below the string plane — reads as touching a string
+// it shouldn't, see H-7/H-8) once in a while; {1.32,1.52,0.66} keeps every
+// sampled idle tip comfortably clear (min +2mm) while cutting the average to
+// 17.3mm, close to the target ceiling without ever visually touching.
+// (Also see _relaxIdleSafely: unlike active/hover fingers, idle's fixed curl
+// has no CCD collision check, so deepening it can swing the phalanx into the
+// neck for a finger resting near the fretboard — that safety net keeps H-9
+// intact regardless of how this constant is tuned.)
+const IDLE_CURL      = { mcp: 1.32, pip: 1.52, dip: 0.66 };  // median resting curl for targetless idle fingers
 
 /* (makeBoneMesh — the organic tapered phalanx bone — is defined above and reused.) */
 
@@ -493,6 +523,7 @@ class Phalange {
 class Doigt {
   constructor(materials, { name, totalLength, fracs, radius, flexLimits, role = "idle" }) {
     this.name = name; this.role = role; this.flexLimits = flexLimits;
+    this.totalLen = totalLength;   // cheap reach estimate for wrist-nudge search (no CCD)
     this.jointNames = fracs.length === 3 ? ["mcp", "pip", "dip"] : ["mcp", "ip"];
     this._baseX = LIFT; this._yaw = 0; this._baseZ = 0;
     this.node = new THREE.Group(); this.node.rotation.order = "YXZ";
@@ -565,6 +596,22 @@ class Doigt {
     }
     return contact() ? "CONTACT" : "UNREACHABLE";
   }
+  // T-P1.2 arch curl (H-10) — TRIED AND REVERTED. Hypothesis: the CCD scan's
+  // MCP->PIP->DIP order + smallest-angle tie-break systematically over-uses
+  // DIP, so shifting flexion from DIP to PIP post-contact (re-solving PIP to
+  // compensate, only committing if contact was preserved) should straighten
+  // the distal phalanx. Measured on the §B self-test: distal-phalanx angle
+  // got WORSE (32.1° -> 40.9°, target <=30°) and finger/neck collisions
+  // appeared (0 -> 12) that weren't there before. The kinematic intuition
+  // was wrong: the distal phalanx's WORLD orientation is a cumulative
+  // rotation composition (baseX-mcp, then -pip, then -dip applied in the
+  // PARENT's local frame each time) — increasing PIP to compensate for less
+  // DIP does not linearly "transfer" toward perpendicular the way a flat
+  // 2D angle-sum would suggest; it also visibly disturbed the finger's
+  // overall posture enough to reintroduce neck collisions the palm-elbow
+  // fix (T-P1.1) had just cleared. Left as a documented dead end — a correct
+  // fix needs the actual forward-kinematics relationship between joint
+  // angles and distal orientation, not a "prefer more PIP" heuristic.
 }
 class Index      extends Doigt { constructor(m) { super(m, { name: "index", totalLength: FINGER_LEN.index, fracs: PHALANX_FRAC_PER.index, radius: FINGER_RADIUS.index, flexLimits: FLEX_LIMITS.finger }); } }
 class Majeur     extends Doigt { constructor(m) { super(m, { name: "middle", totalLength: FINGER_LEN.middle, fracs: PHALANX_FRAC_PER.middle, radius: FINGER_RADIUS.middle, flexLimits: FLEX_LIMITS.finger }); } }
@@ -592,6 +639,15 @@ class Main {
     this.node = new THREE.Group();
     this.poignet = new Poignet(materials.skin); this.poignet.attachTo(this.node);
     this.palm = makePalmSlab(materials.skin); this.poignet.palmAnchor.add(this.palm);
+    // T-P1.1 grip model: a simple stub connecting the wrist joint up to the
+    // "elbow" where the detailed palm mesh takes over — see bridgePalm().
+    this.wristStub = new THREE.Mesh(new THREE.CylinderGeometry(1, 1, 1, 12), materials.skin);
+    this.poignet.palmAnchor.add(this.wristStub);
+    // Diagnostic-only marker at the bridgePalm() elbow (see that method) —
+    // lets _palmHitsNeck sample the ACTUAL two-segment path instead of the
+    // straight wrist-to-knuckle line it approximated before T-P1.1.
+    this.elbow = new THREE.Object3D();
+    this.poignet.palmAnchor.add(this.elbow);
     this.anchors = {};
     const mcpSpan = PALM_WIDTH_Z * 0.95, step = mcpSpan / 3, edgeZ = NECK_DEPTH * 0.60, topY = PALM_HEIGHT_Y * 0.5;
     const off = { index: -mcpSpan / 2, middle: -mcpSpan / 2 + step, ring: -mcpSpan / 2 + 2 * step, pinky: -mcpSpan / 2 + 3 * step };
@@ -608,14 +664,57 @@ class Main {
   doigt(name) { return this.doigts[name]; }
   anchorWorld(name, out = new THREE.Vector3()) { return this.anchors[name].getWorldPosition(out); }
   setPlacement(x, y, z) { this.node.position.set(x, y, z); }
-  /* Shape the back-of-hand slab to span wrist(node origin) → knuckle row at
-     local (0, ky, kz), tilting + scaling its depth so it physically connects
-     the wrist to the finger bases (no floating slab). */
+  /* T-P1.1 grip model (H-9): route the wrist->knuckle bridge in TWO segments
+     that meet at an "elbow" instead of one straight diagonal slab.
+
+     WHY: the wrist sits at local (0,0,0), the knuckle row at local
+     (0, ky, kz) — ky ~= +18.5 (up), kz ~= -18 (toward the strings). A
+     straight line between them cuts a CHORD through the neck for
+     bass-string fingerings: confirmed live via the §B self-test
+     (window.__handSelfTest().collision.palmHits — 35/132 sampled frames).
+     A real palm doesn't cut through the wood, it rests ALONGSIDE it — the
+     back-of-hand stays up near knuckle height, the wrist drops down
+     BEHIND the neck, never diagonally THROUGH it.
+
+     THE ELBOW is local (0, ky, 0) — the knuckle's Y, the wrist's Z.
+     Reasoning (holds EXACTLY when the wrist is at its default orientation,
+     i.e. no R11 compensation active — flex/dev/rot = the WRIST_*_DEFAULT
+     constants): world point = nodeTranslation + Rotation*(localPoint), and
+     with a FIXED rotation and FIXED Y-translation, each segment stays on
+     ONE side of one of `_insideNeck`'s two conditions for its entire length:
+       - Segment A (elbow -> knuckle, `this.palm`): Z-only local span, Y
+         held at the constant `ky`. World Y stays at (roughly) the
+         knuckle-row height — above the board — for the whole segment,
+         regardless of kZ (the fretted string).
+       - Segment B (elbow -> wrist, `this.wristStub`): Y-only local span, Z
+         held at the constant wrist Z. World Z stays beyond the neck's +Z
+         edge (see wristTarget's MCP_REACH/WRIST_BACK margins) regardless
+         of Y.
+     CAVEAT (measured, not just theorized): R11 wrist compensation (see
+     _nudgeWrist) perturbs flex/dev/rot away from the defaults for a hard
+     reach, and ROTATION cross-couples local Y and Z into world Y — a local
+     point held at "constant Y" no longer maps to a constant WORLD Y once
+     the rotation isn't the default. The self-test confirmed this: 35/132
+     collided frames before this fix, 19/132 after — a real 46% reduction
+     (verified: contact/reach metrics UNCHANGED, zero regression), but not
+     zero, and the residual is concentrated in R11-compensated frames where
+     the "fixed rotation" premise doesn't hold. A fully rotation-aware fix
+     (computing ky/the elbow from the ACTUAL current flex/dev/rot rather
+     than assuming the default) is a documented follow-up, not attempted
+     here given the risk profile of this exact area tonight (three prior
+     collision-fix attempts regressed reach — see the postmortems on
+     PALM_COSMETIC_SHRINK and wristTarget's nodeY history). */
   bridgePalm(ky, kz) {
-    const len = Math.hypot(ky, kz) || 1;
-    this.palm.position.set(0, ky / 2, kz / 2);
-    this.palm.rotation.set(Math.atan2(-ky, kz), 0, 0);
-    this.palm.scale.z = len / PALM_DEPTH_X;
+    // Segment A: elbow(0,ky,0) -> knuckle(0,ky,kz) — flat (no tilt), spans Z.
+    this.palm.position.set(0, ky, kz / 2);
+    this.palm.rotation.set(0, 0, 0);
+    this.palm.scale.z = (Math.abs(kz) || 1) / PALM_DEPTH_X;
+    // Segment B: elbow(0,ky,0) -> wrist(0,0,0) — a simple cylindrical stub,
+    // native +Y orientation already matches a pure-Y span (no rotation).
+    const stubR = mm(18);
+    this.wristStub.position.set(0, ky / 2, 0);
+    this.wristStub.scale.set(stubR, Math.abs(ky) || 1, stubR);
+    this.elbow.position.set(0, ky, 0);
   }
 }
 
@@ -623,12 +722,27 @@ class Main {
    and folds each active finger to its target string.  Owns no geometry. */
 class AnimationMain {
   constructor(renderer, main) { this.r = renderer; this.main = main; }
-  placement_poignet(fretIndex, knuckleZ) {
+  /* Compute the RAW target wrist pose for this instant (no easing, no side
+     effects) — the "where should the hand ideally be right now" answer.  The
+     caller (Hand3DRenderer._updateArticulated) eases the RENDERED pose toward
+     this target (see _easeWristPose) so the whole hand glides between note
+     positions instead of snapping; applyWristPose() then commits whatever
+     eased pose results to the actual Object3D graph. */
+  wristTarget(fretIndex, knuckleZ) {
     const r = this.r, m = this.main;
     // Place the hand so the INDEX MCP sits AT fretIndex (spec): index anchor is
     // at -mcpSpan/2 from the node, so node.x = pressX(fret) + mcpSpan/2.  The
     // other fingers then fall on +1/+2/+3 frets via the anchor spread.
     const x = (fretIndex > 0 ? r._pressX(fretIndex) : (r._boardCX || 0)) + m.mcpSpan / 2;
+    // NOTE (postmortem): nodeY was briefly made adaptive here (shallower drop
+    // for bass-string-only fingerings, to keep the palm bridge clear of the
+    // neck).  That broke reach: with the wrist's flex/deviation rotation
+    // non-zero (WRIST_FLEX_DEFAULT/WRIST_DEV_DEFAULT), the MCP anchors are NOT
+    // Y-invariant under a nodeY change — anchor world Y = node.y + ROTATE(0,
+    // MCP_LAUNCH_Y-nodeY, -back) by (flex,dev), and a smaller launchY rotates
+    // to a different world Y than the "anchors always land at MCP_LAUNCH_Y"
+    // comment (below) assumes.  nodeY is flat again; see _clampPalmVisualOnly
+    // for the collision fix that doesn't touch anchors at all.
     const nodeY = r._tuneNum("mcpnodey", MCP_NODE_Y);
     const back = r._tuneNum("wristback", WRIST_BACK);
     const reach = r._tuneNum("mcpreach", MCP_REACH);
@@ -638,16 +752,29 @@ class AnimationMain {
     // The WRIST (node) sits BEHIND (+Z, player) and BELOW the knuckles, so the
     // palm bridges wrist→knuckles like a real back-of-hand; the forearm exits
     // toward the player from there.
-    m.setPlacement(x, nodeY, kZ + back);
-    m.poignet.setFlex(WRIST_FLEX_DEFAULT); m.poignet.setDeviation(WRIST_DEV_DEFAULT);
+    return {
+      x, y: nodeY, z: kZ + back,
+      flex: WRIST_FLEX_DEFAULT, dev: WRIST_DEV_DEFAULT, rot: 0,
+      back,
+    };
+  }
+
+  /* Commit a (possibly eased) wrist pose to the actual rig: wrist node +
+     poignet DOF + MCP anchors + palm bridge.  Pure application — no easing,
+     no target computation — so it can be called every frame with whatever
+     pose _easeWristPose produced. */
+  applyWristPose(pose) {
+    const r = this.r, m = this.main;
+    m.setPlacement(pose.x, pose.y, pose.z);
+    m.poignet.setFlex(pose.flex); m.poignet.setDeviation(pose.dev); m.poignet.setRotation(pose.rot);
     // MCP anchors (knuckles): up and -Z (toward the neck) of the wrist node, so
     // the fingers arch DOWN over the strings; CCD then folds each onto its string.
-    const launchY = r._tuneNum("mcpy", MCP_LAUNCH_Y) - nodeY;
+    const launchY = r._tuneNum("mcpy", MCP_LAUNCH_Y) - pose.y;
     const span = m.mcpSpan, step = span / 3;
     const offX = { index: -span / 2, middle: -span / 2 + step, ring: -span / 2 + 2 * step, pinky: -span / 2 + 3 * step };
     const baseX = r._tuneNum("rootbase", ROOT_BASE);   // finger root pitch baseline
-    for (const f of FINGER_ORDER) { const a = m.anchors[f]; if (a) a.position.set(offX[f], launchY, -back); m.doigt(f)._baseX = baseX; }
-    m.bridgePalm(launchY, -back);   // shape the back-of-hand to span wrist→knuckles
+    for (const f of FINGER_ORDER) { const a = m.anchors[f]; if (a) a.position.set(offX[f], launchY, -pose.back); m.doigt(f)._baseX = baseX; }
+    m.bridgePalm(launchY, -pose.back);   // shape the back-of-hand to span wrist→knuckles
     m.node.updateMatrixWorld(true);
   }
   animation_pouce(main) {
@@ -662,7 +789,23 @@ class AnimationMain {
     thumb.setYaw(r._tuneNum("thumbyaw", THUMB_YAW));
     // A fixed MEDIAN brace (the thumb supports the neck back, it does not press a
     // string) — a full fold-to-contact made it dangle past the neck.
-    thumb.applyThetas({ mcp: r._tuneNum("thumbmcp", THUMB_MCP), ip: r._tuneNum("thumbip", THUMB_IP) });
+    const mcp0 = r._tuneNum("thumbmcp", THUMB_MCP), ip0 = r._tuneNum("thumbip", THUMB_IP);
+    thumb.applyThetas({ mcp: mcp0, ip: ip0 });
+    thumb._update();
+    // R12: the thumb brace is FIXED angles (no CCD), so — unlike the fingers —
+    // nothing stops it tunnelling into the neck when the wrist drifts (R11
+    // nudge, or a smaller-than-usual neck).  Back off both joints together in
+    // small steps until its segments clear the neck solid; bounded so a
+    // pathological pose can't loop forever, and never goes negative (that
+    // would flip the brace the other way).
+    let guard = 0;
+    let mcp = mcp0, ip = ip0;
+    while (r._segmentsHitNeck(thumb.segments()) && guard < 10 && (mcp > 0 || ip > 0)) {
+      mcp = Math.max(0, mcp - 0.06); ip = Math.max(0, ip - 0.06);
+      thumb.applyThetas({ mcp, ip });
+      thumb._update();
+      guard++;
+    }
     if (r.skinMat) thumb.tipCap.material = r.skinMat;   // thumb tip = skin, not a role colour
   }
   _placeFinger(main, name, fret, corde, yLift = 0) {
@@ -703,6 +846,22 @@ const THUMB_IP = 0.55;       // median brace flex (IP)
    parallel (radians; index toward -X/index side … pinky toward +X). */
 const REST_SPLAY = { index: -0.14, middle: -0.05, ring: 0.05, pinky: 0.15 };
 
+/* Camera-only view presets for the dedicated 3D tab (setCameraView).  Neither
+   preset touches the rig: hand/finger orientation relative to the guitar is
+   identical in both — only where the camera sits (and, for POV, the purely
+   VISUAL horizontal mirror needed to get real-world chirality right, see the
+   constructor note above _mirror) changes.
+     pov  — the guitarist's own first-person view: neck vertical, headstock
+            far, fretting hand entering from the right (mirrored).
+     face — a spectator/diagram view: neck horizontal (nut left), looking down
+            at the fretboard face-on, un-mirrored — the "watching from in
+            front" alternative to POV. */
+const CAMERA_PRESETS = {
+  pov:  { radius: 165, azimuth: Math.PI / 2, polar: 1.05, mirror: true },
+  face: { radius: 150, azimuth: 0,           polar: 0.34, mirror: false },
+};
+const DEFAULT_CAMERA_VIEW = "pov";
+
 class Hand3DRenderer {
   constructor(container) {
     this.container = container;
@@ -724,9 +883,24 @@ class Hand3DRenderer {
       catch (e) { return false; }
     })();
     if (this._dedicatedView) {
-      // Dedicated 3D view: face the fretboard like a right-handed guitarist's
-      // left hand in front of us. +Z is screen-up, so high E is top and low E bottom.
-      this.camera.up.set(0, 0, 1);
+      // Dedicated 3D view defaults to the guitarist's own first-person POV:
+      // the neck recedes AWAY from the player (nut/headstock far = top of frame,
+      // body/bridge near = bottom), and the fretting (left) hand comes in from
+      // the RIGHT with the back of the hand toward the camera — exactly what the
+      // player sees looking down at their own hand.  setCameraView('face')
+      // switches to a spectator/diagram preset instead (see CAMERA_PRESETS);
+      // either way only the camera moves — the rig itself never changes.
+      //
+      // POV's procedural rig sits in the opposite chirality (looking down
+      // that neck puts the hand on the LEFT), so it presents the scene
+      // through a horizontal mirror (canvas scaleX(-1), see below): a
+      // purely-visual flip that leaves all kinematics/targets untouched.  The
+      // fret-number sprites are pre-mirrored on their canvas so they read
+      // correctly through it, and pointer-drag azimuth is sign-flipped to stay
+      // intuitive whenever the mirror is active.
+      this.camera.up.set(0, 1, 0);
+      this._camView = DEFAULT_CAMERA_VIEW;
+      this._mirror = CAMERA_PRESETS[DEFAULT_CAMERA_VIEW].mirror;
     }
     // _lookAt is the persistent camera target; setGeometry() recenters it on
     // the actual board centre once the live geometry is known.  resize() and
@@ -743,7 +917,7 @@ class Hand3DRenderer {
     // the ~120 wu forearm + ~50 wu hand at this steeper angle; the wheel
     // clamp (60..300) bounds runtime zoom.
     this._camSpherical = this._dedicatedView
-      ? { radius: 155, azimuth: 0 * Math.PI / 180, polar: 8 * Math.PI / 180 }
+      ? this._camSphericalFromPreset(DEFAULT_CAMERA_VIEW)
       : { radius: 160, azimuth: 12 * Math.PI / 180, polar: 28 * Math.PI / 180 };
     this._dragging = false;
     this._lastPx = 0;
@@ -764,6 +938,10 @@ class Hand3DRenderer {
     // scrolling the page.  Wheel is non-passive so we can preventDefault().
     const canvas = this.renderer.domElement;
     canvas.style.touchAction = "none";
+    // Present the dedicated first-person view through a horizontal mirror so the
+    // fretting hand sits on the RIGHT (see the _mirror note in the constructor).
+    // Purely visual — the WebGL scene and all kinematics are untouched.
+    if (this._mirror) canvas.style.transform = "scaleX(-1)";
     const PI = Math.PI;
     const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
     this._onPointerDown = (e) => {
@@ -777,7 +955,9 @@ class Hand3DRenderer {
       if (!this._dragging) return;
       const dx = e.clientX - this._lastPx;
       const dy = e.clientY - this._lastPy;
-      this._camSpherical.azimuth -= dx * 0.005;
+      // Under the mirror the image is flipped in X, so a rightward drag must
+      // turn the camera the opposite way to feel natural.
+      this._camSpherical.azimuth -= (this._mirror ? -dx : dx) * 0.005;
       this._camSpherical.polar = clamp(
         this._camSpherical.polar - dy * 0.005,
         5 * PI / 180,
@@ -1670,6 +1850,28 @@ class Hand3DRenderer {
       this.fretboardGroup.add(wire);
     }
 
+    // Played-note "cell" tiles (one per finger slot, pooled — see
+    // _updatePlayedFrets).  A thin emissive BOX, not a flat plane: a plane
+    // lying on the board foreshortens to an invisible sliver from the
+    // near-level POV/Face camera presets (the original bug report — the
+    // fret-wire glow this replaces had the same problem).  A box keeps a
+    // bright, camera-facing SIDE face at any viewing angle, so the lit cell
+    // reads clearly from directly overhead, from POV, or anywhere between.
+    this._stringSpacing = STRING_SPACING;
+    const cellMat = new THREE.MeshStandardMaterial({
+      color: 0xff8a2a, emissive: 0xff5500, emissiveIntensity: 2.2,
+      roughness: 0.4, metalness: 0.1, transparent: true, opacity: 0.92,
+    });
+    this._cellMat = cellMat;
+    this._cellGeo = new THREE.BoxGeometry(1, 1, 1);
+    this._playedCells = {};
+    for (const f of FINGER_ORDER) {
+      const cell = new THREE.Mesh(this._cellGeo, cellMat);
+      cell.visible = false;
+      this.fretboardGroup.add(cell);
+      this._playedCells[f] = cell;
+    }
+
     // Position-marker inlays (read the fret number from these): single black
     // dots centred at frets 3·5·7·9·15·17·19·21, a double dot at 12 (and 24).
     // Each dot sits in the CENTRE of its fret space, flush on the board top.
@@ -1681,7 +1883,11 @@ class Hand3DRenderer {
     const zMid = (boardZ0 + boardZ1) / 2;
     const dotOff = boardWidthZ * 0.22;        // double-dot Z spread
     const dotGeo = new THREE.CylinderGeometry(dotR, dotR, 0.05, 18);
-    for (let fr = 2; fr <= visibleFrets; fr++) {
+    // H-4: fret numbering must read 0-22, not 2-22. "0" (open string, at the
+    // nut) is a special case — it has no fret SPACE to center on, unlike
+    // every other number which sits in the middle of its space (fr-1 to fr).
+    if (this._dedicatedView) this._addFretNumber(0, wx(fretX(0)), dotY + 0.16, boardZ0 + boardWidthZ * 0.06);
+    for (let fr = 1; fr <= visibleFrets; fr++) {
       const dbl = DOUBLE_DOTS.has(fr), sgl = SINGLE_DOTS.has(fr);
       const cx = (wx(fretX(fr - 1)) + wx(fretX(fr))) / 2;
       if (this._dedicatedView) this._addFretNumber(fr, cx, dotY + 0.16, boardZ0 + boardWidthZ * 0.06);
@@ -1715,6 +1921,17 @@ class Hand3DRenderer {
     });
     this.stringMeshes = [];
     this._stringZ = new Array(numStrings + 1);
+    // T-P2.2 (H-7): open-string playback lights up the STRING itself (no
+    // finger presses for fret 0) plus the "0" label at the nut — each
+    // string mesh needs its own material reference (not shared with its
+    // neighbours) so relighting one never affects the others, and a small
+    // emissive "cell" near the nut to echo the fret-space highlight fretted
+    // notes get (_updatePlayedFrets).
+    this._stringBaseMat = new Array(numStrings + 1);
+    this._openStringHotMat = new THREE.MeshStandardMaterial({
+      color: 0xff8a2a, emissive: 0xff5500, emissiveIntensity: 2.2, roughness: 0.4, metalness: 0.3,
+    });
+    this._openCells = {};
     for (let s = 1; s <= numStrings; s++) {
       // s = 1 → highest +Z (high-E, player side); s = numStrings → most -Z.
       const sz = stringZMax - (s - 1) * STRING_SPACING;
@@ -1726,11 +1943,17 @@ class Hand3DRenderer {
       const isWound = s >= Math.max(1, numStrings - 2);
       const radius = isWound ? 0.085 + (s - (numStrings - 2)) * 0.012 : 0.052;
       const tube = new THREE.TubeGeometry(path, 8, radius, 6, false);
-      const str = new THREE.Mesh(tube, isWound ? woundStrMat : plainStrMat);
+      const baseMat = isWound ? woundStrMat : plainStrMat;
+      const str = new THREE.Mesh(tube, baseMat);
       this.fretboardGroup.add(str);
       this.stringMeshes.push({
         mesh: str, sz, x0, x1, baseY: STRING_SURFACE, deflect: 0, pressFret: null,
       });
+      this._stringBaseMat[s] = baseMat;
+      const cell = new THREE.Mesh(this._cellGeo, this._openStringHotMat);
+      cell.visible = false;
+      this.fretboardGroup.add(cell);
+      this._openCells[s] = cell;
     }
 
     // Stash the geometry helpers we need each frame.
@@ -1768,29 +1991,35 @@ class Hand3DRenderer {
     const c = (typeof document !== "undefined") ? document.createElement("canvas") : null;
     if (!c) return;
     c.width = 128;
-    c.height = 72;
+    c.height = 96;
     const ctx = c.getContext("2d");
     ctx.clearRect(0, 0, c.width, c.height);
-    ctx.font = fr >= 20 ? "bold 52px Arial, sans-serif" : "bold 46px Arial, sans-serif";
+    // Pre-mirror the glyphs horizontally so the dedicated view's canvas
+    // scaleX(-1) presentation flips them back to readable (see _mirror).
+    ctx.save();
+    ctx.translate(c.width, 0);
+    ctx.scale(-1, 1);
+    ctx.font = fr >= 20 ? "bold 62px Arial, sans-serif" : "bold 56px Arial, sans-serif";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
-    ctx.lineWidth = 5;
-    ctx.strokeStyle = "rgba(245, 220, 172, 0.92)";
+    ctx.lineWidth = 6;
+    ctx.strokeStyle = "rgba(245, 220, 172, 0.95)";
     ctx.strokeText(String(fr), c.width / 2, c.height / 2);
-    ctx.fillStyle = "rgba(18, 14, 8, 0.92)";
+    ctx.fillStyle = "rgba(18, 14, 8, 0.95)";
     ctx.fillText(String(fr), c.width / 2, c.height / 2);
+    ctx.restore();
     const tex = new THREE.CanvasTexture(c);
     if ("colorSpace" in tex) tex.colorSpace = THREE.SRGBColorSpace;
-    const mat = new THREE.MeshBasicMaterial({
-      map: tex,
-      transparent: true,
-      depthWrite: false,
-      side: THREE.DoubleSide,
+    // A Sprite always faces the camera and stays upright, so the number is
+    // legible from any orbit angle (a flat board decal would foreshorten to an
+    // unreadable sliver in the near-horizontal first-person view).
+    const mat = new THREE.SpriteMaterial({
+      map: tex, transparent: true, depthWrite: false, depthTest: true,
     });
-    const label = new THREE.Mesh(new THREE.PlaneGeometry(fr >= 10 ? 7.2 : 4.6, 2.8), mat);
-    label.rotation.x = -Math.PI / 2;
-    label.position.set(x, y, z);
-    this.fretboardGroup.add(label);
+    const sp = new THREE.Sprite(mat);
+    sp.scale.set(fr >= 10 ? 6.4 : 4.6, 4.2, 1);
+    sp.position.set(x, y + 1.2, z);
+    this.fretboardGroup.add(sp);
   }
 
   /* 3-tone sunburst as a CanvasTexture (radial amber→orange→dark). */
@@ -2004,7 +2233,11 @@ class Hand3DRenderer {
     if (fret <= 0) return wx(this._fretX(0)) - 1.0;  // open: just past the nut
     const a = wx(this._fretX(fret - 1));
     const b = wx(this._fretX(fret));
-    return (a + b) / 2;
+    // Real fretting: the fingertip presses in the HALF of the fret space nearest
+    // the fret wire it is stopping (fret `fret`, the "next" wire toward the
+    // bridge = larger X), not the dead centre.  Centre of that near half = 0.75
+    // of the way from the previous wire (a) to the stopping wire (b).
+    return a + 0.75 * (b - a);
   }
 
   /* ---- stringZ: world Z of string s (1 = high-E at +Z, N = low-E at -Z) */
@@ -2031,7 +2264,18 @@ class Hand3DRenderer {
     return p.y >= this._bellyY(p.z) && p.y <= 0.0;
   }
   _segmentHitsNeck(a, b) {
-    const t = new THREE.Vector3();
+    if (this._neckHW == null) return false;
+    // Cheap segment-level reject before the per-sample loop: a segment fully
+    // on one side of the neck's Z footprint (both endpoints beyond hw, same
+    // sign) can't cross it — skips the sample loop entirely for the common
+    // case (most finger segments, most candidate angles, sit well clear of
+    // the neck).  This is the hot path inside Doigt.fold()'s brute-force
+    // angle scan, called thousands of times per real fold, so avoiding both
+    // the loop AND its per-call Vector3 allocation matters.
+    const hw = this._neckHW;
+    if (a.z > hw && b.z > hw) return false;
+    if (a.z < -hw && b.z < -hw) return false;
+    const t = this._segHitTmpV || (this._segHitTmpV = new THREE.Vector3());
     for (let i = 1; i < NECK_SAMPLES; i++) {
       t.lerpVectors(a, b, i / NECK_SAMPLES);
       if (this._insideNeck(t)) return true;
@@ -2047,6 +2291,79 @@ class Hand3DRenderer {
     return this._neckHW != null && Math.abs(p.z) <= this._neckHW &&
       p.x >= this._neckX0 && p.x <= this._neckX1 &&
       Math.abs(p.y - this._bellyY(p.z)) <= CONTACT_EPS;
+  }
+
+  /* Palm/back-of-hand collision (R12): the back-of-hand assembly is NOT
+     covered by the per-finger CCD collision clamp (that only guards each
+     finger's own phalanx chain).  A cheap proxy for "does the palm assembly
+     intersect the neck": sample the wrist centre, the elbow (T-P1.1's
+     bridgePalm waypoint), each finger's MCP anchor, and the midpoints of
+     BOTH bridge segments (wrist-elbow, elbow-anchor) — matching the actual
+     two-segment route bridgePalm() now builds, not the straight line it used
+     to.  Points are written into `out` (reused across calls) to avoid
+     per-frame allocation. */
+  _palmSamplePoints(m, out) {
+    m.node.updateMatrixWorld(true);
+    const pts = out;
+    let i = 0;
+    if (!pts[i]) pts[i] = new THREE.Vector3();
+    m.poignet.node.getWorldPosition(pts[i]);
+    const wristP = pts[i]; i++;
+    if (!pts[i]) pts[i] = new THREE.Vector3();
+    m.elbow.getWorldPosition(pts[i]);
+    const elbowP = pts[i]; i++;
+    if (!pts[i]) pts[i] = new THREE.Vector3();
+    pts[i].copy(wristP).add(elbowP).multiplyScalar(0.5);   // segment B midpoint
+    i++;
+    for (const f of FINGER_ORDER) {
+      const anchor = m.anchors[f];
+      if (!anchor) continue;
+      if (!pts[i]) pts[i] = new THREE.Vector3();
+      anchor.getWorldPosition(pts[i]);
+      const anchorP = pts[i]; i++;
+      if (!pts[i]) pts[i] = new THREE.Vector3();
+      pts[i].copy(elbowP).add(anchorP).multiplyScalar(0.5);   // segment A midpoint
+      i++;
+    }
+    pts.length = Math.max(pts.length, i);
+    return { pts, count: i };
+  }
+  /* Coarse collision proxy: does the WRIST-TO-ANCHOR line (what the rendered
+     palm bridge approximately follows) cross into the neck solid?  Two past
+     mistakes to not repeat (see PALM_COSMETIC_SHRINK / _clampPalmVisualOnly):
+       - Pushing the wrist away along +Z on a hit breaks reach for bass-string
+         fingerings (the same small kZ that triggers this IS the direction the
+         fingers need to reach toward).
+       - Shortening the wrist's Y-drop on a hit ALSO breaks reach: with
+         non-zero wrist flex/deviation, the anchors are not Y-invariant under
+         a nodeY change (their world Y is a ROTATED function of the local
+         launchY, not a constant), so that "looked source-correct" fix
+         silently moved the anchors too.
+     Both prior fixes touched something the CCD fold depends on.  This check
+     itself is now read ONLY by _clampPalmVisualOnly, which reshapes the
+     rendered palm MESH (not the wrist/anchors) after folding is done. */
+  _palmHitsNeck(m) {
+    if (!this._palmPtsCache) this._palmPtsCache = [];
+    const { pts, count } = this._palmSamplePoints(m, this._palmPtsCache);
+    for (let i = 0; i < count; i++) if (this._insideNeck(pts[i])) return true;
+    return false;
+  }
+  /* Cosmetic-only mitigation: when the coarse proxy above flags an overlap
+     (bass-string fingerings — the palm bridge's straight wrist→knuckle sweep
+     can dip through the neck belly), pull the RENDERED bridge mesh in toward
+     the knuckle row.  Runs strictly AFTER folding and touches only
+     `m.palm`'s own position/rotation/scale (see Main.bridgePalm) — never the
+     wrist node or MCP anchors — so it cannot perturb reach.  It does not
+     re-check for full clearance (the proxy is joint-position-based and can't
+     be satisfied by reshaping the mesh, since it doesn't sample the mesh at
+     all); this is a best-effort visual reduction, not a hard guarantee. */
+  _clampPalmVisualOnly(m) {
+    if (!this._palmHitsNeck(m)) return;
+    const pose = this._wristPose;
+    if (!pose) return;
+    const fullLaunchY = this._tuneNum("mcpy", MCP_LAUNCH_Y) - pose.y;
+    m.bridgePalm(fullLaunchY * PALM_COSMETIC_SHRINK, -pose.back);
+    m.node.updateMatrixWorld(true);
   }
 
   _syncImpactHalos(kin) {
@@ -2105,6 +2422,80 @@ class Hand3DRenderer {
     }
   }
 
+  /* Light up the fretboard CELL (the fret-space "square" on the string) of
+     every currently SOUNDING note (role=active) for the duration of that
+     note, and hide the rest.  Replaces two earlier, barely-visible attempts:
+     an expanding impact ring, then a thickened fret-WIRE glow — both read as
+     "barely visible" per user testing, because a thin wire (or a flat plane,
+     tried and rejected during development) foreshortens to a near-invisible
+     sliver from the near-level POV/Face camera presets.  A small emissive
+     BOX keeps a bright side face at any viewing angle instead.
+
+     Only `active` (sounding) fingers light a cell.  A finger merely
+     pressed-and-held for an upcoming note (role=planted) does NOT light its
+     cell — its readiness is shown by its BLUE fingertip cap instead (set in
+     _foldAllFingers via setRole), matching the finger-role colour scheme
+     green(hover/ready) → blue(planted) → the cell lighting up on play. */
+  _updatePlayedFrets(kin) {
+    if (!this._playedCells || !this._fretX) return;
+    for (const f of FINGER_ORDER) {
+      const cell = this._playedCells[f];
+      if (cell) cell.visible = false;
+    }
+    if (kin && kin.fingers) {
+      for (const f of FINGER_ORDER) {
+        const fg = kin.fingers[f];
+        if (!fg || fg.role !== "active" || !(fg.fret > 0) || !fg.strings || !fg.strings.length) continue;
+        const cell = this._playedCells[f];
+        if (!cell) continue;
+        // T-P2.1 (H-5): the cell is the FULL fret space (fret r-1 wire to
+        // fret r wire) by the full inter-string spacing, not an arbitrary
+        // fraction of either — 0.95/0.92 are a hairline margin only, to
+        // keep the glow from visually fusing with the fret wire / adjacent
+        // string's own cell, not a "roughly there" approximation.
+        const fret = fg.fret;
+        const x0 = wx(this._fretX(fret - 1));
+        const x1 = wx(this._fretX(fret));
+        const width = Math.abs(x1 - x0) * 0.95;
+        const depth = (this._stringSpacing || 1) * 0.92;
+        const height = 0.34;
+        cell.scale.set(Math.max(0.3, width), height, depth);
+        cell.position.set((x0 + x1) / 2, BOARD_TOP_Y + height / 2 + 0.02, this._stringZAt(fg.strings[0]));
+        cell.visible = true;
+      }
+    }
+    this._updateOpenStrings(kin);
+  }
+
+  /* T-P2.2 (H-7): an open string (fret 0 — no finger presses) lights up the
+     STRING ITSELF for the note's duration, plus a cell-style glow at the
+     nut (echoing _updatePlayedFrets' fretted-note cells), instead of
+     showing nothing at all like before this change. `kin.openStrings` is a
+     Set of string numbers currently sounding open (see buildKinSnapshot in
+     hand_viz.html, which forwards sampleState()'s already-duration-filtered
+     Set — membership alone means "sounding right now", no separate
+     onset/duration bookkeeping needed here). */
+  _updateOpenStrings(kin) {
+    if (!this._openCells || !this._stringBaseMat) return;
+    const open = (kin && kin.openStrings) || null;
+    for (let s = 1; s < this._stringBaseMat.length; s++) {
+      const cell = this._openCells[s];
+      const mesh = this.stringMeshes[s - 1] && this.stringMeshes[s - 1].mesh;
+      const isOpen = !!(open && open.has(s));
+      if (cell) cell.visible = isOpen;
+      if (mesh) mesh.material = isOpen ? this._openStringHotMat : this._stringBaseMat[s];
+      if (isOpen && cell && this._fretX) {
+        const nutX = wx(this._fretX(0));
+        const spaceX = wx(this._fretX(1));
+        const width = Math.abs(spaceX - nutX) * 0.95;
+        const depth = (this._stringSpacing || 1) * 0.92;
+        const height = 0.34;
+        cell.scale.set(Math.max(0.3, width), height, depth);
+        cell.position.set((nutX + spaceX) / 2, BOARD_TOP_Y + height / 2 + 0.02, this._stringZAt(s));
+      }
+    }
+  }
+
   /* Per-frame re-pose from the shared kinematic snapshot.
 
      We use ONLY semantic intent (target string + fret + role) from the kin
@@ -2129,8 +2520,7 @@ class Hand3DRenderer {
     try {
       if (this._rigMode === "articulated") {
         this._updateArticulated(kin);
-        this._syncImpactHalos(kin);
-        this._updateImpactHalos();
+        this._updatePlayedFrets(kin);
         this._applyCamera();
         this.renderer.render(this.scene, this.camera);
         return;
@@ -2153,8 +2543,7 @@ class Hand3DRenderer {
         this._poseThumb(kin);
         this._poseForearm(kin);
       }
-      this._syncImpactHalos(kin);
-      this._updateImpactHalos();
+      this._updatePlayedFrets(kin);
       this._applyCamera();
       this.renderer.render(this.scene, this.camera);
     } catch (e) {
@@ -2190,7 +2579,41 @@ class Hand3DRenderer {
     if (maxZ === null) maxZ = this._stringZAt(2);
     // Node Z = player-most string; the anchor adds MCP_REACH so the knuckle
     // sits at its reach sweet-spot above that string.
-    a.placement_poignet(idxFret, maxZ);
+    //
+    // R11/R12/perf postmortem — the ease TARGET is not just "this frame's
+    // fresh baseline math".  A note change should ease from wherever the
+    // hand currently is toward a FRESH, un-compensated baseline (so leftover
+    // R11 wrist compensation from a DIFFERENT, unrelated note decays instead
+    // of persisting forever — the original rotation-drift bug).  But for the
+    // SAME held note, re-pointing the ease target at that fresh baseline
+    // every frame fights any compensation R11 just found for THIS note: each
+    // frame eases a little back toward the (unreachable-without-help)
+    // baseline, fold reports unreachable again, R11 re-discovers the same
+    // compensation, forever — a perpetual 30-90ms/frame oscillation that
+    // never converges (confirmed live: _wristConverged stayed false
+    // indefinitely).  So: only reset the ease target on an actual note
+    // change; once R11 finds compensation for the CURRENT note, that
+    // becomes the new ease target (see the tries>0 branch below), so easing
+    // has nothing left to pull against and can actually converge.
+    const sig = this._kinSignature(kin);
+    const sigChanged = sig !== this._lastKinSig;
+    if (sigChanged || !this._wristEaseTarget) {
+      this._wristEaseTarget = a.wristTarget(idxFret, maxZ);
+    }
+    const pose = this._easeWristPose(this._wristEaseTarget);
+    // STEADY-STATE SKIP: once the eased pose has fully CONVERGED for the SAME
+    // note (signature unchanged) and the previous attempt already resolved
+    // (_lastFoldOk), the scene graph already holds the correct pose from last
+    // frame — skip the fold/nudge pipeline rather than reproducing the
+    // identical result at real cost.  A transition (signature just changed,
+    // or still gliding) always falls through and runs normally, so the
+    // glide itself is untouched.
+    if (!sigChanged && this._wristConverged && this._lastFoldOk) {
+      this._poseForearm(kin);
+      return;
+    }
+    this._lastKinSig = sig;
+    a.applyWristPose(pose);
     a.animation_pouce(m);
     // R11: fold all fingers; if any can't reach (even with its 45° point), move
     // the WRIST one step (within R10 limits) and RE-FOLD EVERY finger — the
@@ -2202,49 +2625,174 @@ class Hand3DRenderer {
       unreachable = this._foldAllFingers(kin, false);
       tries++;
     }
+    this._syncWristPoseFromRig();
+    // Compensation found for THIS note: lock it in as the new ease target
+    // (see the big comment above) so next frame's ease has nothing left to
+    // pull against and the search doesn't have to re-run every frame.
+    if (tries > 0) {
+      const wp = this._wristPose;
+      this._wristEaseTarget = { x: wp.x, y: wp.y, z: wp.z, flex: wp.flex, dev: wp.dev, rot: wp.rot, back: wp.back };
+    }
     this._lastUnreachable = unreachable;
     this._wristTries = tries;
+    this._lastFoldOk = true;   // a full resolve attempt just ran, whatever the outcome
+    // R12: cosmetic-only palm/neck mitigation — runs LAST, after fold/reach
+    // are fully settled, and never touches the wrist/anchors.  See
+    // _clampPalmVisualOnly and the postmortem on PALM_COSMETIC_SHRINK for why
+    // it's structured this way (two prior, reach-breaking attempts).
+    this._clampPalmVisualOnly(m);
     this._poseForearm(kin);                                // legacy forearm tube = the arm
   }
 
+  /* Cheap per-frame fingering signature — role+fret+strings for each finger,
+     deliberately ignoring the 2D IK pixels (which don't affect the 3D pose).
+     Two frames with an identical signature want the exact same rig pose;
+     see the steady-state skip in _updateArticulated. */
+  _kinSignature(kin) {
+    let s = "";
+    for (const f of FINGER_ORDER) {
+      const fg = kin.fingers && kin.fingers[f];
+      s += fg ? `${f[0]}${fg.role}${fg.fret}:${(fg.strings || []).join(",")}|` : `${f[0]}-|`;
+    }
+    return s;
+  }
+
+  /* Exponentially ease the RENDERED wrist pose toward `target` (this frame's
+     freshly-computed ideal pose), at a time constant fast enough to track a
+     genuine held-note position but slow enough to read as motion rather than
+     a snap.  First call snaps (no prior pose to ease from). */
+  _easeWristPose(target) {
+    if (!this._wristPose) {
+      this._wristPose = { x: target.x, y: target.y, z: target.z, flex: target.flex, dev: target.dev, rot: target.rot, back: target.back };
+      this._wristConverged = true;   // nothing left to glide on the very first frame
+      return this._wristPose;
+    }
+    const dt = this._updateDt || (1 / 60);
+    const tau = 0.11;   // ~110ms whole-hand glide between positions
+    const k = Math.min(1, 1 - Math.exp(-dt / tau));
+    const p = this._wristPose;
+    const dx = target.x - p.x, dy = target.y - p.y, dz = target.z - p.z;
+    const dflex = target.flex - p.flex, ddev = target.dev - p.dev, drot = target.rot - p.rot;
+    // Weighted "still moving" check across position (wu) and rotation (rad) —
+    // rotation deltas are scaled up since a few hundredths of a radian reads
+    // as visually static while the same magnitude in wu would not.  Gates the
+    // _updateArticulated steady-state skip: only true once the glide has
+    // actually finished, never mid-transition (see that skip's comment).
+    const moveMag = Math.abs(dx) + Math.abs(dy) + Math.abs(dz)
+      + (Math.abs(dflex) + Math.abs(ddev) + Math.abs(drot)) * 10;
+    this._wristConverged = moveMag < 0.05;
+    if (this._wristConverged) {
+      // T-P0.2: snap the last bit exactly onto target instead of leaving an
+      // asymptotic residual (exponential ease never reaches EXACTLY 0 — left
+      // alone, that residual keeps nudging p by a shrinking-but-nonzero
+      // amount forever, which is real, measurable per-frame motion even
+      // though it's imperceptibly small; the point of "converged" is that
+      // NOTHING moves anymore, not "moves by less than we bothered to look
+      // for"). Safe: only fires once already within the convergence band.
+      p.x = target.x; p.y = target.y; p.z = target.z;
+      p.flex = target.flex; p.dev = target.dev; p.rot = target.rot;
+    } else {
+      p.x += dx * k;
+      p.y += dy * k;   // wrist drop varies with R12 bass-string clearance
+      p.z += dz * k;
+      p.flex += dflex * k;
+      p.dev += ddev * k;
+      p.rot += drot * k;
+    }
+    p.back = target.back;
+    return p;
+  }
+
+  /* Write the ACTUAL post-fold rig state (which R11 may have perturbed) back
+     into the eased-pose accumulator, so next frame's ease starts from the
+     compensated pose instead of discarding it. */
+  _syncWristPoseFromRig() {
+    if (!this._wristPose) return;
+    const m = this.main, p = m.poignet;
+    this._wristPose.x = m.node.position.x;
+    this._wristPose.y = m.node.position.y;
+    this._wristPose.z = m.node.position.z;
+    this._wristPose.flex = p.flex;
+    this._wristPose.dev = p.deviation;
+    this._wristPose.rot = p.rotation;
+  }
+
   /* Fold every finger to its target string (R9: index->pinky, each kept from
-     crossing the previous via its target X).  Returns the unreachable list. */
+     crossing the previous via its target X).  Returns the unreachable list.
+
+     T-P0.1 per-finger latch: a finger whose (role, fret, strings) signature
+     is unchanged, whose eased target has fully converged (no residual
+     glide), whose last real fold reached CONTACT, AND whose ANCHOR is no
+     longer moving (this._wristConverged — the finger's own target settling
+     is not enough: its base moves with the wrist, so a finger latched while
+     the wrist is still gliding would freeze angles computed for an anchor
+     position that's about to be stale — confirmed live: omitting the wrist
+     check regressed contact avg from 0.35 to 1.56wu, max to 27wu), reuses
+     its FROZEN angles instead of re-running the CCD scan — the scan is a
+     deterministic pure function of the target, so re-running it against an
+     unchanged target reproduces the identical answer at real cost (and, per
+     the CCD's discrete-angle tie-breaking, a target that jitters by even a
+     floating-point epsilon can flip the winning candidate by one FOLD_STEP,
+     which reads as a 1° tremor — freezing avoids re-asking the question).
+       Latching is gated to the PRIMARY pass only (animateTargets === true).
+     The R11 wrist-compensation retry passes (animateTargets === false) NEVER
+     latch: the wrist just moved, so a "converged" finger's anchor may have
+     shifted under it and needs a real fold to confirm it's still on target
+     (R4 in the risk registry — freezing mid-adjustment reads as a snap). */
   _foldAllFingers(kin, animateTargets = true) {
     const m = this.main, a = this.anim;
     m.node.updateMatrixWorld(true);
     const unreachable = [];
     let prevX = -Infinity;
+    if (!this._fingerLatch) this._fingerLatch = {};
+    const wristStill = !!this._wristConverged;
     for (const f of FINGER_ORDER) {
       const fg = kin.fingers && kin.fingers[f];
       const role = (fg && fg.role) || "idle";
       const str = (fg && fg.strings && fg.strings.length) ? fg.strings[0] : null;
       const d = m.doigt(f);
+      const sig = fg ? `${role}${fg.fret || 0}:${str || 0}` : "idle";
+      const latch = this._fingerLatch[f];
+      if (animateTargets && wristStill && latch && latch.sig === sig && latch.converged && latch.ok) {
+        d.setYaw(latch.yaw);   // MUST precede applyThetas — it reads _yaw when composing rotation
+        d.applyThetas(latch.theta);
+        d._update();
+        d.setRole(role);
+        prevX = Math.max(prevX, d.tipWorld().x);
+        continue;
+      }
+      let ok = true;
       if ((role === "active" || role === "planted") && fg.fret > 0 && str != null) {
         // Pressing (RED) or held-down/soon-used (BLUE): fold to contact.  R9
         // no-cross is preserved by fret-ordered targets + the 45° point cap.
-        const target = this._animatedFingerTarget(f, {
+        const { vec, converged } = this._animatedFingerTarget(f, {
           x: this._pressX(fg.fret),
           y: STRING_SURFACE,
           z: this._stringZAt(str),
           role,
         }, animateTargets);
-        const res = a._placeFingerTo(m, f, target);
-        if (res === "UNREACHABLE") unreachable.push({ f, fret: fg.fret, string: str });
+        const res = a._placeFingerTo(m, f, vec);
+        ok = res !== "UNREACHABLE";
+        if (!ok) unreachable.push({ f, fret: fg.fret, string: str });
         prevX = Math.max(prevX, d.tipWorld().x);
+        if (animateTargets) this._fingerLatch[f] = { sig, theta: { ...d.theta }, yaw: d._yaw, converged, ok };
       } else if (fg && fg.fret > 0 && str != null) {
         // Ready/hover (GREEN): fold to HOVER just above its string — a natural
         // median curl, not a finger sticking up or a tight claw.
-        const target = this._animatedFingerTarget(f, {
+        const { vec, converged } = this._animatedFingerTarget(f, {
           x: this._pressX(fg.fret),
           y: STRING_SURFACE + HOVER_GAP,
           z: this._stringZAt(str),
           role,
         }, animateTargets);
-        a._placeFingerTo(m, f, target);
+        a._placeFingerTo(m, f, vec);
+        if (animateTargets) this._fingerLatch[f] = { sig, theta: { ...d.theta }, yaw: d._yaw, converged, ok: true };
       } else {
         // Idle (GREEN), no target: a median resting curl + a slight natural fan.
         this._resetFingerMotion(f);
-        d.setYaw(REST_SPLAY[f] || 0); d.relax(IDLE_CURL);
+        d.setYaw(REST_SPLAY[f] || 0);
+        this._relaxIdleSafely(d);
+        if (animateTargets) this._fingerLatch[f] = { sig, theta: { ...d.theta }, yaw: d._yaw, converged: true, ok: true };
       }
       d.setRole(role);
     }
@@ -2258,10 +2806,42 @@ class Hand3DRenderer {
     motion.y = null;
     motion.z = null;
     motion.role = "idle";
+    motion.converged = true;   // idle rest pose is constant — nothing left to glide
   }
 
+  /* T-P1.3 safety net: IDLE_CURL was tuned (measured live) to bring idle
+     fingertips within H-12's 5-15mm-above-strings target — but unlike
+     active/hover fingers, which fold via CCD with a collision callback, the
+     idle rest pose is a FIXED curl applied directly (Doigt.relax), with no
+     collision check at all. The deeper curl needed to hit the height target
+     can swing the middle/proximal phalanx into the neck for a finger resting
+     near/over the fretboard (confirmed live: 0 -> 28 finger-neck collisions
+     on the §B self-test when IDLE_CURL was first deepened). Back off toward
+     the old, always-collision-free curl in steps until clear, so H-9 (never
+     regress collision) is preserved while still getting as close to H-12's
+     height target as the finger's actual position safely allows. */
+  _relaxIdleSafely(d) {
+    const SAFE_CURL = { mcp: 0.9, pip: 1.0, dip: 0.5 };   // the pre-T-P1.3 curl — always collision-free
+    d.relax(IDLE_CURL);
+    if (!this._segmentsHitNeck(d.segments())) return;
+    const STEPS = 6;
+    for (let s = 1; s <= STEPS; s++) {
+      const t = s / STEPS;
+      d.relax({
+        mcp: IDLE_CURL.mcp + (SAFE_CURL.mcp - IDLE_CURL.mcp) * t,
+        pip: IDLE_CURL.pip + (SAFE_CURL.pip - IDLE_CURL.pip) * t,
+        dip: IDLE_CURL.dip + (SAFE_CURL.dip - IDLE_CURL.dip) * t,
+      });
+      if (!this._segmentsHitNeck(d.segments())) return;
+    }
+    d.relax(SAFE_CURL);   // last resort — guaranteed safe, matches the prior baseline
+  }
+
+  /* Returns { vec, converged } — `converged` mirrors _easeWristPose's
+     "still moving?" gate (T-P0.1) so _foldAllFingers can tell an in-transit
+     ease apart from a settled one before deciding whether to latch. */
   _animatedFingerTarget(f, target, animateTargets) {
-    if (!animateTargets) return new THREE.Vector3(target.x, target.y, target.z);
+    if (!animateTargets) return { vec: new THREE.Vector3(target.x, target.y, target.z), converged: false };
     const motion = this._fingerMotion[f];
     if (!motion || motion.x == null || motion.y == null || motion.z == null) {
       if (motion) {
@@ -2269,8 +2849,9 @@ class Hand3DRenderer {
         motion.y = target.y;
         motion.z = target.z;
         motion.role = target.role;
+        motion.converged = false;   // just snapped to a new target — not settled yet
       }
-      return new THREE.Vector3(target.x, target.y, target.z);
+      return { vec: new THREE.Vector3(target.x, target.y, target.z), converged: false };
     }
 
     const dt = this._updateDt || (1 / 60);
@@ -2278,20 +2859,48 @@ class Hand3DRenderer {
       : target.role === "planted" ? 0.06
       : 0.075;
     const k = Math.min(1, 1 - Math.exp(-dt / tau));
-    motion.x += (target.x - motion.x) * k;
-    motion.y += (target.y - motion.y) * k;
-    motion.z += (target.z - motion.z) * k;
+    const dx = target.x - motion.x, dy = target.y - motion.y, dz = target.z - motion.z;
+    motion.converged = (Math.abs(dx) + Math.abs(dy) + Math.abs(dz)) < 0.02;
+    if (motion.converged) {
+      // T-P0.2: snap exactly onto target — see _easeWristPose's twin comment.
+      motion.x = target.x; motion.y = target.y; motion.z = target.z;
+    } else {
+      motion.x += dx * k;
+      motion.y += dy * k;
+      motion.z += dz * k;
+    }
     motion.role = target.role;
-    return new THREE.Vector3(motion.x, motion.y, motion.z);
+    return { vec: new THREE.Vector3(motion.x, motion.y, motion.z), converged: motion.converged };
   }
 
   /* R11 wrist compensation: try one bounded step on each wrist DOF (flex, dev,
      rotation) + an along-neck slide; keep the one that most reduces the total
-     unreachable-fingertip gap (re-folding to measure), within R10 limits.
-     Returns false when no in-limit step improves (wrist limits / local min). */
+     unreachable-fingertip gap, within R10 limits.  Returns false when no
+     in-limit step improves (wrist limits / local min).
+
+     PERFORMANCE vs ACCURACY (postmortem — attempts before this one):
+       1. Score all 10 candidates with a full 4-finger CCD fold each: correct,
+          but the #1 per-frame cost (100+ full folds/frame).
+       2. Score with a pure closed-form estimate (MCP-to-target distance minus
+          straight-line reach, no CCD at all): fast, but WRONG — it ignores
+          joint limits, the 45° yaw-point cap, and neck-collision avoidance,
+          so it judges a target "well within reach" (linear distance < max
+          length) when the CONSTRAINED kinematics genuinely can't get there —
+          silently skipping compensation fingers actually needed ("fingers
+          don't curve to touch the string").
+       3. Real-fold only the unreachable finger(s) for EVERY candidate: still
+          correct, but even one real CCD fold costs a few ms (its own
+          brute-force angle scan + collision check), and x10 candidates was
+          still 25-50ms/try — too slow.
+     This version: use the cheap analytic estimate to RANK all 10 candidates
+     (no CCD), then real-fold-verify only the top REAL_VERIFY_CAP of them (in
+     rank order, stopping early once one actually improves) — bounds the
+     expensive part to a small constant regardless of candidate count, while
+     still deciding on real CCD results, not the optimistic estimate. */
   _nudgeWrist(kin, unreachable) {
     if (!unreachable.length) return false;
-    const m = this.main, p = m.poignet;
+    const m = this.main, p = m.poignet, a = this.anim;
+    const unreachableSet = new Set(unreachable.map((u) => u.f));
     // Balance ALL active fingers (not only the unreachable ones) so moving the
     // wrist to help one finger never sacrifices a finger that already reached.
     const targets = [];
@@ -2301,7 +2910,42 @@ class Hand3DRenderer {
         targets.push({ f, T: new THREE.Vector3(this._pressX(fg.fret), STRING_SURFACE, this._stringZAt(fg.strings[0])) });
       }
     }
-    const gap = () => targets.reduce((s, t) => s + m.doigt(t.f).tipWorld().distanceTo(t.T), 0);
+    if (!targets.length) return false;
+    const tmpMcp = this._nudgeTmpV || (this._nudgeTmpV = new THREE.Vector3());
+    const REACH_FRAC = 0.94;   // conservative fraction of straight-line finger length actually usable
+    // NOTE: deliberately no palm/neck collision penalty here (postmortem R12)
+    // — penalizing collision made the search avoid the very Z-slide direction
+    // needed to reach bass-string targets, since a small/negative kZ (close
+    // to the neck footprint) is BOTH the collision signal and the correct
+    // reach direction for those strings.  Palm/neck collision is instead
+    // mitigated cosmetically after folding (_clampPalmVisualOnly).
+    const estGap = () => {
+      m.node.updateMatrixWorld(true);
+      let sum = 0;
+      for (const t of targets) {
+        const d = m.doigt(t.f);
+        d.mcpWorld(tmpMcp);
+        sum += Math.max(0, tmpMcp.distanceTo(t.T) - d.totalLen * REACH_FRAC);
+      }
+      return sum;
+    };
+    // Real gap: CCD-accurate for the unreachable finger(s), cheap proxy for
+    // the rest (they were already reaching; only guard against regressing).
+    const realGap = () => {
+      m.node.updateMatrixWorld(true);
+      let sum = 0;
+      for (const t of targets) {
+        const d = m.doigt(t.f);
+        if (unreachableSet.has(t.f)) {
+          a._placeFingerTo(m, t.f, t.T);
+          sum += d.tipWorld().distanceTo(t.T);
+        } else {
+          d.mcpWorld(tmpMcp);
+          sum += Math.max(0, tmpMcp.distanceTo(t.T) - d.totalLen * REACH_FRAC);
+        }
+      }
+      return sum;
+    };
     const save = { flex: p.flex, dev: p.deviation, rot: p.rotation, x: m.node.position.x, z: m.node.position.z };
     const restore = () => { p.setFlex(save.flex); p.setDeviation(save.dev); p.setRotation(save.rot); m.node.position.x = save.x; m.node.position.z = save.z; m.node.updateMatrixWorld(true); };
     const STEP = 5 * DEG, SLIDE = 1.5;
@@ -2312,12 +2956,52 @@ class Hand3DRenderer {
       () => { m.node.position.x += SLIDE; }, () => { m.node.position.x -= SLIDE; },
       () => { m.node.position.z += SLIDE; }, () => { m.node.position.z -= SLIDE; },
     ];
-    let bestMove = null, bestGap = gap();
+    // Rank all 10 candidates cheaply (no CCD).
+    const ranked = [];
     for (const mv of moves) {
       restore(); mv(); m.node.updateMatrixWorld(true);
-      this._foldAllFingers(kin, false);
-      const g = gap();
-      if (g < bestGap - 1e-3) { bestGap = g; bestMove = mv; }
+      ranked.push({ mv, est: estGap() });
+    }
+    restore();
+    ranked.sort((x, y) => x.est - y.est);
+    // Verify ALL candidates with a real fold and keep the BEST (not just the
+    // first improvement) — the analytic ranking is only a heuristic ordering,
+    // not reliable enough to trust "first" as "best"; a hard multi-finger
+    // stretch can need a candidate that isn't the top-ranked one (confirmed
+    // live: capping this at 6 left ~15% of notes 1-5wu short of contact).
+    //
+    // T-P0 EARLY-EXIT — TRIED AND REVERTED (postmortem, read before touching
+    // this again): the §B self-test showed compensation is needed far more
+    // often than "rare, once per note change" assumed, so verifying all 10
+    // real-costs 30-70ms on MOST note changes, not just hard ones. Stopping
+    // early once a candidate's gap fell under a "good enough" threshold
+    // seemed like a free win. Measured on the same sweep:
+    //   threshold 0.5wu: contact avg 0.35->0.58wu, max 0.84->3.36wu,
+    //     over1 0->13 — clearly WORSE reach, not an acceptable trade.
+    //   threshold CONTACT_EPS (0.4wu): contact held (max 0.91, still <1.0)
+    //     BUT collision got WORSE (palmHits 35->69, fingerHits 0->12) — the
+    //     exhaustive search's "check all 10" was, by accident, also more
+    //     likely to land on a wrist pose clear of the neck; realGap() only
+    //     scores fingertip-to-target distance, never palm/finger collision
+    //     (that's H-9 — P1.1's job, not R11's), so fewer candidates checked
+    //     means less luck avoiding it. Perf gain was marginal and within
+    //     run-to-run noise anyway (p99 34-44ms vs 51-72ms; max actually
+    //     WORSE, 499-620ms vs 291-511ms).
+    // Net: no threshold was both perf-positive and regression-free. The
+    // per-transition cost in dense passages is a PRE-EXISTING characteristic
+    // (confirmed via clean A/B against this same self-test: disabling T-P0.1
+    // entirely, and separately reverting T-P0.3/T-P0.4, changed nothing) —
+    // not something P0 introduced, and not safely fixable by trimming this
+    // search without a real accuracy/collision cost. Left as a documented
+    // follow-up (a proper fix needs the search to score collision directly,
+    // or a cheaper real-fold — out of scope for a "stability" pass).
+    const baseline = realGap();
+    restore();
+    let bestMove = null, bestReal = baseline;
+    for (let i = 0; i < ranked.length; i++) {
+      restore(); ranked[i].mv(); m.node.updateMatrixWorld(true);
+      const g = realGap();
+      if (g < bestReal - 1e-3) { bestReal = g; bestMove = ranked[i].mv; }
     }
     restore();
     if (!bestMove) return false;
@@ -2642,6 +3326,35 @@ class Hand3DRenderer {
     this.__camDone = true;
   }
 
+  _camSphericalFromPreset(name) {
+    const p = CAMERA_PRESETS[name] || CAMERA_PRESETS[DEFAULT_CAMERA_VIEW];
+    return { radius: p.radius, azimuth: p.azimuth, polar: p.polar };
+  }
+
+  /* Switch the dedicated-view camera between named presets (see
+     CAMERA_PRESETS).  Camera-only: never touches the rig, so hand/finger
+     orientation relative to the guitar is identical under either preset —
+     only where the camera sits (and POV's presentation mirror) changes.
+     No-op outside the dedicated view (the floating inspector's own orbit
+     camera has no presets).  Returns true if the view actually switched. */
+  setCameraView(name) {
+    if (!this._dedicatedView || !CAMERA_PRESETS[name]) return false;
+    this._camView = name;
+    this._mirror = CAMERA_PRESETS[name].mirror;
+    this._camSpherical = this._camSphericalFromPreset(name);
+    this._lookAtOverride = null;   // drop any ?lookat= debug override
+    if (this.renderer && this.renderer.domElement) {
+      this.renderer.domElement.style.transform = this._mirror ? "scaleX(-1)" : "";
+    }
+    this._applyCamera();
+    if (this.renderer && this.scene && this.camera) {
+      this.renderer.render(this.scene, this.camera);
+    }
+    return true;
+  }
+
+  getCameraView() { return this._camView || DEFAULT_CAMERA_VIEW; }
+
   resize() {
     if (this.disposed) return;
     const w = this.container.clientWidth || SCENE_W;
@@ -2695,4 +3408,7 @@ export function create(container) {
   }
 }
 
-export { Hand3DRenderer, webglAvailable };
+// STRING_SURFACE/CONTACT_EPS exported for the self-test harness (T-B.1, see
+// hand_viz.html's __handSelfTest) so contact-distance checks read the live
+// constants instead of a hardcoded, driftable magic number.
+export { Hand3DRenderer, webglAvailable, STRING_SURFACE, CONTACT_EPS };

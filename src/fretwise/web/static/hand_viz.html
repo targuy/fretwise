@@ -132,13 +132,18 @@
       border-bottom: 1px solid #2b2e35;
       flex: 0 0 auto;
     }
-    body.dedicated-3d #btn-3d,
     body.dedicated-3d #btn-play,
     body.dedicated-3d #btn-rewind,
     body.dedicated-3d #legend,
     body.dedicated-3d #notelog {
       display: none;
     }
+    /* Camera-view preset toggle: only meaningful for the dedicated tab's 3D
+       renderer (the non-dedicated inspector free-orbits; 2D mode has no
+       camera to preset). Hidden by default; shown by dedicated-mode CSS,
+       then further hidden/shown by JS (_syncCamViewButton) when 2D/3D toggles. */
+    #btn-cam-view { display: none; }
+    body.dedicated-3d #btn-cam-view { display: inline-block; }
     body.dedicated-3d #scene-wrap {
       flex: 1 1 auto;
       min-height: 0;
@@ -167,7 +172,8 @@
     <div class="spacer"></div>
     <div class="meta" id="hud-meta"></div>
     <button class="ctrl" id="btn-rewind">Rewind</button>
-    <button class="ctrl" id="btn-3d" title="Bascule rendu 3D (three.js) — expérimental">3D : off</button>
+    <button class="ctrl" id="btn-cam-view" title="Basculer entre la vue POV (joueur) et la vue de face — la caméra seule change, pas la main">Vue : POV</button>
+    <button class="ctrl" id="btn-3d" title="Basculer entre la vue 3D et la vue 2D">3D : off</button>
     <button class="ctrl primary" id="btn-play">Lecture</button>
   </div>
 
@@ -2373,7 +2379,7 @@ let HAND3D_LOADING  = false;  // guard against concurrent enable() calls
    re-solve angles here, we just package the already-solved joints so hand3d.js
    can re-express them as 3D bones.  Keeping this the single producer guarantees
    the two renderers never diverge kinematically. */
-function buildKinSnapshot(sim) {
+function buildKinSnapshot(sim, sampled) {
   const fingers = {};
   for (const fname of FINGER_ORDER) {
     const mcp = sim.getMcpPos(fname);
@@ -2417,8 +2423,164 @@ function buildKinSnapshot(sim) {
       topY:     FOREARM_TOP_Y,
     },
     thumb: { x: sim.thumb.x, y: sim.thumb.y, role: sim.thumb.role },
+    // T-P2.2 (H-7): open-string playback has no finger to key off of, so the
+    // 3D rig needs this passed explicitly — sampleState() already computes
+    // it (duration-filtered: membership means "sounding right now").
+    openStrings: sampled ? sampled.openStrings : new Set(),
   };
 }
+
+/* ============================================================================
+   T-B.1 — deterministic self-test harness (docs/plan_impl_slope_main3d.md §B).
+
+   Sweeps the current (or an injected) song through the articulated 3D rig at
+   a fixed step, entirely off the real clock, and returns the metrics each
+   spec acceptance criterion (§5) is defined against: contact (H-11),
+   collision (H-9), perf (H-16), stillness (H-15), camera invariant (H-18),
+   distal-phalanx angle (H-10).
+
+   PURE OBSERVER — calls only the same public entry points a real frame
+   would (CURRENT_SIM.update / buildKinSnapshot / renderer._updateArticulated
+   / renderer.setCameraView), never reaches into product state to force an
+   outcome.  Every metric here was hand-run in the browser console during the
+   hand3d.js work (this formalizes those ad-hoc checks into one reusable,
+   regression-checkable call).  Requires the 3D renderer to already be
+   enabled (call enableHand3d() first, or load with ?view=3d which does this
+   automatically).
+
+   Usage: window.__handSelfTest({ step: 0.08, settleFrames: 15 })
+   ========================================================================= */
+window.__handSelfTest = function (opts) {
+  opts = opts || {};
+  const r = HAND3D_RENDERER;
+  if (!r || r._rigMode !== "articulated") {
+    return { error: "3D articulated renderer not active — call enableHand3d() first" };
+  }
+  if (!HAND3D_MODULE || typeof HAND3D_MODULE.STRING_SURFACE !== "number") {
+    return { error: "hand3d.js module not loaded (STRING_SURFACE export missing)" };
+  }
+  const STRING_SURFACE_VAL = HAND3D_MODULE.STRING_SURFACE;
+  // Reset all per-frame easing/latch state before sweeping — without this,
+  // a second call to __handSelfTest() in the same page load starts from
+  // whatever pose the FIRST sweep left the rig in (a mid-note wrist ease,
+  // stale finger latches, ...), making runs non-reproducible (confirmed
+  // live: back-to-back calls on identical code showed collision.fingerHits
+  // swinging 0->12 and distalAngle.avg swinging 32->38 from this alone).
+  delete r._wristPose;
+  delete r._wristEaseTarget;
+  delete r._wristConverged;
+  delete r._lastFoldOk;
+  delete r._lastKinSig;
+  delete r._lastIdxFret;
+  delete r._lastUnreachable;
+  delete r._wristTries;
+  r._fingerLatch = {};
+  for (const f of FINGER_ORDER) r._fingerMotion[f] = { x: null, y: null, z: null, role: "idle" };
+  const data = opts.data || CURRENT_DATA;
+  const chordGroups = opts.chordGroups || CURRENT_CHORD_GROUPS;
+  if (!data || !Array.isArray(data.frames) || !data.frames.length) {
+    return { error: "no frames to sweep (no data loaded)" };
+  }
+  const frames = data.frames;
+  const step = opts.step || 0.08;
+  // Real frames' worth at 60fps to let the wrist/finger ease fully converge
+  // before the metric for that instant is sampled — a mid-glide sample would
+  // conflate "still transitioning" (expected) with "genuinely can't reach"
+  // (a real H-11 regression). 15 frames ≈ 250ms, several times tau (110ms).
+  const settleFrames = opts.settleFrames || 15;
+  const dtSettle = 1 / 60;
+
+  const last = frames[frames.length - 1];
+  const dur = (last ? last.onset_sec + last.duration_sec : 0) + 0.5;
+
+  const contactDists = [];
+  const distalAngles = [];
+  const perfTimes = [];
+  let collisionPalmHits = 0, collisionFingerHits = 0, collisionThumbHits = 0;
+  let framesSampled = 0;
+
+  for (let t = 0; t < dur; t += step) {
+    CURRENT_SIM.update(t, step, frames, chordGroups);
+    const kin = buildKinSnapshot(CURRENT_SIM, sampleState(t, frames));
+    r._updateDt = dtSettle;
+    for (let i = 0; i < settleFrames; i++) {
+      const t0 = performance.now();
+      r._updateArticulated(kin);
+      perfTimes.push(performance.now() - t0);
+    }
+    framesSampled++;
+
+    const m = r.main;
+    // --- H-9 collision: palm/thumb/each finger's phalanx chain vs. the neck
+    if (r._palmHitsNeck(m)) collisionPalmHits++;
+    for (const f of FINGER_ORDER) {
+      if (r._segmentsHitNeck(m.doigt(f).segments())) { collisionFingerHits++; break; }
+    }
+    if (r._segmentsHitNeck(m.doigt("thumb").segments())) collisionThumbHits++;
+
+    // --- H-11 contact + H-10 distal-phalanx angle, active fingers only
+    for (const f of FINGER_ORDER) {
+      const fg = kin.fingers[f];
+      if (!fg || fg.role !== "active" || !(fg.fret > 0) || !fg.strings || !fg.strings.length) continue;
+      const d = m.doigt(f);
+      const tip = d.tipWorld();
+      const target = { x: r._pressX(fg.fret), y: STRING_SURFACE_VAL, z: r._stringZAt(fg.strings[0]) };
+      contactDists.push(Math.hypot(tip.x - target.x, tip.y - target.y, tip.z - target.z));
+
+      // Angle between the last phalanx and the fretboard's normal (+Y): 0° =
+      // perpendicular to the board (ideal press per H-10), 90° = flat/raking.
+      const segs = d.segments();
+      const [base, distalTip] = segs[segs.length - 1];
+      const dx = distalTip.x - base.x, dy = distalTip.y - base.y, dz = distalTip.z - base.z;
+      const len = Math.hypot(dx, dy, dz) || 1;
+      distalAngles.push(Math.acos(Math.min(1, Math.abs(dy) / len)) * 180 / Math.PI);
+    }
+  }
+
+  // --- H-15 stillness: hold the LAST sampled kin static, measure drift
+  const stillKin = buildKinSnapshot(CURRENT_SIM);
+  r._updateDt = dtSettle;
+  for (let i = 0; i < 20; i++) r._updateArticulated(stillKin);   // pre-settle
+  const beforePos = { ...r.main.node.position };
+  const beforeAngles = FINGER_ORDER.map((f) => JSON.stringify(r.main.doigt(f).theta));
+  let stillDWrist = 0;
+  for (let i = 0; i < 20; i++) {
+    r._updateArticulated(stillKin);
+    const p = r.main.node.position;
+    stillDWrist += Math.abs(p.x - beforePos.x) + Math.abs(p.y - beforePos.y) + Math.abs(p.z - beforePos.z);
+  }
+  const afterAngles = FINGER_ORDER.map((f) => JSON.stringify(r.main.doigt(f).theta));
+  let stillDAngle = 0;
+  for (let i = 0; i < FINGER_ORDER.length; i++) if (beforeAngles[i] !== afterAngles[i]) stillDAngle++;
+
+  // --- H-18 camera invariant: POV<->Face must never move the rig
+  let camInvariantOk = null;
+  if (typeof r.setCameraView === "function" && typeof r.getCameraView === "function") {
+    const view0 = r.getCameraView();
+    const tip0 = r.main.doigt("index").tipWorld();
+    const before = { x: tip0.x, y: tip0.y, z: tip0.z };
+    r.setCameraView(view0 === "pov" ? "face" : "pov");
+    r.setCameraView(view0);
+    const tip1 = r.main.doigt("index").tipWorld();
+    camInvariantOk = (before.x === tip1.x && before.y === tip1.y && before.z === tip1.z);
+  }
+
+  perfTimes.sort((a, b) => a - b);
+  const pct = (p) => (perfTimes.length ? perfTimes[Math.min(perfTimes.length - 1, Math.floor(perfTimes.length * p))] : 0);
+  let maxConsecutiveOver33 = 0, run = 0;
+  for (const ms of perfTimes) { if (ms > 33) { run++; maxConsecutiveOver33 = Math.max(maxConsecutiveOver33, run); } else run = 0; }
+  const avg = (arr) => (arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : 0);
+  const max = (arr) => (arr.length ? Math.max(...arr) : 0);
+
+  return {
+    contact: { avg: +avg(contactDists).toFixed(3), max: +max(contactDists).toFixed(3), over1: contactDists.filter((d) => d > 1.0).length, n: contactDists.length },
+    collision: { palmHits: collisionPalmHits, fingerHits: collisionFingerHits, thumbHits: collisionThumbHits, framesSampled },
+    perf: { p50: +pct(0.5).toFixed(2), p95: +pct(0.95).toFixed(2), p99: +pct(0.99).toFixed(2), max: +max(perfTimes).toFixed(2), maxConsecutiveOver33 },
+    still: { sumDAngle: stillDAngle, dWrist: +stillDWrist.toFixed(4) },
+    camInvariant: { ok: camInvariantOk },
+    distalAngle: { avg: +avg(distalAngles).toFixed(2), max: +max(distalAngles).toFixed(2), n: distalAngles.length },
+  };
+};
 
 /* Geometry snapshot for the 3D board — same helpers/constants as the SVG path
    so the 3D fretboard shares one coordinate space with the hand. */
@@ -2461,6 +2623,7 @@ async function enableHand3d() {
     if (mount) mount.style.display = "block";
     if (svg)   svg.style.display   = "none";
     _syncHand3dButton();
+    _syncCamViewButton();
     return true;
   } catch (e) {
     // Silent fall back to SVG: log a single warning so the regression is
@@ -2475,6 +2638,7 @@ async function enableHand3d() {
     if (mount) mount.style.display = "none";
     if (svg)   svg.style.display   = "block";
     _syncHand3dButton();
+    _syncCamViewButton();
     return false;
   } finally {
     HAND3D_LOADING = false;
@@ -2493,11 +2657,27 @@ function disableHand3d() {
   if (mount) mount.style.display = "none";
   if (svg)   svg.style.display   = "block";
   _syncHand3dButton();
+  _syncCamViewButton();
 }
 
 function _syncHand3dButton() {
   const btn = document.getElementById("btn-3d");
-  if (btn) btn.textContent = HAND3D_ACTIVE ? "3D : on" : "3D : off";
+  if (!btn) return;
+  // Label reads as the mode a click switches TO (standard toggle convention).
+  btn.textContent = HAND3D_ACTIVE ? "Vue 2D" : "Vue 3D";
+}
+
+/* Camera-view preset toggle (#btn-cam-view): only relevant while the 3D
+   renderer is live (2D mode has no camera to preset). CSS already restricts
+   the button to the dedicated tab; this hides/shows it further by 2D/3D
+   state and keeps its label in sync with the renderer's current preset. */
+function _syncCamViewButton() {
+  const btn = document.getElementById("btn-cam-view");
+  if (!btn) return;
+  btn.style.display = HAND3D_ACTIVE ? "" : "none";
+  if (!HAND3D_ACTIVE || !HAND3D_RENDERER || typeof HAND3D_RENDERER.getCameraView !== "function") return;
+  // Label reads as the mode a click switches TO (standard toggle convention).
+  btn.textContent = HAND3D_RENDERER.getCameraView() === "pov" ? "Vue : Face" : "Vue : POV";
 }
 
 /* A payload has no playable fingering when it has zero frames or every frame is
@@ -2617,10 +2797,22 @@ window.addEventListener("message", (ev) => {
     });
   }
 
+  // Camera-view preset toggle (POV / face) — camera-only, see setCameraView.
+  const btnCamView = document.getElementById("btn-cam-view");
+  if (btnCamView) {
+    _syncCamViewButton();
+    btnCamView.addEventListener("click", () => {
+      if (!HAND3D_RENDERER || typeof HAND3D_RENDERER.setCameraView !== "function") return;
+      const next = HAND3D_RENDERER.getCameraView() === "pov" ? "face" : "pov";
+      HAND3D_RENDERER.setCameraView(next);
+      _syncCamViewButton();
+    });
+  }
+
   /* Honour an OFF-by-default flag from the URL / localStorage at boot.  Absence
      of the flag leaves the SVG renderer in place, unchanged. */
   if (hand3dRequested()) {
-    enableHand3d();   // async; SVG keeps rendering until/unless it succeeds
+    enableHand3d().then(() => _syncCamViewButton());   // async; SVG keeps rendering until/unless it succeeds
   }
 })();
 
@@ -2820,7 +3012,7 @@ window.addEventListener("message", (ev) => {
       // kinematics are shared with zero divergence.
       if (threeDLive) {
         try {
-          HAND3D_RENDERER.update(buildKinSnapshot(CURRENT_SIM));
+          HAND3D_RENDERER.update(buildKinSnapshot(CURRENT_SIM, getSampledState()));
         } catch (e) {
           // A render fault must never blank the panel: fall back to SVG.
           disableHand3d();

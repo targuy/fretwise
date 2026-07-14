@@ -238,7 +238,7 @@ def test_single_postmessage_contract_reused() -> None:
 def test_3d_reuses_shared_kinematics_not_a_fork() -> None:
     """The 3D snapshot is built from the shared sim/IK, not a second solver."""
     html = _HAND_VIZ.read_text(encoding="utf-8")
-    snap = html[html.index("function buildKinSnapshot(sim)"):]
+    snap = html[html.index("function buildKinSnapshot(sim"):]
     snap = snap[: snap.index("\nfunction hand3dGeometry")]
     # Uses the SAME IK solver and simulator accessors the SVG path uses.
     assert "solveFinger(" in snap

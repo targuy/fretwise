@@ -1,11 +1,14 @@
-"""Smoke tests for the fretboard hand-viz panel wiring (FastAPI TestClient).
+"""Smoke tests for the dedicated 3D-hand tab wiring (FastAPI TestClient).
 
-The hand-viz feature is purely client-side: a toolbar button (#btn-hand-viz)
-toggles a floating panel (#hand-viz-panel) whose iframe (#hand-viz-frame) loads
-the committed renderer ``/static/hand_viz.html``. There is no HTTP endpoint to
-hit, so these guards assert that (1) the app serves the renderer and the static
-shell, and (2) the shell + JS still carry the toggle wiring described by the
-milestone. Mirrors the review-panel smoke test in ``test_web_review.py``.
+The hand-viz feature is purely client-side: the "3D" view-segment button
+(data-mode="hand_3d") shows an iframe (#hand3d-view-frame) pointing at the
+committed renderer ``/static/hand_viz.html?view=3d``. That renderer defaults
+to the 3D rig but also carries its own internal 2D/3D toggle (#btn-3d,
+unhidden in dedicated mode) so the tab can fall back to the SVG rendering
+that used to live in the removed floating panel. There is no HTTP endpoint
+to hit, so these guards assert that (1) the app serves the renderer and the
+static shell, and (2) the shell + JS still carry the iframe wiring described
+by the milestone. Mirrors the review-panel smoke test in ``test_web_review.py``.
 """
 from __future__ import annotations
 
@@ -33,34 +36,33 @@ def test_hand_viz_renderer_is_served(client: TestClient) -> None:
     assert res.headers.get("X-Frame-Options") == "SAMEORIGIN"
 
 
-def test_index_shell_carries_hand_viz_button_and_panel(client: TestClient) -> None:
-    """The toolbar button, the panel, and the iframe wiring are present."""
-    res = client.get("/static/index.html")
-    assert res.status_code == 200
-    html = res.text
-    # Toggle button (index.html:323).
-    assert 'id="btn-hand-viz"' in html
-    # Floating panel the button reveals (index.html:410).
-    assert 'id="hand-viz-panel"' in html
-    # Iframe inside the panel, pointing at the committed renderer (index.html:419).
-    assert 'id="hand-viz-frame"' in html
-    assert 'src="/static/hand_viz.html"' in html
+def test_index_shell_carries_hand3d_iframe() -> None:
+    """The dedicated 3D tab's iframe, pointing at the committed renderer, is present."""
+    html = (_STATIC_DIR / "index.html").read_text(encoding="utf-8")
+    assert 'id="hand3d-view-frame"' in html
+    assert 'data-src="/static/hand_viz.html?view=3d"' in html
+    # The floating panel this replaced must be gone.
+    assert 'id="hand-viz-panel"' not in html
+    assert 'id="btn-hand-viz"' not in html
 
 
-def test_main_js_toggles_panel_on_button_click(client: TestClient) -> None:
-    """main.js binds #btn-hand-viz to a toggle that shows/hides the panel."""
-    res = client.get("/static/js/main.js")
-    assert res.status_code == 200
-    js = res.text
-    # Elements are resolved.
-    assert "$('#btn-hand-viz')" in js
-    assert "$('#hand-viz-panel')" in js
-    assert "$('#hand-viz-frame')" in js
-    # Click handler wired to the toggle.
-    assert "btnHandViz.addEventListener('click', _toggleHandViz)" in js
-    # The toggle flips the panel between hidden and shown.
-    assert "function _toggleHandViz()" in js
-    assert "handVizPanel.style.display = visible ? 'none' : 'flex'" in js
+def test_main_js_wires_hand3d_iframe() -> None:
+    """main.js resolves the hand3d iframe and shows/hides it with the view mode."""
+    js = (_STATIC_DIR / "js" / "main.js").read_text(encoding="utf-8")
+    assert "$('#hand3d-view-frame')" in js
+    assert "function _isHand3dViewVisible()" in js
+    assert "function _ensureHand3dViewFrame()" in js
+    # The floating-panel toggle this replaced must be gone.
+    assert "_toggleHandViz" not in js
+    assert "handVizPanel" not in js
+
+
+def test_hand_viz_renderer_carries_dedicated_2d_toggle() -> None:
+    """hand_viz.html exposes #btn-3d (unhidden in dedicated mode) as the 2D fallback."""
+    html = (_STATIC_DIR / "hand_viz.html").read_text(encoding="utf-8")
+    assert 'id="btn-3d"' in html
+    # Dedicated-mode CSS must NOT hide the toggle (it did before this milestone).
+    assert "body.dedicated-3d #btn-3d" not in html
 
 
 def test_renderer_file_committed_and_nonempty() -> None:

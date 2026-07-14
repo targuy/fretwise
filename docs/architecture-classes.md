@@ -212,14 +212,17 @@ de chaque changement de mode. `playback.usesSvgCursor = !!_svgDriver` arbitre le
 ### 9.3 Affichage des mains (hand viz)
 
 - [`hand_viz.html`](../src/fretwise/web/static/hand_viz.html) — page embarquée
-  (iframe `#hand-viz-panel`, popout possible) : scène SVG 2.5D du manche + main animée
-  image par image, pilotée par le temps de lecture via `postMessage`. Les poses
-  proviennent du JSON `export_hand_viz_json()` (le solveur de pose est **côté navigateur**).
+  (iframe `#hand3d-view-frame` dans l'onglet "3D" de la partition, `?view=3d`) :
+  scène SVG 2.5D **ou** 3D three.js du manche + main animée image par image,
+  pilotée par le temps de lecture via `postMessage`. Les poses proviennent du
+  JSON `export_hand_viz_json()` (le solveur de pose est **côté navigateur**).
+  Le rendu 3D est le défaut de l'onglet dédié ; `#btn-3d` bascule vers la
+  scène SVG 2.5D (repli manuel, ex-panneau flottant supprimé).
 - [`hand3d.js`](../src/fretwise/web/static/js/hand3d.js) — **`Hand3DRenderer`** :
-  rendu 3D three.js **optionnel** (flag `window.FRETWISE_3D_HAND_ENABLED`, off par défaut ;
-  maillage riggé `models/rigged_hand.glb`, fallback FK procédural). Partage exactement
-  les mêmes poses que le SVG (échelle réelle ~2.31 mm/unité) ; fallback SVG si WebGL
-  indisponible.
+  rendu 3D three.js articulé (rig FK avec collision manche), chargé
+  dynamiquement quand `?view=3d`/`?hand3d=1` est actif. Partage exactement
+  les mêmes poses que le SVG (échelle réelle ~2.31 mm/unité) ; fallback SVG si
+  WebGL indisponible.
 
 ### 9.4 Lecture & audio
 

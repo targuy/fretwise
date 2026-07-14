@@ -870,6 +870,37 @@ export class SlopeRenderer {
     ctx.restore();
   }
 
+  /* T-P3.1: snap a CSS-px coordinate to the nearest DEVICE pixel (the canvas
+     transform is set to `dpr` in resize(), so every draw call happens in CSS
+     px — a fractional CSS px means the glyph rasterizes at a different
+     sub-pixel offset every frame while the note glides, which reads as a
+     blur/shimmer even though nothing about the text itself changed). */
+  _snapPx(v) {
+    const dpr = this.dpr || 1;
+    return Math.round(v * dpr) / dpr;
+  }
+
+  /* T-P3.2: round a font size to a size that lands on an integer DEVICE
+     pixel, clamped to never render below `floorDevicePx` (a font a fraction
+     of a device pixel tall is what actually reads as "bouillie", independent
+     of the fractional-position blur T-P3.1 fixes). Use for text that must
+     always render (the fret digit — never skip it). */
+  _snapFontSizeClamped(cssSize, floorDevicePx) {
+    const dpr = this.dpr || 1;
+    const devicePx = Math.max(floorDevicePx, Math.round(cssSize * dpr));
+    return devicePx / dpr;
+  }
+
+  /* Same rounding, but returns null when the size would still fall under the
+     floor even after rounding up — for OPTIONAL text (the note-name letter)
+     where an illegible sub-floor glyph is worse than not drawing it. */
+  _snapFontSizeOrNull(cssSize, floorDevicePx) {
+    const dpr = this.dpr || 1;
+    const devicePx = Math.round(cssSize * dpr);
+    if (devicePx < floorDevicePx) return null;
+    return devicePx / dpr;
+  }
+
   _drawFretDisc(ctx, note, point, radius, meta, showText = true) {
     const exportWarning = note.gp_fingering_export_status === 'missing_source_note_id';
     ctx.fillStyle = exportWarning ? '#ffe3e3' : (meta.discColor || '#fffdf2');
@@ -886,14 +917,23 @@ export class SlopeRenderer {
     ctx.textBaseline = 'middle';
     const noteName = note.noteName || '';
     const alpha = ctx.globalAlpha;
-    const fretSize = noteName ? Math.max(10, radius * 0.82) : Math.max(11, radius * 0.98);
+    const px = this._snapPx(point.x);
+    // Fret digit: always drawn, floor 11 device px (S-1) — never skipped,
+    // it's the primary readability requirement.
+    const fretSizeRaw = noteName ? Math.max(10, radius * 0.82) : Math.max(11, radius * 0.98);
+    const fretSize = this._snapFontSizeClamped(fretSizeRaw, 11);
     ctx.font = `900 ${fretSize}px Inter, sans-serif`;
-    ctx.fillText(String(note.fret), point.x, point.y - (noteName ? radius * 0.18 : -0.5));
+    ctx.fillText(String(note.fret), px, this._snapPx(point.y - (noteName ? radius * 0.18 : -0.5)));
     if (noteName) {
-      ctx.globalAlpha = alpha * 0.88;
-      ctx.font = `850 ${Math.max(6, radius * 0.38)}px Inter, sans-serif`;
-      ctx.fillText(noteName, point.x, point.y + radius * 0.42);
-      ctx.globalAlpha = alpha;
+      // Note-name letter: optional, floor 8 device px — a sub-floor glyph is
+      // dropped rather than rendered as illegible mush.
+      const nameSize = this._snapFontSizeOrNull(Math.max(6, radius * 0.38), 8);
+      if (nameSize != null) {
+        ctx.globalAlpha = alpha * 0.88;
+        ctx.font = `850 ${nameSize}px Inter, sans-serif`;
+        ctx.fillText(noteName, px, this._snapPx(point.y + radius * 0.42));
+        ctx.globalAlpha = alpha;
+      }
     }
   }
 
@@ -915,7 +955,7 @@ export class SlopeRenderer {
     ctx.font = '900 22px Inter, sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'middle';
-    ctx.fillText(chord.label, x, y);
+    ctx.fillText(chord.label, this._snapPx(x), this._snapPx(y));
     ctx.restore();
   }
 

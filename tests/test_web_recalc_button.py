@@ -40,15 +40,14 @@ def test_index_shell_carries_insert_fingerings_button(client: TestClient) -> Non
 def test_insert_button_sits_in_song_action_group() -> None:
     """The button lives in the toolbar-left group, after #btn-review.
 
-    That cluster (fingering / hand-viz / review toggles) is the song page's
-    action-button row; the insert button must join it, not float off elsewhere.
+    That cluster (fingering / review toggles) is the song page's action-button
+    row; the insert button must join it, not float off elsewhere.
     """
     html = (_STATIC_DIR / "index.html").read_text(encoding="utf-8")
     review_idx = html.index('id="btn-review"')
     insert_idx = html.index('id="btn-insert-fingerings"')
-    handviz_idx = html.index('id="btn-hand-viz"')
     # Ordered after the review button within the same group.
-    assert handviz_idx < review_idx < insert_idx
+    assert review_idx < insert_idx
     # And before the transport-center controls (Play) that follow the group.
     assert insert_idx < html.index('id="btn-play"')
 
