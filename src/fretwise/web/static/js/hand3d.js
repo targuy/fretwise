@@ -67,6 +67,7 @@
 
 import * as THREE from "./vendor/three.module.min.js";
 import { GLTFLoader } from "./vendor/GLTFLoader.js";
+import { PoseCache } from "./pose_cache.js";
 
 /* SVG-pixel → world conversion for setGeometry's input (nut x, fret x, etc.)
    The board's world X span derives from the SVG's NUT_X and fretX() values;
@@ -1044,6 +1045,13 @@ class Hand3DRenderer {
     this._impactHalos = [];
     this._activePressKeys = new Set();
     this._lastUpdateMs = 0;
+    /* Converged-pose cache: signature+hand-position → keyframe (wrist scalars +
+       per-finger {yaw, theta}).  The expensive CCD/wrist-compensation solve
+       runs once per DISTINCT shape via this cache; the per-frame render loop
+       replays the cached keyframe with cheap output-space easing.  See
+       pose_cache.js for the rationale and the `resolve` gate. */
+    this._poseCache = new PoseCache(512);
+    this._renderPose = null;   // the CURRENTLY-rendered (eased) keyframe
     this._fingerMotion = {};
     for (const f of FINGER_ORDER) {
       this._fingerMotion[f] = { x: null, y: null, z: null, role: "idle" };
@@ -2561,87 +2569,230 @@ class Hand3DRenderer {
      idle fingers).  Tracks any finger the cost solver asked for that the rig
      could not reach within its joint limits (rule 9). */
   _updateArticulated(kin) {
-    const m = this.main, a = this.anim;
-    this._poseHand(kin);                                   // sets _palmX / _palmZ
+    this._poseHand(kin);                                   // sets _palmX / _palmZ (cheap, no CCD)
     this._lastHandPosX = (this._palmX !== undefined) ? this._palmX : this._lastHandPosX;
-    // index "position" fret = lowest active fret (the hand's neck position)
-    // Position the hand over ANY fretted finger (active OR ready/hover) so it
-    // tracks the upcoming notes even between presses; fall back to the last
-    // position / a default so the startup pose is sensible, never collapsed.
-    let idxFret = 0, maxZ = null;
+
+    // Resolve the exact inputs the converged pose depends on: the fingering
+    // signature (role+fret+strings per finger) AND the hand position it drives
+    // (index fret + player-most string).  Both together form the cache key, so
+    // a cached keyframe is a pure function of the solver's inputs.
+    const inp = this._handPosInputs(kin);
+    const sig = this._kinSignature(kin);
+    const key = this._poseCacheKey(sig, inp);
+
+    // SOLVE-ONCE-PER-SHAPE: the expensive CCD fold + wrist-compensation search
+    // runs only on a cache miss (see PoseCache.resolve).  A held note or a
+    // repeated shape reuses the cached keyframe for free.  The solver leaves
+    // the rig in the converged state as a side effect; _easeAndApplyPose below
+    // then overwrites that with the (eased) rendered pose, so the transient
+    // solve pose is never what actually gets drawn.
+    const target = this._poseCache.resolve(
+      key,
+      () => this._solveConvergedPose(kin, inp.idxFret, inp.anchorZ),
+    );
+
+    // REPLAY: ease the rendered pose toward the cached keyframe in joint-angle
+    // (output) space — a cheap lerp of a handful of scalars, no CCD, no
+    // collision scan.  Once settled it snaps exactly onto the keyframe so a
+    // held note is perfectly still (H-15).
+    this._easeAndApplyPose(target, kin);
+
+    this._lastKinSig = sig;
+    this._lastFoldOk = target.ok;
+    this._lastUnreachable = target.unreachable || [];
+    this._poseForearm(kin);                                // legacy forearm tube = the arm
+  }
+
+  /* Resolve the hand-position inputs the wrist target + fold depend on:
+     idxFret  = lowest fretted finger (the neck position the hand tracks),
+     anchorZ  = world Z of the player-most active target string,
+     anchorStr= that string's number (for a stable integer cache key).
+     Falls back to the last position / string 2 so a targetless (all-idle)
+     frame keeps the hand where it was instead of collapsing. */
+  _handPosInputs(kin) {
+    let idxFret = 0, anchorZ = null, anchorStr = null;
     for (const f of FINGER_ORDER) {
       const fg = kin.fingers && kin.fingers[f];
       if (!fg || !(fg.fret > 0)) continue;
       if (idxFret === 0 || fg.fret < idxFret) idxFret = fg.fret;
-      if (fg.strings && fg.strings.length) { const z = this._stringZAt(fg.strings[0]); if (maxZ === null || z > maxZ) maxZ = z; }
+      if (fg.strings && fg.strings.length) {
+        const s = fg.strings[0];
+        const z = this._stringZAt(s);
+        if (anchorZ === null || z > anchorZ) { anchorZ = z; anchorStr = s; }
+      }
     }
     if (idxFret === 0) idxFret = this._lastIdxFret || 2; else this._lastIdxFret = idxFret;
-    if (maxZ === null) maxZ = this._stringZAt(2);
-    // Node Z = player-most string; the anchor adds MCP_REACH so the knuckle
-    // sits at its reach sweet-spot above that string.
-    //
-    // R11/R12/perf postmortem — the ease TARGET is not just "this frame's
-    // fresh baseline math".  A note change should ease from wherever the
-    // hand currently is toward a FRESH, un-compensated baseline (so leftover
-    // R11 wrist compensation from a DIFFERENT, unrelated note decays instead
-    // of persisting forever — the original rotation-drift bug).  But for the
-    // SAME held note, re-pointing the ease target at that fresh baseline
-    // every frame fights any compensation R11 just found for THIS note: each
-    // frame eases a little back toward the (unreachable-without-help)
-    // baseline, fold reports unreachable again, R11 re-discovers the same
-    // compensation, forever — a perpetual 30-90ms/frame oscillation that
-    // never converges (confirmed live: _wristConverged stayed false
-    // indefinitely).  So: only reset the ease target on an actual note
-    // change; once R11 finds compensation for the CURRENT note, that
-    // becomes the new ease target (see the tries>0 branch below), so easing
-    // has nothing left to pull against and can actually converge.
-    const sig = this._kinSignature(kin);
-    const sigChanged = sig !== this._lastKinSig;
-    if (sigChanged || !this._wristEaseTarget) {
-      this._wristEaseTarget = a.wristTarget(idxFret, maxZ);
+    if (anchorZ === null) { anchorZ = this._stringZAt(2); anchorStr = 2; }
+    return { idxFret, anchorZ, anchorStr };
+  }
+
+  /* Same derivation as _handPosInputs but WITHOUT mutating _lastIdxFret — used
+     by warmPose() so a look-ahead prefill can't perturb the live hand's
+     position history. */
+  _handPosInputsPure(kin) {
+    let idxFret = 0, anchorZ = null, anchorStr = null;
+    for (const f of FINGER_ORDER) {
+      const fg = kin.fingers && kin.fingers[f];
+      if (!fg || !(fg.fret > 0)) continue;
+      if (idxFret === 0 || fg.fret < idxFret) idxFret = fg.fret;
+      if (fg.strings && fg.strings.length) {
+        const s = fg.strings[0];
+        const z = this._stringZAt(s);
+        if (anchorZ === null || z > anchorZ) { anchorZ = z; anchorStr = s; }
+      }
     }
-    const pose = this._easeWristPose(this._wristEaseTarget);
-    // STEADY-STATE SKIP: once the eased pose has fully CONVERGED for the SAME
-    // note (signature unchanged) and the previous attempt already resolved
-    // (_lastFoldOk), the scene graph already holds the correct pose from last
-    // frame — skip the fold/nudge pipeline rather than reproducing the
-    // identical result at real cost.  A transition (signature just changed,
-    // or still gliding) always falls through and runs normally, so the
-    // glide itself is untouched.
-    if (!sigChanged && this._wristConverged && this._lastFoldOk) {
-      this._poseForearm(kin);
-      return;
-    }
-    this._lastKinSig = sig;
-    a.applyWristPose(pose);
+    if (idxFret === 0) idxFret = this._lastIdxFret || 2;
+    if (anchorZ === null) { anchorZ = this._stringZAt(2); anchorStr = 2; }
+    return { idxFret, anchorZ, anchorStr };
+  }
+
+  _poseCacheKey(sig, inp) {
+    return `${sig}#${inp.idxFret}:${inp.anchorStr == null ? "-" : inp.anchorStr}`;
+  }
+
+  /* THE EXPENSIVE SOLVE (cache-gated): place the wrist at its fresh baseline,
+     brace the thumb, then fold every finger to contact, re-folding under wrist
+     compensation until reachable.  Returns a plain-data converged keyframe and
+     leaves the rig in that pose.  Deterministic in (kin signature, idxFret,
+     anchorZ) — which is exactly why it can be cached and replayed. */
+  _solveConvergedPose(kin, idxFret, anchorZ) {
+    const m = this.main, a = this.anim;
+    const wristTarget = a.wristTarget(idxFret, anchorZ);
+    if (!this._wristPose) this._wristPose = { ...wristTarget };
+    a.applyWristPose(wristTarget);
     a.animation_pouce(m);
-    // R11: fold all fingers; if any can't reach (even with its 45° point), move
-    // the WRIST one step (within R10 limits) and RE-FOLD EVERY finger — the
-    // wrist is the outer loop, the fingers fully depend on it.
-    let unreachable = this._foldAllFingers(kin, true);
+    // R11: fold all fingers; if any can't reach (even with its 45° point), nudge
+    // the WRIST one step (within R10 limits) and RE-FOLD every finger.  Raw
+    // targets (animateTargets=false) fold straight to the final contact point —
+    // the per-frame easing is now done in output space by _easeAndApplyPose.
+    let unreachable = this._foldAllFingers(kin, false);
     let tries = 0;
     while (unreachable.length && tries < WRIST_COMP_TRIES) {
-      if (!this._nudgeWrist(kin, unreachable)) break;       // no in-limit step helps
+      if (!this._nudgeWrist(kin, unreachable)) break;
       unreachable = this._foldAllFingers(kin, false);
       tries++;
     }
-    this._syncWristPoseFromRig();
-    // Compensation found for THIS note: lock it in as the new ease target
-    // (see the big comment above) so next frame's ease has nothing left to
-    // pull against and the search doesn't have to re-run every frame.
-    if (tries > 0) {
-      const wp = this._wristPose;
-      this._wristEaseTarget = { x: wp.x, y: wp.y, z: wp.z, flex: wp.flex, dev: wp.dev, rot: wp.rot, back: wp.back };
+    // Snapshot the converged wrist pose off the actual rig (R11 may have moved it).
+    const p = m.poignet;
+    this._wristPose = {
+      x: m.node.position.x, y: m.node.position.y, z: m.node.position.z,
+      flex: p.flex, dev: p.deviation, rot: p.rotation, back: wristTarget.back,
+    };
+    this._clampPalmVisualOnly(m);   // R12 cosmetic-only, reads this._wristPose
+    return this._snapshotPose(kin, this._wristPose, unreachable);
+  }
+
+  /* Capture the current rig's converged joint state as a plain-data keyframe:
+     wrist scalars + per-finger {yaw, theta, role}.  The thumb is a fixed brace
+     recomputed cheaply each frame (animation_pouce), so it is not snapshotted. */
+  _snapshotPose(kin, wrist, unreachable) {
+    const m = this.main;
+    const fingers = {};
+    for (const f of FINGER_ORDER) {
+      const d = m.doigt(f);
+      const fg = kin.fingers && kin.fingers[f];
+      fingers[f] = { yaw: d._yaw, theta: { ...d.theta }, role: (fg && fg.role) || "idle" };
     }
-    this._lastUnreachable = unreachable;
-    this._wristTries = tries;
-    this._lastFoldOk = true;   // a full resolve attempt just ran, whatever the outcome
-    // R12: cosmetic-only palm/neck mitigation — runs LAST, after fold/reach
-    // are fully settled, and never touches the wrist/anchors.  See
-    // _clampPalmVisualOnly and the postmortem on PALM_COSMETIC_SHRINK for why
-    // it's structured this way (two prior, reach-breaking attempts).
+    return {
+      wrist: { ...wrist },
+      fingers,
+      ok: !unreachable || unreachable.length === 0,
+      unreachable: unreachable ? unreachable.slice() : [],
+    };
+  }
+
+  _clonePose(pose) {
+    const fingers = {};
+    for (const f of FINGER_ORDER) {
+      const pf = pose.fingers[f];
+      fingers[f] = { yaw: pf.yaw, theta: { ...pf.theta }, role: pf.role };
+    }
+    return { wrist: { ...pose.wrist }, fingers, ok: pose.ok, unreachable: (pose.unreachable || []).slice() };
+  }
+
+  /* Cheap output-space replay: exponentially ease the rendered keyframe toward
+     the cached `target`, then apply it to the rig.  No CCD, no collision scan —
+     just a lerp of ~7 wrist scalars + per-finger yaw/thetas.  On the first
+     frame (or after a dispose/reset) it snaps.  Once within the convergence
+     band it snaps exactly onto the target so a held shape is perfectly static
+     (mirrors the old T-P0.2 wrist snap, preserving H-15 stillness). */
+  _easeAndApplyPose(target, kin) {
+    if (!this._renderPose) this._renderPose = this._clonePose(target);
+    const rp = this._renderPose;
+    const dt = this._updateDt || (1 / 60);
+    const kW = Math.min(1, 1 - Math.exp(-dt / 0.11));   // ~110ms whole-hand glide
+    const kF = Math.min(1, 1 - Math.exp(-dt / 0.06));   // ~60ms finger glide
+
+    const tw = target.wrist, w = rp.wrist;
+    let moveMag = 0;
+    for (const kName of ["x", "y", "z"]) { const dlt = tw[kName] - w[kName]; w[kName] += dlt * kW; moveMag += Math.abs(dlt); }
+    for (const kName of ["flex", "dev", "rot"]) { const dlt = tw[kName] - w[kName]; w[kName] += dlt * kW; moveMag += Math.abs(dlt) * 10; }
+    w.back = tw.back;
+    for (const f of FINGER_ORDER) {
+      const tf = target.fingers[f], rf = rp.fingers[f];
+      const dy = tf.yaw - rf.yaw; rf.yaw += dy * kF; moveMag += Math.abs(dy);
+      for (const j in tf.theta) { const dj = tf.theta[j] - (rf.theta[j] || 0); rf.theta[j] = (rf.theta[j] || 0) + dj * kF; moveMag += Math.abs(dj); }
+      rf.role = tf.role;
+    }
+    // Snap the last residual so a settled shape stops moving entirely.
+    if (moveMag < 0.02) {
+      rp.wrist = { ...tw };
+      for (const f of FINGER_ORDER) {
+        rp.fingers[f].yaw = target.fingers[f].yaw;
+        rp.fingers[f].theta = { ...target.fingers[f].theta };
+        rp.fingers[f].role = target.fingers[f].role;
+      }
+    }
+    rp.ok = target.ok;
+    this._applyPose(rp, kin);
+  }
+
+  /* Apply a plain-data keyframe directly to the rig (no easing): wrist node +
+     poignet DOF + MCP anchors + palm bridge, the fixed thumb brace, and each
+     finger's yaw/thetas.  Cheap — the whole per-frame render cost after the
+     one-time solve. */
+  _applyPose(pose, kin) {
+    const m = this.main, a = this.anim;
+    this._wristPose = pose.wrist;          // _clampPalmVisualOnly reads this
+    a.applyWristPose(pose.wrist);
+    a.animation_pouce(m);
+    for (const f of FINGER_ORDER) {
+      const d = m.doigt(f);
+      const pf = pose.fingers[f];
+      d.setYaw(pf.yaw);                    // MUST precede applyThetas (reads _yaw)
+      d.applyThetas(pf.theta);
+      d.setRole(pf.role);
+    }
+    m.node.updateMatrixWorld(true);
     this._clampPalmVisualOnly(m);
-    this._poseForearm(kin);                                // legacy forearm tube = the arm
+  }
+
+  /* LOOK-AHEAD PREFILL (deferred rendering): solve + cache the converged pose
+     for an UPCOMING shape without disturbing the live rig, so the frame that
+     eventually reaches that shape is a cheap cache hit instead of a solve
+     hitch.  Called off the critical path (requestIdleCallback in hand_viz.html)
+     with a minimal warm kin ({ fingers:{ <name>:{role,fret,strings} } }) — the
+     only fields the solver reads.  No-op if the shape is already cached.
+     Returns true iff it actually solved a new shape. */
+  warmPose(kin) {
+    if (this.disposed || this._rigMode !== "articulated" || !kin || !kin.fingers) return false;
+    const inp = this._handPosInputsPure(kin);
+    const sig = this._kinSignature(kin);
+    const key = this._poseCacheKey(sig, inp);
+    if (this._poseCache.has(key)) return false;
+    // Save the visible rig's rendered pose + wrist accumulator, solve the
+    // upcoming shape (which mutates the shared Object3D graph), cache it, then
+    // restore the visible pose so the current frame is untouched.
+    const savedRender = this._renderPose ? this._clonePose(this._renderPose) : null;
+    const savedWrist = this._wristPose ? { ...this._wristPose } : null;
+    const pose = this._solveConvergedPose(kin, inp.idxFret, inp.anchorZ);
+    this._poseCache.set(key, pose);
+    this._wristPose = savedWrist;
+    if (savedRender) {
+      this._renderPose = savedRender;
+      this._applyPose(savedRender, this._lastKin || kin);
+    }
+    return true;
   }
 
   /* Cheap per-frame fingering signature — role+fret+strings for each finger,
