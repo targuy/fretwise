@@ -1,0 +1,183 @@
+"""Behavioral guards for the Slope view's text sharpness during motion (Lot C).
+
+Unlike ``test_web_slope_dpr.py`` (which greps the source for the presence of the
+snap helpers), these tests execute the REAL shipped ``slope-renderer.js`` in Node
+against a recording 2D-context mock, drive the animation clock to several
+fractional beat offsets, and assert on the ACTUAL pixel coordinates passed to
+``ctx.fillText`` and the ACTUAL backing-store resolution.
+
+Root cause they lock down: the gliding fret-digit label is already snapped to the
+device-pixel grid, but adaptive quality used to drop ``this.dpr`` below
+``window.devicePixelRatio`` the instant playback degraded quality. A backing store
+smaller than the display is CSS-upscaled by the browser, resampling (blurring)
+every already-snapped glyph. The fix pins the backing store to the true device
+dpr; quality is shed via shadows/step-count/passes, never resolution.
+"""
+from __future__ import annotations
+
+import json
+import shutil
+import subprocess
+from pathlib import Path
+
+import pytest
+
+_SLOPE_JS = (
+    Path(__file__).parents[1] / "src" / "fretwise" / "web" / "static" / "js" / "slope-renderer.js"
+)
+
+pytestmark = pytest.mark.skipif(shutil.which("node") is None, reason="node not available")
+
+
+def _run(script: str, device_pixel_ratio: float = 2) -> dict:
+    """Instantiate the real SlopeRenderer in Node; return the test script's JSON.
+
+    A recording 2D-context Proxy captures every ``fillText`` call. The canvas /
+    document / window globals are the minimum surface the renderer touches.
+    """
+    # file:// URL, not a bare Windows path: Node rejects "D:\..." as an ESM
+    # specifier (the drive letter parses as a URL scheme).
+    harness = f"""
+globalThis.performance = globalThis.performance || {{ now: () => 0 }};
+function makeCtx(fillLog) {{
+  const store = {{}};
+  const grad = {{ addColorStop() {{}} }};
+  return new Proxy({{}}, {{
+    get(_t, prop) {{
+      if (prop === 'fillText') return (txt, x, y) => fillLog.push({{ txt: String(txt), x, y }});
+      if (prop === 'createLinearGradient') return () => grad;
+      if (prop in store) return store[prop];
+      return () => {{}};
+    }},
+    set(_t, prop, val) {{ store[prop] = val; return true; }},
+  }});
+}}
+globalThis.window = {{
+  devicePixelRatio: {device_pixel_ratio},
+  addEventListener() {{}},
+  removeEventListener() {{}},
+}};
+globalThis.document = {{
+  createElement() {{ return {{ width: 0, height: 0, getContext: () => makeCtx([]) }}; }},
+}};
+
+const fillLog = [];
+const ctx = makeCtx(fillLog);
+const canvas = {{
+  width: 0, height: 0, clientWidth: 900, clientHeight: 600, style: {{}},
+  getContext: () => ctx,
+  getBoundingClientRect: () => ({{ width: 900, height: 600, left: 0, top: 0 }}),
+}};
+
+const {{ SlopeRenderer }} = await import({json.dumps(_SLOPE_JS.as_uri())});
+
+const data = {{
+  tempo: 120,
+  beats_per_measure: 4,
+  results: [{{ string: 3, fret: 7, finger: 'index', onset: 1.0, duration: 1.0, pitch: 62 }}],
+}};
+const r = new SlopeRenderer(canvas, data);
+
+// Render one frame at a given beat and return the device-space coords of the
+// gliding fret digit ('7'), or null if it was not drawn.
+function fretDigitDevice(beat) {{
+  r.currentBeat = beat;
+  fillLog.length = 0;
+  r.render();
+  const hit = fillLog.find((e) => e.txt === '7');
+  if (!hit) return null;
+  return {{ x: hit.x, y: hit.y, devX: hit.x * r.dpr, devY: hit.y * r.dpr, dpr: r.dpr }};
+}}
+const nearInt = (v) => Math.abs(v - Math.round(v)) < 1e-6;
+
+{script}
+"""
+    proc = subprocess.run(
+        ["node", "--input-type=module", "-e", harness],
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    assert proc.returncode == 0, f"node failed:\n{proc.stderr}"
+    return json.loads(proc.stdout)
+
+
+def test_gliding_fret_digit_lands_on_integer_device_pixels() -> None:
+    """Across fractional beat offsets the fret digit's fillText x/y must be exact
+    integers in DEVICE space — otherwise the glyph rasterizes at a different
+    sub-pixel every frame and shimmers/blurs while moving."""
+    out = _run("""
+const beats = [0.10, 0.37, 0.63, 0.91, 1.234, 2.718];
+const rows = beats.map((b) => {
+  const p = fretDigitDevice(b);
+  return { beat: b, drawn: !!p, devX: p && p.devX, devY: p && p.devY,
+           xInt: p && nearInt(p.devX), yInt: p && nearInt(p.devY) };
+});
+console.log(JSON.stringify(rows));
+""")
+    assert out, "fret digit was never drawn — fixture note not visible"
+    for row in out:
+        assert row["drawn"], f"fret digit not drawn at beat {row['beat']}"
+        assert row["xInt"], f"fret devX {row['devX']} not integer at beat {row['beat']}"
+        assert row["yInt"], f"fret devY {row['devY']} not integer at beat {row['beat']}"
+
+
+def test_snap_px_maps_fractional_css_to_integer_device_pixel() -> None:
+    """_snapPx(12.37) at dpr=2 -> 12.5 css, i.e. exactly 25 device px (not 24.74)."""
+    out = _run("""
+r.dpr = 2;
+console.log(JSON.stringify({
+  css: r._snapPx(12.37),
+  device: r._snapPx(12.37) * 2,
+}));
+""")
+    assert out["css"] == 12.5
+    assert out["device"] == 25
+
+
+def test_backing_store_stays_at_true_device_dpr_under_quality_degradation() -> None:
+    """THE FIX: when adaptive quality degrades during playback, the backing store
+    must NOT shrink below the display resolution (which would CSS-upscale and blur
+    the whole canvas). _renderDpr() must equal the true device dpr at every
+    quality level, and the fret digit must remain integer in device space."""
+    out = _run("""
+const dprByQuality = {};
+for (const q of [0, 1, 2]) { r._quality = q; dprByQuality[q] = r._renderDpr(); }
+// Simulate the worst-case degrade the animation loop can reach.
+r._quality = 2;
+r.dpr = r._renderDpr();
+r.resize();
+const p = fretDigitDevice(0.37);
+console.log(JSON.stringify({
+  dprByQuality,
+  devicePixelRatio: window.devicePixelRatio,
+  backingW: canvas.width,
+  displayW: canvas.clientWidth * window.devicePixelRatio,
+  fretDevXInt: p && nearInt(p.devX),
+}));
+""")
+    dpr = out["devicePixelRatio"]
+    # No quality level may drop the backing store below the true device dpr.
+    assert out["dprByQuality"] == {"0": dpr, "1": dpr, "2": dpr}
+    # Backing store exactly covers the display -> browser never resamples it.
+    assert out["backingW"] == out["displayW"]
+    assert out["fretDevXInt"], "fret digit off the device grid after degrade"
+
+
+def test_font_size_snaps_to_integer_device_pixels() -> None:
+    """Font sizes must land on whole device pixels (a fractional-device-px glyph
+    is what reads as mush); the clamped variant enforces a floor, the OrNull
+    variant drops optional text that would fall under the floor."""
+    out = _run("""
+r.dpr = 2;
+console.log(JSON.stringify({
+  clampedDevice: r._snapFontSizeClamped(9.3, 11) * 2,   // rounds to whole device px
+  clampFloorDevice: r._snapFontSizeClamped(2.0, 11) * 2, // clamped up to floor 11
+  orNullDropped: r._snapFontSizeOrNull(3.0, 8),          // 6 device px < floor 8 -> null
+  orNullKept: r._snapFontSizeOrNull(5.0, 8) * 2,         // 10 device px >= floor 8
+}));
+""")
+    assert out["clampedDevice"] == 19  # round(9.3*2)=19
+    assert out["clampFloorDevice"] == 11  # max(11, round(2*2)=4) = 11
+    assert out["orNullDropped"] is None
+    assert out["orNullKept"] == 10
