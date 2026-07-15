@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 import fretwise.core.scene.builders as scene_builders
 
 from fretwise.core import run_core_pipeline_from_raw
@@ -1364,6 +1366,64 @@ def test_canonical_to_render_scene_standard_draws_chord_names_from_markers() -> 
 
     assert len(chord_labels) == 1
     assert chord_labels[0].text == "A5"
+
+
+def test_chord_name_label_clears_a_high_note_instead_of_colliding() -> None:
+    """A chord label rises above its default offset when the beat's chord
+    notates a high note (ledger lines above the staff) — a fixed offset
+    otherwise overlaps the note (Stairway intro screenshot: "F/G#"/"E/G#"
+    overlapping a high note in the same beat)."""
+    raw_score = legacy_parse_to_raw_score(
+        Path("chord-high-note.gp"),
+        source_format="gpif",
+        events=[
+            # Low note beat: chord label sits at the default (flat) offset.
+            _note(pitch=57, onset=0.0, duration=1.0, string_hint=4, fret_hint=7),
+            # High note beat (well above the staff, ledger lines): the label
+            # for this beat's chord must clear it.
+            _note(pitch=81, onset=1.0, duration=1.0, string_hint=1, fret_hint=17),
+        ],
+        chord_markers={"0.000000": "Am", "1.000000": "Am"},
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    chord_labels = sorted(
+        (
+            text
+            for text in staff.layer_groups[1].text_instances
+            if text.metadata.get("kind") == "chord_name"
+        ),
+        key=lambda t: t.metadata.get("onset", 0.0),
+    )
+
+    assert len(chord_labels) == 2
+    low_note_label, high_note_label = chord_labels
+    # The high-note beat's label must sit strictly higher (smaller y) than the
+    # low-note beat's — never the reverse, and never merely equal (that would
+    # mean the fix didn't engage).
+    assert high_note_label.y < low_note_label.y
+
+
+def test_chord_name_label_never_drops_below_the_default_offset() -> None:
+    """A note near the staff must not push the chord label DOWN — only a note
+    higher than the default clearance may raise it; anything else keeps the
+    baseline position."""
+    raw_score = legacy_parse_to_raw_score(
+        Path("chord-mid-note.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, duration=1.0, string_hint=2, fret_hint=5)],
+        chord_markers={"0.000000": "C"},
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    chord_labels = [
+        text
+        for text in staff.layer_groups[1].text_instances
+        if text.metadata.get("kind") == "chord_name"
+    ]
+
+    assert len(chord_labels) == 1
+    assert chord_labels[0].y == pytest.approx(staff.y + 4.0 - 18.0)
 
 
 def test_canonical_to_render_scene_standard_tab_draws_strum_direction_marker() -> None:
