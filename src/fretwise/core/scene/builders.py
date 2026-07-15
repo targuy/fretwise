@@ -389,6 +389,12 @@ def layout_to_render_scene(
                     staff_spacing=staff_spacing,
                     clef=clef,
                 )
+                min_note_y_by_onset = _min_note_y_by_onset(
+                    measure_layout.event_layouts,
+                    staff_std_y=staff_std_y,
+                    staff_spacing=staff_spacing,
+                    clef=clef,
+                )
                 standard_visible_event_ids = _standard_visible_event_ids(
                     measure_layout.event_layouts
                 )
@@ -612,11 +618,19 @@ def layout_to_render_scene(
                             )
                             chord_name = str(event_layout.metadata.get("chord_name", "")).strip()
                             if chord_name and onset_key not in shown_chord_labels_by_onset:
+                                # Clear the highest note/ledger line in this beat's
+                                # chord instead of a fixed offset — a high note
+                                # (ledger lines above the staff) otherwise collides
+                                # with the label. min_note_y is smaller = higher on
+                                # screen; never place the label LOWER than the old
+                                # fixed position, only higher when a note demands it.
+                                highest_note_y = min_note_y_by_onset.get(onset_key, staff_std_y)
+                                label_y = min(staff_std_y - 18.0, highest_note_y - 12.0)
                                 notes_layer.text_instances.append(
                                     TextInstance(
                                         text=chord_name,
                                         x=event_layout.x,
-                                        y=staff_std_y - 18.0,
+                                        y=label_y,
                                         font_family="Times-Bold",
                                         font_size=11.0,
                                         metadata={"kind": "chord_name", "onset": onset_key},
@@ -1452,6 +1466,38 @@ def _stem_direction_by_onset_voice(
                 middle_line_y=middle_line_y,
             )
     return direction_by_key
+
+
+def _min_note_y_by_onset(
+    events: list[object],
+    *,
+    staff_std_y: float,
+    staff_spacing: float,
+    clef: str = "treble",
+) -> dict[float, float]:
+    """Return {onset: highest-on-screen (smallest) note_y} across all voices.
+
+    Used to keep the chord-name label clear of a high note's notehead/ledger
+    lines — a fixed offset above the staff top line collides whenever a note in
+    that beat's chord notates above the label's height (screenshot: "F/G#"
+    overlapping a ledger-line note in the Stairway intro).
+    """
+    min_y_by_onset: dict[float, float] = {}
+    for event in events:
+        metadata = getattr(event, "metadata", {})
+        if str(metadata.get("event_type", "")) == "RestEvent":
+            continue
+        onset = round(float(getattr(event, "onset", 0.0)), 6)
+        note_y = _standard_note_y(
+            metadata,
+            staff_std_y=staff_std_y,
+            staff_spacing=staff_spacing,
+            clef=clef,
+        )
+        existing = min_y_by_onset.get(onset)
+        if existing is None or note_y < existing:
+            min_y_by_onset[onset] = note_y
+    return min_y_by_onset
 
 
 def _standard_notehead_offsets_by_event_id(

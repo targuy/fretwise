@@ -1570,10 +1570,14 @@ function applyRepresentationModeView(data) {
     && representationMode !== MODES.SLOPE
     && representationMode !== MODES.HAND_3D;
   if (tabCanvas) {
-    tabCanvas.style.visibility = showCore || showSlope || showHand3d ? 'hidden' : 'visible';
-    tabCanvas.style.display = showSlope || showHand3d ? 'none' : 'block';
+    // display:none (not just visibility:hidden) in every non-Tablature mode —
+    // the canvas can be 40000+ px tall (one row per measure). Left display:block
+    // while merely invisible, it still occupies #tab-container's layout box and
+    // gives it its OWN scrollbar alongside #core-svg-view's, producing two
+    // vertical scrollbars for one view (Staff/Mixed double-scrollbar bug).
+    tabCanvas.style.display = (showCore || showSlope || showHand3d) ? 'none' : 'block';
   }
-  if (cursorCanvas) cursorCanvas.style.visibility = showCore || showSlope || showHand3d ? 'hidden' : 'visible';
+  if (cursorCanvas) cursorCanvas.style.display = (showCore || showSlope || showHand3d) ? 'none' : 'block';
   if (slopeCanvas) slopeCanvas.style.display = showSlope ? 'block' : 'none';
   if (hand3dViewFrame) hand3dViewFrame.style.display = showHand3d ? 'block' : 'none';
   if (!showHand3d) _releaseHand3dViewFrame();

@@ -317,7 +317,12 @@ html, body { height: 100%; font-family: var(--ui); color: var(--fg-0); backgroun
   display: flex;
   align-items: flex-end;
   gap: 3px;
-  height: 44px;
+  /* Height follows the tabs. A fixed height cropped them: the row is bottom-
+     anchored (align-items:flex-end) and clips (overflow-y:hidden), so any tab
+     taller than the bar loses its TOP — the track name — with no scrollbar to
+     reveal it. The tab's own content (name + meta + level fader) decides the
+     height; min-height only keeps the empty bar from collapsing. */
+  min-height: 44px;
   margin-bottom: -3px;   /* sink onto the score's top edge so the tabs attach to it */
   overflow-x: auto;
   overflow-y: hidden;
