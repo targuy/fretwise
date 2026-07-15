@@ -22,6 +22,9 @@ const MIN_NOTE_GAP_PX = 28;
 const MIN_CIRCLE_PAD_PX = 5;
 const MEASURE_NOTE_PAD_PX = 7;
 const TARGET_FRAME_MS = 1000 / 60;
+// Cap the backing-store resolution so a 4x display doesn't allocate an absurd
+// buffer, but never below a real device's dpr — see _renderDpr().
+const MAX_RENDER_DPR = 3;
 const MIN_ACCEPTABLE_FRAME_MS = 1000 / 50;
 const HIGH_QUALITY_FRAME_MS = 1000 / 60;
 const LOW_QUALITY_FRAME_MS = 1000 / 42;
@@ -136,10 +139,14 @@ export class SlopeRenderer {
   }
 
   _renderDpr() {
-    const device = window.devicePixelRatio || 1;
-    if (this._quality >= 2) return Math.min(1.5, device);
-    if (this._quality === 1) return Math.min(2, device);
-    return Math.min(3, device);
+    // Lot C (text sharpness): the backing store must ALWAYS match the true
+    // device pixel ratio. If it drops below it (as the old quality-scaled
+    // ramp did — 1.5x on a 2x display), the canvas element is CSS-upscaled to
+    // fill its box, which resamples and blurs every already-snapped glyph the
+    // instant playback degrades quality. Draw-cost is shed elsewhere (shadows,
+    // path-step count, the extra glow pass — all gated on `this._quality`),
+    // never on resolution.
+    return Math.min(MAX_RENDER_DPR, window.devicePixelRatio || 1);
   }
 
   _invalidateStaticCache() {
