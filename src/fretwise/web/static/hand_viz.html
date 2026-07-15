@@ -2430,6 +2430,62 @@ function buildKinSnapshot(sim, sampled) {
   };
 }
 
+/* ---------- 3D pose look-ahead prefill (deferred rendering) ----------------
+   The articulated 3D rig's converged pose is CPU-expensive to solve but is a
+   pure function of the fingering signature (see hand3d.js / pose_cache.js).
+   The per-frame render loop already replays cached keyframes cheaply; here we
+   fill that cache AHEAD of the playhead during idle time, so the frame that
+   reaches each new shape is a cheap cache hit rather than a solve hitch.
+
+   We build a MINIMAL warm kin ({ fingers:{ <name>:{role,fret,strings} } }) — the
+   only fields hand3d.js's solver reads — directly from a pure sampleState() at a
+   future time, mirroring the live simulator's role classification (a finger is
+   active/planted iff it is sounding/held at that instant, otherwise idle).  This
+   is best-effort: any signature that diverges (e.g. a chord pre-warp window)
+   simply isn't pre-warmed and falls back to the normal lazy solve. */
+function _warmKinFromSampled(st) {
+  const fingers = {};
+  for (const f of FINGER_ORDER) {
+    const a = st.active[f], p = st.planted[f];
+    if (a) fingers[f] = { role: "active", fret: a.fret, strings: a.strings || [a.string] };
+    else if (p) fingers[f] = { role: "planted", fret: p.fret, strings: p.strings || [p.string] };
+    else fingers[f] = { role: "idle", fret: 0, strings: [] };
+  }
+  return { fingers };
+}
+
+let _prefillScheduled = false;
+let _lastPrefillT = -1;
+const _requestIdle = (typeof window !== "undefined" && window.requestIdleCallback)
+  ? window.requestIdleCallback.bind(window)
+  : (cb) => setTimeout(() => cb({ timeRemaining: () => 4 }), 16);
+
+/* Schedule an idle-time pass that warms the pose cache for the next few
+   distinct upcoming shapes.  Throttled (~5x/s) and budgeted so it never
+   competes with the render loop; entirely wrapped so a prefill fault can never
+   break playback. */
+function _scheduleHandPosePrefill(tNow) {
+  if (_prefillScheduled) return;
+  if (_lastPrefillT >= 0 && Math.abs(tNow - _lastPrefillT) < 0.2) return;
+  _prefillScheduled = true;
+  _lastPrefillT = tNow;
+  _requestIdle((deadline) => {
+    _prefillScheduled = false;
+    try {
+      if (!CURRENT_DATA || !CURRENT_DATA.frames || !HAND3D_RENDERER
+          || typeof HAND3D_RENDERER.warmPose !== "function") return;
+      const frames = CURRENT_DATA.frames;
+      const LOOKAHEAD = 2.5, STEP = 0.12;
+      let budget = 6;   // cap real solves per idle slice
+      for (let d = STEP; d <= LOOKAHEAD && budget > 0; d += STEP) {
+        if (deadline && typeof deadline.timeRemaining === "function" && deadline.timeRemaining() <= 1) break;
+        const st = sampleState(tNow + d, frames);
+        if (HAND3D_RENDERER.warmPose(_warmKinFromSampled(st))) budget--;
+      }
+    } catch (e) { /* best-effort; never break playback */ }
+  });
+}
+
 /* ============================================================================
    T-B.1 — deterministic self-test harness (docs/plan_impl_slope_main3d.md §B).
 
@@ -3013,6 +3069,9 @@ window.addEventListener("message", (ev) => {
       if (threeDLive) {
         try {
           HAND3D_RENDERER.update(buildKinSnapshot(CURRENT_SIM, getSampledState()));
+          // Warm the pose cache for upcoming shapes during idle time so the
+          // frame that reaches each new shape is a cheap cache hit, not a solve.
+          if (playing) _scheduleHandPosePrefill(tNow);
         } catch (e) {
           // A render fault must never blank the panel: fall back to SVG.
           disableHand3d();
