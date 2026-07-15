@@ -2449,7 +2449,12 @@ function initRenderer(data) {
 
   _rebuildMultiTrackBar(currentTrackId);
   _rebuildTrackTabs(currentTrackId);
-  _restoreSecondaryTracks(currentTrackId); // re-enable previously active secondary tracks
+  // Tabs are built before the backing channels exist, so their faders start
+  // disabled with no level to show; refresh them once the channels are in and
+  // the engine has balanced them.
+  _restoreSecondaryTracks(currentTrackId) // re-enable previously active secondary tracks
+    .then(() => _refreshTrackFaders())
+    .catch(() => { /* a track that fails to load just keeps its fader disabled */ });
   updatePlayButton(false);
   _setFollowPlayhead(true);
 }
@@ -2542,6 +2547,130 @@ function _wireTrackTabsNav() {
   if (right) right.addEventListener('click', () => _scrollTrackTabs(1));
 }
 
+/**
+ * Per-track level fader for the track tabs — the visible mixer.
+ *
+ * The engine auto-balances backing tracks by instrument kind, but that was
+ * invisible and unadjustable. Each tab now carries its own fader:
+ *  - the open track drives MIDI channel 0 (kept in sync with the toolbar slider);
+ *  - a backing track drives its own channel, and doing so pins the level against
+ *    the auto-balance — double-click hands it back (title says so).
+ * A muted track has no channel, so its fader is disabled rather than lying.
+ *
+ * @param {Object} t track descriptor from /api/tracks
+ * @param {boolean} isPrimary
+ * @param {boolean} isMuted
+ * @param {string} color tab tint, reused for the manual-override cue
+ * @returns {HTMLElement}
+ */
+function _buildTrackFader(t, isPrimary, isMuted, color) {
+  const wrap = document.createElement('div');
+  wrap.className = 'track-fader';
+
+  const slider = document.createElement('input');
+  slider.type = 'range';
+  slider.className = 'track-fader-range';
+  slider.min = '0';
+  slider.max = '100';
+  slider.step = '1';
+  slider.dataset.trackId = String(t.id);
+
+  const readout = document.createElement('span');
+  readout.className = 'track-fader-val';
+
+  const level = isPrimary
+    ? (playback ? playback.primaryVolume : 0.8)
+    : (playback ? playback.trackVolume(t.id) : null);
+  const manual = !isPrimary && !!playback?.trackVolumeIsManual(t.id);
+  const disabled = isMuted || level == null;
+
+  slider.value = String(Math.round((level ?? 0) * 100));
+  slider.disabled = disabled;
+  readout.textContent = disabled ? '—' : String(Math.round((level ?? 0) * 100));
+  wrap.dataset.manual = manual ? '1' : '0';
+  if (manual) readout.style.color = color;
+
+  const label = sanitize(t.name || `Track ${t.id}`);
+  const describe = () => {
+    if (disabled) return `${label} — muted`;
+    return wrap.dataset.manual === '1'
+      ? `${label} — level set by hand; double-click to auto-balance again`
+      : `${label} — auto-balanced level; drag to set it by hand`;
+  };
+  slider.title = describe();
+
+  const apply = (pct) => {
+    const v = Math.max(0, Math.min(100, pct)) / 100;
+    if (!playback) return;
+    if (isPrimary) {
+      playback.setChannelVolume(0, v);
+      // The toolbar slider drives the same channel — keep them from diverging.
+      if (rngTrackVolume) rngTrackVolume.value = String(Math.round(v * 100));
+    } else {
+      playback.setTrackVolume(t.id, v);
+      wrap.dataset.manual = '1';
+      readout.style.color = color;
+    }
+    readout.textContent = String(Math.round(v * 100));
+    slider.title = describe();
+  };
+
+  // The tab itself switches the primary track on click — the fader must not.
+  for (const ev of ['click', 'pointerdown', 'mousedown']) {
+    slider.addEventListener(ev, (e) => e.stopPropagation());
+  }
+  slider.addEventListener('input', () => apply(parseInt(slider.value, 10)));
+
+  if (!isPrimary) {
+    slider.addEventListener('dblclick', (e) => {
+      e.stopPropagation();
+      if (!playback) return;
+      const restored = playback.clearTrackVolumeOverride(t.id);
+      if (restored == null) return;
+      slider.value = String(Math.round(restored * 100));
+      readout.textContent = String(Math.round(restored * 100));
+      wrap.dataset.manual = '0';
+      readout.style.color = '';
+      slider.title = describe();
+    });
+  }
+
+  wrap.appendChild(slider);
+  wrap.appendChild(readout);
+  return wrap;
+}
+
+/**
+ * Sync every tab fader with the engine's current levels, in place.
+ *
+ * Needed because the tabs are built before the backing channels are registered
+ * (and because adding/removing a track re-balances the survivors): without this
+ * the strips would show a stale — or disabled — level for a track that is in
+ * fact playing at an auto-balanced one.
+ */
+function _refreshTrackFaders() {
+  if (!playback) return;
+  for (const wrap of document.querySelectorAll('#track-tabs-bar .track-fader')) {
+    const slider = wrap.querySelector('.track-fader-range');
+    const readout = wrap.querySelector('.track-fader-val');
+    if (!slider || !readout) continue;
+    const trackId = Number(slider.dataset.trackId);
+    const isPrimary = trackId === currentTrackId;
+    const level = isPrimary ? playback.primaryVolume : playback.trackVolume(trackId);
+    if (level == null) {                    // muted / not loaded → nothing to show
+      slider.disabled = true;
+      readout.textContent = '—';
+      continue;
+    }
+    // Never fight the user mid-drag.
+    if (document.activeElement === slider) continue;
+    slider.disabled = false;
+    slider.value = String(Math.round(level * 100));
+    readout.textContent = String(Math.round(level * 100));
+    wrap.dataset.manual = (!isPrimary && playback.trackVolumeIsManual(trackId)) ? '1' : '0';
+  }
+}
+
 function _rebuildTrackTabs(primaryTrackId) {
   const bar = $('#track-tabs-bar');
   if (!bar) return;
@@ -2616,6 +2745,7 @@ function _rebuildTrackTabs(primaryTrackId) {
     tab.appendChild(colorBar);
     tab.appendChild(body);
     tab.appendChild(instrBtn);
+    body.appendChild(_buildTrackFader(t, isPrimary, isMuted, color));
 
     // Mute button (secondary tracks only)
     if (!isPrimary) {
@@ -2629,6 +2759,9 @@ function _rebuildTrackTabs(primaryTrackId) {
         const oldBtn = _multiTrackBar ? _multiTrackBar.querySelector(`[data-track-id="${t.id}"]`) : null;
         _toggleSecondaryTrack(t.id, t.name || '', oldBtn || muteBtn).then(() => {
           _rebuildTrackTabs(primaryTrackId);
+          // Muting one of N same-kind tracks re-balances the survivors upward —
+          // the strips must show the levels the engine actually applied.
+          _refreshTrackFaders();
         });
       });
       tab.appendChild(muteBtn);
@@ -2980,7 +3113,17 @@ if (rngTrackVolume) {
   // Volume of the currently-open track (MIDI channel 0) so it can be balanced
   // against the backing tracks instead of always playing loudest.
   rngTrackVolume.addEventListener('input', () => {
-    if (playback) playback.setChannelVolume(0, parseInt(rngTrackVolume.value, 10) / 100);
+    const pct = parseInt(rngTrackVolume.value, 10);
+    if (playback) playback.setChannelVolume(0, pct / 100);
+    // Mirror onto the open track's tab fader — both drive MIDI channel 0, so
+    // leaving one stale would show two different levels for one channel.
+    const tab = document.querySelector('#track-tabs-bar .track-tab[data-active="1"]');
+    const slider = tab?.querySelector('.track-fader-range');
+    if (slider && !slider.disabled) {
+      slider.value = String(pct);
+      const readout = tab.querySelector('.track-fader-val');
+      if (readout) readout.textContent = String(pct);
+    }
   });
 }
 
