@@ -45,8 +45,9 @@ export class PlaybackEngine {
     this._audioCtx = null;
     this._masterGain = null;
     this._volume = 0.7;        // master volume 0..1
-    this._primaryVolume = 0.8; // current/open-track volume (CC7 on ch 0); balances
-                               // it against the 0.8 backing tracks instead of dominating
+    this._primaryVolume = 0.8; // current/open-track volume (CC7 on ch 0), owned by the
+                               // UI slider; backing tracks are balanced around it by
+                               // _rebalanceSecondaryChannels (kind level ÷ same-kind share)
     this._lastScheduledMeasure = -1;
     // ── Lookahead scheduler (see _pumpScheduler) ──────────────────────
     // Notes are queued on the AudioContext clock up to _lookaheadSec ahead of
@@ -70,7 +71,7 @@ export class PlaybackEngine {
     this._pitchBendRangeSemitones = 12; // wide enough for guitar slides, bends and vibrato
     this._pitchBendRangeChannels = new Set();
     // Secondary audio channels: [{trackId, trackName, measures, synth, gain, enabled,
-    //                             _loading, midiChannel, midiProgram}]
+    //                             _loading, midiChannel, midiProgram, kind, gainManual}]
     this._secondaryChannels = [];
 
     this._followPlayhead = true;  // scroll follows the playhead
@@ -406,6 +407,58 @@ export class PlaybackEngine {
   }
 
   /**
+   * Backing-track mix level by instrument kind (0..1), before same-kind sharing.
+   *
+   * A flat level for every backing track does not balance: a song with five
+   * rhythm/lead guitars stacks five sources of the same timbre in the same
+   * frequency band, burying a single bass or vocal that gets the identical
+   * level. These are mixing-desk defaults — bass and drums anchor, guitars sit
+   * back (there are usually several), keys/strings/pads support.
+   * @returns {Object<string, number>}
+   */
+  static get KIND_MIX_LEVEL() {
+    return { bass: 0.85, drums: 0.75, vocal: 0.80, guitar: 0.62, other: 0.55 };
+  }
+
+  static get KIND_MIX_DEFAULT() { return 0.62; }
+
+  /**
+   * Recompute every backing track's level so the mix stays balanced.
+   *
+   * Two rules:
+   *  1. Level by instrument kind (KIND_MIX_LEVEL) — a bass is not a guitar.
+   *  2. Equal-power sharing inside a kind: N tracks of the same kind each get
+   *     `level / sqrt(N)`, so five guitars together sit about where one guitar
+   *     would, instead of being five times louder than the lone bass.
+   *
+   * The primary (open) track is channel 0 and is never touched — the UI slider
+   * owns it (see setChannelVolume). A track the user has set by hand keeps its
+   * level (gainManual) so a rebalance never overrides an explicit choice.
+   */
+  _rebalanceSecondaryChannels() {
+    const counts = new Map();
+    for (const ch of this._secondaryChannels) {
+      const kind = String(ch.kind || 'other').toLowerCase();
+      counts.set(kind, (counts.get(kind) ?? 0) + 1);
+    }
+    for (const ch of this._secondaryChannels) {
+      if (ch.gainManual) continue;
+      const kind = String(ch.kind || 'other').toLowerCase();
+      const base = PlaybackEngine.KIND_MIX_LEVEL[kind] ?? PlaybackEngine.KIND_MIX_DEFAULT;
+      const share = Math.sqrt(counts.get(kind) ?? 1);
+      const gain = Math.max(0, Math.min(1, base / share));
+      ch.gain = gain;
+      // Apply live (incl. to sustaining notes); pre-init synths pick it up from
+      // ch.gain in _loadChannelInstrument instead.
+      if (this._spessa && ch.synth) {
+        try {
+          this._spessa.controllerChange(ch.midiChannel, 7, Math.round(gain * 127));
+        } catch (_) { /* synth not ready — _loadChannelInstrument applies ch.gain */ }
+      }
+    }
+  }
+
+  /**
    * Pick the lowest free MIDI channel for a secondary track.
    * Channel 0 is the primary track and channel 9 is the GM percussion channel
    * (a melodic part placed there plays as drums) — both are skipped. Reuses
@@ -461,8 +514,14 @@ export class PlaybackEngine {
     const ch = {
       trackId, trackName, measures, synth: null, gain: 0.8, enabled: true, _loading: false,
       midiChannel, midiProgram: resolvedProgram, percussion,
+      // Kind drives the mix level; percussion is authoritative for drums even when
+      // the backend sent no kind (a mis-named drum track must not mix as a guitar).
+      kind: String(kind || (percussion ? 'drums' : 'other')).toLowerCase(),
+      gainManual: false,
     };
     this._secondaryChannels.push(ch);
+    // Sets ch.gain before the (async) instrument load reads it for CC7.
+    this._rebalanceSecondaryChannels();
     if (this.audioEnabled && this._audioCtx) {
       this._loadChannelInstrument(ch).catch(err =>
         console.warn(`[FretWise] secondary channel "${trackName}" load failed:`, err)
@@ -480,6 +539,8 @@ export class PlaybackEngine {
       const ch = this._secondaryChannels[idx];
       if (ch.synth && ch.synth !== 'spessa') { try { ch.synth.stop(); } catch (_) {} }
       this._secondaryChannels.splice(idx, 1);
+      // Removing one of N same-kind tracks makes the survivors louder again.
+      this._rebalanceSecondaryChannels();
     }
   }
 
@@ -752,7 +813,9 @@ export class PlaybackEngine {
     } else {
       // Persist on the secondary channel so re-scheduling / catch-up keeps the level.
       const ch = this._secondaryChannels.find((c) => c.midiChannel === channel);
-      if (ch) ch.gain = v;
+      // gainManual pins it: an explicit user level must survive a rebalance
+      // triggered by another track being added or removed.
+      if (ch) { ch.gain = v; ch.gainManual = true; }
     }
     if (this._spessa) {
       try { this._spessa.controllerChange(channel, 7, Math.round(v * 127)); } catch (_) { /* pre-init */ }
