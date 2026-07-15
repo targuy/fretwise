@@ -825,6 +825,53 @@ export class PlaybackEngine {
   /** Volume of the primary (open) track, 0..1. */
   get primaryVolume() { return this._primaryVolume; }
 
+  /**
+   * Current level of a backing track, 0..1 — or null when it isn't playing.
+   * @param {number} trackId
+   * @returns {number|null}
+   */
+  trackVolume(trackId) {
+    const ch = this._secondaryChannels.find((c) => c.trackId === trackId);
+    return ch ? ch.gain : null;
+  }
+
+  /**
+   * Is this backing track's level set by hand (pinned against auto-balance)?
+   * @param {number} trackId
+   * @returns {boolean}
+   */
+  trackVolumeIsManual(trackId) {
+    const ch = this._secondaryChannels.find((c) => c.trackId === trackId);
+    return !!(ch && ch.gainManual);
+  }
+
+  /**
+   * Set a backing track's level by track id (mixer UI entry point). Pins the
+   * level against auto-balance — see setChannelVolume.
+   * @param {number} trackId
+   * @param {number} vol 0..1
+   * @returns {boolean} false when the track isn't playing
+   */
+  setTrackVolume(trackId, vol) {
+    const ch = this._secondaryChannels.find((c) => c.trackId === trackId);
+    if (!ch) return false;
+    this.setChannelVolume(ch.midiChannel, vol);
+    return true;
+  }
+
+  /**
+   * Drop a hand-set level and hand the track back to the auto-balance.
+   * @param {number} trackId
+   * @returns {number|null} the restored level, or null when not playing
+   */
+  clearTrackVolumeOverride(trackId) {
+    const ch = this._secondaryChannels.find((c) => c.trackId === trackId);
+    if (!ch) return null;
+    ch.gainManual = false;
+    this._rebalanceSecondaryChannels();
+    return ch.gain;
+  }
+
   /** Start or resume playback from current cursor */
   play() {
     if (this.isPlaying) return;

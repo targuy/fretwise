@@ -175,6 +175,46 @@ console.log(JSON.stringify(levels()));
     assert manual["gain"] == 0.2, "rebalance clobbered the user's explicit level"
 
 
+def test_track_volume_api_reads_and_writes_by_track_id() -> None:
+    """The mixer UI addresses tracks by id, not by MIDI channel."""
+    out = _run("""
+addTracks([{ kind: 'bass' }]);
+const auto = engine.trackVolume(1);
+const ok = engine.setTrackVolume(1, 0.4);
+console.log(JSON.stringify({
+  auto, ok, after: engine.trackVolume(1),
+  manual: engine.trackVolumeIsManual(1),
+  missing: engine.trackVolume(999),
+  missingWrite: engine.setTrackVolume(999, 0.5),
+}));
+""")
+    assert out["auto"] == 0.85
+    assert out["ok"] is True
+    assert out["after"] == 0.4
+    assert out["manual"] is True
+    assert out["missing"] is None, "a track that isn't playing has no level"
+    assert out["missingWrite"] is False
+
+
+def test_clear_override_hands_the_track_back_to_auto_balance() -> None:
+    """Double-click in the UI → the level returns to the balanced one."""
+    out = _run("""
+addTracks([{ kind: 'guitar' }, { kind: 'guitar' }]);
+engine.setTrackVolume(1, 0.05);
+const pinned = { gain: engine.trackVolume(1), manual: engine.trackVolumeIsManual(1) };
+const restored = engine.clearTrackVolumeOverride(1);
+console.log(JSON.stringify({
+  pinned, restored, manual: engine.trackVolumeIsManual(1),
+  missing: engine.clearTrackVolumeOverride(999),
+}));
+""")
+    assert out["pinned"] == {"gain": 0.05, "manual": True}
+    # trackVolume/clearTrackVolumeOverride return the raw gain, not a rounded one.
+    assert out["restored"] == pytest.approx(0.62 / 2**0.5)
+    assert out["manual"] is False
+    assert out["missing"] is None
+
+
 def test_primary_channel_volume_is_not_a_secondary_and_stays_slider_owned() -> None:
     """setChannelVolume(0) drives the open track only; backing levels are untouched."""
     out = _run("""

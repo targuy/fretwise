@@ -428,6 +428,62 @@ html, body { height: 100%; font-family: var(--ui); color: var(--fg-0); backgroun
 }
 .track-tab[data-active="1"] .track-tab-meta { color: var(--ink-score-soft); }
 
+/* ── Per-track level fader (the visible mixer) ────────────────
+   One slim channel strip per tab: the engine auto-balances backing tracks by
+   instrument kind, and this is where that level is shown and overridden. Inked
+   like the parchment tab it sits in, not like the dark chrome. */
+.track-fader {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-top: 3px;
+}
+.track-fader-range {
+  -webkit-appearance: none;
+  appearance: none;
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 3px;
+  border-radius: 2px;
+  background: oklch(0.62 0.03 70);
+  cursor: pointer;
+  margin: 0;
+}
+.track-fader-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--ink-score);
+  border: none;
+  cursor: pointer;
+}
+.track-fader-range::-moz-range-thumb {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--ink-score);
+  border: none;
+  cursor: pointer;
+}
+.track-fader-range:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+.track-fader-range:disabled::-webkit-slider-thumb { cursor: default; }
+.track-fader-val {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--ink-score-soft);
+  min-width: 17px;
+  text-align: right;
+  flex-shrink: 0;
+  font-variant-numeric: tabular-nums;
+}
+/* A hand-set level is pinned against the auto-balance — mark the strip so it is
+   obvious which tracks the mix is still free to move. */
+.track-fader[data-manual="1"] .track-fader-val { font-weight: 700; }
+.track-fader[data-manual="1"] .track-fader-range { background: oklch(0.52 0.09 60); }
+
 .track-mute-btn {
   width: 20px; height: 20px;
   flex-shrink: 0;
