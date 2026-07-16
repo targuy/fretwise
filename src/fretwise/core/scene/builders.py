@@ -375,6 +375,7 @@ def layout_to_render_scene(
                 standard_rhythm_events: list[tuple[float, float, float, float, str]] = []
                 tab_rhythm_events: list[tuple[float, float, float, float]] = []
                 tab_span_events: list[dict[str, object]] = []
+                standard_span_events: list[dict[str, object]] = []
                 tuplet_by_onset: dict[float, tuple[int, int]] = {}
                 accidental_columns_by_onset: dict[float, list[float]] = {}
                 shown_accidentals_by_step: dict[int, str | None] = {}
@@ -781,6 +782,13 @@ def layout_to_render_scene(
                                     ).lower() == "true",
                                 }
                             )
+                            standard_span_events.append(
+                                {
+                                    "x": note_x,
+                                    "onset": event_layout.onset,
+                                    "techniques": techniques,
+                                }
+                            )
 
                     if has_tab_rhythm:
                         voice_number = _safe_int(event_layout.metadata.get("voice_number")) or 0
@@ -845,6 +853,14 @@ def layout_to_render_scene(
                         measure_x=measure_layout.x,
                         measure_width=measure_layout.width,
                         events=tab_span_events,
+                    )
+                if has_standard and standard_span_events:
+                    _append_standard_let_ring_spans(
+                        notes_layer,
+                        measure_x=measure_layout.x,
+                        measure_width=measure_layout.width,
+                        events=standard_span_events,
+                        staff_top_y=staff_std_y,
                     )
 
             # Draw tie/slur arcs once per staff after all measures, so that
@@ -3017,6 +3033,13 @@ def _append_tab_technique_spans(
         string_num = int(event.get("tab_string", 3))
         by_string.setdefault(string_num, []).append(event)
 
+    # A single "L.R." caption is emitted for the whole measure; every string's
+    # let-ring run then draws only its own dashed line, sitting in that string's
+    # lane. Without this, a chord that lets several strings ring stacked one
+    # "L.R." label per string at the same x and packed the dashed lines into the
+    # inter-string gutters, producing the unreadable overlap.
+    let_ring_label_emitted = False
+
     for string_num, notes in by_string.items():
         notes_sorted = sorted(notes, key=lambda item: float(item.get("onset", 0.0)))
 
@@ -3114,13 +3137,96 @@ def _append_tab_technique_spans(
 
         for (x0, x1, y) in lr_runs:
             if x1 > x0 + 1.0:
+                # Draw the dashed sustain line just above THIS string's own line
+                # (in its lane), so per-string lines stay 1 tab-space apart and
+                # never pile onto a neighbour's fret digits. Label only once.
+                label = "L.R." if not let_ring_label_emitted else ""
+                let_ring_label_emitted = True
                 layer.recipe_instances.append(
                     RecipeInstance(
                         recipe_id="let_ring_span",
-                        params={"x0": x0, "x1": x1, "y": y - 8.0, "dash": "2,2"},
+                        params={"x0": x0, "x1": x1, "y": y - 3.0, "dash": "2,2",
+                                "label": label},
                         metadata={"string": str(string_num)},
                     )
                 )
+
+
+def _append_standard_let_ring_spans(
+    layer: LayerGroup,
+    *,
+    measure_x: float,
+    measure_width: float,
+    events: list[dict[str, object]],
+    staff_top_y: float,
+) -> None:
+    """Emit a single "let ring" dashed line above the standard staff.
+
+    Standard notation shows let-ring once per passage above the staff (unlike
+    tablature, which draws it per string). All let-ring notes in the measure are
+    grouped by onset; consecutive let-ring onsets form one run whose dashed line
+    runs from the first ringing note to the next struck note (or the measure end
+    when the ring is the last thing in the bar).
+
+    Args:
+        layer: Target layer group to append recipe instances to.
+        measure_x: Left edge x of the measure.
+        measure_width: Width of the measure.
+        events: Per-note dicts with ``x``, ``onset`` and ``techniques``.
+        staff_top_y: Y of the top staff line; the line sits above it.
+    """
+    by_onset: dict[float, dict[str, object]] = {}
+    for event in events:
+        onset = round(float(event.get("onset", 0.0)), 6)
+        # Keep the earliest x seen for the onset (chord notes share a column).
+        existing = by_onset.get(onset)
+        techs = set(event.get("techniques", set()))
+        rings = "let_ring" in techs
+        if existing is None:
+            by_onset[onset] = {"x": float(event.get("x", 0.0)), "rings": rings}
+        else:
+            existing["rings"] = bool(existing["rings"]) or rings
+            existing["x"] = min(float(existing["x"]), float(event.get("x", 0.0)))
+
+    onsets = sorted(by_onset)
+    measure_end = measure_x + measure_width - 4.0
+    run_start_x: float | None = None
+    label_emitted = False
+    for idx, onset in enumerate(onsets):
+        entry = by_onset[onset]
+        if entry["rings"]:
+            if run_start_x is None:
+                run_start_x = float(entry["x"])
+        else:
+            if run_start_x is not None:
+                # The current (non-ringing) note is the next strike: end here.
+                x1 = float(entry["x"]) - _TAB_SPAN_PAD
+                _emit_standard_let_ring(
+                    layer, run_start_x, x1, staff_top_y,
+                    label="" if label_emitted else "let ring",
+                )
+                label_emitted = True
+                run_start_x = None
+    if run_start_x is not None:
+        _emit_standard_let_ring(
+            layer, run_start_x, measure_end, staff_top_y,
+            label="" if label_emitted else "let ring",
+        )
+
+
+def _emit_standard_let_ring(
+    layer: LayerGroup, x0: float, x1: float, staff_top_y: float, *, label: str
+) -> None:
+    """Append one ``let_ring_line`` recipe if the span has positive width."""
+    if x1 <= x0 + 1.0:
+        return
+    layer.recipe_instances.append(
+        RecipeInstance(
+            recipe_id="let_ring_line",
+            params={"x0": x0 + _TAB_SPAN_PAD, "x1": x1, "y": staff_top_y - 14.0,
+                    "label": label},
+        )
+    )
 
 
 def _parse_techniques(value: str | None) -> set[str]:

@@ -688,6 +688,70 @@ def test_canonical_to_render_scene_tab_contains_technique_spans() -> None:
     assert "P.M." in svg
 
 
+def _let_ring_recipes(result: object, recipe_id: str) -> list[object]:
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    out: list[object] = []
+    for layer in staff.layer_groups:
+        out.extend(r for r in layer.recipe_instances if r.recipe_id == recipe_id)
+    return out
+
+
+def test_pure_standard_view_shows_let_ring_line_above_staff() -> None:
+    """Regression: pure Staff used to render nothing for let-ring notes."""
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=64, onset=0.0, duration=1.0, string_hint=1, fret_hint=0, let_ring=True),
+            _note(pitch=66, onset=1.0, duration=1.0, string_hint=1, fret_hint=2),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
+    svg = render_scene_to_svg(result.render_scene)
+
+    lines = _let_ring_recipes(result, "let_ring_line")
+    assert lines, "pure Staff must emit a let-ring line"
+    assert ">let ring<" in svg
+    # It sits above the top staff line, and spans a positive width.
+    line = lines[0]
+    assert line.params["x1"] > line.params["x0"]
+    # No tab spans exist in a pure-standard scene.
+    assert not _let_ring_recipes(result, "let_ring_span")
+    assert result.conformance_issues == []
+
+
+def test_mixed_view_let_ring_spans_are_per_lane_and_captioned_once() -> None:
+    """Regression: a let-ring chord stacked one 'L.R.' per string and packed the
+    dashed lines together. Now each string's line sits in its own lane and the
+    caption is emitted exactly once."""
+    raw_score = legacy_parse_to_raw_score(
+        Path("song.gp"),
+        source_format="gpif",
+        events=[
+            _note(pitch=64, onset=0.0, duration=1.0, string_hint=1, fret_hint=0, let_ring=True),
+            _note(pitch=59, onset=0.0, duration=1.0, string_hint=2, fret_hint=0, let_ring=True),
+            _note(pitch=55, onset=0.0, duration=1.0, string_hint=3, fret_hint=0, let_ring=True),
+            _note(pitch=64, onset=1.0, duration=1.0, string_hint=1, fret_hint=2),
+            _note(pitch=59, onset=1.0, duration=1.0, string_hint=2, fret_hint=2),
+            _note(pitch=55, onset=1.0, duration=1.0, string_hint=3, fret_hint=2),
+        ],
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score, representation_mode=RepresentationMode.STANDARD_TAB
+    )
+    spans = _let_ring_recipes(result, "let_ring_span")
+    assert len(spans) == 3, "one dashed line per ringing string"
+
+    labelled = [s for s in spans if s.params.get("label")]
+    assert len(labelled) == 1, "the 'L.R.' caption must be drawn exactly once"
+
+    ys = sorted(float(s.params["y"]) for s in spans)
+    gaps = [b - a for a, b in zip(ys, ys[1:])]
+    # Each line lives in its own string lane: adjacent lines are a full tab
+    # spacing apart, never crammed into the same row (the old overlap bug).
+    assert all(g > 6.0 for g in gaps), f"lines overlap: gaps={gaps}"
+
+
 def test_canonical_to_render_scene_tablature_rhythm_emits_rhythm_recipes() -> None:
     score = Score(
         score_id="s-tab-rhythm",

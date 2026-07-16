@@ -260,6 +260,12 @@ def default_notation_policy() -> NotationPolicy:
             anchor=SymbolAnchor.TAB,
             notes="Instrumental effect span anchored to tablature plane.",
         ),
+        "let_ring_line": SymbolRule(
+            symbol_id="let_ring_line",
+            allowed_modes=standard_modes,
+            anchor=SymbolAnchor.STANDARD,
+            notes="Let-ring sustain line drawn above the standard staff.",
+        ),
     }
 
     return NotationPolicy(
