@@ -604,7 +604,64 @@ export class TabRenderer {
       .sort((a, b) => a.note.onset - b.note.onset);
 
     this._drawAnnotationBand(ctx, sorted, 'palm_muted',  staffBottom + 5,  'P.M.', COL_PM);
-    this._drawAnnotationBand(ctx, sorted, 'let_ring',    staffBottom + 14, 'let ring', COL_LET_RING);
+    // Let-ring is drawn per string (a dashed sustain line running from each
+    // ringing note along its own string to the next strike), NOT as a single
+    // band: the band collapsed every string onto one row and drew nothing at all
+    // for isolated ringing notes. Per-string lines sit in their own string lane,
+    // so they never overlap one another.
+    this._drawLetRingStrings(ctx, sorted, sysY, mX, mW);
+  }
+
+  // ── Let-ring: per-string dashed sustain lines ─────────────────────
+
+  _drawLetRingStrings(ctx, sortedPositions, sysY, mX, mW) {
+    const byString = new Map();
+    for (const np of sortedPositions) {
+      const s = np.note.string;
+      if (!Number.isInteger(s)) continue;
+      if (!byString.has(s)) byString.set(s, []);
+      byString.get(s).push(np);
+    }
+
+    const measureRight = mX + mW - RIGHT_PAD;
+    // Collect segments first so the single "let ring" caption can be anchored to
+    // the leftmost ringing note in the measure.
+    const segments = [];
+    let labelX = Infinity;
+    for (const positions of byString.values()) {
+      positions.sort((a, b) => a.note.onset - b.note.onset);
+      for (let i = 0; i < positions.length; i++) {
+        const np = positions[i];
+        if (!np.note.let_ring) continue;
+        const startX = np.x + NOTE_RX + 2;
+        const next = positions[i + 1];
+        // The ring lasts until the next strike on THIS string, else the bar end.
+        const endX = next ? next.x - NOTE_RX - 1 : measureRight;
+        if (endX <= startX + 3) continue;
+        segments.push({ startX, endX, y: np.y - 4 });
+        labelX = Math.min(labelX, np.x - NOTE_RX);
+      }
+    }
+    if (!segments.length) return;
+
+    ctx.save();
+    ctx.strokeStyle = COL_LET_RING;
+    ctx.lineWidth = 0.9;
+    for (const seg of segments) {
+      ctx.setLineDash([3, 2]);
+      ctx.beginPath();
+      ctx.moveTo(seg.startX, seg.y);
+      ctx.lineTo(seg.endX, seg.y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    // One caption for the whole measure, sitting above the top string line.
+    ctx.fillStyle = COL_LET_RING;
+    ctx.font = `500 7.5px ${SANS}`;
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('let ring', labelX, sysY + ABOVE_STRINGS - 7);
+    ctx.restore();
   }
 
   _drawAnnotationBand(ctx, sortedPositions, field, y, label, color) {

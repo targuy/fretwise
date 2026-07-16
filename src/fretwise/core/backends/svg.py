@@ -80,9 +80,18 @@ def render_scene_to_svg(scene: RenderScene) -> str:
                         out.extend(
                             _render_tab_span(
                                 recipe.params,
-                                label="L.R.",
+                                label=str(recipe.params.get("label", "L.R.")),
                                 stroke="#446",
                                 dy=-1.0,
+                            )
+                        )
+                    elif recipe.recipe_id == "let_ring_line":
+                        out.extend(
+                            _render_tab_span(
+                                recipe.params,
+                                label=str(recipe.params.get("label", "let ring")),
+                                stroke="#446",
+                                dy=-2.0,
                             )
                         )
                     elif recipe.recipe_id == "palm_mute_span":
@@ -281,13 +290,17 @@ def _render_tab_span(
     y = float(params.get("y", 0.0))
     if x1 <= x0:
         return []
-    text = (
-        f'<text x="{x0:.2f}" y="{(y + dy):.2f}" '
-        f'font-family="Helvetica" font-size="6">{escape(label)}</text>'
-    )
     line = (
         f'<line x1="{x0:.2f}" y1="{y:.2f}" x2="{x1:.2f}" y2="{y:.2f}" '
         f'stroke="{stroke}" stroke-width="0.8" stroke-dasharray="3 2"/>'
+    )
+    # An empty label yields only the dashed line — used when several spans share
+    # one caption (e.g. a let-ring chord captions once, then draws bare lines).
+    if not label:
+        return [line]
+    text = (
+        f'<text x="{x0:.2f}" y="{(y + dy):.2f}" '
+        f'font-family="Helvetica" font-size="6">{escape(label)}</text>'
     )
     return [text, line]
 
