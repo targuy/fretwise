@@ -108,8 +108,28 @@ export class SlopeRenderer {
     const rect = this.canvas.getBoundingClientRect();
     if (!rect.width || !rect.height) return;
     this.dpr = this._renderDpr();
-    this.canvas.width = Math.max(1, Math.floor(rect.width * this.dpr));
-    this.canvas.height = Math.max(1, Math.floor(rect.height * this.dpr));
+    // Device-pixel-exact backing store: floor(rect * dpr), same math the CSS
+    // box is pinned to below.
+    const bw = Math.max(1, Math.floor(rect.width * this.dpr));
+    const bh = Math.max(1, Math.floor(rect.height * this.dpr));
+    this.canvas.width = bw;
+    this.canvas.height = bh;
+    // Pin the CSS box to the EXACT size the backing store was sized for
+    // (bw/dpr, bh/dpr), in px — not the stylesheet's `width:100%`. Left as a
+    // percentage, the box's rendered size is whatever the layout engine
+    // computes for "100% of the parent" on each paint, independently of the
+    // integer-pixel backing store above; any sub-pixel drift between the two
+    // (sub-pixel layout rounding, a scrollbar appearing, a parent reflow)
+    // makes the browser resample the ENTIRE canvas to fit the box each
+    // frame — a continuous soft blur on exactly the high-frequency content
+    // (glyph edges) that _snapPx/_snapFontSizeClamped worked to make crisp,
+    // while low-frequency content (fret-disc circles, lane lines) looks
+    // almost unaffected. That mismatch is invisible to source-level pixel
+    // math (draw calls land on exact device pixels of the BACKING STORE) —
+    // it only shows up as the compositor scales the finished bitmap into a
+    // box of a slightly different size.
+    this.canvas.style.width = `${bw / this.dpr}px`;
+    this.canvas.style.height = `${bh / this.dpr}px`;
     this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
     this.ctx.imageSmoothingEnabled = false;
     this._geometry = null;

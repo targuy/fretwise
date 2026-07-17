@@ -21,10 +21,18 @@ def _slope_js() -> str:
 
 
 def test_slope_backing_store_matches_client_size_times_dpr() -> None:
-    """resize() sizes the canvas backing store from clientWidth/Height * dpr."""
+    """resize() sizes the canvas backing store from clientWidth/Height * dpr, and
+    pins the CSS box to that same size (see test_web_slope_text_sharpness.py's
+    behavioral test_css_box_is_pinned_to_the_exact_backing_store_size for why
+    the pin matters — a bare `width:100%` box can drift from the backing store
+    and get resampled by the browser, blurring text)."""
     js = _slope_js()
-    assert "this.canvas.width = Math.max(1, Math.floor(rect.width * this.dpr));" in js
-    assert "this.canvas.height = Math.max(1, Math.floor(rect.height * this.dpr));" in js
+    assert "const bw = Math.max(1, Math.floor(rect.width * this.dpr));" in js
+    assert "const bh = Math.max(1, Math.floor(rect.height * this.dpr));" in js
+    assert "this.canvas.width = bw;" in js
+    assert "this.canvas.height = bh;" in js
+    assert "this.canvas.style.width = `${bw / this.dpr}px`;" in js
+    assert "this.canvas.style.height = `${bh / this.dpr}px`;" in js
     assert "this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);" in js
 
 
