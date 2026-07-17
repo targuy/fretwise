@@ -621,7 +621,12 @@ export class SlopeRenderer {
   }
 
   _circleRadius() {
-    return Math.max(10, Math.min(16, this._laneSpacing() * 0.36));
+    // Bumped 10-16 -> 12-18 (Lot C follow-up #2, legibility): the old cap left
+    // ~6px of headroom for a fret digit + note-name letter stacked in one
+    // disc — too little regardless of pixel-crispness. Capped at 18, not
+    // higher, so adjacent-string discs (spacing tops out at 44px) keep a
+    // visible gap rather than touching.
+    return Math.max(12, Math.min(18, this._laneSpacing() * 0.40));
   }
 
   _pixelBeats(px) {
@@ -918,16 +923,6 @@ export class SlopeRenderer {
     return devicePx / dpr;
   }
 
-  /* Same rounding, but returns null when the size would still fall under the
-     floor even after rounding up — for OPTIONAL text (the note-name letter)
-     where an illegible sub-floor glyph is worse than not drawing it. */
-  _snapFontSizeOrNull(cssSize, floorDevicePx) {
-    const dpr = this.dpr || 1;
-    const devicePx = Math.round(cssSize * dpr);
-    if (devicePx < floorDevicePx) return null;
-    return devicePx / dpr;
-  }
-
   _drawFretDisc(ctx, note, point, radius, meta, showText = true) {
     const exportWarning = note.gp_fingering_export_status === 'missing_source_note_id';
     ctx.fillStyle = exportWarning ? '#ffe3e3' : (meta.discColor || '#fffdf2');
@@ -945,22 +940,36 @@ export class SlopeRenderer {
     const noteName = note.noteName || '';
     const alpha = ctx.globalAlpha;
     const px = this._snapPx(point.x);
-    // Fret digit: always drawn, floor 11 device px (S-1) — never skipped,
-    // it's the primary readability requirement.
-    const fretSizeRaw = noteName ? Math.max(10, radius * 0.82) : Math.max(11, radius * 0.98);
-    const fretSize = this._snapFontSizeClamped(fretSizeRaw, 11);
+    const dpr = this.dpr || 1;
+    // Legibility floors (Lot C follow-up #2): the floor MUST be expressed as
+    // `desiredCssPx * dpr`, not a bare device-px constant. A bare device-px
+    // floor (the old "11 device px") is fine at dpr>=2 but on a 1x display —
+    // the common case on a high-refresh (144-240Hz) gaming monitor, which is
+    // almost never run at fractional OS scaling — device px === CSS px, so
+    // "11 device px" is really just an 11 CSS px floor... except the OLD
+    // note-name floor (8 device px) with the old raw size formula
+    // (radius*0.38, ~6 CSS px at max radius) computed devicePx=round(6*1)=6,
+    // BELOW the floor of 8, so _snapFontSizeOrNull returned null — the
+    // note-name letter was silently never drawn at all on a 1x display,
+    // independent of every crispness fix (backing-store DPR, CSS-box pin):
+    // there was nothing there to be crisp. Scaling the floor by dpr fixes
+    // that at the source, and raising both floors to real reading sizes (not
+    // just "big enough to rasterize cleanly") addresses the digit being
+    // technically crisp but still too small to read while gliding.
+    const fretSizeRaw = noteName ? Math.max(13, radius * 0.80) : Math.max(14, radius * 0.95);
+    const fretSize = this._snapFontSizeClamped(fretSizeRaw, Math.round(13 * dpr));
     ctx.font = `900 ${fretSize}px Inter, sans-serif`;
     ctx.fillText(String(note.fret), px, this._snapPx(point.y - (noteName ? radius * 0.18 : -0.5)));
     if (noteName) {
-      // Note-name letter: optional, floor 8 device px — a sub-floor glyph is
-      // dropped rather than rendered as illegible mush.
-      const nameSize = this._snapFontSizeOrNull(Math.max(6, radius * 0.38), 8);
-      if (nameSize != null) {
-        ctx.globalAlpha = alpha * 0.88;
-        ctx.font = `850 ${nameSize}px Inter, sans-serif`;
-        ctx.fillText(noteName, px, this._snapPx(point.y + radius * 0.42));
-        ctx.globalAlpha = alpha;
-      }
+      // Note-name letter: guaranteed >=9 CSS px now (never dropped — a
+      // consistently-small differentiator letter beats one that vanishes on
+      // some displays and not others).
+      const nameSizeRaw = Math.max(9, radius * 0.44);
+      const nameSize = this._snapFontSizeClamped(nameSizeRaw, Math.round(9 * dpr));
+      ctx.globalAlpha = alpha * 0.88;
+      ctx.font = `850 ${nameSize}px Inter, sans-serif`;
+      ctx.fillText(noteName, px, this._snapPx(point.y + radius * 0.42));
+      ctx.globalAlpha = alpha;
     }
   }
 
