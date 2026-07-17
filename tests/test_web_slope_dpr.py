@@ -46,25 +46,33 @@ def test_slope_canvas_has_no_css_transform_scale() -> None:
 
 
 def test_slope_text_snapping_helpers_present() -> None:
-    """T-P3.1/T-P3.2: device-pixel position snap + integer font-size floors."""
+    """T-P3.1/T-P3.2: device-pixel position snap + integer font-size floor.
+
+    (Behavioral coverage of the actual legibility numbers — the real point of
+    this mechanism — lives in test_web_slope_text_sharpness.py; this is just a
+    presence guard for the helpers themselves.)"""
     js = _slope_js()
     assert "_snapPx(v)" in js
     assert "_snapFontSizeClamped(cssSize, floorDevicePx)" in js
-    assert "_snapFontSizeOrNull(cssSize, floorDevicePx)" in js
 
 
-def test_fret_disc_uses_snapped_positions_and_floored_fonts() -> None:
+def test_fret_disc_uses_snapped_positions_and_dpr_scaled_floors() -> None:
     """_drawFretDisc (the moving fret-number label) must use the snap helpers,
-    not raw fillText(point.x, point.y) with unclamped font sizes."""
+    not raw fillText(point.x, point.y) with unclamped font sizes — and both
+    floors must scale with dpr (Math.round(N * dpr)), not a bare device-px
+    constant, which vanished the note-name letter entirely on a 1x display
+    (see test_note_name_letter_is_never_dropped_on_a_1x_display)."""
     js = _slope_js()
     disc_start = js.index("_drawFretDisc(ctx, note, point, radius, meta, showText = true) {")
     disc_end = js.index("\n  }", disc_start)
     body = js[disc_start:disc_end]
     assert "this._snapPx(point.x)" in body
-    assert "this._snapFontSizeClamped(fretSizeRaw, 11)" in body
-    assert "this._snapFontSizeOrNull(" in body
+    assert "this._snapFontSizeClamped(fretSizeRaw, Math.round(13 * dpr))" in body
+    assert "this._snapFontSizeClamped(nameSizeRaw, Math.round(9 * dpr))" in body
     # Fret digit is never optional — it must always be drawn.
     assert "ctx.fillText(String(note.fret)" in body
+    # Note-name letter is now unconditional too (no more "if (nameSize != null)").
+    assert "nameSize != null" not in body
 
 
 def test_chord_label_uses_snapped_position() -> None:
