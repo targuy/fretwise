@@ -164,6 +164,44 @@ console.log(JSON.stringify({
     assert out["fretDevXInt"], "fret digit off the device grid after degrade"
 
 
+def test_css_box_is_pinned_to_the_exact_backing_store_size() -> None:
+    """THE FIX (follow-up): resize() must pin canvas.style.width/height to the
+    exact px the backing store was sized for, not leave the stylesheet's
+    `width:100%` in charge.
+
+    Left as a percentage, the browser recomputes the CSS box size fresh on
+    every paint (sub-pixel layout rounding, a reflow, a scrollbar appearing);
+    any drift between that box and the backing store's integer-pixel size
+    makes the COMPOSITOR resample the whole canvas to fit — a continuous soft
+    blur on exactly the high-frequency content (glyph edges) that _snapPx
+    already made land on exact device pixels. Reproduced here with a
+    fractional bounding-rect width (843.7px), the realistic case (a
+    non-integer container width, common at 125%/150% Windows display
+    scaling) that a naive integer-rect test would never catch."""
+    out = _run("""
+canvas.getBoundingClientRect = () => ({ width: 843.7, height: 512.3, left: 0, top: 0 });
+r.resize();
+console.log(JSON.stringify({
+  backingW: canvas.width,
+  backingH: canvas.height,
+  styleW: canvas.style.width,
+  styleH: canvas.style.height,
+  dpr: r.dpr,
+}));
+""")
+    # The CSS box (parsed back from the "<n>px" string) must reproduce the
+    # backing store exactly: backingW / dpr, to full float precision — any
+    # rounding here is exactly the drift that causes compositor resampling.
+    css_w = float(out["styleW"].removesuffix("px"))
+    css_h = float(out["styleH"].removesuffix("px"))
+    assert css_w == out["backingW"] / out["dpr"]
+    assert css_h == out["backingH"] / out["dpr"]
+    # And the stylesheet's 100% must no longer be the deciding size — an
+    # explicit px value is set.
+    assert out["styleW"] != "100%"
+    assert out["styleH"] != "100%"
+
+
 def test_font_size_snaps_to_integer_device_pixels() -> None:
     """Font sizes must land on whole device pixels (a fractional-device-px glyph
     is what reads as mush); the clamped variant enforces a floor, the OrNull
