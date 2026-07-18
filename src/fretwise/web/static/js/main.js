@@ -46,13 +46,13 @@ const _slopeModeSeg = document.getElementById('slope-mode-seg');
 // Persisted like the mode; applies regardless of which sub-mode is active
 // (a slower glide helps P1's moving discs too, not just P2's own readout).
 const _SLOPE_DENSITY_KEY = 'fretwise.slopeDensity';
-const _SLOPE_DENSITY_MIN = 6;
-const _SLOPE_DENSITY_MAX = 24;
+const _SLOPE_DENSITY_MIN = 24;
+const _SLOPE_DENSITY_MAX = 48;
 let _slopeDensity = (() => {
   try {
     const v = Number(localStorage.getItem(_SLOPE_DENSITY_KEY));
-    return Number.isFinite(v) && v >= _SLOPE_DENSITY_MIN && v <= _SLOPE_DENSITY_MAX ? v : 12;
-  } catch (_) { return 12; }
+    return Number.isFinite(v) && v >= _SLOPE_DENSITY_MIN && v <= _SLOPE_DENSITY_MAX ? v : 24;
+  } catch (_) { return 24; }
 })();
 const _slopeDensityCtrl = document.getElementById('slope-density-ctrl');
 const _rngSlopeDensity = document.getElementById('rng-slope-density');
@@ -4062,7 +4062,7 @@ if (_rngSlopeDensity) {
   _rngSlopeDensity.addEventListener('input', () => {
     const beats = Math.max(
       _SLOPE_DENSITY_MIN,
-      Math.min(_SLOPE_DENSITY_MAX, parseFloat(_rngSlopeDensity.value) || 12),
+      Math.min(_SLOPE_DENSITY_MAX, parseFloat(_rngSlopeDensity.value) || 24),
     );
     _slopeDensity = beats;
     try { localStorage.setItem(_SLOPE_DENSITY_KEY, String(beats)); } catch (_) { /* private mode */ }
