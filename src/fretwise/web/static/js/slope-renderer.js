@@ -70,9 +70,8 @@ export class SlopeRenderer {
     this.currentBeat = 0;
     this.visible = false;
     // Legibility aid mode (P1–P4): 'base' = raw slope, 'p1' = fixed reading
-    // band (default), 'p2' = density control (below). See setLegibilityMode.
-    // P3–P4 are staged follow-ups; for now they render as 'base' plus a
-    // corner tag naming what's coming.
+    // band (default), 'p2' = density control, 'p3' = strike magnifier (see
+    // _drawStrikeMagnifier). See setLegibilityMode.
     this.legibilityMode = 'p1';
     // P2 (density): how many beats of future notes are visible on screen at
     // once. Fewer beats -> the same physical path length covers less musical
@@ -310,6 +309,8 @@ export class SlopeRenderer {
       this._drawReadingBand(w, h);
     } else if (this.legibilityMode === 'p2') {
       this._drawDensityReadout(w, h);
+    } else if (this.legibilityMode === 'p3') {
+      this._drawStrikeMagnifier(w, h);
     } else if (this.legibilityMode !== 'base') {
       this._drawModeComingSoonTag(w, h);
     }
@@ -327,9 +328,17 @@ export class SlopeRenderer {
     let cur = null;
     for (const n of ahead) {
       if (!cur || Math.abs(n.onset - cur.onset) > eps) {
+        // Check the cap BEFORE starting a new group, not after: the group
+        // just pushed for maxGroups may be a chord (several notes sharing
+        // this onset) whose later notes haven't been seen yet in this sorted
+        // pass — breaking right after the push would drop them, silently
+        // truncating the last group's chord down to whichever single note
+        // happened to sort first (lowest string). Most visible with
+        // maxGroups=1 (P3's single-group magnifier), but the same truncation
+        // could hit P1's 4th group too.
+        if (groups.length >= maxGroups) break;
         cur = { onset: n.onset, notes: [n] };
         groups.push(cur);
-        if (groups.length >= maxGroups) break;
       } else {
         cur.notes.push(n);
       }
@@ -507,11 +516,110 @@ export class SlopeRenderer {
 
   _drawModeComingSoonTag(w, h) {
     const label = {
-      p3: 'P3 — loupe de lecture (à venir)',
       p4: 'P4 — défilement cranté (à venir)',
     }[this.legibilityMode] || '';
     if (!label) return;
     this._drawTag(w, h, label, 'rgba(255,210,90,0.95)');
+  }
+
+  /* P3 — reading magnifier before the strike. Where P1 previews a ROW of
+     upcoming groups (read while there's still several beats of runway) and
+     P2 just enlarges the moving discs, P3 answers a narrower question: "what
+     am I about to play, right now, in fixation, at maximum size?" It shows
+     ONLY the single next unstruck group, as large as the lane gap allows,
+     with a shrinking countdown bar that reads the remaining time as a static
+     fill level (not motion) — the group swaps the instant it's struck, a
+     discrete flip rather than a glide, so there's never a moment where the
+     magnifier itself is something the eye has to track. */
+  _drawStrikeMagnifier(w, h) {
+    const groups = this._upcomingNotes(1);
+    if (!groups.length) return;
+    const group = groups[0];
+    const ctx = this.ctx;
+    const pad = 12;
+
+    const g = this._foldGeometry();
+    const gapTop = g.topBase + g.spread / 2;
+    const gapBottom = g.bottomBase - g.spread / 2;
+    // Same arc-avoidance as P1's band (see _drawReadingBand): stay left of
+    // the string turn, whose rightmost bulge sits at this gap's vertical
+    // center.
+    const maxRight = Math.max(240, g.bendX - g.outerRadius - 24);
+    const cardW = Math.min(360, maxRight - pad * 2);
+    const cardH = Math.max(56, gapBottom - gapTop - 24);
+    const cardX = Math.max(pad, (maxRight - cardW) / 2);
+    const cardY = (gapTop + gapBottom) / 2 - cardH / 2;
+
+    const beatsAway = Math.max(0, group.onset - this.currentBeat);
+    // A full window's worth of lead time reads as a full bar; 0 beats away
+    // (the strike instant) reads as empty. minimumGapBeats is the shortest
+    // gap the renderer already treats as "distinct notes", so it's a sane
+    // floor for what "about to strike" means.
+    const horizonBeats = Math.max(this._minimumGapBeats() * 4, 1.5);
+    const urgency = 1 - this._clamp(beatsAway / horizonBeats, 0, 1);
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(6, 8, 12, 0.88)';
+    ctx.fillRect(cardX - 8, cardY - 8, cardW + 16, cardH + 16);
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.font = '600 11px Inter, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('AVANT LA FRAPPE', cardX, cardY - 12);
+
+    ctx.fillStyle = 'rgba(76,175,80,0.14)';
+    this._roundRect(ctx, cardX, cardY, cardW, cardH, 10);
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(76,175,80,0.9)';
+    ctx.lineWidth = 2;
+    this._roundRect(ctx, cardX, cardY, cardW, cardH, 10);
+    ctx.stroke();
+
+    // Countdown bar: a static fill level, not a moving element — it still
+    // communicates "how soon" without asking the eye to track anything.
+    const barH = 6;
+    const barY = cardY + cardH - barH - 8;
+    ctx.fillStyle = 'rgba(255,255,255,0.12)';
+    this._roundRect(ctx, cardX + 10, barY, cardW - 20, barH, 3);
+    ctx.fill();
+    ctx.fillStyle = urgency > 0.75 ? 'rgba(255,138,101,0.95)' : 'rgba(76,175,80,0.95)';
+    this._roundRect(ctx, cardX + 10, barY, (cardW - 20) * urgency, barH, 3);
+    ctx.fill();
+
+    const rows = group.notes.slice(0, 4);
+    const rowsTop = cardY + 26;
+    const rowsH = barY - 10 - rowsTop;
+    const rowH = rowsH / rows.length;
+    const dotR = Math.min(16, Math.max(9, rowH * 0.28));
+    const dotX = cardX + 26;
+    const digitX = dotX + dotR + 14;
+    const digitMaxW = (cardW - (digitX - cardX) - 90) / 0.62;
+    rows.forEach((n, ri) => {
+      const cy = rowsTop + rowH * ri + rowH / 2;
+      const meta = FINGER_META[String(n.finger || '').toLowerCase()] || FINGER_META.open;
+      ctx.fillStyle = meta.color;
+      ctx.beginPath();
+      ctx.arc(dotX, cy, dotR, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'middle';
+      ctx.font = `900 ${Math.max(20, Math.min(56, rowH * 0.86, digitMaxW))}px Inter, sans-serif`;
+      ctx.fillText(String(n.fret), digitX, cy);
+      ctx.fillStyle = 'rgba(255,255,255,0.78)';
+      ctx.font = '700 18px Inter, sans-serif';
+      ctx.fillText(`${n.noteName || ''}`, cardX + cardW - 66, cy - 9);
+      ctx.fillStyle = 'rgba(255,255,255,0.55)';
+      ctx.font = '600 14px Inter, sans-serif';
+      ctx.fillText(`${STRING_NAMES[n.string] || ''}${n.string}`, cardX + cardW - 66, cy + 11);
+    });
+
+    ctx.fillStyle = 'rgba(76,175,80,0.9)';
+    ctx.font = '700 12px Inter, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText(`+${beatsAway.toFixed(2)}`, cardX + cardW - 6, cardY + cardH + 20);
+    ctx.restore();
   }
 
   _roundRect(ctx, x, y, w, h, r) {

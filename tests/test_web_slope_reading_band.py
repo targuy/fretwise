@@ -276,9 +276,10 @@ console.log(JSON.stringify(t.all));
 
 
 def test_unimplemented_modes_render_a_coming_soon_tag() -> None:
-    """P2–P4 aren't built yet: they render as base plus a corner tag naming the
-    plan, so the button does something honest rather than nothing."""
-    for mode in ("p2", "p3", "p4"):
+    """P4 isn't built yet: it renders as base plus a corner tag naming the
+    plan, so the button does something honest rather than nothing. (P2 and
+    P3 are live now — see test_web_slope_density.py / test_web_slope_strike_magnifier.py.)"""
+    for mode in ("p4",):
         out = _run(f"""
 r.setLegibilityMode('{mode}');
 const t = frameTexts(1.0);
