@@ -72,15 +72,21 @@ const data = {{
 }};
 const r = new SlopeRenderer(canvas, data);
 
-// Record the fillText calls in the bottom reading-band region for one frame.
+// Record the fillText calls inside the reading-band region for one frame. The
+// band is centered in the gap between the two lanes (see _drawReadingBand's
+// comment) — derive that same region from the renderer's own geometry rather
+// than a guessed pixel range, so this stays correct if the layout changes.
 function frameTexts(beat) {{
   r.currentBeat = beat;
   fillLog.length = 0;
   r.render();
-  const h = canvas.clientHeight;
+  const g = r._foldGeometry();
+  const gapTop = g.topBase + g.spread / 2;
+  const gapBottom = g.bottomBase - g.spread / 2;
   return {{
     all: fillLog.map((e) => e.txt),
-    band: fillLog.filter((e) => e.y > h - 140).map((e) => e.txt),
+    band: fillLog.filter((e) => e.y >= gapTop && e.y <= gapBottom).map((e) => e.txt),
+    outsideBand: fillLog.filter((e) => e.y < gapTop || e.y > gapBottom).map((e) => e.txt),
   }};
 }}
 
@@ -96,6 +102,35 @@ function frameTexts(beat) {{
     )
     assert proc.returncode == 0, f"node failed:\n{proc.stderr}"
     return json.loads(proc.stdout)
+
+
+def test_p1_band_sits_in_the_gap_not_under_the_bottom_toolbar() -> None:
+    """Regression: the band used to be pinned to the bottom edge, which is
+    covered by the fixed playback toolbar + scrubber (main.js BOT_GUTTER,
+    ~88px) — invisible/clipped in practice ("coupe en bas, pas lisible"). It
+    must now sit centered in the gap between the two lanes, clear of both the
+    bottom toolbar zone and the lanes themselves."""
+    out = _run("""
+r.setLegibilityMode('p1');
+r.currentBeat = 2.0; fillLog.length = 0; r.render();
+const g = r._foldGeometry();
+const h = canvas.clientHeight;
+const BOT_GUTTER = 88;
+const header = fillLog.find((e) => String(e.txt).includes('VENIR'));
+console.log(JSON.stringify({
+  headerY: header ? header.y : null,
+  bottomToolbarStartsAt: h - BOT_GUTTER,
+  gapTop: g.topBase + g.spread / 2,
+  gapBottom: g.bottomBase - g.spread / 2,
+}));
+""")
+    assert out["headerY"] is not None, "band header must be drawn"
+    assert out["headerY"] < out["bottomToolbarStartsAt"], (
+        "band must clear the fixed bottom toolbar/scrubber zone"
+    )
+    assert out["gapTop"] < out["headerY"] < out["gapBottom"], (
+        "band must sit inside the gap between the two lanes"
+    )
 
 
 def test_p1_reading_band_shows_upcoming_notes_in_a_fixed_strip() -> None:
@@ -131,17 +166,10 @@ def test_p1_moving_disc_drops_the_note_name_letter() -> None:
     letter); the redundant letter on the gliding disc is what blurs worst."""
     out = _run("""
 r.setLegibilityMode('p1');
-// A note mid-flight (not in the band) — its disc must draw the digit, no letter.
 const t = frameTexts(1.0);
-// Above the band only: strip the band region.
-const h = canvas.clientHeight;
-const moving = [];
-const seen = new Set();
-r.currentBeat = 1.0; fillLog.length = 0; r.render();
-for (const e of fillLog) { if (e.y <= h - 140) moving.push(e.txt); }
-console.log(JSON.stringify(moving));
+console.log(JSON.stringify(t.outsideBand));
 """)
-    # No standalone note-name letters among the moving discs (digits only).
+    # No standalone note-name letters among the moving (outside-band) discs.
     letters = [t for t in out if t in ("A", "B", "C", "D", "E", "F", "G")]
     assert letters == [], f"moving discs must not draw note-name letters in P1, saw {letters}"
 
