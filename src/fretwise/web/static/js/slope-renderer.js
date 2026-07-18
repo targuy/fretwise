@@ -315,10 +315,23 @@ export class SlopeRenderer {
     if (!groups.length) return;
     const ctx = this.ctx;
     const pad = 12;
-    const cardH = 66;
-    const gap = 8;
-    const cardW = Math.min(150, (w - pad * 2 - gap * 3) / 4);
-    const bandY = h - cardH - pad;
+    const gapPx = 8;
+    const cardW = Math.min(150, (w - pad * 2 - gapPx * 3) / 4);
+
+    // Vertical placement: NOT pinned to the bottom edge — that zone is covered
+    // by the fixed playback toolbar + scrubber (~88px, see main.js's
+    // BOT_GUTTER), so a bottom-pinned band was invisible/clipped in practice
+    // (confirmed: "coupé en bas, pas lisible"). The fold geometry leaves a real
+    // empty gap between the bottom lane (the incoming/near-future strip) and
+    // the top lane (the far-future strip, after the arc) — dead space with
+    // nothing drawn in it. Center the band there instead: visible, doesn't
+    // overlap either lane, and sits where the eye naturally rests between the
+    // two lanes rather than requiring a saccade all the way to a screen edge.
+    const g = this._foldGeometry();
+    const gapTop = g.topBase + g.spread / 2;
+    const gapBottom = g.bottomBase - g.spread / 2;
+    const cardH = Math.max(40, Math.min(66, gapBottom - gapTop - 24));
+    const bandY = (gapTop + gapBottom) / 2 - cardH / 2;
 
     ctx.save();
     // Dim scrim behind the band so the moving lane doesn't bleed through the text.
@@ -331,7 +344,7 @@ export class SlopeRenderer {
     ctx.fillText('À VENIR', pad, bandY - 10);
 
     groups.forEach((group, gi) => {
-      const x = pad + gi * (cardW + gap);
+      const x = pad + gi * (cardW + gapPx);
       const beatsAway = group.onset - this.currentBeat;
       // The imminent group is brightest; later ones fade so the eye lands on
       // "what's next" first.
