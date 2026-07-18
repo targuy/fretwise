@@ -34,7 +34,7 @@ let renderer = null;
 let _slopeRenderer = null;
 // Slope legibility sub-mode (P1–P4), persisted across sessions/tracks.
 const _SLOPE_MODE_KEY = 'fretwise.slopeMode';
-const _SLOPE_MODES = ['base', 'p1', 'p2', 'p3', 'p4'];
+const _SLOPE_MODES = ['base', 'p1', 'p2', 'p3', 'p4', 'p5'];
 let _slopeMode = (() => {
   try {
     const v = localStorage.getItem(_SLOPE_MODE_KEY);
