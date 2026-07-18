@@ -191,6 +191,20 @@ console.log(JSON.stringify(f.fills.map((e) => e.txt)));
     assert letters == [], f"P5 must not draw string-letter labels anymore, saw {letters}"
 
 
+def test_p5_moving_disc_also_drops_the_note_name_letter() -> None:
+    """The P5 band's own circles never had a letter (see the test above) —
+    this covers the OTHER circles: the moving fret-discs gliding along the
+    lane itself (_drawFretDisc), which used to keep their note-name letter
+    in every mode except P1/P2. P5 must drop it there too, so the freed
+    space goes to the fret digit, same rationale as P1/P2."""
+    out = _run("""
+const f = frame(1.0);
+console.log(JSON.stringify(f.allFills));
+""")
+    letters = [t for t in out if t in ("A", "B", "C", "D", "E", "F", "G")]
+    assert letters == [], f"P5 moving discs must not draw the note-name letter, saw {letters}"
+
+
 def test_p5_played_string_shows_its_fret_digit() -> None:
     out = _run("""
 const f = frame(1.0);
