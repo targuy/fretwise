@@ -15,13 +15,16 @@ const FINGER_META = {
 };
 
 const MEASURE_BEATS = 4;
-const FUTURE_BEATS = MEASURE_BEATS * 3;
 // P2 density slider bounds, in beats. Below MIN, notes crowd/overlap in the
 // shrunken window; above MAX, the path is stretched so thin each note
 // occupies a sliver of a pixel-beat, defeating the whole point of slowing
 // the glide down for legibility.
-const MIN_DENSITY_BEATS = MEASURE_BEATS * 1.5;
-const MAX_DENSITY_BEATS = MEASURE_BEATS * 6;
+const MIN_DENSITY_BEATS = MEASURE_BEATS * 6;
+const MAX_DENSITY_BEATS = MEASURE_BEATS * 12;
+// Default matches MIN_DENSITY_BEATS: the slowest glide is the safest starting
+// point, and it keeps the renderer's own default in sync with the slider's
+// (see main.js's _SLOPE_DENSITY_MIN/_slopeDensity fallback).
+const FUTURE_BEATS = MIN_DENSITY_BEATS;
 const PAST_BEATS = 0.75;
 const STRING_COLLISION_GAP_BEATS = 0.18;
 const MIN_NOTE_GAP_PX = 28;
@@ -883,6 +886,14 @@ export class SlopeRenderer {
     // disc — too little regardless of pixel-crispness. Capped at 18, not
     // higher, so adjacent-string discs (spacing tops out at 44px) keep a
     // visible gap rather than touching.
+    if (this.legibilityMode === 'p2') {
+      // P2 drops the note-name letter (see _drawFretDisc), so the disc only
+      // ever holds one glyph — push the cap close to _laneSpacing()'s ceiling
+      // (44px) instead of leaving headroom for a second line of text.
+      // Stays just under spacing/2 so adjacent-string discs still clear each
+      // other by a couple of px rather than touching.
+      return Math.max(16, Math.min(24, this._laneSpacing() * 0.48));
+    }
     return Math.max(12, Math.min(18, this._laneSpacing() * 0.40));
   }
 
@@ -1197,8 +1208,10 @@ export class SlopeRenderer {
     // In P1 the fixed reading band carries the note name; the moving disc drops
     // the letter and shows the fret digit alone — one thick glyph survives motion
     // far better than two stacked, and the redundant letter is right there in the
-    // band, read in fixation.
-    const noteName = this.legibilityMode === 'p1' ? '' : (note.noteName || '');
+    // band, read in fixation. P2 drops it too, for the same reason plus its own
+    // goal: maximize the fret digit itself (_circleRadius already gives P2 a
+    // bigger disc; freeing the second text row lets the digit fill it).
+    const noteName = (this.legibilityMode === 'p1' || this.legibilityMode === 'p2') ? '' : (note.noteName || '');
     const alpha = ctx.globalAlpha;
     const px = this._snapPx(point.x);
     const dpr = this.dpr || 1;

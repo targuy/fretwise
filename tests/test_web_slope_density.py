@@ -79,20 +79,22 @@ const r = new SlopeRenderer(canvas, data);
     return json.loads(proc.stdout)
 
 
-def test_density_defaults_to_the_original_future_beats() -> None:
-    """No-op by default: nothing changes for a user who never touches the slider."""
+def test_density_defaults_to_the_minimum_density_beats() -> None:
+    """No-op by default: a user who never touches the slider gets the slowest,
+    most legible glide (MIN_DENSITY_BEATS), matching the slider's own default."""
     out = _run("console.log(JSON.stringify({ futureBeats: r.futureBeats }));")
-    assert out["futureBeats"] == 12  # MEASURE_BEATS(4) * 3, the pre-P2 constant
+    assert out["futureBeats"] == 24  # MIN_DENSITY_BEATS = MEASURE_BEATS(4) * 6
 
 
 def test_set_density_lowers_future_beats_and_recomputes_geometry() -> None:
     """A lower density value slows the glide: fewer beats span the same path,
     so px-per-beat goes up (each beat of music occupies more screen space)."""
     out = _run("""
-r.render(); // warm the geometry cache at the default density
+r.setDensity(48); // warm the geometry cache at the top of the range
+r.render();
 const before = r._foldGeometry().totalLen;
 const beforePxPerBeat = before / r.futureBeats;
-r.setDensity(8);
+r.setDensity(24);
 r.render();
 const after = r._foldGeometry().totalLen;
 const afterPxPerBeat = after / r.futureBeats;
@@ -101,7 +103,7 @@ console.log(JSON.stringify({
   beforePxPerBeat, afterPxPerBeat,
 }));
 """)
-    assert out["futureBeats"] == 8
+    assert out["futureBeats"] == 24
     assert out["afterPxPerBeat"] > out["beforePxPerBeat"], (
         "lower density must give each beat MORE screen space (slower glide)"
     )
@@ -118,9 +120,9 @@ r.setDensity(NaN);
 const afterNaN = r.futureBeats;
 console.log(JSON.stringify({ tooLow, tooHigh, afterNaN }));
 """)
-    assert out["tooLow"] == 6  # MIN_DENSITY_BEATS
-    assert out["tooHigh"] == 24  # MAX_DENSITY_BEATS
-    assert out["afterNaN"] == 24, "a non-finite value must be ignored, not blank the setting"
+    assert out["tooLow"] == 24  # MIN_DENSITY_BEATS
+    assert out["tooHigh"] == 48  # MAX_DENSITY_BEATS
+    assert out["afterNaN"] == 48, "a non-finite value must be ignored, not blank the setting"
 
 
 def test_p2_readout_shows_the_current_density_and_clears_the_bottom_toolbar() -> None:
@@ -129,7 +131,7 @@ def test_p2_readout_shows_the_current_density_and_clears_the_bottom_toolbar() ->
     (main.js BOT_GUTTER ~88px) — the same bug that hid the P1 band."""
     out = _run("""
 r.setLegibilityMode('p2');
-r.setDensity(9.5);
+r.setDensity(31.5);
 fillLog.length = 0;
 r.render();
 const g = r._foldGeometry();
@@ -143,9 +145,30 @@ console.log(JSON.stringify({
 }));
 """)
     assert out["tagText"] is not None, "P2 must draw a live readout tag"
-    assert "9.5" in out["tagText"], "readout must show the current density value"
+    assert "31.5" in out["tagText"], "readout must show the current density value"
     assert out["tagY"] < out["bottomToolbarStartsAt"], "must clear the fixed bottom toolbar"
     assert out["gapTop"] < out["tagY"] < out["gapBottom"], "must sit inside the lane gap"
+
+
+def test_p2_maximizes_circle_radius_and_drops_the_note_name_letter() -> None:
+    """P2's whole point is maximum-size digits: bigger discs than base/P1, and
+    the note-name letter dropped so the freed space goes to the fret digit."""
+    out = _run("""
+r.setLegibilityMode('base');
+const baseRadius = r._circleRadius();
+r.setLegibilityMode('p2');
+const p2Radius = r._circleRadius();
+fillLog.length = 0;
+r.currentBeat = 1.0;
+r.render();
+console.log(JSON.stringify({
+  baseRadius, p2Radius,
+  texts: fillLog.map((e) => e.txt),
+}));
+""")
+    assert out["p2Radius"] > out["baseRadius"], "P2 discs must be bigger than base"
+    letters = [t for t in out["texts"] if t in ("A", "B", "C", "D", "E", "F", "G")]
+    assert letters == [], f"P2 discs must not draw the note-name letter, saw {letters}"
 
 
 def test_p3_p4_coming_soon_tags_also_clear_the_bottom_toolbar() -> None:
