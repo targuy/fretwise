@@ -16,6 +16,12 @@ const FINGER_META = {
 
 const MEASURE_BEATS = 4;
 const FUTURE_BEATS = MEASURE_BEATS * 3;
+// P2 density slider bounds, in beats. Below MIN, notes crowd/overlap in the
+// shrunken window; above MAX, the path is stretched so thin each note
+// occupies a sliver of a pixel-beat, defeating the whole point of slowing
+// the glide down for legibility.
+const MIN_DENSITY_BEATS = MEASURE_BEATS * 1.5;
+const MAX_DENSITY_BEATS = MEASURE_BEATS * 6;
 const PAST_BEATS = 0.75;
 const STRING_COLLISION_GAP_BEATS = 0.18;
 const MIN_NOTE_GAP_PX = 28;
@@ -61,9 +67,17 @@ export class SlopeRenderer {
     this.currentBeat = 0;
     this.visible = false;
     // Legibility aid mode (P1–P4): 'base' = raw slope, 'p1' = fixed reading
-    // band (default). See setLegibilityMode. P2–P4 are staged follow-ups; for
-    // now they render as 'base' plus a corner tag naming what's coming.
+    // band (default), 'p2' = density control (below). See setLegibilityMode.
+    // P3–P4 are staged follow-ups; for now they render as 'base' plus a
+    // corner tag naming what's coming.
     this.legibilityMode = 'p1';
+    // P2 (density): how many beats of future notes are visible on screen at
+    // once. Fewer beats -> the same physical path length covers less musical
+    // time -> notes glide slower in px/s and sit farther apart, both of which
+    // make the residual smooth-pursuit slip (the eye's ~0.9 tracking gain
+    // never reaches 1, independent of screen Hz) proportionally smaller
+    // relative to glyph size. See setDensity.
+    this.futureBeats = FUTURE_BEATS;
     this.dpr = window.devicePixelRatio || 1;
     this.playback = null;
     this._lastSeconds = 0;
@@ -159,6 +173,19 @@ export class SlopeRenderer {
   setLegibilityMode(mode) {
     const allowed = ['base', 'p1', 'p2', 'p3', 'p4'];
     this.legibilityMode = allowed.includes(mode) ? mode : 'base';
+  }
+
+  /* P2 — density: how many beats of upcoming notes are visible at once.
+     Clamped to [MIN_DENSITY_BEATS, MAX_DENSITY_BEATS] so an extreme value
+     can't collapse the lane (too few beats -> notes overlap/crowd) or spread
+     notes into illegibly-tiny specks (too many beats -> everything shrinks
+     toward one pixel per beat). No cache to invalidate here: _foldGeometry's
+     cache key already includes futureBeats, so it naturally recomputes on
+     the next render when this changes. */
+  setDensity(beats) {
+    const n = Number(beats);
+    if (!Number.isFinite(n)) return;
+    this.futureBeats = Math.max(MIN_DENSITY_BEATS, Math.min(MAX_DENSITY_BEATS, n));
   }
 
   bindPlayback(playback) {
@@ -278,6 +305,8 @@ export class SlopeRenderer {
     this._drawTempoHeart();
     if (this.legibilityMode === 'p1') {
       this._drawReadingBand(w, h);
+    } else if (this.legibilityMode === 'p2') {
+      this._drawDensityReadout(w, h);
     } else if (this.legibilityMode !== 'base') {
       this._drawModeComingSoonTag(w, h);
     }
@@ -400,25 +429,51 @@ export class SlopeRenderer {
     ctx.restore();
   }
 
-  _drawModeComingSoonTag(w, h) {
+  /* Shared corner-tag y position for P2's live readout and P3/P4's "coming
+     soon" notices: centered in the same lane gap _drawReadingBand uses — NOT
+     the bottom edge, which is covered by the fixed playback toolbar +
+     scrubber (see _drawReadingBand's comment; the original bottom-pinned
+     placement bit this tag too before it was noticed on the reading band). */
+  _tagY(h) {
+    const g = this._foldGeometry();
+    const gapTop = g.topBase + g.spread / 2;
+    const gapBottom = g.bottomBase - g.spread / 2;
+    return this._clamp(h * 0.5, gapTop + 20, gapBottom - 6);
+  }
+
+  _drawTag(w, h, label, color) {
     const ctx = this.ctx;
-    const label = {
-      p2: 'P2 — droite d’approche + densité (à venir)',
-      p3: 'P3 — loupe de lecture (à venir)',
-      p4: 'P4 — défilement cranté (à venir)',
-    }[this.legibilityMode] || '';
-    if (!label) return;
+    const y = this._tagY(h);
     ctx.save();
     ctx.font = '600 11px Inter, sans-serif';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'alphabetic';
     const tw = ctx.measureText(label).width;
     ctx.fillStyle = 'rgba(6,8,12,0.8)';
-    this._roundRect(ctx, w / 2 - tw / 2 - 10, h - 30, tw + 20, 22, 6);
+    this._roundRect(ctx, w / 2 - tw / 2 - 10, y - 15, tw + 20, 22, 6);
     ctx.fill();
-    ctx.fillStyle = 'rgba(255,210,90,0.95)';
-    ctx.fillText(label, w / 2, h - 15);
+    ctx.fillStyle = color;
+    ctx.fillText(label, w / 2, y);
     ctx.restore();
+  }
+
+  /* P2 is live (the density control) — show its current setting rather than
+     a "coming soon" placeholder. */
+  _drawDensityReadout(w, h) {
+    this._drawTag(
+      w, h,
+      `P2 — densité : ${this.futureBeats.toFixed(1)} temps visibles`,
+      'rgba(120,200,255,0.95)',
+    );
+  }
+
+  _drawModeComingSoonTag(w, h) {
+    const label = {
+      p3: 'P3 — loupe de lecture (à venir)',
+      p4: 'P4 — défilement cranté (à venir)',
+    }[this.legibilityMode] || '';
+    if (!label) return;
+    this._drawTag(w, h, label, 'rgba(255,210,90,0.95)');
   }
 
   _roundRect(ctx, x, y, w, h, r) {
@@ -537,7 +592,9 @@ export class SlopeRenderer {
   _foldGeometry() {
     const w = this.canvas.clientWidth;
     const h = this.canvas.clientHeight;
-    const key = `${Math.round(w)}:${Math.round(h)}`;
+    // futureBeats is part of the key: it feeds pastLen below, so a density
+    // change (setDensity) must not silently return a stale cached geometry.
+    const key = `${Math.round(w)}:${Math.round(h)}:${this.futureBeats}`;
     if (this._frameGeometry) return this._frameGeometry;
     if (this._geometry && this._geometryKey === key) return this._geometry;
     const marginX = Math.max(70, Math.min(120, w * 0.055));
@@ -554,7 +611,7 @@ export class SlopeRenderer {
     const bottomLen = Math.max(1, bendX - startX);
     const arcLen = Math.PI * radius;
     const topLen = Math.max(1, bendX - farX);
-    const pastLen = (PAST_BEATS / FUTURE_BEATS) * (bottomLen + arcLen + topLen);
+    const pastLen = (PAST_BEATS / this.futureBeats) * (bottomLen + arcLen + topLen);
 
     const geometry = {
       w,
@@ -587,7 +644,7 @@ export class SlopeRenderer {
 
   _lanePoint(stringNum, depth) {
     const g = this._foldGeometry();
-    const minDepth = -PAST_BEATS / FUTURE_BEATS;
+    const minDepth = -PAST_BEATS / this.futureBeats;
     const t = this._clamp(depth, minDepth, 1.08);
     const d = t * g.totalLen;
     const offset = (Number(stringNum) - 1 - 2.5) * g.spacing;
@@ -633,12 +690,12 @@ export class SlopeRenderer {
 
   _minimumGapBeats() {
     const g = this._foldGeometry();
-    const pixelGapBeats = (MIN_NOTE_GAP_PX / Math.max(1, g.totalLen)) * FUTURE_BEATS;
+    const pixelGapBeats = (MIN_NOTE_GAP_PX / Math.max(1, g.totalLen)) * this.futureBeats;
     return Math.max(STRING_COLLISION_GAP_BEATS, pixelGapBeats);
   }
 
   _depthForBeat(noteBeat) {
-    return (noteBeat - this.currentBeat) / FUTURE_BEATS;
+    return (noteBeat - this.currentBeat) / this.futureBeats;
   }
 
   _hitY() {
@@ -773,7 +830,7 @@ export class SlopeRenderer {
   }
 
   _traceDepthPath(ctx, stringNum, startDepth, endDepth) {
-    const minDepth = -PAST_BEATS / FUTURE_BEATS;
+    const minDepth = -PAST_BEATS / this.futureBeats;
     const start = this._clamp(startDepth, minDepth, 1.08);
     const end = this._clamp(endDepth, minDepth, 1.08);
     const steps = Math.max(3, Math.ceil(Math.abs(end - start) * (this._quality >= 2 ? 18 : 42)));
@@ -796,7 +853,7 @@ export class SlopeRenderer {
 
   _pixelBeats(px) {
     const g = this._foldGeometry();
-    return (px / Math.max(1, g.totalLen)) * FUTURE_BEATS;
+    return (px / Math.max(1, g.totalLen)) * this.futureBeats;
   }
 
   _visibleMeasureBoundaryBeats() {
@@ -808,7 +865,7 @@ export class SlopeRenderer {
     const totalBeats = this._totalBeats();
     const boundaries = this._measureBoundaryBeats();
     const minBeat = this.currentBeat - PAST_BEATS - MEASURE_BEATS;
-    const maxBeat = this.currentBeat + FUTURE_BEATS * 1.12 + MEASURE_BEATS;
+    const maxBeat = this.currentBeat + this.futureBeats * 1.12 + MEASURE_BEATS;
     const visible = new Map();
     for (let repeat = -1; repeat <= 1; repeat += 1) {
       for (const boundary of boundaries) {
@@ -855,14 +912,14 @@ export class SlopeRenderer {
       const startDepth = this._depthForBeat(note.onset);
       const endDepth = this._depthForBeat(note.onset + note.duration);
       const labelDepth = this._clamp(
-        (Math.max(-PAST_BEATS / FUTURE_BEATS, startDepth) + Math.min(1.06, endDepth)) / 2,
-        -PAST_BEATS / FUTURE_BEATS,
+        (Math.max(-PAST_BEATS / this.futureBeats, startDepth) + Math.min(1.06, endDepth)) / 2,
+        -PAST_BEATS / this.futureBeats,
         1.06,
       );
       const point = this._lanePoint(note.string, labelDepth);
       note._labelPoint = point;
       note._labelDepth = labelDepth;
-      const labelBeat = this.currentBeat + labelDepth * FUTURE_BEATS;
+      const labelBeat = this.currentBeat + labelDepth * this.futureBeats;
       const clearsMeasure = this._distanceToMeasureBoundaryBeats(labelBeat) >= measurePadBeats;
       const prev = byString.get(note.string);
       const farEnough = !prev || Math.hypot(point.x - prev.x, point.y - prev.y) >= minDistance;
@@ -880,7 +937,7 @@ export class SlopeRenderer {
         const note = { ...source, onset: source.onset + repeat * totalBeats };
         const startDepth = this._depthForBeat(note.onset);
         const endDepth = this._depthForBeat(note.onset + note.duration);
-        if (endDepth >= -PAST_BEATS / FUTURE_BEATS && startDepth <= 1.12) visible.push(note);
+        if (endDepth >= -PAST_BEATS / this.futureBeats && startDepth <= 1.12) visible.push(note);
       }
     }
     visible.sort((a, b) => a.string - b.string || a.onset - b.onset);
@@ -995,7 +1052,7 @@ export class SlopeRenderer {
     const now = this.currentBeat;
     const active = note.onset <= now && now <= note.onset + note.duration;
     const vibration = active ? 1 + 0.16 * Math.sin(performance.now() / 34) : 1;
-    const minDepth = -PAST_BEATS / FUTURE_BEATS;
+    const minDepth = -PAST_BEATS / this.futureBeats;
     const rawADepth = Math.max(minDepth, Math.min(1.08, startDepth));
     const rawBDepth = Math.max(0, Math.min(1.08, endDepth));
     const meta = FINGER_META[String(note.finger || '').toLowerCase()] || FINGER_META.open;

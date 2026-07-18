@@ -42,6 +42,21 @@ let _slopeMode = (() => {
   } catch (_) { return 'p1'; }
 })();
 const _slopeModeSeg = document.getElementById('slope-mode-seg');
+// P2 — density: how many beats of upcoming notes the Slope view shows at once.
+// Persisted like the mode; applies regardless of which sub-mode is active
+// (a slower glide helps P1's moving discs too, not just P2's own readout).
+const _SLOPE_DENSITY_KEY = 'fretwise.slopeDensity';
+const _SLOPE_DENSITY_MIN = 6;
+const _SLOPE_DENSITY_MAX = 24;
+let _slopeDensity = (() => {
+  try {
+    const v = Number(localStorage.getItem(_SLOPE_DENSITY_KEY));
+    return Number.isFinite(v) && v >= _SLOPE_DENSITY_MIN && v <= _SLOPE_DENSITY_MAX ? v : 12;
+  } catch (_) { return 12; }
+})();
+const _slopeDensityCtrl = document.getElementById('slope-density-ctrl');
+const _rngSlopeDensity = document.getElementById('rng-slope-density');
+if (_rngSlopeDensity) _rngSlopeDensity.value = String(_slopeDensity);
 let playback = null;
 let _svgDriver = null;  // SvgCursorDriver instance for standard/standard+tab views
 let loopASet = false;  // has A marker been set
@@ -1591,8 +1606,10 @@ function applyRepresentationModeView(data) {
   if (slopeCanvas) slopeCanvas.style.display = showSlope ? 'block' : 'none';
   if (hand3dViewFrame) hand3dViewFrame.style.display = showHand3d ? 'block' : 'none';
   if (!showHand3d) _releaseHand3dViewFrame();
-  // The Slope legibility sub-mode selector (P1–P4) only makes sense in Slope view.
+  // The Slope legibility sub-mode selector (P1–P4) and density control only
+  // make sense in Slope view.
   if (_slopeModeSeg) _slopeModeSeg.style.display = showSlope ? '' : 'none';
+  if (_slopeDensityCtrl) _slopeDensityCtrl.style.display = showSlope ? '' : 'none';
   _slopeRenderer?.setVisible(showSlope);
   if (showHand3d) {
     const frameReady = _ensureHand3dViewFrame();
@@ -2219,8 +2236,9 @@ function initRenderer(data) {
   renderer = new TabRenderer(tabCanvas, data);
   _slopeRenderer?.destroy();
   _slopeRenderer = slopeCanvas ? new SlopeRenderer(slopeCanvas, data) : null;
-  // Re-apply the user's persisted Slope legibility mode to the new renderer.
+  // Re-apply the user's persisted Slope legibility mode + density to the new renderer.
   _slopeRenderer?.setLegibilityMode(_slopeMode);
+  _slopeRenderer?.setDensity(_slopeDensity);
   // Non-guitar tracks carry no fingering: never draw finger annotations and
   // keep the (hidden) fingering toggle inactive. Defensive — the solve
   // response also exposes `fingered:false` for these tracks.
@@ -4036,6 +4054,21 @@ if (_slopeModeSeg) {
     });
   });
   _syncSlopeModePills();
+}
+
+// P2 density slider: how many beats of upcoming notes the Slope view shows.
+// Applies live regardless of which legibility sub-mode is active.
+if (_rngSlopeDensity) {
+  _rngSlopeDensity.addEventListener('input', () => {
+    const beats = Math.max(
+      _SLOPE_DENSITY_MIN,
+      Math.min(_SLOPE_DENSITY_MAX, parseFloat(_rngSlopeDensity.value) || 12),
+    );
+    _slopeDensity = beats;
+    try { localStorage.setItem(_SLOPE_DENSITY_KEY, String(beats)); } catch (_) { /* private mode */ }
+    _slopeRenderer?.setDensity(beats);
+    _slopeRenderer?.render();
+  });
 }
 
 _syncViewSegPills();
