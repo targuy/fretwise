@@ -3,7 +3,7 @@
 P5 mixes P1's fixed reading band (read in fixation, never glided) with a
 genuine 6-string chord shape per upcoming group: every string gets a row,
 played strings get a filled disc + fret digit, unplayed/muted strings get a
-hollow ring. 5 groups (P1 shows 4), circle radius between P1's and P2's
+hollow ring. 10 groups (P1 shows 4), circle radius between P1's and P2's
 ranges, one chord triangle per card (not per note). These tests execute the
 real shipped ``slope-renderer.js`` in Node and assert on actual canvas
 draw-call output, not source text.
@@ -26,7 +26,7 @@ pytestmark = pytest.mark.skipif(shutil.which("node") is None, reason="node not a
 
 
 def _run(script: str, *, width: int = 1400, height: int = 700) -> dict:
-    # Wider/taller than the P1/P3 default test canvas: P5's 5 tall cards need
+    # Wider/taller than the P1/P3 default test canvas: P5's 10 tall cards need
     # real room in the lane gap to avoid every case degrading to the
     # graceful-shrink floor, which would mask real bugs in the normal-size path.
     harness = f"""
@@ -79,8 +79,8 @@ const data = {{
   beats_per_measure: 4,
   results: [
     // A genuine chord (3 strings, same onset, tagged with a chord label) at
-    // a beat clear of any measure boundary, plus 4 more single-note groups
-    // so there are enough upcoming groups to fill all 5 P5 cards.
+    // a beat clear of any measure boundary, plus 9 more single-note groups
+    // so there are enough upcoming groups to fill all 10 P5 cards.
     {{ string: 1, fret: 0, finger: 'open',  onset: 5.5,  duration: 0.5, pitch: 64, chord: 'Am' }},
     {{ string: 2, fret: 1, finger: 'index', onset: 5.5,  duration: 0.5, pitch: 61, chord: 'Am' }},
     {{ string: 3, fret: 2, finger: 'ring',  onset: 5.5,  duration: 0.5, pitch: 57, chord: 'Am' }},
@@ -88,6 +88,11 @@ const data = {{
     {{ string: 4, fret: 3, finger: 'ring',  onset: 7.5,  duration: 0.5, pitch: 53 }},
     {{ string: 2, fret: 5, finger: 'pinky', onset: 8.5,  duration: 0.5, pitch: 65 }},
     {{ string: 5, fret: 2, finger: 'index', onset: 9.5,  duration: 0.5, pitch: 47 }},
+    {{ string: 6, fret: 1, finger: 'index', onset: 10.5, duration: 0.5, pitch: 41 }},
+    {{ string: 1, fret: 3, finger: 'ring',  onset: 11.5, duration: 0.5, pitch: 67 }},
+    {{ string: 2, fret: 2, finger: 'middle',onset: 12.5, duration: 0.5, pitch: 62 }},
+    {{ string: 3, fret: 1, finger: 'index', onset: 13.5, duration: 0.5, pitch: 56 }},
+    {{ string: 4, fret: 2, finger: 'ring',  onset: 14.5, duration: 0.5, pitch: 55 }},
   ],
 }};
 const r = new SlopeRenderer(canvas, data);
@@ -139,14 +144,14 @@ function frame(beat) {{
     return json.loads(proc.stdout)
 
 
-def test_p5_shows_five_groups_not_four() -> None:
-    """P1 shows 4 groups; P5 must show 5 — one column of 6 discs/rings each,
-    so 30 shapes total (5 cards x 6 strings)."""
+def test_p5_shows_ten_groups() -> None:
+    """P1 shows 4 groups; P5 must show 10 — one column of 6 discs/rings each,
+    so 60 shapes total (10 cards x 6 strings)."""
     out = _run("""
 const f = frame(1.0);
 console.log(JSON.stringify({ shapeCount: f.shapes.length }));
 """)
-    assert out["shapeCount"] == 30, f"expected 5 cards x 6 strings = 30 shapes, got {out['shapeCount']}"
+    assert out["shapeCount"] == 60, f"expected 10 cards x 6 strings = 60 shapes, got {out['shapeCount']}"
 
 
 def test_p5_unplayed_strings_are_hollow_played_strings_are_filled() -> None:
@@ -159,8 +164,8 @@ console.log(JSON.stringify(f.shapes));
     kinds = [s["kind"] for s in out]
     filled = kinds.count("fill")
     hollow = kinds.count("stroke")
-    assert filled == 7, f"7 notes are actually played across all 5 groups, got {filled} filled"
-    assert hollow == 30 - 7, f"the rest must be hollow rings, got {hollow} hollow"
+    assert filled == 12, f"12 notes are actually played across all 10 groups, got {filled} filled"
+    assert hollow == 60 - 12, f"the rest must be hollow rings, got {hollow} hollow"
 
 
 def test_p5_played_string_shows_its_fret_digit() -> None:
@@ -175,8 +180,8 @@ console.log(JSON.stringify(f.fills.map((e) => e.txt)));
 def test_p5_draws_the_chord_triangle_once_not_per_note() -> None:
     """The Am group has 3 notes all tagged chord: 'Am' -> exactly ONE triangle
     for that card, not three. Single-note groups (no chord tag) get none, so
-    across all 5 upcoming groups the triangle-red fillStyle must be set
-    exactly once, not 3 times (once per Am note) or 5 times (once per card)."""
+    across all 10 upcoming groups the triangle-red fillStyle must be set
+    exactly once, not 3 times (once per Am note) or 10 times (once per card)."""
     out = _run("""
 const f = frame(1.0);
 console.log(JSON.stringify({ triangleFillCount: f.triangleFillCount }));
@@ -187,16 +192,16 @@ console.log(JSON.stringify({ triangleFillCount: f.triangleFillCount }));
 
 
 def test_p5_chord_triangle_count_matches_chorded_groups() -> None:
-    """Direct structural check: exactly 1 of the 5 upcoming groups is a chord
+    """Direct structural check: exactly 1 of the 10 upcoming groups is a chord
     (the Am at onset 5.5); confirm _upcomingNotes/group.notes reflects that,
     which is what _drawChordLookaheadBand's triangle condition reads."""
     out = _run("""
 r.currentBeat = 1.0;
-const groups = r._upcomingNotes(5);
+const groups = r._upcomingNotes(10);
 const chordedGroups = groups.filter((g) => g.notes.some((n) => n.chord)).length;
 console.log(JSON.stringify({ groupCount: groups.length, chordedGroups }));
 """)
-    assert out["groupCount"] == 5
+    assert out["groupCount"] == 10
     assert out["chordedGroups"] == 1, "only the Am group (3 notes, same onset) should be tagged"
 
 
@@ -223,19 +228,34 @@ console.log(JSON.stringify({ baseRadius, p2Radius, shapeRadii }));
 
 
 def test_p5_cards_do_not_overlap_horizontally() -> None:
-    """Collision avoidance at the card level: 5 columns must be strictly
-    ordered left-to-right with no horizontal overlap between cards."""
-    out = _run("""
+    """Collision avoidance at the card level: 10 columns must be strictly
+    ordered left-to-right, each column's circle radius small enough
+    (clamped to cardW/2-3, see _drawChordLookaheadBand) that adjacent
+    discs can't touch even when 10 narrow columns are squeezed together.
+    Uses the real production canvas size (968x816, see the P1 band tests)
+    where 10 columns actually squeeze narrow enough for the cardW clamp —
+    not the rowH clamp — to be the binding constraint."""
+    out = _run(
+        """
 const f = frame(1.0);
-// Group shape x's into 5 clusters (cards) by rounding — each card's 6
+// Group shape x's into 10 clusters (cards) by rounding — each card's 6
 // circles share the same cx.
 const xs = [...new Set(f.shapes.map((s) => Math.round(s.x)))].sort((a, b) => a - b);
-console.log(JSON.stringify({ xs }));
-""")
+const maxRadius = Math.max(...f.shapes.map((s) => s.radius));
+console.log(JSON.stringify({ xs, maxRadius }));
+""",
+        width=968,
+        height=816,
+    )
     xs = out["xs"]
-    assert len(xs) == 5, f"expected 5 distinct card columns, got {len(xs)}"
+    assert len(xs) == 10, f"expected 10 distinct card columns, got {len(xs)}"
     for i in range(1, len(xs)):
-        assert xs[i] > xs[i - 1], "cards must be strictly left-to-right, no two sharing a column"
+        gap = xs[i] - xs[i - 1]
+        assert gap > 0, "cards must be strictly left-to-right, no two sharing a column"
+        assert gap >= out["maxRadius"] * 2, (
+            f"column pitch {gap} must clear the disc diameter {out['maxRadius'] * 2} "
+            "or adjacent discs would overlap"
+        )
 
 
 def test_p5_no_two_shapes_share_a_row_within_a_card() -> None:

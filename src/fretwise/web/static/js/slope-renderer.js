@@ -643,16 +643,19 @@ export class SlopeRenderer {
      string gets its own row, played strings get a filled disc + fret digit,
      unplayed/muted strings get a hollow ring — without that, there's no way
      to tell "not played" from "chord I haven't read yet" at a glance.
-     5 groups (P1 shows 4), laid out as narrow, TALL cards — one column per
+     10 groups (P1 shows 4), laid out as narrow, TALL cards — one column per
      group, one fixed row per string — rather than P1's wide, short cards.
      Six FIXED rows per card is what guarantees no collision between
      displayed notes: every string has exactly one slot, played or hollow,
      so nothing can ever land on top of anything else. Circle radius targets
      the range between P1's (12-18px) and P2's (16-24px), shrinking further
      only if six rows genuinely don't fit the available height — the same
-     graceful-degradation approach as P1's compact mode. */
+     graceful-degradation approach as P1's compact mode. Card WIDTH shrinks
+     to fit all 10 columns in the arc-safe zone (same shrink-to-fit as P1's
+     compact mode); radius/digit size are driven by cardH, not cardW, so
+     legibility per string doesn't degrade as the column count grows. */
   _drawChordLookaheadBand(w, h) {
-    const groups = this._upcomingNotes(5);
+    const groups = this._upcomingNotes(10);
     if (!groups.length) return;
     const ctx = this.ctx;
     const pad = 12;
@@ -672,9 +675,13 @@ export class SlopeRenderer {
     const maxBandRight = Math.max(240, g.bendX - g.outerRadius - 24);
     const count = groups.length;
     // Each card only needs one column (string label + one disc/ring stack),
-    // far narrower than P1's dot+digit+name+string row — so 5 cards still
-    // fit comfortably in the same arc-safe zone P1's 4 wider cards used.
-    const IDEAL_CARD_W = 96;
+    // far narrower than P1's dot+digit+name+string row. 60px is enough for
+    // a ~42px disc (radius up to 21) plus the string-label sliver and
+    // padding — still tight for 10 columns in the arc-safe zone, so cardW
+    // below shrinks below this target on narrower screens (same
+    // shrink-to-fit as P1's compact mode; radius/digit size don't depend on
+    // cardW so per-string legibility holds even when cards get narrow).
+    const IDEAL_CARD_W = 60;
     const idealWidth = IDEAL_CARD_W * count + gapPx * (count - 1);
     const bandWidth = Math.min(idealWidth, maxBandRight - pad * 2);
     const cardW = (bandWidth - gapPx * (count - 1)) / count;
@@ -689,9 +696,13 @@ export class SlopeRenderer {
 
     const rowPad = 4;
     const rowH = (cardH - rowPad * 2) / 6;
-    // Target: between P1's circleRadius (12-18) and P2's (16-24).
+    // Target: between P1's circleRadius (12-18) and P2's (16-24). Also
+    // clamped to cardW/2 — with 10 narrow columns squeezed into the
+    // arc-safe zone, a height-only radius could exceed the column's own
+    // width and spill into the next card; that clamp is what keeps 10
+    // columns collision-free the same way rowH/2 keeps 6 rows collision-free.
     const targetRadius = this._clamp(this._laneSpacing() * 0.42, 14, 21);
-    const radius = Math.min(targetRadius, rowH / 2 - 2);
+    const radius = Math.min(targetRadius, rowH / 2 - 2, cardW / 2 - 3);
 
     groups.forEach((group, gi) => {
       const x = bandLeft + gi * (cardW + gapPx);
