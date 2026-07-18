@@ -334,18 +334,17 @@ export class SlopeRenderer {
     return groups;
   }
 
-  /* P1 — fixed reading band. A static strip pinned to the bottom edge shows the
-     next few note groups in large, still text. Because it never moves, the eye
-     reads it in fixation (not smooth pursuit), so it stays sharp at any tempo /
-     refresh rate — the moving discs keep carrying position/colour/length, the
-     band carries the reading. */
+  /* P1 — fixed reading band. A static strip shows the next few note groups in
+     large, still text. Because it never moves, the eye reads it in fixation
+     (not smooth pursuit), so it stays sharp at any tempo / refresh rate — the
+     moving discs keep carrying position/colour/length, the band carries the
+     reading. */
   _drawReadingBand(w, h) {
     const groups = this._upcomingNotes(4);
     if (!groups.length) return;
     const ctx = this.ctx;
     const pad = 12;
-    const gapPx = 8;
-    const cardW = Math.min(150, (w - pad * 2 - gapPx * 3) / 4);
+    const gapPx = 10;
 
     // Vertical placement: NOT pinned to the bottom edge — that zone is covered
     // by the fixed playback toolbar + scrubber (~88px, see main.js's
@@ -359,21 +358,43 @@ export class SlopeRenderer {
     const g = this._foldGeometry();
     const gapTop = g.topBase + g.spread / 2;
     const gapBottom = g.bottomBase - g.spread / 2;
-    const cardH = Math.max(40, Math.min(66, gapBottom - gapTop - 24));
+    const cardH = Math.max(56, Math.min(96, gapBottom - gapTop - 24));
     const bandY = (gapTop + gapBottom) / 2 - cardH / 2;
+
+    // Horizontal extent: a band spanning the FULL canvas width crosses through
+    // the arc (the string turn) — the arc's rightmost bulge sits at almost
+    // exactly this band's vertical center (x = bendX + outerRadius occurs at
+    // y = centerY, see _lanePoint's arc branch), so a full-width band visually
+    // cut through the turn ("écrase le tournant des cordes"). Confine the band
+    // to the straight-run zone left of the arc, and center it THERE (not
+    // pinned to the left edge, which read as off-center against the lanes
+    // spanning most of the canvas).
+    const maxBandRight = Math.max(240, g.bendX - g.outerRadius - 24);
+    // Size cards to a fixed comfortable target (IDEAL_CARD_W) rather than
+    // maximizing into whatever room is available — a cap close to the
+    // available width leaves near-zero slack, so the row always ends up
+    // hugging the left edge regardless of a "center it" formula below (this
+    // was the actual bug: the old 190px cap nearly filled realistic
+    // straight-run zones, leaving ~12px of "slack" — invisible in practice).
+    // Only shrink below the target on a zone too narrow to fit it.
+    const IDEAL_CARD_W = 160;
+    const idealWidth = IDEAL_CARD_W * 4 + gapPx * 3;
+    const bandWidth = Math.min(idealWidth, maxBandRight - pad * 2);
+    const cardW = (bandWidth - gapPx * 3) / 4;
+    const bandLeft = Math.max(pad, (maxBandRight - bandWidth) / 2);
 
     ctx.save();
     // Dim scrim behind the band so the moving lane doesn't bleed through the text.
-    ctx.fillStyle = 'rgba(6, 8, 12, 0.82)';
-    ctx.fillRect(0, bandY - 6, w, cardH + 12);
+    ctx.fillStyle = 'rgba(6, 8, 12, 0.85)';
+    ctx.fillRect(bandLeft - 8, bandY - 8, bandWidth + 16, cardH + 16);
     ctx.fillStyle = 'rgba(255,255,255,0.55)';
-    ctx.font = '600 10px Inter, sans-serif';
+    ctx.font = '600 11px Inter, sans-serif';
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
-    ctx.fillText('À VENIR', pad, bandY - 10);
+    ctx.fillText('À VENIR', bandLeft, bandY - 12);
 
     groups.forEach((group, gi) => {
-      const x = pad + gi * (cardW + gapPx);
+      const x = bandLeft + gi * (cardW + gapPx);
       const beatsAway = group.onset - this.currentBeat;
       // The imminent group is brightest; later ones fade so the eye lands on
       // "what's next" first.
@@ -391,39 +412,53 @@ export class SlopeRenderer {
 
       // Stack the group's notes (a chord) as compact rows inside the card.
       const rows = group.notes.slice(0, 4);
-      const rowH = (cardH - 16) / rows.length;
+      const rowH = (cardH - 20) / rows.length;
+      // Below ~100px the fixed dot+digit+name+string layout no longer fits —
+      // a narrow zone (a tall/near-square panel drives outerRadius up, eating
+      // most of the straight-run width before the arc) would otherwise
+      // overlap neighbouring cards' text. Drop the note-name/string and show
+      // ONLY the finger dot + a big digit, using the freed width to keep it
+      // large rather than shrinking everything to illegible mush.
+      const compact = cardW < 100;
+      const dotR = compact ? 5 : 7;
+      const dotX = x + (compact ? 12 : 18);
+      const digitX = dotX + dotR + 8;
+      // Rough glyph-width factor for a bold ("900") numeral: ~0.62x font-size.
+      const digitMaxW = (cardW - (digitX - x) - (compact ? 6 : 46)) / 0.62;
       rows.forEach((n, ri) => {
-        const cy = bandY + 8 + rowH * ri + rowH / 2;
+        const cy = bandY + 10 + rowH * ri + rowH / 2;
         const meta = FINGER_META[String(n.finger || '').toLowerCase()] || FINGER_META.open;
         // Finger colour dot.
         ctx.globalAlpha = prom;
         ctx.fillStyle = meta.color;
         ctx.beginPath();
-        ctx.arc(x + 16, cy, 6, 0, Math.PI * 2);
+        ctx.arc(dotX, cy, dotR, 0, Math.PI * 2);
         ctx.fill();
         // Big fret number — the primary reading target.
         ctx.fillStyle = '#ffffff';
-        ctx.font = `900 ${Math.min(26, rowH * 0.86)}px Inter, sans-serif`;
+        ctx.font = `900 ${Math.max(14, Math.min(38, rowH * 0.94, digitMaxW))}px Inter, sans-serif`;
         ctx.textAlign = 'left';
         ctx.textBaseline = 'middle';
-        ctx.fillText(String(n.fret), x + 28, cy);
-        // Note name + string, smaller, to the right.
-        ctx.fillStyle = 'rgba(255,255,255,0.72)';
-        ctx.font = '700 12px Inter, sans-serif';
-        ctx.fillText(`${n.noteName}`, x + 28 + 22, cy - 6);
-        ctx.fillStyle = 'rgba(255,255,255,0.45)';
-        ctx.font = '600 10px Inter, sans-serif';
-        ctx.fillText(`${STRING_NAMES[n.string] || ''}${n.string}`, x + 28 + 22, cy + 8);
+        ctx.fillText(String(n.fret), digitX, cy);
+        if (!compact) {
+          // Note name + string, smaller, to the right.
+          ctx.fillStyle = 'rgba(255,255,255,0.75)';
+          ctx.font = '700 15px Inter, sans-serif';
+          ctx.fillText(`${n.noteName}`, digitX + 30, cy - 7);
+          ctx.fillStyle = 'rgba(255,255,255,0.5)';
+          ctx.font = '600 12px Inter, sans-serif';
+          ctx.fillText(`${STRING_NAMES[n.string] || ''}${n.string}`, digitX + 30, cy + 10);
+        }
       });
 
       // "in N.n beats" hint under the imminent card.
       if (gi === 0) {
         ctx.globalAlpha = 0.7;
         ctx.fillStyle = 'rgba(76,175,80,0.9)';
-        ctx.font = '600 9px Inter, sans-serif';
+        ctx.font = '600 10px Inter, sans-serif';
         ctx.textAlign = 'right';
         ctx.textBaseline = 'alphabetic';
-        ctx.fillText(`+${beatsAway.toFixed(1)}`, x + cardW - 6, bandY + 12);
+        ctx.fillText(`+${beatsAway.toFixed(1)}`, x + cardW - 6, bandY + 14);
       }
     });
     ctx.restore();
@@ -1240,7 +1275,13 @@ export class SlopeRenderer {
     const beatPhase = this.currentBeat - Math.floor(this.currentBeat);
     const pulse = 1 + Math.pow(1 - beatPhase, 5) * 0.34;
     const cx = Math.max(54, this.canvas.clientWidth * 0.055);
-    const cy = this.canvas.clientHeight * 0.50;
+    // Vertical-center placement used to be safe when this was the only thing
+    // drawn there; it now collides with the P1 reading band / P2 density
+    // readout / P3-P4 tags, which all live in the lane gap around
+    // clientHeight*0.5 (confirmed: "72 BPM" landing directly on a band
+    // card's digit row). Pin it above the top lane instead — dead space no
+    // legibility aid uses.
+    const cy = Math.max(40, this._foldGeometry().topBase - 45);
     const size = 26 * pulse;
     ctx.save();
     ctx.translate(cx, cy);

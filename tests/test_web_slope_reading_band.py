@@ -133,9 +133,67 @@ console.log(JSON.stringify({
     )
 
 
-def test_p1_reading_band_shows_upcoming_notes_in_a_fixed_strip() -> None:
-    """P1 draws the 'À VENIR' band with the fret + note name of upcoming notes."""
+def test_p1_band_does_not_cross_into_the_arc() -> None:
+    """Regression: the band's scrim used to span the FULL canvas width, which
+    crosses through the arc (the string turn) at almost exactly the band's
+    vertical center — visually "ecrase le tournant des cordes". Isolates the
+    band's OWN draw calls by wrapping _drawReadingBand itself (a y-region
+    filter is not enough: moving note discs legitimately pass through this
+    same y-band while curving through the arc — confirmed by inspection, two
+    of this fixture's discs land at x=1137/1172 in the 1400px-wide case,
+    comfortably past the arc boundary, which is correct for THEM). Uses a
+    widescreen canvas (1400x650 — closer to a real desktop viewport than the
+    harness default 900x600, whose arc eats most of the width)."""
     out = _run("""
+canvas.clientWidth = 1400; canvas.clientHeight = 650;
+r.setLegibilityMode('p1');
+r.currentBeat = 2.0;
+const bandCalls = [];
+const origDraw = r._drawReadingBand.bind(r);
+r._drawReadingBand = (...args) => {
+  const startIdx = fillLog.length;
+  origDraw(...args);
+  bandCalls.push(...fillLog.slice(startIdx));
+};
+fillLog.length = 0;
+r.render();
+const g = r._foldGeometry();
+const arcLeftEdge = g.bendX - g.outerRadius;
+console.log(JSON.stringify({ maxX: Math.max(...bandCalls.map((e) => e.x)), arcLeftEdge }));
+""")
+    assert out["maxX"] < out["arcLeftEdge"], (
+        f"band text (max x={out['maxX']}) must stay clear of the arc "
+        f"(starts at x={out['arcLeftEdge']})"
+    )
+
+
+def test_p1_band_is_horizontally_centered_when_room_allows() -> None:
+    """When the straight-run zone is wide enough that the 4 cards don't fill
+    it, the band must be pulled off the left edge toward the zone's center
+    (the old behavior always started at x=pad, reading as off-center). Uses
+    the same widescreen canvas as the arc-overlap test — the harness default
+    900x600 leaves almost no slack to center into (its arc eats most of the
+    straight-run width), which would make this assertion trivially fail
+    regardless of the centering logic."""
+    out = _run("""
+canvas.clientWidth = 1400; canvas.clientHeight = 650;
+r.setLegibilityMode('p1');
+r.currentBeat = 2.0; fillLog.length = 0; r.render();
+const header = fillLog.find((e) => String(e.txt).includes('VENIR'));
+console.log(JSON.stringify({ headerX: header.x }));
+""")
+    assert out["headerX"] > 12, "band must be pulled off the bare left-edge pad"
+
+
+def test_p1_reading_band_shows_upcoming_notes_in_a_fixed_strip() -> None:
+    """P1 draws the 'À VENIR' band with the fret + note name of upcoming notes.
+    Uses a wide/short canvas (1200x500) where cards have full room (~160px) —
+    the harness default 900x600 (and any tall/near-square panel) lands in
+    _drawReadingBand's compact fallback, which deliberately drops the note
+    name to keep the digit legible in a narrow card (see
+    test_p1_band_drops_note_name_when_cards_are_too_narrow_to_fit_it)."""
+    out = _run("""
+canvas.clientWidth = 1200; canvas.clientHeight = 500;
 r.setLegibilityMode('p1');
 const t = frameTexts(2.0);
 console.log(JSON.stringify(t.band));
@@ -146,6 +204,39 @@ console.log(JSON.stringify(t.band));
     assert "7" in out and "6" in out
     assert "B" in out, "note name B (string 1 fret 7) must be shown in the band"
     assert "G#" in out, "note name G# (string 4 fret 6) must be shown in the band"
+
+
+def test_p1_band_drops_note_name_when_cards_are_too_narrow_to_fit_it() -> None:
+    """Regression: a tall/near-square panel (this session's real browser
+    canvas was 968x816) drives outerRadius up, which eats most of the
+    straight-run width before the arc, leaving cards too narrow (~46px) for
+    the fixed dot+digit+name+string layout — it overlapped neighbouring
+    cards. Below the compact threshold the band drops the name/string and
+    shows only a big digit, sized to fill the freed width."""
+    out = _run("""
+canvas.clientWidth = 968; canvas.clientHeight = 816;
+r.setLegibilityMode('p1');
+r.currentBeat = 2.0;
+const bandCalls = [];
+const origDraw = r._drawReadingBand.bind(r);
+r._drawReadingBand = (...args) => {
+  const startIdx = fillLog.length;
+  origDraw(...args);
+  bandCalls.push(...fillLog.slice(startIdx));
+};
+fillLog.length = 0;
+r.render();
+const g = r._foldGeometry();
+const maxBandRight = Math.max(240, g.bendX - g.outerRadius - 24);
+console.log(JSON.stringify({ maxBandRight, texts: bandCalls.map((e) => e.txt) }));
+""")
+    assert out["maxBandRight"] < 260, "fixture must actually land in the narrow case"
+    # The fret digit must still be there; the note-name letters must not — and
+    # this is scoped to the band's OWN draw calls (not the permanent string-
+    # name labels 'e/B/G/D/A/E' on the fretboard, which are drawn regardless).
+    assert "7" in out["texts"]
+    letters = [t for t in out["texts"] if t in ("A", "B", "C", "D", "E", "F", "G")]
+    assert letters == [], f"compact band must drop note-name letters, saw {letters}"
 
 
 def test_p1_upcoming_groups_are_ordered_and_chorded() -> None:
