@@ -60,6 +60,10 @@ export class SlopeRenderer {
     this.bpm = data?.beats_per_measure || 4;
     this.currentBeat = 0;
     this.visible = false;
+    // Legibility aid mode (P1–P4): 'base' = raw slope, 'p1' = fixed reading
+    // band (default). See setLegibilityMode. P2–P4 are staged follow-ups; for
+    // now they render as 'base' plus a corner tag naming what's coming.
+    this.legibilityMode = 'p1';
     this.dpr = window.devicePixelRatio || 1;
     this.playback = null;
     this._lastSeconds = 0;
@@ -147,6 +151,14 @@ export class SlopeRenderer {
     } else {
       this._stopAnimationLoop();
     }
+  }
+
+  /* Select the in-motion legibility aid. See the class-level modes note.
+     Unknown values fall back to 'base' so a stale localStorage value can't
+     blank the view. */
+  setLegibilityMode(mode) {
+    const allowed = ['base', 'p1', 'p2', 'p3', 'p4'];
+    this.legibilityMode = allowed.includes(mode) ? mode : 'base';
   }
 
   bindPlayback(playback) {
@@ -264,7 +276,147 @@ export class SlopeRenderer {
     this._drawHitFlashes();
     this._drawNowPulse();
     this._drawTempoHeart();
+    if (this.legibilityMode === 'p1') {
+      this._drawReadingBand(w, h);
+    } else if (this.legibilityMode !== 'base') {
+      this._drawModeComingSoonTag(w, h);
+    }
     this._endFrameCaches();
+  }
+
+  /* Upcoming notes to show, earliest first, from the current playhead forward.
+     Chords (same onset) are kept together as one group. */
+  _upcomingNotes(maxGroups) {
+    const eps = 1e-4;
+    const ahead = this.notes
+      .filter((n) => n.onset >= this.currentBeat - eps)
+      .sort((a, b) => a.onset - b.onset || a.string - b.string);
+    const groups = [];
+    let cur = null;
+    for (const n of ahead) {
+      if (!cur || Math.abs(n.onset - cur.onset) > eps) {
+        cur = { onset: n.onset, notes: [n] };
+        groups.push(cur);
+        if (groups.length >= maxGroups) break;
+      } else {
+        cur.notes.push(n);
+      }
+    }
+    return groups;
+  }
+
+  /* P1 — fixed reading band. A static strip pinned to the bottom edge shows the
+     next few note groups in large, still text. Because it never moves, the eye
+     reads it in fixation (not smooth pursuit), so it stays sharp at any tempo /
+     refresh rate — the moving discs keep carrying position/colour/length, the
+     band carries the reading. */
+  _drawReadingBand(w, h) {
+    const groups = this._upcomingNotes(4);
+    if (!groups.length) return;
+    const ctx = this.ctx;
+    const pad = 12;
+    const cardH = 66;
+    const gap = 8;
+    const cardW = Math.min(150, (w - pad * 2 - gap * 3) / 4);
+    const bandY = h - cardH - pad;
+
+    ctx.save();
+    // Dim scrim behind the band so the moving lane doesn't bleed through the text.
+    ctx.fillStyle = 'rgba(6, 8, 12, 0.82)';
+    ctx.fillRect(0, bandY - 6, w, cardH + 12);
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.font = '600 10px Inter, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('À VENIR', pad, bandY - 10);
+
+    groups.forEach((group, gi) => {
+      const x = pad + gi * (cardW + gap);
+      const beatsAway = group.onset - this.currentBeat;
+      // The imminent group is brightest; later ones fade so the eye lands on
+      // "what's next" first.
+      const prom = gi === 0 ? 1 : Math.max(0.4, 1 - gi * 0.22);
+      ctx.globalAlpha = prom;
+      ctx.fillStyle = gi === 0 ? 'rgba(76,175,80,0.16)' : 'rgba(255,255,255,0.05)';
+      this._roundRect(ctx, x, bandY, cardW, cardH, 8);
+      ctx.fill();
+      if (gi === 0) {
+        ctx.strokeStyle = 'rgba(76,175,80,0.85)';
+        ctx.lineWidth = 1.5;
+        this._roundRect(ctx, x, bandY, cardW, cardH, 8);
+        ctx.stroke();
+      }
+
+      // Stack the group's notes (a chord) as compact rows inside the card.
+      const rows = group.notes.slice(0, 4);
+      const rowH = (cardH - 16) / rows.length;
+      rows.forEach((n, ri) => {
+        const cy = bandY + 8 + rowH * ri + rowH / 2;
+        const meta = FINGER_META[String(n.finger || '').toLowerCase()] || FINGER_META.open;
+        // Finger colour dot.
+        ctx.globalAlpha = prom;
+        ctx.fillStyle = meta.color;
+        ctx.beginPath();
+        ctx.arc(x + 16, cy, 6, 0, Math.PI * 2);
+        ctx.fill();
+        // Big fret number — the primary reading target.
+        ctx.fillStyle = '#ffffff';
+        ctx.font = `900 ${Math.min(26, rowH * 0.86)}px Inter, sans-serif`;
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(String(n.fret), x + 28, cy);
+        // Note name + string, smaller, to the right.
+        ctx.fillStyle = 'rgba(255,255,255,0.72)';
+        ctx.font = '700 12px Inter, sans-serif';
+        ctx.fillText(`${n.noteName}`, x + 28 + 22, cy - 6);
+        ctx.fillStyle = 'rgba(255,255,255,0.45)';
+        ctx.font = '600 10px Inter, sans-serif';
+        ctx.fillText(`${STRING_NAMES[n.string] || ''}${n.string}`, x + 28 + 22, cy + 8);
+      });
+
+      // "in N.n beats" hint under the imminent card.
+      if (gi === 0) {
+        ctx.globalAlpha = 0.7;
+        ctx.fillStyle = 'rgba(76,175,80,0.9)';
+        ctx.font = '600 9px Inter, sans-serif';
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'alphabetic';
+        ctx.fillText(`+${beatsAway.toFixed(1)}`, x + cardW - 6, bandY + 12);
+      }
+    });
+    ctx.restore();
+  }
+
+  _drawModeComingSoonTag(w, h) {
+    const ctx = this.ctx;
+    const label = {
+      p2: 'P2 — droite d’approche + densité (à venir)',
+      p3: 'P3 — loupe de lecture (à venir)',
+      p4: 'P4 — défilement cranté (à venir)',
+    }[this.legibilityMode] || '';
+    if (!label) return;
+    ctx.save();
+    ctx.font = '600 11px Inter, sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'alphabetic';
+    const tw = ctx.measureText(label).width;
+    ctx.fillStyle = 'rgba(6,8,12,0.8)';
+    this._roundRect(ctx, w / 2 - tw / 2 - 10, h - 30, tw + 20, 22, 6);
+    ctx.fill();
+    ctx.fillStyle = 'rgba(255,210,90,0.95)';
+    ctx.fillText(label, w / 2, h - 15);
+    ctx.restore();
+  }
+
+  _roundRect(ctx, x, y, w, h, r) {
+    const rr = Math.min(r, w / 2, h / 2);
+    ctx.beginPath();
+    ctx.moveTo(x + rr, y);
+    ctx.arcTo(x + w, y, x + w, y + h, rr);
+    ctx.arcTo(x + w, y + h, x, y + h, rr);
+    ctx.arcTo(x, y + h, x, y, rr);
+    ctx.arcTo(x, y, x + w, y, rr);
+    ctx.closePath();
   }
 
   _totalBeats() {
@@ -937,7 +1089,11 @@ export class SlopeRenderer {
     ctx.fillStyle = exportWarning ? '#d32f2f' : '#050505';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    const noteName = note.noteName || '';
+    // In P1 the fixed reading band carries the note name; the moving disc drops
+    // the letter and shows the fret digit alone — one thick glyph survives motion
+    // far better than two stacked, and the redundant letter is right there in the
+    // band, read in fixation.
+    const noteName = this.legibilityMode === 'p1' ? '' : (note.noteName || '');
     const alpha = ctx.globalAlpha;
     const px = this._snapPx(point.x);
     const dpr = this.dpr || 1;

@@ -32,6 +32,16 @@ let _currentTrackKind = 'guitar';
 let _lastGuitarMode = DEFAULT_MODE;
 let renderer = null;
 let _slopeRenderer = null;
+// Slope legibility sub-mode (P1–P4), persisted across sessions/tracks.
+const _SLOPE_MODE_KEY = 'fretwise.slopeMode';
+const _SLOPE_MODES = ['base', 'p1', 'p2', 'p3', 'p4'];
+let _slopeMode = (() => {
+  try {
+    const v = localStorage.getItem(_SLOPE_MODE_KEY);
+    return _SLOPE_MODES.includes(v) ? v : 'p1';
+  } catch (_) { return 'p1'; }
+})();
+const _slopeModeSeg = document.getElementById('slope-mode-seg');
 let playback = null;
 let _svgDriver = null;  // SvgCursorDriver instance for standard/standard+tab views
 let loopASet = false;  // has A marker been set
@@ -1511,7 +1521,7 @@ function _applyTrackKindLock() {
   // View pills: Staff is always available; Mixed / Tab require tablature.
   // style.css is owned by another team, so the disabled look is applied via
   // inline styles (opacity / cursor / pointer-events) rather than a class.
-  document.querySelectorAll('.view-seg-btn').forEach((btn) => {
+  document.querySelectorAll('#view-seg .view-seg-btn').forEach((btn) => {
     const needsTab = btn.dataset.mode !== MODES.STANDARD;
     const lock = !guitar && needsTab;
     btn.disabled = lock;
@@ -1581,6 +1591,8 @@ function applyRepresentationModeView(data) {
   if (slopeCanvas) slopeCanvas.style.display = showSlope ? 'block' : 'none';
   if (hand3dViewFrame) hand3dViewFrame.style.display = showHand3d ? 'block' : 'none';
   if (!showHand3d) _releaseHand3dViewFrame();
+  // The Slope legibility sub-mode selector (P1–P4) only makes sense in Slope view.
+  if (_slopeModeSeg) _slopeModeSeg.style.display = showSlope ? '' : 'none';
   _slopeRenderer?.setVisible(showSlope);
   if (showHand3d) {
     const frameReady = _ensureHand3dViewFrame();
@@ -2207,6 +2219,8 @@ function initRenderer(data) {
   renderer = new TabRenderer(tabCanvas, data);
   _slopeRenderer?.destroy();
   _slopeRenderer = slopeCanvas ? new SlopeRenderer(slopeCanvas, data) : null;
+  // Re-apply the user's persisted Slope legibility mode to the new renderer.
+  _slopeRenderer?.setLegibilityMode(_slopeMode);
   // Non-guitar tracks carry no fingering: never draw finger annotations and
   // keep the (hidden) fingering toggle inactive. Defensive — the solve
   // response also exposes `fingered:false` for these tracks.
@@ -3981,22 +3995,48 @@ if (selRepresentationMode) {
 // ── View segmented control (pills) ─────────────────────────────────
 function _syncViewSegPills() {
   const active = selRepresentationMode?.value || DEFAULT_MODE;
-  document.querySelectorAll('.view-seg-btn').forEach(btn => {
+  document.querySelectorAll('#view-seg .view-seg-btn').forEach(btn => {
     btn.classList.toggle('view-seg-active', btn.dataset.mode === active);
   });
   _syncZoomControl(active);
   _applyZoomForMode(active);
 }
 
-document.querySelectorAll('.view-seg-btn').forEach(btn => {
+document.querySelectorAll('#view-seg .view-seg-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     if (!selRepresentationMode) return;
     // Ignore clicks on a pill locked for the current (non-guitar) track.
     if (btn.disabled || btn.classList.contains('view-seg-disabled')) return;
+    // Slope legibility pills (P1–P4) carry data-slope-mode, not data-mode —
+    // they switch the Slope aid, not the notation view. Skip the view logic.
+    if (btn.dataset.mode == null) return;
     selRepresentationMode.value = btn.dataset.mode;
     selRepresentationMode.dispatchEvent(new Event('change'));
   });
 });
+
+// Slope legibility sub-mode pills (P1–P4): switch the in-motion readability aid
+// on the live Slope renderer and persist the choice.
+function _syncSlopeModePills() {
+  if (!_slopeModeSeg) return;
+  _slopeModeSeg.querySelectorAll('.view-seg-btn').forEach((btn) => {
+    btn.classList.toggle('view-seg-active', btn.dataset.slopeMode === _slopeMode);
+  });
+}
+if (_slopeModeSeg) {
+  _slopeModeSeg.querySelectorAll('.view-seg-btn').forEach((btn) => {
+    btn.addEventListener('click', () => {
+      const mode = btn.dataset.slopeMode;
+      if (!_SLOPE_MODES.includes(mode)) return;
+      _slopeMode = mode;
+      try { localStorage.setItem(_SLOPE_MODE_KEY, mode); } catch (_) { /* private mode */ }
+      _syncSlopeModePills();
+      _slopeRenderer?.setLegibilityMode(mode);
+      _slopeRenderer?.render();
+    });
+  });
+  _syncSlopeModePills();
+}
 
 _syncViewSegPills();
 

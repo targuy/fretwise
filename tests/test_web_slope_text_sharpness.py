@@ -225,6 +225,9 @@ def test_note_name_letter_is_never_dropped_on_a_1x_display() -> None:
     crispness fix (there was nothing there to be crisp). It must now always
     render, at a real reading size, at every dpr from 1 to 3."""
     out = _run("""
+// 'base' mode keeps the letter on the disc (P1 deliberately drops it — the band
+// carries the letter there — so this letter-on-disc guarantee is a base-mode one).
+r.setLegibilityMode('base');
 const rows = [1, 1.25, 1.5, 2, 3].map((dpr) => {
   r.dpr = dpr;
   fillLog.length = 0;
