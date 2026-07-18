@@ -643,23 +643,27 @@ export class SlopeRenderer {
      string gets its own row, played strings get a filled disc + fret digit,
      unplayed/muted strings get a hollow ring — without that, there's no way
      to tell "not played" from "chord I haven't read yet" at a glance.
-     10 groups (P1 shows 4), laid out as narrow, TALL cards — one column per
+     20 groups (P1 shows 4), laid out as narrow, TALL cards — one column per
      group, one fixed row per string — rather than P1's wide, short cards.
      Six FIXED rows per card is what guarantees no collision between
      displayed notes: every string has exactly one slot, played or hollow,
-     so nothing can ever land on top of anything else. Circle radius targets
-     the range between P1's (12-18px) and P2's (16-24px), shrinking further
-     only if six rows genuinely don't fit the available height — the same
-     graceful-degradation approach as P1's compact mode. Card WIDTH shrinks
-     to fit all 10 columns in the arc-safe zone (same shrink-to-fit as P1's
-     compact mode); radius/digit size are driven by cardH, not cardW, so
-     legibility per string doesn't degrade as the column count grows. */
+     so nothing can ever land on top of anything else. No per-row string
+     label — with 20 columns every pixel of row width goes to the disc/digit
+     instead; the string is already identifiable by row position (row 0 is
+     always string 1, row 5 always string 6), same convention the fretboard
+     view already uses. Circle radius targets the range between P1's
+     (12-18px) and P2's (16-24px), shrinking further only if six rows
+     genuinely don't fit the available height — the same graceful-degradation
+     approach as P1's compact mode. Card WIDTH shrinks to fit all 20 columns
+     in the arc-safe zone (same shrink-to-fit as P1's compact mode);
+     radius/digit size are driven by cardH, not cardW, so legibility per
+     string doesn't degrade as the column count grows. */
   _drawChordLookaheadBand(w, h) {
-    const groups = this._upcomingNotes(10);
+    const groups = this._upcomingNotes(20);
     if (!groups.length) return;
     const ctx = this.ctx;
     const pad = 12;
-    const gapPx = 10;
+    const gapPx = 6;
 
     const g = this._foldGeometry();
     const gapTop = g.topBase + g.spread / 2;
@@ -674,14 +678,13 @@ export class SlopeRenderer {
     // rightmost bulge sits at this gap's vertical center.
     const maxBandRight = Math.max(240, g.bendX - g.outerRadius - 24);
     const count = groups.length;
-    // Each card only needs one column (string label + one disc/ring stack),
-    // far narrower than P1's dot+digit+name+string row. 60px is enough for
-    // a ~42px disc (radius up to 21) plus the string-label sliver and
-    // padding — still tight for 10 columns in the arc-safe zone, so cardW
-    // below shrinks below this target on narrower screens (same
-    // shrink-to-fit as P1's compact mode; radius/digit size don't depend on
-    // cardW so per-string legibility holds even when cards get narrow).
-    const IDEAL_CARD_W = 60;
+    // Each card only needs one column (one disc/ring stack, no string
+    // label) — narrower than the 5/10-group version since there's no
+    // letter sliver to reserve. 40px is enough for a ~30px disc; cardW
+    // below shrinks further on narrow screens (same shrink-to-fit as P1's
+    // compact mode; radius/digit size don't depend on cardW so per-string
+    // legibility holds even when cards get narrow).
+    const IDEAL_CARD_W = 40;
     const idealWidth = IDEAL_CARD_W * count + gapPx * (count - 1);
     const bandWidth = Math.min(idealWidth, maxBandRight - pad * 2);
     const cardW = (bandWidth - gapPx * (count - 1)) / count;
@@ -693,16 +696,19 @@ export class SlopeRenderer {
     ctx.textAlign = 'left';
     ctx.textBaseline = 'alphabetic';
     ctx.fillText('PROCHAINS ACCORDS', bandLeft, cardY - 12);
+    ctx.textBaseline = 'middle'; // for the per-row fret digits below
 
     const rowPad = 4;
     const rowH = (cardH - rowPad * 2) / 6;
     // Target: between P1's circleRadius (12-18) and P2's (16-24). Also
-    // clamped to cardW/2 — with 10 narrow columns squeezed into the
+    // clamped to cardW/2 — with 20 narrow columns squeezed into the
     // arc-safe zone, a height-only radius could exceed the column's own
-    // width and spill into the next card; that clamp is what keeps 10
+    // width and spill into the next card; that clamp is what keeps the
     // columns collision-free the same way rowH/2 keeps 6 rows collision-free.
+    // No string-label sliver to share cardW with anymore, so the disc gets
+    // to use nearly the whole column.
     const targetRadius = this._clamp(this._laneSpacing() * 0.42, 14, 21);
-    const radius = Math.min(targetRadius, rowH / 2 - 2, cardW / 2 - 3);
+    const radius = Math.min(targetRadius, rowH / 2 - 2, cardW / 2 - 2);
 
     groups.forEach((group, gi) => {
       const x = bandLeft + gi * (cardW + gapPx);
@@ -741,12 +747,6 @@ export class SlopeRenderer {
         const stringNum = row + 1; // row 0 = string 1 ('e', highest) at top
         const cy = cardY + rowPad + rowH * row + rowH / 2;
         const played = group.notes.find((n) => n.string === stringNum);
-
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'rgba(255,255,255,0.4)';
-        ctx.font = '600 9px Inter, sans-serif';
-        ctx.fillText(STRING_NAMES[stringNum] || '', x + 2, cy);
 
         if (played) {
           const meta = FINGER_META[String(played.finger || '').toLowerCase()] || FINGER_META.open;
@@ -1141,16 +1141,72 @@ export class SlopeRenderer {
     ctx.stroke();
   }
 
+  /* Traces a string's path between two depths. The bottom/top lanes are
+     genuinely straight (any two lanePoints on them are colinear), so they
+     only ever need their two endpoints. The 180° turn is a true circular
+     arc — _lanePoint already computes it as one (per-string concentric
+     circle around g.bendX/g.centerY) — so it's drawn with a single native
+     ctx.arc() call instead of sampling many points and connecting them with
+     lineTo: a real semicircle, not a polyline approximation of one, and
+     smooth regardless of quality tier or step count (canvas rasterizes arcs
+     natively). The old sampled version spent most of its ~18-42 steps on
+     the straight segments, where they bought nothing (straight lines need
+     only 2 points), while the curved segment — the only part sampling could
+     ever visibly facet — got whatever fraction of those steps fell inside
+     it. This handles partial ranges too (e.g. a note spanning only part of
+     the turn), not just full lane traces. */
   _traceDepthPath(ctx, stringNum, startDepth, endDepth) {
     const minDepth = -PAST_BEATS / this.futureBeats;
     const start = this._clamp(startDepth, minDepth, 1.08);
     const end = this._clamp(endDepth, minDepth, 1.08);
-    const steps = Math.max(3, Math.ceil(Math.abs(end - start) * (this._quality >= 2 ? 18 : 42)));
-    for (let i = 0; i <= steps; i += 1) {
-      const depth = this._lerp(start, end, i / steps);
-      const p = this._lanePoint(stringNum, depth);
-      if (i === 0) ctx.moveTo(p.x, p.y);
-      else ctx.lineTo(p.x, p.y);
+    if (end <= start) return;
+
+    const g = this._foldGeometry();
+    const stringRadius = g.radius + this._stringOffset(stringNum);
+    const dStart = start * g.totalLen;
+    const dEnd = end * g.totalLen;
+    const arcStart = g.bottomLen;
+    const arcEnd = g.bottomLen + g.arcLen;
+
+    let moved = false;
+    const lineOrMove = (x, y) => {
+      if (moved) ctx.lineTo(x, y);
+      else { ctx.moveTo(x, y); moved = true; }
+    };
+
+    if (dStart < arcStart) {
+      const p0 = this._lanePoint(stringNum, dStart / g.totalLen);
+      lineOrMove(p0.x, p0.y);
+      const segEndD = Math.min(dEnd, arcStart);
+      const p1 = this._lanePoint(stringNum, segEndD / g.totalLen);
+      ctx.lineTo(p1.x, p1.y);
+    }
+
+    if (dEnd > arcStart && dStart < arcEnd) {
+      const segStartD = Math.max(dStart, arcStart);
+      const segEndD = Math.min(dEnd, arcEnd);
+      // Matches _lanePoint's arc formula exactly: angle decreases from π/2
+      // (bottom-lane handoff) to -π/2 (top-lane handoff) as depth increases,
+      // sweeping through angle 0 (the turn's rightmost bulge) — a 180°
+      // sweep, hence anticlockwise=true so canvas takes that direct path
+      // instead of the long way around.
+      const angleFor = (d) => Math.PI / 2 - (d - arcStart) / g.radius;
+      const a0 = angleFor(segStartD);
+      const a1 = angleFor(segEndD);
+      if (!moved) {
+        const p0 = this._lanePoint(stringNum, segStartD / g.totalLen);
+        ctx.moveTo(p0.x, p0.y);
+        moved = true;
+      }
+      ctx.arc(g.bendX, g.centerY, stringRadius, a0, a1, true);
+    }
+
+    if (dEnd > arcEnd) {
+      const segStartD = Math.max(dStart, arcEnd);
+      const p0 = this._lanePoint(stringNum, segStartD / g.totalLen);
+      lineOrMove(p0.x, p0.y);
+      const p1 = this._lanePoint(stringNum, dEnd / g.totalLen);
+      ctx.lineTo(p1.x, p1.y);
     }
   }
 
@@ -1561,14 +1617,21 @@ export class SlopeRenderer {
     const ctx = this.ctx;
     const beatPhase = this.currentBeat - Math.floor(this.currentBeat);
     const pulse = 1 + Math.pow(1 - beatPhase, 5) * 0.34;
-    const cx = Math.max(54, this.canvas.clientWidth * 0.055);
-    // Vertical-center placement used to be safe when this was the only thing
-    // drawn there; it now collides with the P1 reading band / P2 density
-    // readout / P3-P4 tags, which all live in the lane gap around
-    // clientHeight*0.5 (confirmed: "72 BPM" landing directly on a band
-    // card's digit row). Pin it above the top lane instead — dead space no
-    // legibility aid uses.
-    const cy = Math.max(40, this._foldGeometry().topBase - 45);
+    // Was pinned to the left corner (clientWidth*0.055); that sits right
+    // above where the top lane's far/oldest-visible notes and their chord
+    // triangles cluster (near farX, close to the same left margin), so the
+    // heart routinely collided with them ("Fmaj7"/fret-digit overlap seen in
+    // practice). Centered horizontally instead — still well above topBase
+    // (see cy below), so it clears the note path regardless of x, and
+    // "au milieu" reads as a single stable landmark rather than a corner
+    // that happens to coincide with wherever notes currently are.
+    const cx = this.canvas.clientWidth / 2;
+    // Pinned near the very top of the canvas, not just "above the top lane"
+    // (topBase - 45): chord triangles/labels can stick up well past topBase
+    // for a tall chord, so a fixed small y stays clear of every lane, arc,
+    // and legibility overlay (P1-P5 all live at/below the lane gap, well
+    // below this) regardless of geometry.
+    const cy = 30;
     const size = 26 * pulse;
     ctx.save();
     ctx.translate(cx, cy);
