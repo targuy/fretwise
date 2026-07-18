@@ -184,7 +184,7 @@ export class SlopeRenderer {
      Unknown values fall back to 'base' so a stale localStorage value can't
      blank the view. */
   setLegibilityMode(mode) {
-    const allowed = ['base', 'p1', 'p2', 'p3', 'p4'];
+    const allowed = ['base', 'p1', 'p2', 'p3', 'p4', 'p5'];
     this.legibilityMode = allowed.includes(mode) ? mode : 'base';
   }
 
@@ -324,6 +324,8 @@ export class SlopeRenderer {
       this._drawStrikeMagnifier(w, h);
     } else if (this.legibilityMode === 'p4') {
       this._drawSteppedScrollReadout(w, h);
+    } else if (this.legibilityMode === 'p5') {
+      this._drawChordLookaheadBand(w, h);
     }
     this._endFrameCaches();
   }
@@ -632,6 +634,130 @@ export class SlopeRenderer {
     ctx.textAlign = 'right';
     ctx.textBaseline = 'alphabetic';
     ctx.fillText(`+${beatsAway.toFixed(2)}`, cardX + cardW - 6, cardY + cardH + 20);
+    ctx.restore();
+  }
+
+  /* P5 — chord-diagram lookahead. Mixes P1's fixed reading band (never
+     moves, so it's read in fixation, not smooth pursuit) with a genuine
+     6-string chord shape per group instead of a flat note list: every
+     string gets its own row, played strings get a filled disc + fret digit,
+     unplayed/muted strings get a hollow ring — without that, there's no way
+     to tell "not played" from "chord I haven't read yet" at a glance.
+     5 groups (P1 shows 4), laid out as narrow, TALL cards — one column per
+     group, one fixed row per string — rather than P1's wide, short cards.
+     Six FIXED rows per card is what guarantees no collision between
+     displayed notes: every string has exactly one slot, played or hollow,
+     so nothing can ever land on top of anything else. Circle radius targets
+     the range between P1's (12-18px) and P2's (16-24px), shrinking further
+     only if six rows genuinely don't fit the available height — the same
+     graceful-degradation approach as P1's compact mode. */
+  _drawChordLookaheadBand(w, h) {
+    const groups = this._upcomingNotes(5);
+    if (!groups.length) return;
+    const ctx = this.ctx;
+    const pad = 12;
+    const gapPx = 10;
+
+    const g = this._foldGeometry();
+    const gapTop = g.topBase + g.spread / 2;
+    const gapBottom = g.bottomBase - g.spread / 2;
+    // Reuse P1's vertical centering (bottom toolbar clearance already
+    // solved there) but claim much more of the gap's height — tall cards
+    // are what let 6 string-rows have real room per row.
+    const cardH = Math.max(90, Math.min(280, gapBottom - gapTop - 24));
+    const cardY = (gapTop + gapBottom) / 2 - cardH / 2;
+
+    // Same arc-avoidance as P1/P3: stay left of the string turn, whose
+    // rightmost bulge sits at this gap's vertical center.
+    const maxBandRight = Math.max(240, g.bendX - g.outerRadius - 24);
+    const count = groups.length;
+    // Each card only needs one column (string label + one disc/ring stack),
+    // far narrower than P1's dot+digit+name+string row — so 5 cards still
+    // fit comfortably in the same arc-safe zone P1's 4 wider cards used.
+    const IDEAL_CARD_W = 96;
+    const idealWidth = IDEAL_CARD_W * count + gapPx * (count - 1);
+    const bandWidth = Math.min(idealWidth, maxBandRight - pad * 2);
+    const cardW = (bandWidth - gapPx * (count - 1)) / count;
+    const bandLeft = Math.max(pad, (maxBandRight - bandWidth) / 2);
+
+    ctx.save();
+    ctx.fillStyle = 'rgba(255,255,255,0.55)';
+    ctx.font = '600 11px Inter, sans-serif';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'alphabetic';
+    ctx.fillText('PROCHAINS ACCORDS', bandLeft, cardY - 12);
+
+    const rowPad = 4;
+    const rowH = (cardH - rowPad * 2) / 6;
+    // Target: between P1's circleRadius (12-18) and P2's (16-24).
+    const targetRadius = this._clamp(this._laneSpacing() * 0.42, 14, 21);
+    const radius = Math.min(targetRadius, rowH / 2 - 2);
+
+    groups.forEach((group, gi) => {
+      const x = bandLeft + gi * (cardW + gapPx);
+      const prom = gi === 0 ? 1 : Math.max(0.4, 1 - gi * 0.18);
+      ctx.globalAlpha = prom;
+
+      ctx.fillStyle = 'rgba(6, 8, 12, 0.85)';
+      ctx.fillRect(x - 4, cardY - 4, cardW + 8, cardH + 8);
+      ctx.fillStyle = gi === 0 ? 'rgba(76,175,80,0.14)' : 'rgba(255,255,255,0.04)';
+      this._roundRect(ctx, x, cardY, cardW, cardH, 8);
+      ctx.fill();
+      if (gi === 0) {
+        ctx.strokeStyle = 'rgba(76,175,80,0.85)';
+        ctx.lineWidth = 1.5;
+        this._roundRect(ctx, x, cardY, cardW, cardH, 8);
+        ctx.stroke();
+      }
+
+      // One triangle per CHORD, not per note: drawn once above the card,
+      // only when a note in this group actually carries a chord label (see
+      // _buildChordEvents/note.chord) — a single melody note doesn't get one.
+      if (group.notes.some((n) => n.chord)) {
+        const tipY = cardY - 6;
+        const size = 8;
+        ctx.fillStyle = '#ff3030';
+        ctx.beginPath();
+        ctx.moveTo(x + cardW / 2, tipY);
+        ctx.lineTo(x + cardW / 2 - size, tipY - size * 1.4);
+        ctx.lineTo(x + cardW / 2 + size, tipY - size * 1.4);
+        ctx.closePath();
+        ctx.fill();
+      }
+
+      const cx = x + cardW / 2;
+      for (let row = 0; row < 6; row += 1) {
+        const stringNum = row + 1; // row 0 = string 1 ('e', highest) at top
+        const cy = cardY + rowPad + rowH * row + rowH / 2;
+        const played = group.notes.find((n) => n.string === stringNum);
+
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'middle';
+        ctx.fillStyle = 'rgba(255,255,255,0.4)';
+        ctx.font = '600 9px Inter, sans-serif';
+        ctx.fillText(STRING_NAMES[stringNum] || '', x + 2, cy);
+
+        if (played) {
+          const meta = FINGER_META[String(played.finger || '').toLowerCase()] || FINGER_META.open;
+          ctx.fillStyle = meta.color;
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+          ctx.fill();
+          ctx.fillStyle = '#050505';
+          ctx.textAlign = 'center';
+          ctx.font = `900 ${Math.max(10, radius * 1.05)}px Inter, sans-serif`;
+          ctx.fillText(String(played.fret), cx, cy + 0.5);
+        } else {
+          // Unplayed/muted string: hollow ring only, no fill, no digit — the
+          // only way to distinguish "not played" from "not read yet".
+          ctx.strokeStyle = 'rgba(255,255,255,0.30)';
+          ctx.lineWidth = Math.max(1.2, radius * 0.16);
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius * 0.7, 0, Math.PI * 2);
+          ctx.stroke();
+        }
+      }
+    });
     ctx.restore();
   }
 
