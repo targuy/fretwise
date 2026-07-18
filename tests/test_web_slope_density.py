@@ -171,10 +171,12 @@ console.log(JSON.stringify({
     assert letters == [], f"P2 discs must not draw the note-name letter, saw {letters}"
 
 
-def test_p3_p4_coming_soon_tags_also_clear_the_bottom_toolbar() -> None:
+def test_p4_coming_soon_tag_also_clears_the_bottom_toolbar() -> None:
     """Regression: _drawModeComingSoonTag shared the same bottom-pinned bug as
-    the P1 band before the fix; both now route through the shared _tagY()."""
-    for mode in ("p3", "p4"):
+    the P1 band before the fix; both now route through the shared _tagY().
+    (P3 is live now — its own toolbar-clearance check lives in
+    test_web_slope_strike_magnifier.py.)"""
+    for mode in ("p4",):
         out = _run(f"""
 r.setLegibilityMode('{mode}');
 fillLog.length = 0;
