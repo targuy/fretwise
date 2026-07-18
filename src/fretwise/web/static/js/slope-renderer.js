@@ -25,6 +25,11 @@ const MAX_DENSITY_BEATS = MEASURE_BEATS * 12;
 // point, and it keeps the renderer's own default in sync with the slider's
 // (see main.js's _SLOPE_DENSITY_MIN/_slopeDensity fallback).
 const FUTURE_BEATS = MIN_DENSITY_BEATS;
+// P4 — stepped scroll: how many beats wide each hold is. Half a beat (an
+// eighth note at 4/4) is short enough that the view still reads as playing
+// along in real time, but long enough to give a real fixation window between
+// jumps instead of a barely-shorter blur.
+const STEP_BEATS = 0.5;
 const PAST_BEATS = 0.75;
 const STRING_COLLISION_GAP_BEATS = 0.18;
 const MIN_NOTE_GAP_PX = 28;
@@ -80,6 +85,12 @@ export class SlopeRenderer {
     // never reaches 1, independent of screen Hz) proportionally smaller
     // relative to glyph size. See setDensity.
     this.futureBeats = FUTURE_BEATS;
+    // P4 (stepped scroll): the beat used for on-screen positioning is
+    // quantized to this many beats when legibilityMode === 'p4' — see
+    // _renderBeat(). The actual playback clock (this.currentBeat) stays
+    // continuous throughout, so audio sync and hit detection are unaffected;
+    // only what gets drawn where is stepped.
+    this.stepBeats = STEP_BEATS;
     this.dpr = window.devicePixelRatio || 1;
     this.playback = null;
     this._lastSeconds = 0;
@@ -311,8 +322,8 @@ export class SlopeRenderer {
       this._drawDensityReadout(w, h);
     } else if (this.legibilityMode === 'p3') {
       this._drawStrikeMagnifier(w, h);
-    } else if (this.legibilityMode !== 'base') {
-      this._drawModeComingSoonTag(w, h);
+    } else if (this.legibilityMode === 'p4') {
+      this._drawSteppedScrollReadout(w, h);
     }
     this._endFrameCaches();
   }
@@ -514,12 +525,14 @@ export class SlopeRenderer {
     );
   }
 
-  _drawModeComingSoonTag(w, h) {
-    const label = {
-      p4: 'P4 — défilement cranté (à venir)',
-    }[this.legibilityMode] || '';
-    if (!label) return;
-    this._drawTag(w, h, label, 'rgba(255,210,90,0.95)');
+  /* P4 is live (stepped scroll, see _renderBeat) — show a status readout
+     rather than a "coming soon" placeholder. */
+  _drawSteppedScrollReadout(w, h) {
+    this._drawTag(
+      w, h,
+      `P4 — défilement cranté : pas de ${this.stepBeats} temps`,
+      'rgba(255,183,77,0.95)',
+    );
   }
 
   /* P3 — reading magnifier before the strike. Where P1 previews a ROW of
@@ -841,7 +854,23 @@ export class SlopeRenderer {
   }
 
   _depthForBeat(noteBeat) {
-    return (noteBeat - this.currentBeat) / this.futureBeats;
+    return (noteBeat - this._renderBeat()) / this.futureBeats;
+  }
+
+  /* P4 — stepped scroll. Continuous glide is exactly what smooth pursuit
+     can't track sharply, independent of refresh rate (the eye's tracking
+     gain tops out around 0.9, never reaching 1). Quantizing the beat used
+     for POSITIONING (not this.currentBeat itself, which stays continuous —
+     see the constructor) turns the glide into a sequence of held frames:
+     the eye gets a real fixation window between jumps instead of continuous
+     motion to chase. Every on-screen position derives from _depthForBeat,
+     so quantizing it there alone makes P4 apply everywhere (notes, chord
+     labels, measure bars) without threading a mode check through each draw
+     call. The now-line and hit flashes are pinned to depth 0 directly
+     (bypassing _depthForBeat), so the strike line itself never jumps. */
+  _renderBeat() {
+    if (this.legibilityMode !== 'p4') return this.currentBeat;
+    return Math.floor(this.currentBeat / this.stepBeats) * this.stepBeats;
   }
 
   _hitY() {
