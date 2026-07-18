@@ -1538,10 +1538,13 @@ export class SlopeRenderer {
     // In P1 the fixed reading band carries the note name; the moving disc drops
     // the letter and shows the fret digit alone — one thick glyph survives motion
     // far better than two stacked, and the redundant letter is right there in the
-    // band, read in fixation. P2 drops it too, for the same reason plus its own
-    // goal: maximize the fret digit itself (_circleRadius already gives P2 a
-    // bigger disc; freeing the second text row lets the digit fill it).
-    const noteName = (this.legibilityMode === 'p1' || this.legibilityMode === 'p2') ? '' : (note.noteName || '');
+    // band, read in fixation. P2 and P5 drop it too, for the same reason plus
+    // their own goal: maximize the fret digit itself (P2/P5's own chord-diagram
+    // circles already carry the string/position info some other way, so the
+    // moving disc's letter is pure redundancy — freeing that second text row
+    // lets the digit fill the circle instead).
+    const dropsNoteName = ['p1', 'p2', 'p5'].includes(this.legibilityMode);
+    const noteName = dropsNoteName ? '' : (note.noteName || '');
     const alpha = ctx.globalAlpha;
     const px = this._snapPx(point.x);
     const dpr = this.dpr || 1;
