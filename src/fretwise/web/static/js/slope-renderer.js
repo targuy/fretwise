@@ -15,7 +15,7 @@ const FINGER_META = {
 };
 
 const MEASURE_BEATS = 4;
-// P2 density slider bounds, in beats. Below MIN, notes crowd/overlap in the
+// Density slider bounds, in beats. Below MIN, notes crowd/overlap in the
 // shrunken window; above MAX, the path is stretched so thin each note
 // occupies a sliver of a pixel-beat, defeating the whole point of slowing
 // the glide down for legibility.
@@ -25,11 +25,6 @@ const MAX_DENSITY_BEATS = MEASURE_BEATS * 12;
 // point, and it keeps the renderer's own default in sync with the slider's
 // (see main.js's _SLOPE_DENSITY_MIN/_slopeDensity fallback).
 const FUTURE_BEATS = MIN_DENSITY_BEATS;
-// P4 — stepped scroll: how many beats wide each hold is. Half a beat (an
-// eighth note at 4/4) is short enough that the view still reads as playing
-// along in real time, but long enough to give a real fixation window between
-// jumps instead of a barely-shorter blur.
-const STEP_BEATS = 0.5;
 const PAST_BEATS = 0.75;
 const STRING_COLLISION_GAP_BEATS = 0.18;
 const MIN_NOTE_GAP_PX = 28;
@@ -74,23 +69,13 @@ export class SlopeRenderer {
     this.bpm = data?.beats_per_measure || 4;
     this.currentBeat = 0;
     this.visible = false;
-    // Legibility aid mode (P1–P4): 'base' = raw slope, 'p1' = fixed reading
-    // band (default), 'p2' = density control, 'p3' = strike magnifier (see
-    // _drawStrikeMagnifier). See setLegibilityMode.
-    this.legibilityMode = 'p1';
-    // P2 (density): how many beats of future notes are visible on screen at
-    // once. Fewer beats -> the same physical path length covers less musical
-    // time -> notes glide slower in px/s and sit farther apart, both of which
-    // make the residual smooth-pursuit slip (the eye's ~0.9 tracking gain
-    // never reaches 1, independent of screen Hz) proportionally smaller
-    // relative to glyph size. See setDensity.
+    // Density: how many beats of future notes are visible on screen at once.
+    // Fewer beats -> the same physical path length covers less musical time
+    // -> notes glide slower in px/s and sit farther apart, both of which make
+    // the residual smooth-pursuit slip (the eye's ~0.9 tracking gain never
+    // reaches 1, independent of screen Hz) proportionally smaller relative to
+    // glyph size. See setDensity.
     this.futureBeats = FUTURE_BEATS;
-    // P4 (stepped scroll): the beat used for on-screen positioning is
-    // quantized to this many beats when legibilityMode === 'p4' — see
-    // _renderBeat(). The actual playback clock (this.currentBeat) stays
-    // continuous throughout, so audio sync and hit detection are unaffected;
-    // only what gets drawn where is stepped.
-    this.stepBeats = STEP_BEATS;
     this.dpr = window.devicePixelRatio || 1;
     this.playback = null;
     this._lastSeconds = 0;
@@ -180,16 +165,8 @@ export class SlopeRenderer {
     }
   }
 
-  /* Select the in-motion legibility aid. See the class-level modes note.
-     Unknown values fall back to 'base' so a stale localStorage value can't
-     blank the view. */
-  setLegibilityMode(mode) {
-    const allowed = ['base', 'p1', 'p2', 'p3', 'p4', 'p5'];
-    this.legibilityMode = allowed.includes(mode) ? mode : 'base';
-  }
-
-  /* P2 — density: how many beats of upcoming notes are visible at once.
-     Clamped to [MIN_DENSITY_BEATS, MAX_DENSITY_BEATS] so an extreme value
+  /* Density: how many beats of upcoming notes are visible at once. Clamped
+     to [MIN_DENSITY_BEATS, MAX_DENSITY_BEATS] so an extreme value
      can't collapse the lane (too few beats -> notes overlap/crowd) or spread
      notes into illegibly-tiny specks (too many beats -> everything shrinks
      toward one pixel per beat). No cache to invalidate here: _foldGeometry's
@@ -316,17 +293,7 @@ export class SlopeRenderer {
     this._drawHitFlashes();
     this._drawNowPulse();
     this._drawTempoHeart();
-    if (this.legibilityMode === 'p1') {
-      this._drawReadingBand(w, h);
-    } else if (this.legibilityMode === 'p2') {
-      this._drawDensityReadout(w, h);
-    } else if (this.legibilityMode === 'p3') {
-      this._drawStrikeMagnifier(w, h);
-    } else if (this.legibilityMode === 'p4') {
-      this._drawSteppedScrollReadout(w, h);
-    } else if (this.legibilityMode === 'p5') {
-      this._drawChordLookaheadBand(w, h);
-    }
+    this._drawChordLookaheadBand(w, h);
     this._endFrameCaches();
   }
 
@@ -346,9 +313,8 @@ export class SlopeRenderer {
         // this onset) whose later notes haven't been seen yet in this sorted
         // pass — breaking right after the push would drop them, silently
         // truncating the last group's chord down to whichever single note
-        // happened to sort first (lowest string). Most visible with
-        // maxGroups=1 (P3's single-group magnifier), but the same truncation
-        // could hit P1's 4th group too.
+        // happened to sort first (lowest string) — most visible with a
+        // small maxGroups, but the bug applied at any group count.
         if (groups.length >= maxGroups) break;
         cur = { onset: n.onset, notes: [n] };
         groups.push(cur);
@@ -359,305 +325,24 @@ export class SlopeRenderer {
     return groups;
   }
 
-  /* P1 — fixed reading band. A static strip shows the next few note groups in
-     large, still text. Because it never moves, the eye reads it in fixation
-     (not smooth pursuit), so it stays sharp at any tempo / refresh rate — the
-     moving discs keep carrying position/colour/length, the band carries the
-     reading. */
-  _drawReadingBand(w, h) {
-    const groups = this._upcomingNotes(4);
-    if (!groups.length) return;
-    const ctx = this.ctx;
-    const pad = 12;
-    const gapPx = 10;
-
-    // Vertical placement: NOT pinned to the bottom edge — that zone is covered
-    // by the fixed playback toolbar + scrubber (~88px, see main.js's
-    // BOT_GUTTER), so a bottom-pinned band was invisible/clipped in practice
-    // (confirmed: "coupé en bas, pas lisible"). The fold geometry leaves a real
-    // empty gap between the bottom lane (the incoming/near-future strip) and
-    // the top lane (the far-future strip, after the arc) — dead space with
-    // nothing drawn in it. Center the band there instead: visible, doesn't
-    // overlap either lane, and sits where the eye naturally rests between the
-    // two lanes rather than requiring a saccade all the way to a screen edge.
-    const g = this._foldGeometry();
-    const gapTop = g.topBase + g.spread / 2;
-    const gapBottom = g.bottomBase - g.spread / 2;
-    const cardH = Math.max(56, Math.min(96, gapBottom - gapTop - 24));
-    const bandY = (gapTop + gapBottom) / 2 - cardH / 2;
-
-    // Horizontal extent: a band spanning the FULL canvas width crosses through
-    // the arc (the string turn) — the arc's rightmost bulge sits at almost
-    // exactly this band's vertical center (x = bendX + outerRadius occurs at
-    // y = centerY, see _lanePoint's arc branch), so a full-width band visually
-    // cut through the turn ("écrase le tournant des cordes"). Confine the band
-    // to the straight-run zone left of the arc, and center it THERE (not
-    // pinned to the left edge, which read as off-center against the lanes
-    // spanning most of the canvas).
-    const maxBandRight = Math.max(240, g.bendX - g.outerRadius - 24);
-    // Size cards to a fixed comfortable target (IDEAL_CARD_W) rather than
-    // maximizing into whatever room is available — a cap close to the
-    // available width leaves near-zero slack, so the row always ends up
-    // hugging the left edge regardless of a "center it" formula below (this
-    // was the actual bug: the old 190px cap nearly filled realistic
-    // straight-run zones, leaving ~12px of "slack" — invisible in practice).
-    // Only shrink below the target on a zone too narrow to fit it.
-    const IDEAL_CARD_W = 160;
-    const idealWidth = IDEAL_CARD_W * 4 + gapPx * 3;
-    const bandWidth = Math.min(idealWidth, maxBandRight - pad * 2);
-    const cardW = (bandWidth - gapPx * 3) / 4;
-    const bandLeft = Math.max(pad, (maxBandRight - bandWidth) / 2);
-
-    ctx.save();
-    // Dim scrim behind the band so the moving lane doesn't bleed through the text.
-    ctx.fillStyle = 'rgba(6, 8, 12, 0.85)';
-    ctx.fillRect(bandLeft - 8, bandY - 8, bandWidth + 16, cardH + 16);
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
-    ctx.font = '600 11px Inter, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText('À VENIR', bandLeft, bandY - 12);
-
-    groups.forEach((group, gi) => {
-      const x = bandLeft + gi * (cardW + gapPx);
-      const beatsAway = group.onset - this.currentBeat;
-      // The imminent group is brightest; later ones fade so the eye lands on
-      // "what's next" first.
-      const prom = gi === 0 ? 1 : Math.max(0.4, 1 - gi * 0.22);
-      ctx.globalAlpha = prom;
-      ctx.fillStyle = gi === 0 ? 'rgba(76,175,80,0.16)' : 'rgba(255,255,255,0.05)';
-      this._roundRect(ctx, x, bandY, cardW, cardH, 8);
-      ctx.fill();
-      if (gi === 0) {
-        ctx.strokeStyle = 'rgba(76,175,80,0.85)';
-        ctx.lineWidth = 1.5;
-        this._roundRect(ctx, x, bandY, cardW, cardH, 8);
-        ctx.stroke();
-      }
-
-      // Stack the group's notes (a chord) as compact rows inside the card.
-      const rows = group.notes.slice(0, 4);
-      const rowH = (cardH - 20) / rows.length;
-      // Below ~100px the fixed dot+digit+name+string layout no longer fits —
-      // a narrow zone (a tall/near-square panel drives outerRadius up, eating
-      // most of the straight-run width before the arc) would otherwise
-      // overlap neighbouring cards' text. Drop the note-name/string and show
-      // ONLY the finger dot + a big digit, using the freed width to keep it
-      // large rather than shrinking everything to illegible mush.
-      const compact = cardW < 100;
-      const dotR = compact ? 5 : 7;
-      const dotX = x + (compact ? 12 : 18);
-      const digitX = dotX + dotR + 8;
-      // Rough glyph-width factor for a bold ("900") numeral: ~0.62x font-size.
-      const digitMaxW = (cardW - (digitX - x) - (compact ? 6 : 46)) / 0.62;
-      rows.forEach((n, ri) => {
-        const cy = bandY + 10 + rowH * ri + rowH / 2;
-        const meta = FINGER_META[String(n.finger || '').toLowerCase()] || FINGER_META.open;
-        // Finger colour dot.
-        ctx.globalAlpha = prom;
-        ctx.fillStyle = meta.color;
-        ctx.beginPath();
-        ctx.arc(dotX, cy, dotR, 0, Math.PI * 2);
-        ctx.fill();
-        // Big fret number — the primary reading target.
-        ctx.fillStyle = '#ffffff';
-        ctx.font = `900 ${Math.max(14, Math.min(38, rowH * 0.94, digitMaxW))}px Inter, sans-serif`;
-        ctx.textAlign = 'left';
-        ctx.textBaseline = 'middle';
-        ctx.fillText(String(n.fret), digitX, cy);
-        if (!compact) {
-          // Note name + string, smaller, to the right.
-          ctx.fillStyle = 'rgba(255,255,255,0.75)';
-          ctx.font = '700 15px Inter, sans-serif';
-          ctx.fillText(`${n.noteName}`, digitX + 30, cy - 7);
-          ctx.fillStyle = 'rgba(255,255,255,0.5)';
-          ctx.font = '600 12px Inter, sans-serif';
-          ctx.fillText(`${STRING_NAMES[n.string] || ''}${n.string}`, digitX + 30, cy + 10);
-        }
-      });
-
-      // "in N.n beats" hint under the imminent card.
-      if (gi === 0) {
-        ctx.globalAlpha = 0.7;
-        ctx.fillStyle = 'rgba(76,175,80,0.9)';
-        ctx.font = '600 10px Inter, sans-serif';
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'alphabetic';
-        ctx.fillText(`+${beatsAway.toFixed(1)}`, x + cardW - 6, bandY + 14);
-      }
-    });
-    ctx.restore();
-  }
-
-  /* Shared corner-tag y position for P2's live readout and P3/P4's "coming
-     soon" notices: centered in the same lane gap _drawReadingBand uses — NOT
-     the bottom edge, which is covered by the fixed playback toolbar +
-     scrubber (see _drawReadingBand's comment; the original bottom-pinned
-     placement bit this tag too before it was noticed on the reading band). */
-  _tagY(h) {
-    const g = this._foldGeometry();
-    const gapTop = g.topBase + g.spread / 2;
-    const gapBottom = g.bottomBase - g.spread / 2;
-    return this._clamp(h * 0.5, gapTop + 20, gapBottom - 6);
-  }
-
-  _drawTag(w, h, label, color) {
-    const ctx = this.ctx;
-    const y = this._tagY(h);
-    ctx.save();
-    ctx.font = '600 11px Inter, sans-serif';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'alphabetic';
-    const tw = ctx.measureText(label).width;
-    ctx.fillStyle = 'rgba(6,8,12,0.8)';
-    this._roundRect(ctx, w / 2 - tw / 2 - 10, y - 15, tw + 20, 22, 6);
-    ctx.fill();
-    ctx.fillStyle = color;
-    ctx.fillText(label, w / 2, y);
-    ctx.restore();
-  }
-
-  /* P2 is live (the density control) — show its current setting rather than
-     a "coming soon" placeholder. */
-  _drawDensityReadout(w, h) {
-    this._drawTag(
-      w, h,
-      `P2 — densité : ${this.futureBeats.toFixed(1)} temps visibles`,
-      'rgba(120,200,255,0.95)',
-    );
-  }
-
-  /* P4 is live (stepped scroll, see _renderBeat) — show a status readout
-     rather than a "coming soon" placeholder. */
-  _drawSteppedScrollReadout(w, h) {
-    this._drawTag(
-      w, h,
-      `P4 — défilement cranté : pas de ${this.stepBeats} temps`,
-      'rgba(255,183,77,0.95)',
-    );
-  }
-
-  /* P3 — reading magnifier before the strike. Where P1 previews a ROW of
-     upcoming groups (read while there's still several beats of runway) and
-     P2 just enlarges the moving discs, P3 answers a narrower question: "what
-     am I about to play, right now, in fixation, at maximum size?" It shows
-     ONLY the single next unstruck group, as large as the lane gap allows,
-     with a shrinking countdown bar that reads the remaining time as a static
-     fill level (not motion) — the group swaps the instant it's struck, a
-     discrete flip rather than a glide, so there's never a moment where the
-     magnifier itself is something the eye has to track. */
-  _drawStrikeMagnifier(w, h) {
-    const groups = this._upcomingNotes(1);
-    if (!groups.length) return;
-    const group = groups[0];
-    const ctx = this.ctx;
-    const pad = 12;
-
-    const g = this._foldGeometry();
-    const gapTop = g.topBase + g.spread / 2;
-    const gapBottom = g.bottomBase - g.spread / 2;
-    // Same arc-avoidance as P1's band (see _drawReadingBand): stay left of
-    // the string turn, whose rightmost bulge sits at this gap's vertical
-    // center.
-    const maxRight = Math.max(240, g.bendX - g.outerRadius - 24);
-    const cardW = Math.min(360, maxRight - pad * 2);
-    const cardH = Math.max(56, gapBottom - gapTop - 24);
-    const cardX = Math.max(pad, (maxRight - cardW) / 2);
-    const cardY = (gapTop + gapBottom) / 2 - cardH / 2;
-
-    const beatsAway = Math.max(0, group.onset - this.currentBeat);
-    // A full window's worth of lead time reads as a full bar; 0 beats away
-    // (the strike instant) reads as empty. minimumGapBeats is the shortest
-    // gap the renderer already treats as "distinct notes", so it's a sane
-    // floor for what "about to strike" means.
-    const horizonBeats = Math.max(this._minimumGapBeats() * 4, 1.5);
-    const urgency = 1 - this._clamp(beatsAway / horizonBeats, 0, 1);
-
-    ctx.save();
-    ctx.fillStyle = 'rgba(6, 8, 12, 0.88)';
-    ctx.fillRect(cardX - 8, cardY - 8, cardW + 16, cardH + 16);
-    ctx.fillStyle = 'rgba(255,255,255,0.55)';
-    ctx.font = '600 11px Inter, sans-serif';
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText('AVANT LA FRAPPE', cardX, cardY - 12);
-
-    ctx.fillStyle = 'rgba(76,175,80,0.14)';
-    this._roundRect(ctx, cardX, cardY, cardW, cardH, 10);
-    ctx.fill();
-    ctx.strokeStyle = 'rgba(76,175,80,0.9)';
-    ctx.lineWidth = 2;
-    this._roundRect(ctx, cardX, cardY, cardW, cardH, 10);
-    ctx.stroke();
-
-    // Countdown bar: a static fill level, not a moving element — it still
-    // communicates "how soon" without asking the eye to track anything.
-    const barH = 6;
-    const barY = cardY + cardH - barH - 8;
-    ctx.fillStyle = 'rgba(255,255,255,0.12)';
-    this._roundRect(ctx, cardX + 10, barY, cardW - 20, barH, 3);
-    ctx.fill();
-    ctx.fillStyle = urgency > 0.75 ? 'rgba(255,138,101,0.95)' : 'rgba(76,175,80,0.95)';
-    this._roundRect(ctx, cardX + 10, barY, (cardW - 20) * urgency, barH, 3);
-    ctx.fill();
-
-    const rows = group.notes.slice(0, 4);
-    const rowsTop = cardY + 26;
-    const rowsH = barY - 10 - rowsTop;
-    const rowH = rowsH / rows.length;
-    const dotR = Math.min(16, Math.max(9, rowH * 0.28));
-    const dotX = cardX + 26;
-    const digitX = dotX + dotR + 14;
-    const digitMaxW = (cardW - (digitX - cardX) - 90) / 0.62;
-    rows.forEach((n, ri) => {
-      const cy = rowsTop + rowH * ri + rowH / 2;
-      const meta = FINGER_META[String(n.finger || '').toLowerCase()] || FINGER_META.open;
-      ctx.fillStyle = meta.color;
-      ctx.beginPath();
-      ctx.arc(dotX, cy, dotR, 0, Math.PI * 2);
-      ctx.fill();
-      ctx.fillStyle = '#ffffff';
-      ctx.textAlign = 'left';
-      ctx.textBaseline = 'middle';
-      ctx.font = `900 ${Math.max(20, Math.min(56, rowH * 0.86, digitMaxW))}px Inter, sans-serif`;
-      ctx.fillText(String(n.fret), digitX, cy);
-      ctx.fillStyle = 'rgba(255,255,255,0.78)';
-      ctx.font = '700 18px Inter, sans-serif';
-      ctx.fillText(`${n.noteName || ''}`, cardX + cardW - 66, cy - 9);
-      ctx.fillStyle = 'rgba(255,255,255,0.55)';
-      ctx.font = '600 14px Inter, sans-serif';
-      ctx.fillText(`${STRING_NAMES[n.string] || ''}${n.string}`, cardX + cardW - 66, cy + 11);
-    });
-
-    ctx.fillStyle = 'rgba(76,175,80,0.9)';
-    ctx.font = '700 12px Inter, sans-serif';
-    ctx.textAlign = 'right';
-    ctx.textBaseline = 'alphabetic';
-    ctx.fillText(`+${beatsAway.toFixed(2)}`, cardX + cardW - 6, cardY + cardH + 20);
-    ctx.restore();
-  }
-
-  /* P5 — chord-diagram lookahead. Mixes P1's fixed reading band (never
-     moves, so it's read in fixation, not smooth pursuit) with a genuine
-     6-string chord shape per group instead of a flat note list: every
-     string gets its own row, played strings get a filled disc + fret digit,
-     unplayed/muted strings get a hollow ring — without that, there's no way
-     to tell "not played" from "chord I haven't read yet" at a glance.
-     20 groups (P1 shows 4), laid out as narrow, TALL cards — one column per
-     group, one fixed row per string — rather than P1's wide, short cards.
-     Six FIXED rows per card is what guarantees no collision between
-     displayed notes: every string has exactly one slot, played or hollow,
-     so nothing can ever land on top of anything else. No per-row string
-     label — with 20 columns every pixel of row width goes to the disc/digit
-     instead; the string is already identifiable by row position (row 0 is
-     always string 1, row 5 always string 6), same convention the fretboard
-     view already uses. Circle radius targets the range between P1's
-     (12-18px) and P2's (16-24px), shrinking further only if six rows
-     genuinely don't fit the available height — the same graceful-degradation
-     approach as P1's compact mode. Card WIDTH shrinks to fit all 20 columns
-     in the arc-safe zone (same shrink-to-fit as P1's compact mode);
-     radius/digit size are driven by cardH, not cardW, so legibility per
-     string doesn't degrade as the column count grows. */
+  /* The Slope reading band. A static strip shows the next 20 upcoming groups
+     as narrow, tall chord-diagram cards — one column per group, one fixed
+     row per string. Because it never moves, the eye reads it in fixation
+     (not smooth pursuit), so it stays sharp at any tempo / refresh rate —
+     the moving discs keep carrying position/colour/length, the band carries
+     the reading. Every string gets its own row: played strings get a filled
+     disc + fret digit, unplayed/muted strings get a hollow ring — without
+     that, there's no way to tell "not played" from "chord I haven't read
+     yet" at a glance. Six FIXED rows per card is what guarantees no
+     collision between displayed notes: every string has exactly one slot,
+     played or hollow, so nothing can ever land on top of anything else. No
+     per-row string label — every pixel of row width goes to the disc/digit
+     instead; the string is identifiable by row position (row 0 is always
+     string 1, row 5 always string 6), same convention the fretboard view
+     uses. Circle radius targets a legible middle ground, shrinking further
+     only if six rows genuinely don't fit the available height, or if 20
+     columns don't fit the available width (graceful degradation rather than
+     overlap either way). */
   _drawChordLookaheadBand(w, h) {
     const groups = this._upcomingNotes(20);
     if (!groups.length) return;
@@ -668,22 +353,22 @@ export class SlopeRenderer {
     const g = this._foldGeometry();
     const gapTop = g.topBase + g.spread / 2;
     const gapBottom = g.bottomBase - g.spread / 2;
-    // Reuse P1's vertical centering (bottom toolbar clearance already
-    // solved there) but claim much more of the gap's height — tall cards
-    // are what let 6 string-rows have real room per row.
+    // Centered vertically in the lane gap (clear of the fixed bottom
+    // playback toolbar/scrubber) but claiming much more of the gap's
+    // height — tall cards are what let 6 string-rows have real room per row.
     const cardH = Math.max(90, Math.min(280, gapBottom - gapTop - 24));
     const cardY = (gapTop + gapBottom) / 2 - cardH / 2;
 
-    // Same arc-avoidance as P1/P3: stay left of the string turn, whose
-    // rightmost bulge sits at this gap's vertical center.
+    // Arc-avoidance: stay left of the string turn, whose rightmost bulge
+    // sits at this gap's vertical center — a full-width band would visually
+    // cut through the turn.
     const maxBandRight = Math.max(240, g.bendX - g.outerRadius - 24);
     const count = groups.length;
     // Each card only needs one column (one disc/ring stack, no string
-    // label) — narrower than the 5/10-group version since there's no
-    // letter sliver to reserve. 40px is enough for a ~30px disc; cardW
-    // below shrinks further on narrow screens (same shrink-to-fit as P1's
-    // compact mode; radius/digit size don't depend on cardW so per-string
-    // legibility holds even when cards get narrow).
+    // label) — 40px is enough for a ~30px disc; cardW below shrinks further
+    // on narrow screens (graceful shrink-to-fit rather than overlap; radius/
+    // digit size don't depend on cardW so per-string legibility holds even
+    // when cards get narrow).
     const IDEAL_CARD_W = 40;
     const idealWidth = IDEAL_CARD_W * count + gapPx * (count - 1);
     const bandWidth = Math.min(idealWidth, maxBandRight - pad * 2);
@@ -700,13 +385,13 @@ export class SlopeRenderer {
 
     const rowPad = 4;
     const rowH = (cardH - rowPad * 2) / 6;
-    // Target: between P1's circleRadius (12-18) and P2's (16-24). Also
+    // Target radius sized off lane spacing, clamped to a legible range. Also
     // clamped to cardW/2 — with 20 narrow columns squeezed into the
     // arc-safe zone, a height-only radius could exceed the column's own
     // width and spill into the next card; that clamp is what keeps the
     // columns collision-free the same way rowH/2 keeps 6 rows collision-free.
-    // No string-label sliver to share cardW with anymore, so the disc gets
-    // to use nearly the whole column.
+    // No string-label sliver to share cardW with, so the disc gets to use
+    // nearly the whole column.
     const targetRadius = this._clamp(this._laneSpacing() * 0.42, 14, 21);
     const radius = Math.min(targetRadius, rowH / 2 - 2, cardW / 2 - 2);
 
@@ -991,23 +676,7 @@ export class SlopeRenderer {
   }
 
   _depthForBeat(noteBeat) {
-    return (noteBeat - this._renderBeat()) / this.futureBeats;
-  }
-
-  /* P4 — stepped scroll. Continuous glide is exactly what smooth pursuit
-     can't track sharply, independent of refresh rate (the eye's tracking
-     gain tops out around 0.9, never reaching 1). Quantizing the beat used
-     for POSITIONING (not this.currentBeat itself, which stays continuous —
-     see the constructor) turns the glide into a sequence of held frames:
-     the eye gets a real fixation window between jumps instead of continuous
-     motion to chase. Every on-screen position derives from _depthForBeat,
-     so quantizing it there alone makes P4 apply everywhere (notes, chord
-     labels, measure bars) without threading a mode check through each draw
-     call. The now-line and hit flashes are pinned to depth 0 directly
-     (bypassing _depthForBeat), so the strike line itself never jumps. */
-  _renderBeat() {
-    if (this.legibilityMode !== 'p4') return this.currentBeat;
-    return Math.floor(this.currentBeat / this.stepBeats) * this.stepBeats;
+    return (noteBeat - this.currentBeat) / this.futureBeats;
   }
 
   _hitY() {
@@ -1216,14 +885,6 @@ export class SlopeRenderer {
     // disc — too little regardless of pixel-crispness. Capped at 18, not
     // higher, so adjacent-string discs (spacing tops out at 44px) keep a
     // visible gap rather than touching.
-    if (this.legibilityMode === 'p2') {
-      // P2 drops the note-name letter (see _drawFretDisc), so the disc only
-      // ever holds one glyph — push the cap close to _laneSpacing()'s ceiling
-      // (44px) instead of leaving headroom for a second line of text.
-      // Stays just under spacing/2 so adjacent-string discs still clear each
-      // other by a couple of px rather than touching.
-      return Math.max(16, Math.min(24, this._laneSpacing() * 0.48));
-    }
     return Math.max(12, Math.min(18, this._laneSpacing() * 0.40));
   }
 
@@ -1535,49 +1196,27 @@ export class SlopeRenderer {
     ctx.fillStyle = exportWarning ? '#d32f2f' : '#050505';
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    // In P1 the fixed reading band carries the note name; the moving disc drops
-    // the letter and shows the fret digit alone — one thick glyph survives motion
-    // far better than two stacked, and the redundant letter is right there in the
-    // band, read in fixation. P2 and P5 drop it too, for the same reason plus
-    // their own goal: maximize the fret digit itself (P2/P5's own chord-diagram
-    // circles already carry the string/position info some other way, so the
-    // moving disc's letter is pure redundancy — freeing that second text row
-    // lets the digit fill the circle instead).
-    const dropsNoteName = ['p1', 'p2', 'p5'].includes(this.legibilityMode);
-    const noteName = dropsNoteName ? '' : (note.noteName || '');
-    const alpha = ctx.globalAlpha;
+    // The fixed reading band carries the note name; the moving disc shows
+    // the fret digit alone — one thick glyph survives motion far better than
+    // two stacked, and the redundant letter is right there in the band,
+    // read in fixation. The band's own chord-diagram circles carry the
+    // string/position info a different way, so a letter on the moving disc
+    // would be pure redundancy — that space goes to the digit instead.
     const px = this._snapPx(point.x);
     const dpr = this.dpr || 1;
-    // Legibility floors (Lot C follow-up #2): the floor MUST be expressed as
+    // Legibility floor (Lot C follow-up #2): the floor MUST be expressed as
     // `desiredCssPx * dpr`, not a bare device-px constant. A bare device-px
-    // floor (the old "11 device px") is fine at dpr>=2 but on a 1x display —
-    // the common case on a high-refresh (144-240Hz) gaming monitor, which is
-    // almost never run at fractional OS scaling — device px === CSS px, so
-    // "11 device px" is really just an 11 CSS px floor... except the OLD
-    // note-name floor (8 device px) with the old raw size formula
-    // (radius*0.38, ~6 CSS px at max radius) computed devicePx=round(6*1)=6,
-    // BELOW the floor of 8, so _snapFontSizeOrNull returned null — the
-    // note-name letter was silently never drawn at all on a 1x display,
-    // independent of every crispness fix (backing-store DPR, CSS-box pin):
-    // there was nothing there to be crisp. Scaling the floor by dpr fixes
-    // that at the source, and raising both floors to real reading sizes (not
-    // just "big enough to rasterize cleanly") addresses the digit being
-    // technically crisp but still too small to read while gliding.
-    const fretSizeRaw = noteName ? Math.max(13, radius * 0.80) : Math.max(14, radius * 0.95);
+    // floor is fine at dpr>=2 but on a 1x display — the common case on a
+    // high-refresh (144-240Hz) gaming monitor, which is almost never run at
+    // fractional OS scaling — device px === CSS px, so a bare "11 device px"
+    // is really just an 11 CSS px floor. Scaling the floor by dpr fixes that
+    // at the source, and raising it to a real reading size (not just "big
+    // enough to rasterize cleanly") addresses the digit being technically
+    // crisp but still too small to read while gliding.
+    const fretSizeRaw = Math.max(14, radius * 0.95);
     const fretSize = this._snapFontSizeClamped(fretSizeRaw, Math.round(13 * dpr));
     ctx.font = `900 ${fretSize}px Inter, sans-serif`;
-    ctx.fillText(String(note.fret), px, this._snapPx(point.y - (noteName ? radius * 0.18 : -0.5)));
-    if (noteName) {
-      // Note-name letter: guaranteed >=9 CSS px now (never dropped — a
-      // consistently-small differentiator letter beats one that vanishes on
-      // some displays and not others).
-      const nameSizeRaw = Math.max(9, radius * 0.44);
-      const nameSize = this._snapFontSizeClamped(nameSizeRaw, Math.round(9 * dpr));
-      ctx.globalAlpha = alpha * 0.88;
-      ctx.font = `850 ${nameSize}px Inter, sans-serif`;
-      ctx.fillText(noteName, px, this._snapPx(point.y + radius * 0.42));
-      ctx.globalAlpha = alpha;
-    }
+    ctx.fillText(String(note.fret), px, this._snapPx(point.y - 0.5));
   }
 
   _drawChordLabel(chord) {
@@ -1632,8 +1271,8 @@ export class SlopeRenderer {
     // Pinned near the very top of the canvas, not just "above the top lane"
     // (topBase - 45): chord triangles/labels can stick up well past topBase
     // for a tall chord, so a fixed small y stays clear of every lane, arc,
-    // and legibility overlay (P1-P5 all live at/below the lane gap, well
-    // below this) regardless of geometry.
+    // and the reading band (which lives at/below the lane gap, well below
+    // this) regardless of geometry.
     const cy = 30;
     const size = 26 * pulse;
     ctx.save();

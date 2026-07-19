@@ -1,12 +1,12 @@
-"""Behavioral tests for the Slope P2 density control.
+"""Behavioral tests for the Slope density control.
 
-P2 exposes how many beats of upcoming notes are visible on screen at once.
-Fewer beats means the same physical path length covers less musical time, so
-notes glide slower in px/s and sit farther apart — both reduce the residual
-smooth-pursuit slip (the eye's tracking gain never reaches 1, independent of
-screen refresh rate) relative to glyph size. These tests execute the real
-shipped ``slope-renderer.js`` in Node and assert on actual geometry/position
-output, not source text.
+Density exposes how many beats of upcoming notes are visible on screen at
+once. Fewer beats means the same physical path length covers less musical
+time, so notes glide slower in px/s and sit farther apart — both reduce the
+residual smooth-pursuit slip (the eye's tracking gain never reaches 1,
+independent of screen refresh rate) relative to glyph size. These tests
+execute the real shipped ``slope-renderer.js`` in Node and assert on actual
+geometry/position output, not source text.
 """
 
 from __future__ import annotations
@@ -123,69 +123,3 @@ console.log(JSON.stringify({ tooLow, tooHigh, afterNaN }));
     assert out["tooLow"] == 24  # MIN_DENSITY_BEATS
     assert out["tooHigh"] == 48  # MAX_DENSITY_BEATS
     assert out["afterNaN"] == 48, "a non-finite value must be ignored, not blank the setting"
-
-
-def test_p2_readout_shows_the_current_density_and_clears_the_bottom_toolbar() -> None:
-    """P2's tag confirms the live setting (not a 'coming soon' placeholder) and
-    must sit in the lane gap, not under the fixed bottom playback toolbar
-    (main.js BOT_GUTTER ~88px) — the same bug that hid the P1 band."""
-    out = _run("""
-r.setLegibilityMode('p2');
-r.setDensity(31.5);
-fillLog.length = 0;
-r.render();
-const g = r._foldGeometry();
-const tag = fillLog.find((e) => String(e.txt).includes('P2'));
-console.log(JSON.stringify({
-  tagText: tag ? tag.txt : null,
-  tagY: tag ? tag.y : null,
-  gapTop: g.topBase + g.spread / 2,
-  gapBottom: g.bottomBase - g.spread / 2,
-  bottomToolbarStartsAt: canvas.clientHeight - 88,
-}));
-""")
-    assert out["tagText"] is not None, "P2 must draw a live readout tag"
-    assert "31.5" in out["tagText"], "readout must show the current density value"
-    assert out["tagY"] < out["bottomToolbarStartsAt"], "must clear the fixed bottom toolbar"
-    assert out["gapTop"] < out["tagY"] < out["gapBottom"], "must sit inside the lane gap"
-
-
-def test_p2_maximizes_circle_radius_and_drops_the_note_name_letter() -> None:
-    """P2's whole point is maximum-size digits: bigger discs than base/P1, and
-    the note-name letter dropped so the freed space goes to the fret digit."""
-    out = _run("""
-r.setLegibilityMode('base');
-const baseRadius = r._circleRadius();
-r.setLegibilityMode('p2');
-const p2Radius = r._circleRadius();
-fillLog.length = 0;
-r.currentBeat = 1.0;
-r.render();
-console.log(JSON.stringify({
-  baseRadius, p2Radius,
-  texts: fillLog.map((e) => e.txt),
-}));
-""")
-    assert out["p2Radius"] > out["baseRadius"], "P2 discs must be bigger than base"
-    letters = [t for t in out["texts"] if t in ("A", "B", "C", "D", "E", "F", "G")]
-    assert letters == [], f"P2 discs must not draw the note-name letter, saw {letters}"
-
-
-def test_p4_coming_soon_tag_also_clears_the_bottom_toolbar() -> None:
-    """Regression: _drawModeComingSoonTag shared the same bottom-pinned bug as
-    the P1 band before the fix; both now route through the shared _tagY().
-    (P3 is live now — its own toolbar-clearance check lives in
-    test_web_slope_strike_magnifier.py.)"""
-    for mode in ("p4",):
-        out = _run(f"""
-r.setLegibilityMode('{mode}');
-fillLog.length = 0;
-r.render();
-const tag = fillLog.find((e) => String(e.txt).toUpperCase().includes('{mode.upper()}'));
-console.log(JSON.stringify({{
-  tagY: tag ? tag.y : null,
-  bottomToolbarStartsAt: canvas.clientHeight - 88,
-}}));
-""")
-        assert out["tagY"] is not None, f"{mode} must draw its tag"
-        assert out["tagY"] < out["bottomToolbarStartsAt"], f"{mode} tag must clear the toolbar"
