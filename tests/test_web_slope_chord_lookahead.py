@@ -1,13 +1,12 @@
-"""Behavioral tests for the Slope P5 legibility mode (chord-diagram lookahead).
+"""Behavioral tests for the Slope reading band (chord-diagram lookahead).
 
-P5 mixes P1's fixed reading band (read in fixation, never glided) with a
-genuine 6-string chord shape per upcoming group: every string gets a row,
-played strings get a filled disc + fret digit (no note-name letter — string
+The band is a fixed strip (read in fixation, never glided) showing a genuine
+6-string chord shape per upcoming group: every string gets a row, played
+strings get a filled disc + fret digit (no note-name letter — string
 identity comes from fixed row position, row 0 = string 1), unplayed/muted
-strings get a hollow ring. 20 groups (P1 shows 4), circle radius between
-P1's and P2's ranges, one chord triangle per card (not per note). These
-tests execute the real shipped ``slope-renderer.js`` in Node and assert on
-actual canvas draw-call output, not source text.
+strings get a hollow ring. 20 upcoming groups, one chord triangle per card
+(not per note). These tests execute the real shipped ``slope-renderer.js``
+in Node and assert on actual canvas draw-call output, not source text.
 """
 
 from __future__ import annotations
@@ -27,9 +26,10 @@ pytestmark = pytest.mark.skipif(shutil.which("node") is None, reason="node not a
 
 
 def _run(script: str, *, width: int = 1400, height: int = 700) -> dict:
-    # Wider/taller than the P1/P3 default test canvas: P5's 20 tall cards need
-    # real room in the lane gap to avoid every case degrading to the
-    # graceful-shrink floor, which would mask real bugs in the normal-size path.
+    # Wider/taller than the default test canvas elsewhere: the band's 20 tall
+    # cards need real room in the lane gap to avoid every case degrading to
+    # the graceful-shrink floor, which would mask real bugs in the
+    # normal-size path.
     harness = f"""
 globalThis.performance = globalThis.performance || {{ now: () => 0 }};
 function makeCtx(fillLog, shapeLog, styleLog) {{
@@ -81,7 +81,7 @@ const data = {{
   results: [
     // A genuine chord (3 strings, same onset, tagged with a chord label) at
     // a beat clear of any measure boundary, plus 19 more single-note groups
-    // so there are enough upcoming groups to fill all 20 P5 cards.
+    // so there are enough upcoming groups to fill all 20 band cards.
     {{ string: 1, fret: 0, finger: 'open',  onset: 5.5,  duration: 0.5, pitch: 64, chord: 'Am' }},
     {{ string: 2, fret: 1, finger: 'index', onset: 5.5,  duration: 0.5, pitch: 61, chord: 'Am' }},
     {{ string: 3, fret: 2, finger: 'ring',  onset: 5.5,  duration: 0.5, pitch: 57, chord: 'Am' }},
@@ -107,23 +107,22 @@ const data = {{
   ],
 }};
 const r = new SlopeRenderer(canvas, data);
-r.setLegibilityMode('p5');
 
-// Isolate P5's OWN draw calls (fillText + shapes), not the moving discs or
-// permanent fretboard labels that can share the same coordinates — the same
-// false-positive trap the P1 band tests hit with a naive y-region filter.
-const p5Fills = [];
-const p5Shapes = [];
-const p5Styles = [];
+// Isolate the band's OWN draw calls (fillText + shapes), not the moving
+// discs or permanent fretboard labels that can share the same coordinates —
+// a naive y-region filter produces false positives against those.
+const bandFills = [];
+const bandShapes = [];
+const bandStyles = [];
 const origDraw = r._drawChordLookaheadBand.bind(r);
 r._drawChordLookaheadBand = (...args) => {{
   const fillStart = fillLog.length;
   const shapeStart = shapeLog.length;
   const styleStart = styleLog.length;
   origDraw(...args);
-  p5Fills.push(...fillLog.slice(fillStart));
-  p5Shapes.push(...shapeLog.slice(shapeStart));
-  p5Styles.push(...styleLog.slice(styleStart));
+  bandFills.push(...fillLog.slice(fillStart));
+  bandShapes.push(...shapeLog.slice(shapeStart));
+  bandStyles.push(...styleLog.slice(styleStart));
 }};
 
 function frame(beat) {{
@@ -131,15 +130,15 @@ function frame(beat) {{
   fillLog.length = 0;
   shapeLog.length = 0;
   styleLog.length = 0;
-  p5Fills.length = 0;
-  p5Shapes.length = 0;
-  p5Styles.length = 0;
+  bandFills.length = 0;
+  bandShapes.length = 0;
+  bandStyles.length = 0;
   r.render();
   return {{
     allFills: fillLog.map((e) => e.txt),
-    fills: p5Fills.map((e) => ({{ txt: e.txt, x: e.x, y: e.y }})),
-    shapes: p5Shapes,
-    triangleFillCount: p5Styles.filter((s) => s === '#ff3030').length,
+    fills: bandFills.map((e) => ({{ txt: e.txt, x: e.x, y: e.y }})),
+    shapes: bandShapes,
+    triangleFillCount: bandStyles.filter((s) => s === '#ff3030').length,
   }};
 }}
 
@@ -155,9 +154,9 @@ function frame(beat) {{
     return json.loads(proc.stdout)
 
 
-def test_p5_shows_twenty_groups() -> None:
-    """P1 shows 4 groups; P5 must show 20 — one column of 6 discs/rings each,
-    so 120 shapes total (20 cards x 6 strings)."""
+def test_band_shows_twenty_groups() -> None:
+    """The band must show 20 upcoming groups — one column of 6 discs/rings
+    each, so 120 shapes total (20 cards x 6 strings)."""
     out = _run("""
 const f = frame(1.0);
 console.log(JSON.stringify({ shapeCount: f.shapes.length }));
@@ -179,7 +178,7 @@ console.log(JSON.stringify(f.shapes));
     assert hollow == 120 - 22, f"the rest must be hollow rings, got {hollow} hollow"
 
 
-def test_p5_no_string_letter_drawn_next_to_the_disc() -> None:
+def test_band_draws_no_string_letter_next_to_the_disc() -> None:
     """Row position (row 0 = string 1) identifies the string now, not a
     letter next to the disc — removed so every freed pixel of column width
     goes to the disc/digit instead."""
@@ -188,24 +187,24 @@ const f = frame(1.0);
 console.log(JSON.stringify(f.fills.map((e) => e.txt)));
 """)
     letters = [t for t in out if t in ("e", "B", "G", "D", "A", "E")]
-    assert letters == [], f"P5 must not draw string-letter labels anymore, saw {letters}"
+    assert letters == [], f"the band must not draw string-letter labels, saw {letters}"
 
 
-def test_p5_moving_disc_also_drops_the_note_name_letter() -> None:
-    """The P5 band's own circles never had a letter (see the test above) —
-    this covers the OTHER circles: the moving fret-discs gliding along the
-    lane itself (_drawFretDisc), which used to keep their note-name letter
-    in every mode except P1/P2. P5 must drop it there too, so the freed
-    space goes to the fret digit, same rationale as P1/P2."""
+def test_moving_disc_drops_the_note_name_letter() -> None:
+    """The band's own circles never had a letter (see the test above) — this
+    covers the OTHER circles: the moving fret-discs gliding along the lane
+    itself (_drawFretDisc). The reading band carries the note name; the
+    moving disc shows only the fret digit, so the freed space goes to
+    making that digit as big as possible."""
     out = _run("""
 const f = frame(1.0);
 console.log(JSON.stringify(f.allFills));
 """)
     letters = [t for t in out if t in ("A", "B", "C", "D", "E", "F", "G")]
-    assert letters == [], f"P5 moving discs must not draw the note-name letter, saw {letters}"
+    assert letters == [], f"moving discs must not draw the note-name letter, saw {letters}"
 
 
-def test_p5_played_string_shows_its_fret_digit() -> None:
+def test_band_played_string_shows_its_fret_digit() -> None:
     out = _run("""
 const f = frame(1.0);
 console.log(JSON.stringify(f.fills.map((e) => e.txt)));
@@ -214,7 +213,7 @@ console.log(JSON.stringify(f.fills.map((e) => e.txt)));
     assert "0" in out and "1" in out and "2" in out
 
 
-def test_p5_draws_the_chord_triangle_once_not_per_note() -> None:
+def test_band_draws_the_chord_triangle_once_not_per_note() -> None:
     """The Am group has 3 notes all tagged chord: 'Am' -> exactly ONE triangle
     for that card, not three. Single-note groups (no chord tag) get none, so
     across all 20 upcoming groups the triangle-red fillStyle must be set
@@ -228,7 +227,7 @@ console.log(JSON.stringify({ triangleFillCount: f.triangleFillCount }));
     )
 
 
-def test_p5_chord_triangle_count_matches_chorded_groups() -> None:
+def test_chord_triangle_count_matches_chorded_groups() -> None:
     """Direct structural check: exactly 1 of the 20 upcoming groups is a chord
     (the Am at onset 5.5); confirm _upcomingNotes/group.notes reflects that,
     which is what _drawChordLookaheadBand's triangle condition reads."""
@@ -242,38 +241,32 @@ console.log(JSON.stringify({ groupCount: groups.length, chordedGroups }));
     assert out["chordedGroups"] == 1, "only the Am group (3 notes, same onset) should be tagged"
 
 
-def test_p5_circle_radius_never_exceeds_p2_and_stays_legible() -> None:
-    """20 narrow columns (vs. the original 5) genuinely can't reach P1's
-    radius on most screens anymore — that's an honest space trade-off, not a
-    bug, since cardW/2-2 caps it (see _drawChordLookaheadBand). What must
-    still hold: it never exceeds P2's cap (the absolute ceiling requested),
-    and it doesn't collapse to an illegible speck."""
+def test_band_circle_radius_stays_bounded_and_legible() -> None:
+    """20 narrow columns genuinely can't reach a big-disc radius on most
+    screens — an honest space trade-off, not a bug, since cardW/2-2 caps it
+    (see _drawChordLookaheadBand). What must hold: the radius never exceeds
+    its own 21px target ceiling, and it doesn't collapse to an illegible
+    speck on a reasonably-sized canvas."""
     out = _run("""
-r.setLegibilityMode('p2');
-const p2Radius = r._circleRadius();
-r.setLegibilityMode('p5');
 const f = frame(1.0);
 const shapeRadii = f.shapes.map((s) => s.radius).filter((r2) => r2 > 0);
-console.log(JSON.stringify({ p2Radius, shapeRadii }));
+console.log(JSON.stringify({ shapeRadii }));
 """)
-    p2_max = out["p2Radius"]
-    # Filled-disc radii are the real ones (hollow rings are drawn at radius*0.7
-    # of the same target, so checking the raw shape radius covers both).
     for r_val in out["shapeRadii"]:
-        assert r_val <= p2_max + 0.5, f"P5 radius {r_val} must not exceed P2's {p2_max}"
+        assert r_val <= 21.5, f"radius {r_val} must not exceed the 21px target ceiling"
     assert min(out["shapeRadii"]) >= 6, (
         f"radius {min(out['shapeRadii'])} is too small to read even on a 1400px-wide canvas"
     )
 
 
-def test_p5_cards_do_not_overlap_horizontally() -> None:
+def test_band_cards_do_not_overlap_horizontally() -> None:
     """Collision avoidance at the card level: 20 columns must be strictly
     ordered left-to-right, each column's circle radius small enough
     (clamped to cardW/2-2, see _drawChordLookaheadBand) that adjacent
     discs can't touch even when 20 narrow columns are squeezed together.
-    Uses the real production canvas size (968x816, see the P1 band tests)
-    where the columns actually squeeze narrow enough for the cardW clamp —
-    not the rowH clamp — to be the binding constraint."""
+    Uses the real production canvas size (968x816) where the columns
+    actually squeeze narrow enough for the cardW clamp — not the rowH
+    clamp — to be the binding constraint."""
     out = _run(
         """
 const f = frame(1.0);
@@ -297,7 +290,7 @@ console.log(JSON.stringify({ xs, maxRadius }));
         )
 
 
-def test_p5_no_two_shapes_share_a_row_within_a_card() -> None:
+def test_band_no_two_shapes_share_a_row_within_a_card() -> None:
     """Collision avoidance at the row level: within one card (fixed cx), the
     6 string rows must have 6 distinct y positions - fixed grid, no overlap."""
     out = _run("""
@@ -309,13 +302,3 @@ console.log(JSON.stringify(f.shapes));
         by_x.setdefault(round(s["x"]), set()).add(round(s["y"]))
     for x, ys in by_x.items():
         assert len(ys) == 6, f"card at x={x} must have 6 distinct row y's, got {len(ys)}"
-
-
-def test_other_modes_do_not_draw_the_chord_lookahead_band() -> None:
-    for mode in ("base", "p1", "p2", "p3", "p4"):
-        out = _run(f"""
-r.setLegibilityMode('{mode}');
-const f = frame(1.0);
-console.log(JSON.stringify({{ fillCount: f.fills.length, shapeCount: f.shapes.length }}));
-""")
-        assert out["fillCount"] == 0 and out["shapeCount"] == 0, f"{mode} must not draw P5's band"

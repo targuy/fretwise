@@ -1,7 +1,7 @@
 """Guard tests for the Slope view's text-sharpness fix (S-1/S-2/S-3, T-P3).
 
-The Slope renderer draws text (fret digits, note names, chord labels) that
-glides continuously with playback. Sub-pixel positions and non-integer font
+The Slope renderer draws text (fret digits, chord labels) that glides
+continuously with playback. Sub-pixel positions and non-integer font
 sizes read as "blur" while moving, even though the canvas itself is high-DPI.
 These guards assert the fix's mechanics are present in the shipped source —
 there is no headless WebGL/canvas here, so behavior is verified by presence
@@ -58,21 +58,22 @@ def test_slope_text_snapping_helpers_present() -> None:
 
 def test_fret_disc_uses_snapped_positions_and_dpr_scaled_floors() -> None:
     """_drawFretDisc (the moving fret-number label) must use the snap helpers,
-    not raw fillText(point.x, point.y) with unclamped font sizes — and both
-    floors must scale with dpr (Math.round(N * dpr)), not a bare device-px
-    constant, which vanished the note-name letter entirely on a 1x display
-    (see test_note_name_letter_is_never_dropped_on_a_1x_display)."""
+    not raw fillText(point.x, point.y) with an unclamped font size — and the
+    floor must scale with dpr (Math.round(N * dpr)), not a bare device-px
+    constant, which used to vanish the label entirely on a 1x display
+    (see test_fret_digit_is_never_dropped_on_a_1x_display in
+    test_web_slope_text_sharpness.py)."""
     js = _slope_js()
     disc_start = js.index("_drawFretDisc(ctx, note, point, radius, meta, showText = true) {")
     disc_end = js.index("\n  }", disc_start)
     body = js[disc_start:disc_end]
     assert "this._snapPx(point.x)" in body
     assert "this._snapFontSizeClamped(fretSizeRaw, Math.round(13 * dpr))" in body
-    assert "this._snapFontSizeClamped(nameSizeRaw, Math.round(9 * dpr))" in body
     # Fret digit is never optional — it must always be drawn.
     assert "ctx.fillText(String(note.fret)" in body
-    # Note-name letter is now unconditional too (no more "if (nameSize != null)").
-    assert "nameSize != null" not in body
+    # The note-name letter was removed entirely (the reading band carries it) —
+    # no leftover conditional branch for it.
+    assert "noteName" not in body
 
 
 def test_chord_label_uses_snapped_position() -> None:

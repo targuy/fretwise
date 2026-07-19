@@ -33,18 +33,7 @@ let _lastGuitarMode = DEFAULT_MODE;
 let renderer = null;
 let _slopeRenderer = null;
 // Slope legibility sub-mode (P1–P4), persisted across sessions/tracks.
-const _SLOPE_MODE_KEY = 'fretwise.slopeMode';
-const _SLOPE_MODES = ['base', 'p1', 'p2', 'p3', 'p4', 'p5'];
-let _slopeMode = (() => {
-  try {
-    const v = localStorage.getItem(_SLOPE_MODE_KEY);
-    return _SLOPE_MODES.includes(v) ? v : 'p1';
-  } catch (_) { return 'p1'; }
-})();
-const _slopeModeSeg = document.getElementById('slope-mode-seg');
-// P2 — density: how many beats of upcoming notes the Slope view shows at once.
-// Persisted like the mode; applies regardless of which sub-mode is active
-// (a slower glide helps P1's moving discs too, not just P2's own readout).
+// Density: how many beats of upcoming notes the Slope view shows at once.
 const _SLOPE_DENSITY_KEY = 'fretwise.slopeDensity';
 const _SLOPE_DENSITY_MIN = 24;
 const _SLOPE_DENSITY_MAX = 48;
@@ -1606,9 +1595,7 @@ function applyRepresentationModeView(data) {
   if (slopeCanvas) slopeCanvas.style.display = showSlope ? 'block' : 'none';
   if (hand3dViewFrame) hand3dViewFrame.style.display = showHand3d ? 'block' : 'none';
   if (!showHand3d) _releaseHand3dViewFrame();
-  // The Slope legibility sub-mode selector (P1–P4) and density control only
-  // make sense in Slope view.
-  if (_slopeModeSeg) _slopeModeSeg.style.display = showSlope ? '' : 'none';
+  // The density control only makes sense in Slope view.
   if (_slopeDensityCtrl) _slopeDensityCtrl.style.display = showSlope ? '' : 'none';
   _slopeRenderer?.setVisible(showSlope);
   if (showHand3d) {
@@ -2236,8 +2223,7 @@ function initRenderer(data) {
   renderer = new TabRenderer(tabCanvas, data);
   _slopeRenderer?.destroy();
   _slopeRenderer = slopeCanvas ? new SlopeRenderer(slopeCanvas, data) : null;
-  // Re-apply the user's persisted Slope legibility mode + density to the new renderer.
-  _slopeRenderer?.setLegibilityMode(_slopeMode);
+  // Re-apply the user's persisted Slope density to the new renderer.
   _slopeRenderer?.setDensity(_slopeDensity);
   // Non-guitar tracks carry no fingering: never draw finger annotations and
   // keep the (hidden) fingering toggle inactive. Defensive — the solve
@@ -4025,39 +4011,12 @@ document.querySelectorAll('#view-seg .view-seg-btn').forEach(btn => {
     if (!selRepresentationMode) return;
     // Ignore clicks on a pill locked for the current (non-guitar) track.
     if (btn.disabled || btn.classList.contains('view-seg-disabled')) return;
-    // Slope legibility pills (P1–P4) carry data-slope-mode, not data-mode —
-    // they switch the Slope aid, not the notation view. Skip the view logic.
-    if (btn.dataset.mode == null) return;
     selRepresentationMode.value = btn.dataset.mode;
     selRepresentationMode.dispatchEvent(new Event('change'));
   });
 });
 
-// Slope legibility sub-mode pills (P1–P4): switch the in-motion readability aid
-// on the live Slope renderer and persist the choice.
-function _syncSlopeModePills() {
-  if (!_slopeModeSeg) return;
-  _slopeModeSeg.querySelectorAll('.view-seg-btn').forEach((btn) => {
-    btn.classList.toggle('view-seg-active', btn.dataset.slopeMode === _slopeMode);
-  });
-}
-if (_slopeModeSeg) {
-  _slopeModeSeg.querySelectorAll('.view-seg-btn').forEach((btn) => {
-    btn.addEventListener('click', () => {
-      const mode = btn.dataset.slopeMode;
-      if (!_SLOPE_MODES.includes(mode)) return;
-      _slopeMode = mode;
-      try { localStorage.setItem(_SLOPE_MODE_KEY, mode); } catch (_) { /* private mode */ }
-      _syncSlopeModePills();
-      _slopeRenderer?.setLegibilityMode(mode);
-      _slopeRenderer?.render();
-    });
-  });
-  _syncSlopeModePills();
-}
-
-// P2 density slider: how many beats of upcoming notes the Slope view shows.
-// Applies live regardless of which legibility sub-mode is active.
+// Density slider: how many beats of upcoming notes the Slope view shows.
 if (_rngSlopeDensity) {
   _rngSlopeDensity.addEventListener('input', () => {
     const beats = Math.max(

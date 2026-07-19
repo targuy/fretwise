@@ -216,51 +216,45 @@ console.log(JSON.stringify({
     assert out["clampFloorDevice"] == 11  # max(11, round(2*2)=4) = 11
 
 
-def test_note_name_letter_is_never_dropped_on_a_1x_display() -> None:
+def test_fret_digit_is_never_dropped_on_a_1x_display() -> None:
     """Regression: on a 1x-DPR display (the common case on a high-refresh
-    gaming monitor, which is almost never run at fractional OS scaling), the
-    note-name letter used to compute devicePx = round(radius*0.38 * 1) ~= 6,
-    below the old fixed 8-device-px floor -> _snapFontSizeOrNull returned null
-    and the letter was silently never drawn AT ALL, independent of every
-    crispness fix (there was nothing there to be crisp). It must now always
-    render, at a real reading size, at every dpr from 1 to 3."""
+    gaming monitor, which is almost never run at fractional OS scaling), a
+    device-px floor expressed as a bare constant (not scaled by dpr) can
+    compute a devicePx below the floor and get silently dropped, independent
+    of every other crispness fix (there was nothing there to be crisp). The
+    fret digit — the disc's only text now that the note-name letter has been
+    removed entirely (the reading band carries it) — must always render, at
+    a real reading size, at every dpr from 1 to 3."""
     out = _run("""
-// 'base' mode keeps the letter on the disc (P1 deliberately drops it — the band
-// carries the letter there — so this letter-on-disc guarantee is a base-mode one).
-r.setLegibilityMode('base');
 const rows = [1, 1.25, 1.5, 2, 3].map((dpr) => {
   r.dpr = dpr;
   fillLog.length = 0;
-  r._drawFretDisc(ctx, { fret: 7, noteName: 'B' }, { x: 100, y: 100 }, r._circleRadius(),
+  r._drawFretDisc(ctx, { fret: 7 }, { x: 100, y: 100 }, r._circleRadius(),
     { discColor: '#fffdf2', color: '#c68a2e' });
-  const letter = fillLog.find((e) => e.txt === 'B');
   const digit = fillLog.find((e) => e.txt === '7');
-  return { dpr, letterDrawn: !!letter, digitDrawn: !!digit };
+  return { dpr, digitDrawn: !!digit };
 });
 console.log(JSON.stringify(rows));
 """)
     for row in out:
-        assert row["digitDrawn"], f"fret digit not drawn at dpr={row['dpr']}"
-        assert row["letterDrawn"], f"note-name letter not drawn at dpr={row['dpr']} (the bug)"
+        assert row["digitDrawn"], f"fret digit not drawn at dpr={row['dpr']} (the bug)"
 
 
-def test_disc_and_font_sizes_meet_a_real_minimum_reading_size() -> None:
-    """The fret digit and note-name letter must be a genuinely legible CSS
-    size at every dpr, not just crisply-rasterized-but-tiny. Guards the actual
-    numbers a human reads, not just the snap-to-pixel mechanics."""
+def test_disc_and_font_size_meet_a_real_minimum_reading_size() -> None:
+    """The fret digit must be a genuinely legible CSS size at every dpr, not
+    just crisply-rasterized-but-tiny. Guards the actual number a human
+    reads, not just the snap-to-pixel mechanics."""
     out = _run("""
 const rows = [1, 2].map((dpr) => {
   r.dpr = dpr;
   const radius = r._circleRadius();
   return {
     dpr, radius,
-    fretCss: r._snapFontSizeClamped(Math.max(13, radius * 0.80), Math.round(13 * dpr)),
-    nameCss: r._snapFontSizeClamped(Math.max(9, radius * 0.44), Math.round(9 * dpr)),
+    fretCss: r._snapFontSizeClamped(Math.max(14, radius * 0.95), Math.round(13 * dpr)),
   };
 });
 console.log(JSON.stringify(rows));
 """)
     for row in out:
-        assert row["radius"] >= 12, f"disc radius {row['radius']} too small to hold two lines of text"
-        assert row["fretCss"] >= 13, f"fret digit {row['fretCss']}css px at dpr={row['dpr']} too small"
-        assert row["nameCss"] >= 9, f"note-name letter {row['nameCss']}css px at dpr={row['dpr']} too small"
+        assert row["radius"] >= 12, f"disc radius {row['radius']} too small to hold the digit"
+        assert row["fretCss"] >= 14, f"fret digit {row['fretCss']}css px at dpr={row['dpr']} too small"
