@@ -3806,12 +3806,31 @@ def _extract_measure_regions(
             y0_sys, y1_sys = sys_y_bounds[si] if si < len(sys_y_bounds) else (0.0, 100.0)
             for stf_layout in sys_layout.staves[:1]:
                 for ml in stf_layout.measure_layouts:
+                    # Per-onset note columns for the sub-measure playhead. `beat` is
+                    # the measure-relative onset in quarter-beats (same unit as the
+                    # web player's `_measureSecPerBeat`), `x` the absolute page x of
+                    # that column. The frontend interpolates the playhead x between
+                    # consecutive columns so it glides note-to-note instead of
+                    # jumping per measure. Deduped by onset (chords share a column).
+                    columns: list[dict[str, float]] = []
+                    events = getattr(ml, "event_layouts", None) or []
+                    if events:
+                        m_start = min(ev.onset for ev in events)
+                        seen: set[float] = set()
+                        for ev in sorted(events, key=lambda e: e.onset):
+                            beat = round(float(ev.onset) - m_start, 6)
+                            if beat in seen:
+                                continue
+                            seen.add(beat)
+                            columns.append({"beat": beat, "x": float(ev.x)})
                     regions.append({
                         "measure_idx": measure_idx,
                         "x": ml.x,
                         "y0": y0_sys,
                         "y1": y1_sys,
                         "width": ml.width,
+                        "beats": float(getattr(ml, "beats_per_measure", 4) or 4),
+                        "columns": columns,
                     })
                     measure_idx += 1
         return regions

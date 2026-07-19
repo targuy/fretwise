@@ -275,6 +275,44 @@ export class TabRenderer {
     return best;
   }
 
+  /**
+   * Interpolated playhead position for a continuous onset. Unlike getCursorX
+   * (which snaps to the last note column), this glides the x between the two
+   * bracketing columns proportionally to the elapsed beats, so the cursor line
+   * moves smoothly note-to-note. Interpolation stops at a system wrap (columns
+   * with a different yTop) — there the line holds on the last column of the row
+   * rather than jumping backward to the next line.
+   * @param {number} onset  continuous onset in note-onset (quarter-beat) units.
+   * @returns {{x:number,yTop:number,yBottom:number}|null}
+   */
+  getCursorLine(onset) {
+    const cols = this.noteColumns;
+    if (!cols.length) return null;
+    // Columns are pushed in draw order = system order = onset order.
+    let lo = null;
+    let hi = null;
+    for (let i = 0; i < cols.length; i++) {
+      if (cols[i].onset <= onset + 1e-6) {
+        lo = cols[i];
+      } else {
+        hi = cols[i];
+        break;
+      }
+    }
+    if (!lo) {
+      // Before the first note — sit on the first column.
+      const c = cols[0];
+      return { x: c.x, yTop: c.yTop, yBottom: c.yBottom };
+    }
+    // No next column, or the next column wraps to another system row: hold.
+    if (!hi || hi.yTop !== lo.yTop || hi.x < lo.x) {
+      return { x: lo.x, yTop: lo.yTop, yBottom: lo.yBottom };
+    }
+    const span = hi.onset - lo.onset;
+    const t = span > 1e-6 ? Math.min(1, Math.max(0, (onset - lo.onset) / span)) : 0;
+    return { x: lo.x + (hi.x - lo.x) * t, yTop: lo.yTop, yBottom: lo.yBottom };
+  }
+
   // ── Grouping ──────────────────────────────────────────────────────
 
   _groupMeasures() {

@@ -722,6 +722,15 @@ body.has-multitrack-bar #tab-container { padding-bottom: 72px; }
   background: #07080b;
   z-index: 3;
 }
+#rain-canvas {
+  position: absolute;
+  inset: 0;
+  display: none;
+  width: 100%;
+  height: 100%;
+  background: #07080b;
+  z-index: 3;
+}
 #hand3d-view-frame {
   position: absolute;
   inset: 0;
@@ -1105,8 +1114,15 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 .fw-cursor.loop {
   fill: rgba(64, 148, 255, 0.12);
 }
-/* (The red beat-accurate cursor line was removed — the highlighted current
-   measure, .fw-cursor.active above, is the sole playback indicator.) */
+/* Gliding sub-measure playhead — a thin vertical line that interpolates between
+   note columns so the eye can track the exact note being played. Complements the
+   .fw-cursor.active measure highlight above (context) with note-level precision.
+   pointer-events:none so it never steals click-to-seek from the measure rects. */
+.fw-playhead {
+  stroke: rgba(224, 49, 49, 0.9);
+  stroke-width: 2;
+  pointer-events: none;
+}
 /* Tempo marks — bold, slightly darker for prominence */
 .fw-tempo-mark {
   fill: #111;

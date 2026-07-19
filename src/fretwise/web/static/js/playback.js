@@ -1209,28 +1209,32 @@ export class PlaybackEngine {
     if (this.usesSvgCursor) return;
     if (!this._followPlayhead) return;
     const canvas = this.renderer.canvas;
-    const container = canvas.parentElement;
+    const container = canvas.parentElement;   // #tab-container — the real scroller
     if (!container) return;
 
-    const sys = this.renderer.systems.find(
-      s => this.renderer.cursorMeasure >= s.startMeasure &&
-           this.renderer.cursorMeasure < s.startMeasure + s.measures.length
-    );
-    if (!sys) return;
+    // Use the CURRENT note column's real canvas Y band (getCursorX returns the
+    // last column at/under this measure's start onset — every column in a system
+    // shares the same y band). This replaces the previous HARD-CODED system
+    // geometry (SYSTEM_H=200 …), which under-counted the true 288 px system
+    // height and so drifted ~88 px per system — after two or three systems the
+    // playhead fell below the viewport and vanished.
+    const onset = this._measureOnsetBeats(this.renderer.cursorMeasure || 0);
+    const col = this.renderer.getCursorX(onset);
+    if (!col) return;
 
-    const sysIdx = this.renderer.systems.indexOf(sys);
-    const SYSTEM_H = 200, INTER_SYSTEM = 16, MARGIN_T = 12;
-    const sysY = MARGIN_T + sysIdx * (SYSTEM_H + INTER_SYSTEM);
-    const sysMid = sysY + SYSTEM_H / 2;
+    const view = container.clientHeight;
+    const top = container.scrollTop;
+    const bot = top + view;
+    const margin = Math.min(120, view * 0.18);
 
-    const rect = container.getBoundingClientRect();
-    const visibleTop = container.scrollTop;
-    const visibleBot = container.scrollTop + rect.height;
-    const centerTarget = sysMid - rect.height / 2;
-
-    // Only scroll when system center would be too close to top/bottom edges
-    if (sysMid > visibleBot - SYSTEM_H * 0.6 || sysMid < visibleTop + SYSTEM_H * 0.6) {
-      container.scrollTo({ top: Math.max(0, centerTarget), behavior: 'smooth' });
+    // System-stable: scroll only when the playhead's band leaves the comfortable
+    // reading zone, then land the current system near the top third so the next
+    // lines are already visible for look-ahead. Within a system the page holds
+    // still — no per-measure jitter.
+    if (col.yBottom > bot - margin || col.yTop < top + margin) {
+      const target = col.yTop - view * 0.30;
+      const maxTop = Math.max(0, container.scrollHeight - view);
+      container.scrollTo({ top: Math.max(0, Math.min(target, maxTop)), behavior: 'smooth' });
     }
   }
 

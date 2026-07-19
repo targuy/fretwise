@@ -9,6 +9,7 @@ import { activateRigProfile, activateSoundfont, cleanupLibrary, connectStorage, 
 import { getMaskedMeasures, renderAuditBanner, resetAuditBanner, statusBanner } from './audit.js';
 import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { SlopeRenderer } from './slope-renderer.js';
+import { RainRenderer } from './rain-renderer.js';
 import { PlaybackEngine } from './playback.js';
 import { SvgCursorDriver } from './svg-playback.js';
 import { task as notifyTask, toast as notifyToast } from './notify.js';
@@ -43,9 +44,40 @@ let _slopeDensity = (() => {
     return Number.isFinite(v) && v >= _SLOPE_DENSITY_MIN && v <= _SLOPE_DENSITY_MAX ? v : 24;
   } catch (_) { return 24; }
 })();
+let _rainRenderer = null;
+// Rain density: how many beats of upcoming notes span the fall zone. The
+// range sits far below Slope's (one straight screen of fall height vs a
+// folded path) — must match rain-renderer.js's MIN/MAX_DENSITY_BEATS.
+const _RAIN_DENSITY_KEY = 'fretwise.rainDensity';
+const _RAIN_DENSITY_MIN = 8;
+const _RAIN_DENSITY_MAX = 24;
+const _RAIN_DENSITY_DEFAULT = 12;
+let _rainDensity = (() => {
+  try {
+    const v = Number(localStorage.getItem(_RAIN_DENSITY_KEY));
+    return Number.isFinite(v) && v >= _RAIN_DENSITY_MIN && v <= _RAIN_DENSITY_MAX
+      ? v : _RAIN_DENSITY_DEFAULT;
+  } catch (_) { return _RAIN_DENSITY_DEFAULT; }
+})();
 const _slopeDensityCtrl = document.getElementById('slope-density-ctrl');
 const _rngSlopeDensity = document.getElementById('rng-slope-density');
 if (_rngSlopeDensity) _rngSlopeDensity.value = String(_slopeDensity);
+
+/* The density slider is shared between Slope and Rain: retarget its bounds
+   and value to whichever of the two views is active so the same control
+   drives either renderer without the ranges bleeding into each other. */
+function _configureDensitySlider(mode) {
+  if (!_rngSlopeDensity) return;
+  if (mode === MODES.RAIN) {
+    _rngSlopeDensity.min = String(_RAIN_DENSITY_MIN);
+    _rngSlopeDensity.max = String(_RAIN_DENSITY_MAX);
+    _rngSlopeDensity.value = String(_rainDensity);
+  } else {
+    _rngSlopeDensity.min = String(_SLOPE_DENSITY_MIN);
+    _rngSlopeDensity.max = String(_SLOPE_DENSITY_MAX);
+    _rngSlopeDensity.value = String(_slopeDensity);
+  }
+}
 let playback = null;
 let _svgDriver = null;  // SvgCursorDriver instance for standard/standard+tab views
 let loopASet = false;  // has A marker been set
@@ -71,6 +103,7 @@ const _ZOOM_BASE = {
   [MODES.TABLATURE]:          -5,   // Tab    :  -5 %
   [MODES.TABLATURE_RHYTHM]:   -5,   // Tab+Rhythm : same as Tab
   [MODES.SLOPE]:               0,   // Slope  : full-canvas perspective view
+  [MODES.RAIN]:                0,   // Rain   : full-canvas falling-notes view
   [MODES.HAND_3D]:             0,   // 3D     : dedicated hand/guitar view
 };
 // User slider offset relative to each view's baseline (-50 to +50).
@@ -94,7 +127,7 @@ function _solveCacheKey(file, trackId, mode, prefs, svgWidth) {
 function _svgRenderWidth(mode) {
   // Canvas-only modes: no SVG is generated, width is irrelevant.
   if (mode === MODES.TABLATURE || mode === MODES.TABLATURE_RHYTHM
-      || mode === MODES.SLOPE || mode === MODES.HAND_3D) return undefined;
+      || mode === MODES.SLOPE || mode === MODES.RAIN || mode === MODES.HAND_3D) return undefined;
   const base = _ZOOM_BASE[mode] ?? 0;          // fallback 0 if unknown mode
   const factor = 1 + ((base + (_viewZoom[mode] ?? 0)) / 100);
   const w = Math.round((window.innerWidth - 48) / factor / 50) * 50;
@@ -102,9 +135,10 @@ function _svgRenderWidth(mode) {
   return Number.isFinite(w) && w >= 400 ? w : undefined;
 }
 
-/** Slope and 3D are frontend-only views; the backend payload is the tablature solve. */
+/** Slope, Rain and 3D are frontend-only views; the backend payload is the tablature solve. */
 function _backendRepresentationMode(mode) {
-  return (mode === MODES.SLOPE || mode === MODES.HAND_3D) ? MODES.TABLATURE : mode;
+  return (mode === MODES.SLOPE || mode === MODES.RAIN || mode === MODES.HAND_3D)
+    ? MODES.TABLATURE : mode;
 }
 
 /**
@@ -242,6 +276,7 @@ const settingsPage  = $('#settings-page');
 const trackGrid     = $('#track-list');
 const tabCanvas     = $('#tab-canvas');
 const slopeCanvas   = $('#slope-canvas');
+const rainCanvas    = $('#rain-canvas');
 const hand3dViewFrame = $('#hand3d-view-frame');
 const cursorCanvas  = $('#cursor-canvas');
 const coreSvgView   = $('#core-svg-view');
@@ -1549,6 +1584,7 @@ function _applyTrackKindLock() {
         btn.title = 'Standard + Tab (default)';
       } else if (btn.dataset.mode === MODES.TABLATURE) btn.title = 'Tablature only';
       else if (btn.dataset.mode === MODES.SLOPE) btn.title = 'Perspective playback lane';
+      else if (btn.dataset.mode === MODES.RAIN) btn.title = 'Falling notes on fretboard';
       else if (btn.dataset.mode === MODES.HAND_3D) btn.title = '3D fretting hand';
     }
   });
@@ -1579,9 +1615,11 @@ function applyRepresentationModeView(data) {
   }
 
   const showSlope = representationMode === MODES.SLOPE;
+  const showRain = representationMode === MODES.RAIN;
   const showHand3d = representationMode === MODES.HAND_3D;
   const showCore = representationMode !== MODES.TABLATURE
     && representationMode !== MODES.SLOPE
+    && representationMode !== MODES.RAIN
     && representationMode !== MODES.HAND_3D;
   if (tabCanvas) {
     // display:none (not just visibility:hidden) in every non-Tablature mode —
@@ -1589,15 +1627,19 @@ function applyRepresentationModeView(data) {
     // while merely invisible, it still occupies #tab-container's layout box and
     // gives it its OWN scrollbar alongside #core-svg-view's, producing two
     // vertical scrollbars for one view (Staff/Mixed double-scrollbar bug).
-    tabCanvas.style.display = (showCore || showSlope || showHand3d) ? 'none' : 'block';
+    tabCanvas.style.display = (showCore || showSlope || showRain || showHand3d) ? 'none' : 'block';
   }
-  if (cursorCanvas) cursorCanvas.style.display = (showCore || showSlope || showHand3d) ? 'none' : 'block';
+  if (cursorCanvas) cursorCanvas.style.display = (showCore || showSlope || showRain || showHand3d) ? 'none' : 'block';
   if (slopeCanvas) slopeCanvas.style.display = showSlope ? 'block' : 'none';
+  if (rainCanvas) rainCanvas.style.display = showRain ? 'block' : 'none';
   if (hand3dViewFrame) hand3dViewFrame.style.display = showHand3d ? 'block' : 'none';
   if (!showHand3d) _releaseHand3dViewFrame();
-  // The density control only makes sense in Slope view.
-  if (_slopeDensityCtrl) _slopeDensityCtrl.style.display = showSlope ? '' : 'none';
+  // The density control only makes sense in the Slope and Rain views; its
+  // bounds/value are retargeted to whichever of the two is active.
+  if (_slopeDensityCtrl) _slopeDensityCtrl.style.display = (showSlope || showRain) ? '' : 'none';
+  if (showSlope || showRain) _configureDensitySlider(representationMode);
   _slopeRenderer?.setVisible(showSlope);
+  _rainRenderer?.setVisible(showRain);
   if (showHand3d) {
     const frameReady = _ensureHand3dViewFrame();
     if (frameReady) {
@@ -2225,6 +2267,9 @@ function initRenderer(data) {
   _slopeRenderer = slopeCanvas ? new SlopeRenderer(slopeCanvas, data) : null;
   // Re-apply the user's persisted Slope density to the new renderer.
   _slopeRenderer?.setDensity(_slopeDensity);
+  _rainRenderer?.destroy();
+  _rainRenderer = rainCanvas ? new RainRenderer(rainCanvas, data) : null;
+  _rainRenderer?.setDensity(_rainDensity);
   // Non-guitar tracks carry no fingering: never draw finger annotations and
   // keep the (hidden) fingering toggle inactive. Defensive — the solve
   // response also exposes `fingered:false` for these tracks.
@@ -2235,6 +2280,7 @@ function initRenderer(data) {
   _updateInsertFingeringsBtn(data);
   renderer.render();
   _slopeRenderer?.setVisible((data.__client_view_mode || getSelectedRepresentationMode()) === MODES.SLOPE);
+  _rainRenderer?.setVisible((data.__client_view_mode || getSelectedRepresentationMode()) === MODES.RAIN);
   // Notify the floating hand-viz panel that fresh fingering data is ready.
   window.dispatchEvent(new CustomEvent('fretwise:renderer-ready'));
   // Audio is always enabled; the multi-track bar handles per-track muting
@@ -2295,6 +2341,7 @@ function initRenderer(data) {
     playback = new PlaybackEngine(renderer, engineOpts);
   }
   _slopeRenderer?.bindPlayback(playback);
+  _rainRenderer?.bindPlayback(playback);
   // Set GM MIDI program (SpessaSynth) and infer MusyngKite instrument (fallback)
   playback.setMidiProgram(data.midi_program ?? -1);
   playback.setInstrument(data.track_name || '');
@@ -2309,6 +2356,7 @@ function initRenderer(data) {
   playback.onTimeChange = (sec) => {
     if (tcCurrent) tcCurrent.textContent = _fmtTime(sec);
     _slopeRenderer?.setPlaybackTime(sec, playback);
+    _rainRenderer?.setPlaybackTime(sec, playback);
     if (getSelectedRepresentationMode() === MODES.HAND_3D) _postHandVizTime();
   };
   // Surface soundfont loading so a big bank (StrixGuitarPack 186 MB, East_West
@@ -2399,6 +2447,7 @@ function initRenderer(data) {
   _svgDriver = null;
   const _svgMode = data.__client_view_mode || data.representation_mode || getSelectedRepresentationMode();
   if (_svgMode !== MODES.TABLATURE && _svgMode !== MODES.SLOPE
+      && _svgMode !== MODES.RAIN
       && _svgMode !== MODES.HAND_3D && data.measure_regions?.length && coreSvgView) {
     _svgDriver = new SvgCursorDriver(coreSvgView, data);
     _svgDriver.init();
@@ -2438,21 +2487,25 @@ function initRenderer(data) {
     };
   } else {
     if (coreSvgView) coreSvgView.onclick = null;
-    // Canvas (Tab) view scrolls #tab-container. Slope owns its own full-canvas
-    // animation and should not run the legacy tab cursor overlay.
-    playback.usesSvgCursor = _svgMode === MODES.SLOPE || _svgMode === MODES.HAND_3D;
+    // Canvas (Tab) view scrolls #tab-container. Slope and Rain own their own
+    // full-canvas animation and should not run the legacy tab cursor overlay.
+    playback.usesSvgCursor = _svgMode === MODES.SLOPE || _svgMode === MODES.RAIN
+      || _svgMode === MODES.HAND_3D;
   }
 
   // Speed
   if (selSpeed) {
     selSpeed.value = '100';
     _slopeRenderer?.setSpeed(1.0);
+    _rainRenderer?.setSpeed(1.0);
     _setTempoText(playback?.tempo || data.tempo || 120);
     selSpeed.onchange = () => {
       const s = parseInt(selSpeed.value, 10) / 100;
       playback.setSpeed(s);
       _slopeRenderer?.setSpeed(s);
       _slopeRenderer?.render();
+      _rainRenderer?.setSpeed(s);
+      _rainRenderer?.render();
       _setTempoText(playback.tempo);
     };
   }
@@ -2464,6 +2517,7 @@ function initRenderer(data) {
       if (playback) playback.tempo = bpm;
       if (renderer) { renderer.tempo = bpm; renderer.render(); }
       if (_slopeRenderer) { _slopeRenderer.tempo = bpm; _slopeRenderer.render(); }
+      if (_rainRenderer) { _rainRenderer.tempo = bpm; _rainRenderer.render(); }
       _setTempoText(bpm);
     };
     bpmInput.onkeydown = (e) => { if (e.key === 'Enter') bpmInput.onchange(); };
@@ -2958,6 +3012,9 @@ if (btnFollow) {
     // SVG (Staff / Mixed): the driver scrolls #core-svg-view. The canvas
     // geometry below does not apply (and #tab-container is no longer scrolled).
     if (playback.usesSvgCursor && _svgDriver) {
+      // Force a recenter on the current system: highlight() only scrolls on a
+      // system change, so clear the anchor first to make it re-scroll now.
+      _svgDriver._lastSystemKey = null;
       _svgDriver.highlight(
         renderer.cursorMeasure || 0, playback.loopStart, playback.loopEnd,
       );
@@ -4016,9 +4073,22 @@ document.querySelectorAll('#view-seg .view-seg-btn').forEach(btn => {
   });
 });
 
-// Density slider: how many beats of upcoming notes the Slope view shows.
+// Density slider: how many beats of upcoming notes the Slope / Rain view
+// shows. Shared control — _configureDensitySlider retargets its bounds to the
+// active view, and this handler routes the value to the matching renderer.
 if (_rngSlopeDensity) {
   _rngSlopeDensity.addEventListener('input', () => {
+    if (getSelectedRepresentationMode() === MODES.RAIN) {
+      const beats = Math.max(
+        _RAIN_DENSITY_MIN,
+        Math.min(_RAIN_DENSITY_MAX, parseFloat(_rngSlopeDensity.value) || _RAIN_DENSITY_DEFAULT),
+      );
+      _rainDensity = beats;
+      try { localStorage.setItem(_RAIN_DENSITY_KEY, String(beats)); } catch (_) { /* private mode */ }
+      _rainRenderer?.setDensity(beats);
+      _rainRenderer?.render();
+      return;
+    }
     const beats = Math.max(
       _SLOPE_DENSITY_MIN,
       Math.min(_SLOPE_DENSITY_MAX, parseFloat(_rngSlopeDensity.value) || 24),
@@ -4458,7 +4528,7 @@ function _onZoomInput() {
   if (zoomLabel) zoomLabel.textContent = _zoomLabelText(pct);
   _applyZoomForMode(mode);
   if (mode !== MODES.TABLATURE && mode !== MODES.TABLATURE_RHYTHM
-      && mode !== MODES.SLOPE && mode !== MODES.HAND_3D) {
+      && mode !== MODES.SLOPE && mode !== MODES.RAIN && mode !== MODES.HAND_3D) {
     // Force SVG re-fetch with the new (zoom-adjusted) page width.
     _lastSvgWidth[mode] = null;
     _refreshSvgView();
@@ -4759,8 +4829,19 @@ function stopCursorLoop() {
 }
 
 function _tickSvgCursor() {
-  // The SVG cursor line was removed; the current-measure highlight is driven by
-  // playback.onMeasureChange (meter-aware timeline). Nothing to update per frame.
+  // Drive the gliding sub-measure playhead in the SVG views (Staff / Mixed).
+  // The current-measure highlight is still handled by playback.onMeasureChange;
+  // this adds note-to-note resolution by interpolating the playhead x from the
+  // elapsed beats inside the current measure.
+  if (!_svgDriver || !playback || !renderer) return;
+  if (!playback.usesSvgCursor) return;
+  if (!playback.isPlaying) { _svgDriver.hideLine(); return; }
+  const m = renderer.cursorMeasure || 0;
+  const curSec = playback.getCurrentTimeSec();
+  const startSec = playback._measureStartSec(m);
+  const spb = playback._measureSecPerBeat(m);
+  const localBeats = spb > 0 ? (curSec - startSec) / spb : 0;
+  _svgDriver.tickFine(m, Math.max(0, localBeats));
 }
 
 function _drawCursorOverlay() {
@@ -4781,44 +4862,42 @@ function _drawCursorOverlay() {
   }
 
   const ctx = cursorCanvas.getContext('2d');
-  ctx.clearRect(0, 0, cursorCanvas.width, cursorCanvas.height);
+  // Draw in CSS pixels (same coordinate space as the renderer's note columns):
+  // the backing store is device-pixel sized, so scale by dpr and clear/draw in
+  // CSS units.
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const cssW = cursorCanvas.width / dpr;
+  const cssH = cursorCanvas.height / dpr;
+  ctx.clearRect(0, 0, cssW, cssH);
 
   if (!playback.isPlaying) return;
 
-  // The cursor LINE was removed; we only need the current measure's screen column
-  // to keep it in the reading zone (auto-scroll). Use the meter-aware measure-start
-  // onset so scrolling stays correct across meter changes.
-  const cursorOnset = playback._measureOnsetBeats(renderer.cursorMeasure || 0);
-  const col = renderer.getCursorX(cursorOnset);
+  // Continuous onset = measure-start onset + elapsed beats inside the measure,
+  // so the playhead glides note-to-note (sub-measure resolution) instead of
+  // snapping per measure. Meter-aware: uses this measure's own seconds-per-beat.
+  const m = renderer.cursorMeasure || 0;
+  const startSec = playback._measureStartSec(m);
+  const spb = playback._measureSecPerBeat(m);
+  const localBeats = spb > 0 ? (playback.getCurrentTimeSec() - startSec) / spb : 0;
+  const cursorOnset = playback._measureOnsetBeats(m) + Math.max(0, localBeats);
+  const col = renderer.getCursorLine(cursorOnset);
   if (!col) return;
 
-  // ── Auto-scroll: keep cursor in comfortable reading zone ──────────
-  // Fixed UI: header=50px top, toolbar=52px+scrubber=16px bottom
-  if (_followPlayhead) {
-    const TOP_GUTTER  = 70;   // header (50) + small buffer
-    const BOT_GUTTER  = 88;   // toolbar (52) + scrubber (16) + buffer
-    const canvasRect = tabCanvas.getBoundingClientRect();
-    const cursorViewportY = canvasRect.top + col.yTop;
-    const vh = window.innerHeight;
-    const usable = vh - TOP_GUTTER - BOT_GUTTER;
-    const triggerLow  = vh - BOT_GUTTER - 80;   // wider trigger zone near bottom
-    const triggerHigh = TOP_GUTTER + 40;          // wider trigger zone near top
-    const targetY     = TOP_GUTTER + usable * 0.45; // land at 45% of usable area (near center)
-    if (cursorViewportY > triggerLow || cursorViewportY < triggerHigh) {
-      _autoScrollTarget = window.scrollY + cursorViewportY - targetY;
-    }
-    if (_autoScrollTarget !== null) {
-      const delta = _autoScrollTarget - window.scrollY;
-      if (Math.abs(delta) < 0.5) {
-        _autoScrollTarget = null;
-      } else {
-        window.scrollTo(0, window.scrollY + delta * 0.12);
-      }
-    }
-  }
+  // NOTE: vertical auto-scroll is owned solely by playback._scrollCursorIntoView
+  // (which scrolls #tab-container, the real scroll box). The old window.scrollTo
+  // easing here targeted the page/body — which does NOT scroll in the tab view
+  // (#tab-viewer is height-capped, #tab-container handles overflow) — so it did
+  // nothing useful while fighting the container scroll and causing the jitter.
+  // Removed: this function now only draws the gliding playhead line.
   // ─────────────────────────────────────────────────────────────────
-  // No cursor line is drawn — the highlighted current measure is the only
-  // playback indicator. The cleared canvas above removes any stale line.
+  // Gliding vertical playhead — the sub-measure indicator that lets the eye
+  // track the exact note being played while reading ahead in the same system.
+  ctx.strokeStyle = 'rgba(224, 49, 49, 0.9)';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(col.x, col.yTop);
+  ctx.lineTo(col.x, col.yBottom);
+  ctx.stroke();
 }
 
 // ── Library table: sort and filter events ──────────────────────────
