@@ -1621,13 +1621,33 @@ function applyRepresentationModeView(data) {
     && representationMode !== MODES.SLOPE
     && representationMode !== MODES.RAIN
     && representationMode !== MODES.HAND_3D;
+  const showTab = !(showCore || showSlope || showRain || showHand3d);
   if (tabCanvas) {
     // display:none (not just visibility:hidden) in every non-Tablature mode —
     // the canvas can be 40000+ px tall (one row per measure). Left display:block
     // while merely invisible, it still occupies #tab-container's layout box and
     // gives it its OWN scrollbar alongside #core-svg-view's, producing two
     // vertical scrollbars for one view (Staff/Mixed double-scrollbar bug).
-    tabCanvas.style.display = (showCore || showSlope || showRain || showHand3d) ? 'none' : 'block';
+    tabCanvas.style.display = showTab ? 'block' : 'none';
+  }
+  if (showTab && renderer) {
+    // The TAB canvas was just switched from display:none to block. Its layout
+    // (system widths from #tab-container's clientWidth, and the click/scroll
+    // geometry that reads it) was computed while the canvas was hidden — on the
+    // very first TAB entry that width/height can still be settling, so the first
+    // click mapped to the wrong measure and the first play scrolled to a
+    // half-hidden line until a reflow corrected it. Rebuild + render on the next
+    // frame, once the browser has laid the now-visible canvas out, so the first
+    // interaction already uses final geometry. Also reset the follow-scroll
+    // anchor and park the view at the top.
+    const container = tabCanvas.parentElement;
+    if (container) container.scrollTop = 0;
+    if (playback) playback._lastScrollSystemTop = -1;
+    requestAnimationFrame(() => {
+      if (tabCanvas.style.display === 'none') return;   // user switched away already
+      renderer._buildSystems();
+      renderer.render();
+    });
   }
   if (cursorCanvas) cursorCanvas.style.display = (showCore || showSlope || showRain || showHand3d) ? 'none' : 'block';
   if (slopeCanvas) slopeCanvas.style.display = showSlope ? 'block' : 'none';

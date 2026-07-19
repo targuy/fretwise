@@ -75,6 +75,9 @@ export class PlaybackEngine {
     this._secondaryChannels = [];
 
     this._followPlayhead = true;  // scroll follows the playhead
+    // Top Y (canvas px) of the system the tab auto-scroll last centred on. The
+    // scroll fires only when this changes (system-stable follow). -1 = none yet.
+    this._lastScrollSystemTop = -1;
     // When the score is shown as server-rendered SVG (Staff / Mixed views),
     // the SvgCursorDriver owns scrolling of #core-svg-view. This engine's
     // canvas-geometry scroll (#tab-container) MUST then stay out of the way:
@@ -180,6 +183,7 @@ export class PlaybackEngine {
     this._skipMeasure = -1;
     this._firstScheduleSkipSec = 0;
     this._resumeSubMeasureSec = 0;
+    this._lastScrollSystemTop = -1;   // new score → re-evaluate tab follow-scroll
     // Default to canvas scrolling; main.js re-asserts this per render once it
     // knows whether an SvgCursorDriver was created for the new view mode.
     this.usesSvgCursor = false;
@@ -1223,18 +1227,23 @@ export class PlaybackEngine {
     if (!col) return;
 
     const view = container.clientHeight;
-    const top = container.scrollTop;
-    const bot = top + view;
-    const margin = Math.min(120, view * 0.18);
+    const systemTop = Math.round(col.yTop);   // shared by every column in a system
 
-    // System-stable: scroll only when the playhead's band leaves the comfortable
-    // reading zone, then land the current system near the top third so the next
-    // lines are already visible for look-ahead. Within a system the page holds
-    // still — no per-measure jitter.
-    if (col.yBottom > bot - margin || col.yTop < top + margin) {
+    // System-stable, change-triggered: scroll the instant the playhead enters a
+    // NEW system row, landing that system near the top third so the next lines
+    // are visible for look-ahead. Triggering on the system CHANGE (not on the
+    // band drifting into the bottom margin) means the playhead is never left
+    // dwelling half-hidden at the bottom edge during the smooth-scroll — the
+    // "current line half-masked on the first play" symptom. Within a system the
+    // page holds still (no per-measure jitter). The band is also re-centred if
+    // it somehow left the viewport (e.g. after a manual scroll).
+    const top = container.scrollTop;
+    const outOfView = col.yTop < top || col.yBottom > top + view;
+    if (systemTop !== this._lastScrollSystemTop || outOfView) {
       const target = col.yTop - view * 0.30;
       const maxTop = Math.max(0, container.scrollHeight - view);
       container.scrollTo({ top: Math.max(0, Math.min(target, maxTop)), behavior: 'smooth' });
+      this._lastScrollSystemTop = systemTop;
     }
   }
 
