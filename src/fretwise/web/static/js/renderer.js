@@ -200,9 +200,14 @@ export class TabRenderer {
     return MARGIN_T + this.systems.length * (SYSTEM_H + INTER_SYSTEM) + 20;
   }
 
-  /** Compute width per system */
+  /** Compute width per system. Prefer the actual scroll container's inner width
+   *  (excludes the maple frame border and scrollbar) so the staff fits it exactly
+   *  with no residual horizontal scroll; fall back to the viewport when the canvas
+   *  isn't in the DOM yet. */
   get systemWidth() {
-    return Math.max(800, window.innerWidth - 40);
+    const contW = this.canvas?.parentElement?.clientWidth;
+    const w = (contW && contW > 200) ? contW : (window.innerWidth - 40);
+    return Math.max(800, w);
   }
 
   /** Full render */
@@ -391,6 +396,23 @@ export class TabRenderer {
       curW += w;
     }
     if (cur.length) systems.push(cur);
+
+    // Justify each system to fill the available width — otherwise dense lines
+    // (that could not fit one more measure) leave a ragged right gap and the
+    // staff doesn't span the window. Mirrors the SVG layout's content-width
+    // scaling. Multi-measure systems always have natural width <= availW (the
+    // packer breaks before overflow), so scale >= 1 stretches them to the edge;
+    // a single measure wider than availW gets scale < 1 and shrinks to fit. The
+    // last system is left at its natural width when it's under ~60% full, so a
+    // short final line isn't blown up to absurd note spacing.
+    const lastIdx = systems.length - 1;
+    systems.forEach((s, si) => {
+      const natural = s.reduce((a, c) => a + c.w, 0);
+      if (natural <= 0) return;
+      if (si === lastIdx && natural < availW * 0.6) return;
+      const scale = availW / natural;
+      for (const c of s) c.w *= scale;
+    });
 
     this.systems = systems.map(s => ({
       measures: s.map(c => measures[c.idx]),

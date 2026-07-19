@@ -678,6 +678,11 @@ body.has-multitrack-bar #tab-container { padding-bottom: 72px; }
   padding: 16px 0 96px; /* top breathing room; bottom clears fixed toolbar */
   overflow-x: auto;
   overflow-y: auto;
+  /* Reserve the vertical scrollbar gutter so clientWidth stays constant whether
+     or not the scrollbar is showing. The canvas width is sized from clientWidth,
+     so without this a long score's scrollbar would shrink the width AFTER the
+     canvas was laid out, flashing a spurious horizontal scrollbar on first paint. */
+  scrollbar-gutter: stable;
   position: relative; /* needed for absolute cursor canvas */
   background: var(--bg-score); /* score area always light/cream */
   /* Fancy maple 9-slice frame — same family as the library plaques, but WITHOUT
