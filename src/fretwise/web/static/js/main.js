@@ -507,7 +507,8 @@ function _renderLibTable() {
       case 'title':  av = a.meta?.title || a.stem || ''; bv = b.meta?.title || b.stem || ''; break;
       case 'artist': av = a.meta?.artist || ''; bv = b.meta?.artist || ''; break;
       case 'genre':  av = a.meta?.genre || ''; bv = b.meta?.genre || ''; break;
-      case 'year':   av = parseInt(a.meta?.year) || 0; bv = parseInt(b.meta?.year) || 0; break;
+      case 'type_guitare': av = a.meta?.type_guitare || ''; bv = b.meta?.type_guitare || ''; break;
+      case 'difficulte':   av = a.meta?.difficulte || ''; bv = b.meta?.difficulte || ''; break;
       case 'format': av = a.format || ''; bv = b.format || ''; break;
       default:       av = ''; bv = '';
     }
@@ -548,7 +549,8 @@ function _renderLibTable() {
     const title = f.meta?.title || f.stem || f.name;
     const artist = f.meta?.artist || '—';
     const genre = f.meta?.genre || '—';
-    const year = f.meta?.year || '—';
+    const typeGuitare = f.meta?.type_guitare || '—';
+    const difficulte = f.meta?.difficulte || '—';
     const format = f.format || '?';
 
     const isGpFile = f.name.endsWith('.gp');
@@ -573,7 +575,8 @@ function _renderLibTable() {
       <td class="lib-cell-title"><span class="lib-title-text">${_esc(title)}</span>${fingerBadge}${chordBadge}</td>
       <td class="lib-cell-artist">${_esc(artist)}</td>
       <td class="lib-cell-genre"><span class="lib-badge lib-badge-genre">${_esc(genre)}</span></td>
-      <td class="lib-cell-year">${_esc(String(year))}</td>
+      <td class="lib-cell-guitare">${_esc(typeGuitare)}</td>
+      <td class="lib-cell-difficulte">${_esc(difficulte)}</td>
       <td class="lib-cell-format"><span class="lib-badge lib-badge-fmt">${_esc(format)}</span></td>
       <td class="lib-cell-actions">
         <button class="lib-btn-info" title="Song info" data-file="${_esc(f.name)}">ℹ</button>
@@ -3497,9 +3500,16 @@ async function _loadRigBankControl(filename, rigData) {
     _rigBank = await fetchRigBank();
     const profiles = Array.isArray(_rigBank.profiles) ? _rigBank.profiles : [];
     if (!profiles.length) {
+      wrap.style.display = '';
+      // Still list the MIDI ports: an empty bank says nothing about the
+      // hardware, and showing the detected ports makes it obvious that the
+      // missing piece is the bank file and not the GP-180 connection.
+      // Loaded *before* the status is written because _loadRigMidiOutputs
+      // sets its own status when no port is found — and here the empty bank
+      // is the actual blocker, so its message must be the one left standing.
+      await _loadRigMidiOutputs();
       status.className = 'rig-bank-status';
       status.textContent = 'Aucun profil MIDI dans rig_bank.json.';
-      wrap.style.display = '';
       return;
     }
     const body = {

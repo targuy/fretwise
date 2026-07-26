@@ -24,9 +24,20 @@ data/profiles/*.json
 # Fichiers GP personnels
 tests/fixtures/private/
 
-# Score files (personal library — not versioned)
-partitions/
-partitions save/
+# Score files (personal library — not versioned).
+# Leading slash anchors these to the repo root: an unanchored "partitions/"
+# matches at ANY depth and was silently swallowing the src/fretwise/partitions/
+# source package too.
+# Ignore the *contents*, not the directory itself: git never descends into an
+# excluded directory, which would make the re-include below unreachable.
+/partitions/*
+# …except the GP-180 rig bank: a single hand-curated reference file (profiles,
+# MIDI program numbers, genre bindings) that lives nowhere else. It was lost
+# once because partitions/ was ignored wholesale; version it so it survives.
+!/partitions/rigs/
+/partitions/rigs/*
+!/partitions/rigs/rig_bank.json
+/partitions save/
 _tmp_after_fingerings/
 
 # Reference image sets (large binaries — not versioned)
