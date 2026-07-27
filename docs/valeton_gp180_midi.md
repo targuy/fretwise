@@ -84,3 +84,32 @@ Resolution order:
 4. genre binding
 5. profile artist metadata
 6. profile genre metadata
+
+## Troubleshooting: activation reports success but the pedal does not react
+
+Two independent failure modes look identical from the FretWise UI ("Activé",
+no error) — use `tools/gp180_midi_diag.py` to tell them apart:
+
+1. **Bytes never reach the pedal** (FretWise-side). Before the fix in
+   `fix(rig): never send GP-180 activation to the default MIDI output`, leaving
+   the MIDI-output combo on "Port par défaut" with more than one MIDI device
+   connected sent the Program Change to whatever `mido.open_output()` picks by
+   default — on Windows, the built-in GS Wavetable synth — which succeeds
+   silently. `send_profile_program_change` now resolves the GP-180's own port by
+   name and raises instead of falling back.
+
+2. **Bytes arrive but the pedal ignores them** (device-side). Confirmed once on
+   2026-07-27: `tools/gp180_midi_diag.py echo` showed the GP-180 echoing our USB
+   Program Change back on its own MIDI OUT (so USB MIDI IN was physically live),
+   yet `sweep` across all 16 channels produced no patch change, while the
+   Chocolate+ TRS footswitch's Program Change on the *same* channel (1) did
+   switch patches. Root cause: **Global > MIDI > Input Source** was not set to
+   `USB` / `Mixed` (see the MIDI preset selection section above) — likely
+   changed while pairing the Chocolate+ footswitch. Fix is on the pedal, not in
+   code: set Input Source back to `USB` or `Mixed`.
+
+Diagnostic order when this recurs: `ports` (is the device even enumerated?) →
+`echo` (does it echo, i.e. is USB MIDI IN physically live?) → `sweep` (does any
+channel actually change the patch?) → if echo works but no channel in the sweep
+does, it's almost certainly the Input Source setting above, not a channel or
+rig-bank data problem.
