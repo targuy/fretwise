@@ -927,6 +927,37 @@ def list_midi_output_names() -> list[str]:
         raise RigBankError(f"MIDI output listing failed: {exc}") from exc
 
 
+# Substrings that identify the MIDI output port belonging to a device family.
+# Windows/rtmidi port names carry a trailing index ("Valeton GP-180 Subdevice 3")
+# that shifts whenever another MIDI device is plugged in, so ports are matched by
+# substring rather than by an exact remembered name.
+_DEVICE_PORT_HINTS: dict[str, tuple[str, ...]] = {
+    "valeton_gp180": ("valeton", "gp-180", "gp180"),
+}
+
+
+def find_device_output_name(device: str, names: Iterable[str]) -> str | None:
+    """Return the first MIDI output port that looks like ``device``'s own port.
+
+    Args:
+        device: Device family identifier, e.g. ``valeton_gp180``.
+        names: Available MIDI output port names.
+
+    Returns:
+        The matching port name, or ``None`` when the device is not connected or
+        the family has no known naming hint.
+    """
+
+    hints = _DEVICE_PORT_HINTS.get(device, ())
+    if not hints:
+        return None
+    for name in names:
+        lowered = name.lower()
+        if any(hint in lowered for hint in hints):
+            return name
+    return None
+
+
 def send_profile_program_change(
     profile: RigProfile,
     port_name: str | None = None,
@@ -935,11 +966,17 @@ def send_profile_program_change(
 
     Args:
         profile: Profile to activate.
-        port_name: Optional mido output name. ``None`` lets mido open its default
-            output, when available.
+        port_name: Optional mido output name. When omitted, the port belonging to
+            the profile's own device is looked up by name; mido's default output
+            is deliberately NOT used as a fallback, because on Windows that is
+            the built-in GS synth — sending there succeeds silently and looks
+            like a working activation while the pedal never moves.
 
     Returns:
         Raw bytes that were sent, useful for logs and API responses.
+
+    Raises:
+        RigBankError: When the device's port cannot be found or opened.
     """
 
     messages = profile.midi_bytes()
@@ -948,11 +985,21 @@ def send_profile_program_change(
     except ImportError as exc:
         raise RigBankError("mido is required to activate a MIDI rig profile") from exc
 
+    if not port_name:
+        available = list(mido.get_output_names())
+        port_name = find_device_output_name(profile.device, available)
+        if not port_name:
+            listed = ", ".join(repr(name) for name in available) or "none"
+            raise RigBankError(
+                f"No MIDI output port found for device {profile.device!r}. "
+                f"Connect it over USB and enable its USB MIDI output. "
+                f"Available ports: {listed}"
+            )
+
     try:
-        output = mido.open_output(port_name) if port_name else mido.open_output()
+        output = mido.open_output(port_name)
     except Exception as exc:
-        label = f" {port_name!r}" if port_name else ""
-        raise RigBankError(f"MIDI output{label} could not be opened: {exc}") from exc
+        raise RigBankError(f"MIDI output {port_name!r} could not be opened: {exc}") from exc
     try:
         for raw in messages:
             output.send(mido.Message.from_bytes(list(raw)))

@@ -3630,8 +3630,16 @@ async function _loadRigMidiOutputs() {
       opt.textContent = name;
       outputSelect.appendChild(opt);
     });
+    // Prefer the GP-180's own port. Leaving the combo on "Port par défaut"
+    // used to send the Program Change to whatever MIDI output the OS considers
+    // default — on Windows the built-in GS synth — which succeeds silently and
+    // reads as a working activation while the pedal never moves.
+    const gp180 = outputs.find((name) => /valeton|gp-?180/i.test(name));
     if (_lastRigMidiOutput && outputs.includes(_lastRigMidiOutput)) {
       outputSelect.value = _lastRigMidiOutput;
+    } else if (gp180) {
+      outputSelect.value = gp180;
+      _rememberRigMidiOutput(gp180);
     } else if (outputs.length === 1) {
       outputSelect.value = outputs[0];
       _rememberRigMidiOutput(outputs[0]);

@@ -14,9 +14,11 @@ from fretwise.rig_bank import (
     RigModule,
     RigProfile,
     _match_model,
+    find_device_output_name,
     load_rig_bank,
     read_valeton_suite_effect_catalog,
     save_rig_bank,
+    send_profile_program_change,
 )
 from tools.seed_gp180_rig_bank import _apply_captured_modules, build_bank
 
@@ -888,3 +890,76 @@ def test_seed_gp180_bank_contains_captured_presets_and_valid_bindings() -> None:
     assert bank.get_profile("gp180-110-muse").artist == "Muse"
     assert bank.resolve(song="Comfortably Numb").profile.id == "gp180-048-numb-of-pf"
     assert bank.resolve(artist="Dire Straits").profile.id == "gp180-053-straits-clean"
+
+
+# --- MIDI output port resolution -------------------------------------------
+# Windows/rtmidi port names carry a trailing index that shifts whenever another
+# MIDI device is plugged in, and mido's default output on Windows is the built-in
+# GS synth. Sending there succeeds silently, so a missing/stale port must never
+# fall back to it: that reads as a successful activation while the pedal is
+# untouched.
+
+
+def test_find_device_output_name_matches_gp180_despite_port_index() -> None:
+    names = [
+        "Microsoft GS Wavetable Synth 0",
+        "Loupedeck CT 2",
+        "Valeton GP-180 Subdevice 3",
+    ]
+    assert find_device_output_name("valeton_gp180", names) == "Valeton GP-180 Subdevice 3"
+    # Same device, different trailing index after replugging another device.
+    shifted = ["Loupedeck CT 1", "Valeton GP-180 Subdevice 2"]
+    assert find_device_output_name("valeton_gp180", shifted) == "Valeton GP-180 Subdevice 2"
+
+
+def test_find_device_output_name_returns_none_when_device_absent() -> None:
+    names = ["Microsoft GS Wavetable Synth 0", "Loupedeck CT 2"]
+    assert find_device_output_name("valeton_gp180", names) is None
+    assert find_device_output_name("unknown_device", names) is None
+
+
+def test_send_profile_without_port_never_falls_back_to_default_output(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import mido
+
+    opened: list[str] = []
+    monkeypatch.setattr(
+        mido, "get_output_names",
+        lambda: ["Microsoft GS Wavetable Synth 0", "Loupedeck CT 2"],
+    )
+    monkeypatch.setattr(mido, "open_output", lambda name: opened.append(name))
+
+    profile = RigProfile(id="p", name="P", program=5)
+    with pytest.raises(RigBankError, match="No MIDI output port found"):
+        send_profile_program_change(profile)
+    assert opened == []
+
+
+def test_send_profile_without_port_resolves_the_device_port(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import mido
+
+    class _FakePort:
+        def __init__(self) -> None:
+            self.sent: list[list[int]] = []
+
+        def send(self, message: object) -> None:
+            self.sent.append(list(message.bytes()))  # type: ignore[attr-defined]
+
+        def close(self) -> None:
+            pass
+
+    port = _FakePort()
+    monkeypatch.setattr(
+        mido, "get_output_names",
+        lambda: ["Microsoft GS Wavetable Synth 0", "Valeton GP-180 Subdevice 3"],
+    )
+    monkeypatch.setattr(mido, "open_output", lambda name: port)
+
+    profile = RigProfile(id="p", name="P", program=5)
+    sent = send_profile_program_change(profile)
+
+    assert sent == ((0xB0, 0, 0), (0xC0, 5))
+    assert port.sent == [[0xB0, 0, 0], [0xC0, 5]]
