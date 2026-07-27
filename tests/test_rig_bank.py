@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import time
 from pathlib import Path
 
 import pytest
@@ -959,7 +960,33 @@ def test_send_profile_without_port_resolves_the_device_port(
     monkeypatch.setattr(mido, "open_output", lambda name: port)
 
     profile = RigProfile(id="p", name="P", program=5)
-    sent = send_profile_program_change(profile)
+    sent = send_profile_program_change(profile, inter_message_delay_s=0)
 
     assert sent == ((0xB0, 0, 0), (0xC0, 5))
     assert port.sent == [[0xB0, 0, 0], [0xC0, 5]]
+
+
+def test_send_profile_pauses_between_bank_select_and_program_change(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    # Confirmed on hardware 2026-07-27: the GP-180 drops a Bank Select (CC0)
+    # immediately followed by a Program Change over USB with no gap — sending
+    # them back-to-back never changed the patch, a short pause between them did.
+    import mido
+
+    class _FakePort:
+        def send(self, message: object) -> None:
+            pass
+
+        def close(self) -> None:
+            pass
+
+    monkeypatch.setattr(mido, "open_output", lambda name: _FakePort())
+    sleeps: list[float] = []
+    monkeypatch.setattr(time, "sleep", sleeps.append)
+
+    profile = RigProfile(id="p", name="P", program=5)
+    send_profile_program_change(profile, port_name="Valeton GP-180 Subdevice 3")
+
+    # One gap for two messages (CC0, then PC) — none before the first message.
+    assert sleeps == [pytest.approx(0.2)]

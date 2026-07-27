@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import re
+import time
 from collections.abc import Iterable, Mapping
 from dataclasses import dataclass, field
 from difflib import SequenceMatcher
@@ -958,9 +959,20 @@ def find_device_output_name(device: str, names: Iterable[str]) -> str | None:
     return None
 
 
+# The GP-180 drops/misparses a Bank Select (CC0) immediately followed by a
+# Program Change over USB MIDI with no gap between them: confirmed on hardware
+# 2026-07-27 (see docs/valeton_gp180_midi.md) — sending the pair back-to-back
+# never changed the patch, while inserting a short pause between them did,
+# across both banks (patch 006 in bank 1, patch 129 in bank 2). 150ms worked in
+# that test; kept a bit above that for margin.
+_INTER_MESSAGE_DELAY_S = 0.2
+
+
 def send_profile_program_change(
     profile: RigProfile,
     port_name: str | None = None,
+    *,
+    inter_message_delay_s: float = _INTER_MESSAGE_DELAY_S,
 ) -> tuple[tuple[int, ...], ...]:
     """Send the MIDI messages that activate ``profile``.
 
@@ -971,6 +983,8 @@ def send_profile_program_change(
             is deliberately NOT used as a fallback, because on Windows that is
             the built-in GS synth — sending there succeeds silently and looks
             like a working activation while the pedal never moves.
+        inter_message_delay_s: Pause between successive MIDI messages (see
+            ``_INTER_MESSAGE_DELAY_S``). Exposed mainly so tests can pass ``0``.
 
     Returns:
         Raw bytes that were sent, useful for logs and API responses.
@@ -1001,7 +1015,9 @@ def send_profile_program_change(
     except Exception as exc:
         raise RigBankError(f"MIDI output {port_name!r} could not be opened: {exc}") from exc
     try:
-        for raw in messages:
+        for index, raw in enumerate(messages):
+            if index > 0 and inter_message_delay_s > 0:
+                time.sleep(inter_message_delay_s)
             output.send(mido.Message.from_bytes(list(raw)))
     finally:
         output.close()

@@ -98,18 +98,25 @@ no error) — use `tools/gp180_midi_diag.py` to tell them apart:
    silently. `send_profile_program_change` now resolves the GP-180's own port by
    name and raises instead of falling back.
 
-2. **Bytes arrive but the pedal ignores them** (device-side). Confirmed once on
-   2026-07-27: `tools/gp180_midi_diag.py echo` showed the GP-180 echoing our USB
-   Program Change back on its own MIDI OUT (so USB MIDI IN was physically live),
-   yet `sweep` across all 16 channels produced no patch change, while the
-   Chocolate+ TRS footswitch's Program Change on the *same* channel (1) did
-   switch patches. Root cause: **Global > MIDI > Input Source** was not set to
-   `USB` / `Mixed` (see the MIDI preset selection section above) — likely
-   changed while pairing the Chocolate+ footswitch. Fix is on the pedal, not in
-   code: set Input Source back to `USB` or `Mixed`.
+2. **Bytes arrive but the pedal ignores them** (firmware quirk, fixed in
+   `send_profile_program_change`). Confirmed on hardware 2026-07-27:
+   `tools/gp180_midi_diag.py echo` showed the GP-180 echoing our USB Program
+   Change back on its own MIDI OUT (USB MIDI IN physically live), yet `sweep`
+   across all 16 channels produced no patch change, while the Chocolate+ TRS
+   footswitch's Program Change on the *same* channel (1) did switch patches.
+   Global > MIDI > Input Source was checked and set to Mixed — not the cause.
+   The actual root cause: the GP-180 drops a Bank Select (CC0) message
+   immediately followed by a Program Change over USB with **no gap** between
+   them. A bare Program Change (no CC0) worked immediately; inserting a ~150ms
+   pause between CC0 and PC also worked, on both bank 1 (patch 006) and bank 2
+   (patch 129, which genuinely needs `CC0=1`). Fixed by
+   `_INTER_MESSAGE_DELAY_S` (0.2s) between successive messages in
+   `send_profile_program_change` — bank select is kept (needed for patches
+   129-200) rather than dropped, since dropping it would silently break the
+   second bank instead of fixing a timing bug.
 
 Diagnostic order when this recurs: `ports` (is the device even enumerated?) →
 `echo` (does it echo, i.e. is USB MIDI IN physically live?) → `sweep` (does any
-channel actually change the patch?) → if echo works but no channel in the sweep
-does, it's almost certainly the Input Source setting above, not a channel or
-rig-bank data problem.
+channel actually change the patch?). If echo works but no channel in the sweep
+does, suspect Input Source first (quick to check), then this inter-message
+timing issue if Input Source is already correct.
