@@ -98,6 +98,7 @@ from fretwise.rig_bank import (
 )
 from fretwise.rig_generation import RigGenerationError, SongRigGenerationService
 from fretwise.rig_pipeline import JsonFactsProvider, generate_grounded_rig
+from fretwise.runtime import RuntimeCapabilities, RuntimeCapability, resolve_runtime_capabilities
 from fretwise.scoring import CostFunction, CostWeights, RulePreferences
 from fretwise.storage import (
     CATALOG_NAME,
@@ -164,6 +165,7 @@ def create_app(
     fixtures_dir: Path | None = None,
     *,
     allowed_hosts: list[str] | None = None,
+    runtime_profile: str | None = None,
 ) -> FastAPI:
     """Create and configure the FastAPI application.
 
@@ -175,6 +177,7 @@ def create_app(
                        ``FRETWISE_ALLOWED_HOSTS`` environment variable).
     """
     app = FastAPI(title="FretWise", version="0.4.0")
+    app.state.runtime_capabilities = resolve_runtime_capabilities(runtime_profile)
 
     # Reject requests whose Host header is not in the allowlist. Without this a
     # malicious web page could use DNS rebinding to reach the loopback server
@@ -317,6 +320,12 @@ def _register_routes(app: FastAPI) -> None:
             return RedirectResponse(url="/login", status_code=303)
         html_path = _STATIC_DIR / "index.html"
         return HTMLResponse(content=html_path.read_text(encoding="utf-8"))
+
+    @app.get("/api/runtime")
+    async def runtime_status() -> JSONResponse:
+        """Report deployment profile and explicitly enabled capabilities."""
+        capabilities: RuntimeCapabilities = app.state.runtime_capabilities
+        return JSONResponse(capabilities.to_json())
 
     @app.get("/api/files")
     async def list_files() -> JSONResponse:
@@ -515,6 +524,8 @@ def _register_routes(app: FastAPI) -> None:
     @app.get("/api/rig-bank/midi-outputs")
     async def get_rig_midi_outputs() -> JSONResponse:
         """List mido output ports that could drive the GP-180."""
+        _require_admin(app)
+        _require_runtime_capability(app, "midi_output")
         try:
             outputs = list_midi_output_names()
         except RigBankError as exc:
@@ -536,6 +547,8 @@ def _register_routes(app: FastAPI) -> None:
             dry_run = bool(body.get("dry_run", True))
             messages = resolution.profile.midi_bytes()
             if not dry_run:
+                _require_admin(app)
+                _require_runtime_capability(app, "midi_output")
                 port_name = str(body.get("port_name") or "").strip() or None
                 messages = send_profile_program_change(resolution.profile, port_name)
         except (_json.JSONDecodeError, RigBankError, OSError, TypeError) as exc:
@@ -562,7 +575,7 @@ def _register_routes(app: FastAPI) -> None:
         """Execute one ready GP-180 control-surface action.
 
         Body: ``{"action_id": str, "port_name"?: str, "dry_run"?: bool}``.
-        ``dry_run`` defaults to false for hardware-surface usage.
+        ``dry_run`` defaults to true; hardware sending must be explicit.
         """
 
         try:
@@ -593,9 +606,11 @@ def _register_routes(app: FastAPI) -> None:
                 if profile is None:
                     raise RigBankError(f"unknown rig profile id: {profile_id}")
                 source = "explicit"
-            dry_run = bool(body.get("dry_run", False))
+            dry_run = bool(body.get("dry_run", True))
             messages = profile.midi_bytes()
             if not dry_run:
+                _require_admin(app)
+                _require_runtime_capability(app, "midi_output")
                 port_name = str(body.get("port_name") or "").strip() or None
                 messages = send_profile_program_change(profile, port_name)
         except (_json.JSONDecodeError, RigBankError, OSError, TypeError) as exc:
@@ -2527,6 +2542,21 @@ def _require_admin(app: FastAPI) -> None:
         raise HTTPException(401, "Authentication required")
     if not user.is_admin:
         raise HTTPException(403, "Admin privileges required")
+
+
+def _require_runtime_capability(app: FastAPI, capability: RuntimeCapability) -> None:
+    """Reject workstation-only operations in the server runtime profile."""
+    capabilities: RuntimeCapabilities = app.state.runtime_capabilities
+    if getattr(capabilities, capability):
+        return
+    raise HTTPException(
+        status_code=503,
+        detail={
+            "code": "feature_disabled",
+            "capability": capability,
+            "runtime_profile": capabilities.profile,
+        },
+    )
 
 
 def _current_storage(app: FastAPI) -> StorageBackend:

@@ -5,7 +5,7 @@
  * Orchestra: renderer + playback + toolbar
  */
 
-import { activateRigProfile, activateSoundfont, cleanupLibrary, connectStorage, deleteSoundfont, disconnectStorage, downloadFile, fetchExportGp, fetchExportMusicXml, fetchExportMusicXmlAll, fetchExportPdf, fetchFiles, fetchGearVerificationPrompt, fetchGmInstruments, fetchLlmPrompt, fetchMe, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSongListDownload, fetchSoundfonts, fetchStorage, fetchTracks, fetchSaveGp, fetchRig, fetchRigBank, fetchRigMidiOutputs, recommendRigProfile, saveGearSheet, saveRigBinding, saveRigProfile, importSongMetadata, saveSettings, uploadFile, uploadSoundfont } from './api.js';
+import { activateRigProfile, activateSoundfont, cleanupLibrary, connectStorage, deleteSoundfont, disconnectStorage, downloadFile, fetchExportGp, fetchExportMusicXml, fetchExportMusicXmlAll, fetchExportPdf, fetchFiles, fetchGearVerificationPrompt, fetchGmInstruments, fetchLlmPrompt, fetchMe, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSongListDownload, fetchSoundfonts, fetchStorage, fetchTracks, fetchSaveGp, fetchRig, fetchRigBank, fetchRigMidiOutputs, fetchRuntime, recommendRigProfile, saveGearSheet, saveRigBinding, saveRigProfile, importSongMetadata, saveSettings, uploadFile, uploadSoundfont } from './api.js';
 import { getMaskedMeasures, renderAuditBanner, resetAuditBanner, statusBanner } from './audit.js';
 import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { SlopeRenderer } from './slope-renderer.js';
@@ -16,6 +16,7 @@ import { task as notifyTask, toast as notifyToast } from './notify.js';
 import { MODES, MODE_LABELS, DEFAULT_MODE, isGuitarKind, trackKindLabel } from './modeConfig.js';
 import { applyLeatherIcons } from './icons.js';
 import { initReview, resetReview } from './review.js';
+import { chooseMidiOutput, connectedMidiOutputs, requestWebMidiAccess, sendMidiMessages, supportsWebMidi } from './web-midi.js';
 
 // ── State ───────────────────────────────────────────────────────────
 
@@ -85,6 +86,8 @@ let soundOn = false;   // tracks mute state across track changes
 const _notesCache = new Map(); // key: `${file}#${trackId}` → /api/notes response
 const _RIG_MIDI_OUTPUT_SESSION_KEY = 'fretwise.rigMidiOutput';
 let _lastRigMidiOutput = _readSessionValue(_RIG_MIDI_OUTPUT_SESSION_KEY);
+let _runtimeCapabilities = null;
+let _browserMidiAccess = null;
 // Client-side solve cache: key `${file}#${trackId}#${mode}#${prefsKey}` →
 // /api/solve response. Avoids re-hitting the network (and re-deserialising a
 // large payload) when the user flips back to a track/mode already viewed.
@@ -3614,8 +3617,52 @@ function _textTokens(value) {
 
 async function _loadRigMidiOutputs() {
   const outputSelect = document.getElementById('rig-midi-output-select');
+  const sendBtn = document.getElementById('rig-midi-send-btn');
   const status = document.getElementById('rig-bank-status');
   if (!outputSelect) return;
+  if (_runtimeCapabilities === null) {
+    try {
+      _runtimeCapabilities = await fetchRuntime();
+    } catch (_err) {
+      // Backward-compatible fallback for older servers without /api/runtime.
+      _runtimeCapabilities = { profile: 'desktop', midi_output: true };
+    }
+  }
+  if (_runtimeCapabilities.midi_output === false) {
+    outputSelect.innerHTML = '';
+    outputSelect.style.display = '';
+    if (sendBtn) {
+      sendBtn.style.display = '';
+      sendBtn.disabled = !supportsWebMidi();
+    }
+    if (!supportsWebMidi()) {
+      const unavailable = document.createElement('option');
+      unavailable.value = '';
+      unavailable.textContent = 'MIDI USB indisponible dans ce navigateur';
+      outputSelect.appendChild(unavailable);
+      if (status) {
+        status.textContent = 'Web MIDI indisponible dans ce navigateur ou ce système.';
+      }
+      return;
+    }
+    if (_browserMidiAccess) {
+      _renderBrowserMidiOutputs(outputSelect, _browserMidiAccess);
+    } else {
+      const authorize = document.createElement('option');
+      authorize.value = '';
+      authorize.textContent = 'MIDI USB du navigateur — autoriser';
+      outputSelect.appendChild(authorize);
+      if (status) {
+        status.textContent = 'Cliquer sur Activer MIDI pour autoriser les sorties USB de cet appareil.';
+      }
+    }
+    return;
+  }
+  outputSelect.style.display = '';
+  if (sendBtn) {
+    sendBtn.style.display = '';
+    sendBtn.disabled = false;
+  }
   outputSelect.innerHTML = '';
   const defaultOpt = document.createElement('option');
   defaultOpt.value = '';
@@ -3658,6 +3705,59 @@ async function _loadRigMidiOutputs() {
       status.textContent = `Ports MIDI indisponibles : ${err.message || err}`;
     }
   }
+}
+
+function _renderBrowserMidiOutputs(outputSelect, access) {
+  outputSelect.innerHTML = '';
+  const outputs = connectedMidiOutputs(access);
+  outputs.forEach((output) => {
+    const opt = document.createElement('option');
+    opt.value = output.id;
+    const manufacturer = String(output.manufacturer || '').trim();
+    const name = String(output.name || output.id).trim();
+    opt.textContent = manufacturer && !name.toLowerCase().includes(manufacturer.toLowerCase())
+      ? `${manufacturer} · ${name}`
+      : name;
+    outputSelect.appendChild(opt);
+  });
+  const selected = chooseMidiOutput(outputs, _lastRigMidiOutput);
+  if (selected) {
+    outputSelect.value = selected.id;
+    _rememberRigMidiOutput(selected.id);
+  }
+  if (!outputs.length) {
+    const missing = document.createElement('option');
+    missing.value = '';
+    missing.textContent = 'Aucune sortie MIDI USB détectée';
+    outputSelect.appendChild(missing);
+  }
+  return outputs;
+}
+
+async function _requestBrowserMidiOutput(outputSelect) {
+  if (!supportsWebMidi()) {
+    throw new Error('Web MIDI indisponible dans ce navigateur ou ce système.');
+  }
+  if (!_browserMidiAccess) {
+    _browserMidiAccess = await requestWebMidiAccess();
+    _browserMidiAccess.onstatechange = () => {
+      _renderBrowserMidiOutputs(outputSelect, _browserMidiAccess);
+    };
+  }
+  const outputs = _renderBrowserMidiOutputs(outputSelect, _browserMidiAccess);
+  if (!outputs.length) {
+    throw new Error('Aucune sortie MIDI. Brancher le périphérique USB puis réessayer.');
+  }
+  const selected = _browserMidiAccess.outputs.get(outputSelect.value);
+  if (selected) return selected;
+  if (outputs.length === 1) return outputs[0];
+  throw new Error('Choisir une sortie MIDI USB, puis cliquer de nouveau sur Activer MIDI.');
+}
+
+async function _sendBrowserMidiMessages(outputSelect, messages) {
+  const output = await _requestBrowserMidiOutput(outputSelect);
+  await sendMidiMessages(output, messages);
+  _rememberRigMidiOutput(output.id);
 }
 
 function _readSessionValue(key) {
@@ -3721,6 +3821,13 @@ async function _activateSelectedRigProfile() {
   if (!select || !select.value) return;
   _rememberRigMidiOutput(outputSelect?.value || '');
   try {
+    if (_runtimeCapabilities?.midi_output === false) {
+      const payload = await activateRigProfile({ profile_id: select.value, dry_run: true });
+      await _sendBrowserMidiMessages(outputSelect, payload.midi || []);
+      _lastRigResolution = payload;
+      _renderRigBankStatus(payload, true);
+      return;
+    }
     const payload = await activateRigProfile({
       profile_id: select.value,
       port_name: outputSelect?.value || null,

@@ -47,6 +47,12 @@ export async function fetchRig(filename) {
   }
 }
 
+export async function fetchRuntime() {
+  const res = await fetch('/api/runtime', { cache: 'no-store' });
+  if (!res.ok) throw new Error('Failed to load runtime capabilities');
+  return await res.json();
+}
+
 export async function fetchRigBank() {
   const res = await fetch('/api/rig-bank', { cache: 'no-store' });
   if (!res.ok) throw new Error('Failed to load GP-180 rig bank');
