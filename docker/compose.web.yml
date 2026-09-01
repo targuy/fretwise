@@ -1,0 +1,92 @@
+name: fretwise
+
+services:
+  web:
+    image: ${FRETWISE_IMAGE:-fretwise-web:local}
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        FRETWISE_MODELS_IMAGE: ${FRETWISE_MODELS_IMAGE:-fretwise-models:local}
+    init: true
+    user: "${FRETWISE_UID:-1000}:${FRETWISE_GID:-10}"
+    env_file:
+      - path: ${FRETWISE_ENV_FILE:-/volume2/docker/fretwise/shared/fretwise.env}
+        required: true
+        # PBKDF2 hashes contain '$'; raw prevents Compose interpolation/corruption.
+        format: raw
+    environment:
+      HOME: /data/config/home
+      FRETWISE_RUNTIME_PROFILE: server
+      FRETWISE_PARTITIONS_DIR: /data/partitions
+      FRETWISE_CONFIG_DIR: /data/config
+      FRETWISE_DATA_DIR: /data/auth
+      FRETWISE_STORAGE_CACHE_ROOT: /data/cache
+      FRETWISE_SOUNDFONTS_DIR: /data/sounds
+      FRETWISE_GEARS_DIR: /data/gears
+      FRETWISE_MODEL_DIR: /app/data/models
+      FRETWISE_REQUIRE_ML_MODELS: "1"
+      FRETWISE_ONNX_THREADS: "${FRETWISE_ONNX_THREADS:-2}"
+      PYTHONDONTWRITEBYTECODE: "1"
+    volumes:
+      - /volume1/gp:/data/partitions:rw
+      - /volume2/docker/fretwise/state/config:/data/config:rw
+      - /volume2/docker/fretwise/state/auth:/data/auth:rw
+      - /volume2/docker/fretwise/state/cache:/data/cache:rw
+      - /volume2/docker/fretwise/state/sounds:/data/sounds:rw
+      - /volume2/docker/fretwise/state/gears:/data/gears:rw
+      # Pedal artwork is local/non-versioned runtime data, served read-only.
+      - /volume2/docker/fretwise/state/pedals:/app/data/pedals:ro
+    ports:
+      - "${FRETWISE_BIND_ADDRESS:-127.0.0.1}:8080:8080"
+    restart: unless-stopped
+    stop_grace_period: 30s
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 512
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=256m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+  cloudflared:
+    image: cloudflare/cloudflared:2026.7.3@sha256:e39ee8da81ad5e05d77f38d2f51c60ca51bf2a8450ac3abab50c17fdb91d91bf
+    # Compose file-backed secrets keep host ownership/mode. Host token uses
+    # root:65532/0640 so cloudflared can remain explicitly non-root.
+    user: "65532:65532"
+    command:
+      - tunnel
+      - --no-autoupdate
+      - --metrics
+      - 0.0.0.0:2000
+      - run
+      - --token-file
+      - /run/secrets/cloudflared_token
+    depends_on:
+      web:
+        condition: service_healthy
+    secrets:
+      - cloudflared_token
+    restart: unless-stopped
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    pids_limit: 256
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=32m
+    logging:
+      driver: json-file
+      options:
+        max-size: 10m
+        max-file: "3"
+
+secrets:
+  cloudflared_token:
+    file: /volume2/docker/fretwise/shared/cloudflared.token
