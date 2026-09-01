@@ -270,8 +270,12 @@ def create_app(
         response.headers.setdefault("Referrer-Policy", "no-referrer")
         response.headers.setdefault("Content-Security-Policy", (
             "default-src 'self'; "
-            "script-src 'self' 'unsafe-inline'; "
-            "style-src 'self'; "
+            # 'wasm-unsafe-eval': the SpessaSynth AudioWorklet compiles a WASM
+            # module at runtime; without it every song load hangs on "Chargement
+            # de l'instrument..." (WebAssembly.instantiate throws under CSP).
+            "script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; "
+            "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            "font-src 'self' https://fonts.gstatic.com; "
             "img-src 'self' data:; "
             "connect-src 'self'; "
             "form-action 'self'; "
