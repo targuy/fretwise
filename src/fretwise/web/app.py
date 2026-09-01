@@ -13,7 +13,17 @@ from datetime import date as _date
 from pathlib import Path
 from typing import Any
 
-from fastapi import Body, FastAPI, File, HTTPException, Query, Request, UploadFile
+from fastapi import (
+    Body,
+    FastAPI,
+    File,
+    HTTPException,
+    Query,
+    Request,
+    UploadFile,
+    WebSocket,
+    WebSocketDisconnect,
+)
 from fastapi.responses import FileResponse, HTMLResponse, JSONResponse, Response, StreamingResponse
 from fastapi.staticfiles import StaticFiles
 from starlette.middleware.trustedhost import TrustedHostMiddleware
@@ -54,6 +64,24 @@ from fretwise.gears import (
 from fretwise.gears.naming import gears_filename as _gears_filename
 from fretwise.gears.naming import gears_key as _gears_key
 from fretwise.generator import StateGenerator
+from fretwise.listening.frames import DEFAULT_HOP_SEC
+from fretwise.listening.matching import TOLERANCE_SEC
+from fretwise.listening.session import (
+    ListeningSession,
+    SessionError,
+    parse_frames,
+    parse_notes,
+    score_to_dict,
+    verdict_to_dict,
+)
+from fretwise.model_bundle import (
+    ModelBundleError,
+    ModelBundleStatus,
+    model_bundle_required,
+    require_model_bundle,
+    resolve_model_dir,
+    validate_model_bundle,
+)
 from fretwise.models import (
     ChordDiagram,
     Finger,
@@ -69,6 +97,9 @@ from fretwise.parser.gpif_adapter import (
     classify_kind_for_program,
 )
 from fretwise.patterns import PatternMatcher
+from fretwise.patterns.chord_library import all_voicings as _all_chord_voicings
+from fretwise.patterns.scale_library import list_scales as _list_scales
+from fretwise.patterns.scale_library import scale_boxes_for_root as _scale_boxes_for_root
 from fretwise.pdf_conformance import (
     legacy_shadow_pdf_conformance_report,
 )
@@ -96,12 +127,11 @@ from fretwise.rig_bank import (
     save_rig_bank,
     send_profile_program_change,
 )
-from fretwise.rig_generation import RigGenerationError, SongRigGenerationService
-from fretwise.rig_pipeline import JsonFactsProvider, generate_grounded_rig
 from fretwise.runtime import RuntimeCapabilities, RuntimeCapability, resolve_runtime_capabilities
 from fretwise.scoring import CostFunction, CostWeights, RulePreferences
 from fretwise.storage import (
     CATALOG_NAME,
+    FAVORITES_NAME,
     SUPPORTED_SCORE_EXTS,
     StorageBackend,
     StorageError,
@@ -113,6 +143,7 @@ from fretwise.storage import (
 from fretwise.storage.local import LocalStorageBackend
 
 from . import settings as _settings
+from . import songs_metadata as _songs_metadata
 from .songs_index import (
     METADATA_PROMPT,
     enrich_file_info,
@@ -175,9 +206,19 @@ def create_app(
         allowed_hosts: Host header allowlist for the DNS-rebinding guard.
                        Defaults to loopback only (overridable via the
                        ``FRETWISE_ALLOWED_HOSTS`` environment variable).
+        runtime_profile: ``desktop`` enables hardware MIDI integration;
+                         ``server`` disables PC-only capabilities.
     """
     app = FastAPI(title="FretWise", version="0.4.0")
     app.state.runtime_capabilities = resolve_runtime_capabilities(runtime_profile)
+    require_models = model_bundle_required()
+    model_status = (
+        require_model_bundle() if require_models else validate_model_bundle(verify_hashes=False)
+    )
+    if require_models:
+        _warm_required_model_bundle()
+    app.state.model_bundle_required = require_models
+    app.state.model_bundle_status = model_status
 
     # Reject requests whose Host header is not in the allowlist. Without this a
     # malicious web page could use DNS rebinding to reach the loopback server
@@ -227,15 +268,35 @@ def create_app(
         # hand-fretting visualisation panel loads /static/hand_viz.html in one.
         response.headers.setdefault("X-Frame-Options", "SAMEORIGIN")
         response.headers.setdefault("Referrer-Policy", "no-referrer")
+        response.headers.setdefault("Content-Security-Policy", (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline'; "
+            "style-src 'self'; "
+            "img-src 'self' data:; "
+            "connect-src 'self'; "
+            "form-action 'self'; "
+            "base-uri 'self'; "
+            "frame-ancestors 'self'; "
+            "object-src 'none'"
+        ))
+        response.headers.setdefault(
+            "Strict-Transport-Security",
+            "max-age=63072000; includeSubDomains; preload",
+        )
+        response.headers.setdefault("Cross-Origin-Opener-Policy", "same-origin")
+        response.headers.setdefault("Cross-Origin-Resource-Policy", "same-origin")
+        response.headers.setdefault("Permissions-Policy", (
+            "camera=(), microphone=(), geolocation=(), "
+            "payment=(), usb=(), xr-spatial-tracking=()"
+        ))
         path = request.url.path
         if path.startswith("/static/") and path.endswith((".js", ".css", ".html")):
             response.headers["Cache-Control"] = "no-cache, no-store, must-revalidate"
             response.headers["Pragma"] = "no-cache"
             response.headers["Expires"] = "0"
         elif path.startswith("/api/"):
-            # API responses are live state (e.g. /api/files fingering badges that
-            # change after a save). Never let the browser serve a stale cached
-            # body — otherwise the library icon does not refresh on return.
+            # API responses are live state. Never let the browser serve stale
+            # data after saves, uploads, or storage changes.
             response.headers.setdefault("Cache-Control", "no-store")
         return response
 
@@ -264,8 +325,34 @@ def create_app(
     app.state.auth_error = None
     _setup_multiuser(app)
 
+    _log_songs_metadata_startup(app)
+
     _register_routes(app)
     return app
+
+
+def _log_songs_metadata_startup(app: FastAPI) -> None:
+    """Startup-time songs_metadata.json <-> disk reconciliation check (logged only).
+
+    Single-user mode only: multi-user mode has no server-wide storage to scan
+    at startup, since each user's own catalog is reconciled per-request instead
+    (see ``_load_songs_metadata_index``).
+    """
+    if getattr(app.state, "multiuser", False):
+        return
+    storage: StorageBackend = app.state.storage
+    local_root = storage.local_root
+    if local_root is None:
+        return
+    entries = _songs_metadata.load_songs_metadata(local_root / _songs_metadata.CATALOG_FILENAME)
+    if not entries:
+        return
+    try:
+        filenames = [obj.name for obj in storage.list_scores()]
+    except StorageError:
+        return
+    index, missing, new_files = _songs_metadata.reconcile_songs_metadata(entries, filenames)
+    _songs_metadata.log_reconciliation(missing, new_files, len(index))
 
 
 def _setup_multiuser(app: FastAPI) -> None:
@@ -325,7 +412,29 @@ def _register_routes(app: FastAPI) -> None:
     async def runtime_status() -> JSONResponse:
         """Report deployment profile and explicitly enabled capabilities."""
         capabilities: RuntimeCapabilities = app.state.runtime_capabilities
-        return JSONResponse(capabilities.to_json())
+        model_status: ModelBundleStatus = app.state.model_bundle_status
+        payload = capabilities.to_json()
+        payload["fingering_ml"] = model_status.to_json()
+        return JSONResponse(payload)
+
+    @app.get("/health/live")
+    async def health_live() -> JSONResponse:
+        """Report process liveness independently from optional integrations."""
+        return JSONResponse({"status": "live"})
+
+    @app.get("/health/ready")
+    async def health_ready() -> JSONResponse:
+        """Report whether required CPU fingering models passed startup validation."""
+        model_status: ModelBundleStatus = app.state.model_bundle_status
+        required = bool(app.state.model_bundle_required)
+        ready = model_status.available or not required
+        return JSONResponse(
+            {
+                "status": "ready" if ready else "not_ready",
+                "fingering_ml": model_status.to_json(),
+            },
+            status_code=200 if ready else 503,
+        )
 
     @app.get("/api/files")
     async def list_files() -> JSONResponse:
@@ -336,6 +445,7 @@ def _register_routes(app: FastAPI) -> None:
         """
         storage: StorageBackend = _current_storage(app)
         songs = _load_catalog(app)
+        favorites = _load_favorites(app)
         # Scan the rigs directory ONCE into an in-memory fingerprint set for O(1)
         # per-file has-rig checks (a per-file find_rig() would rescan the whole
         # rigs dir for every score without an exact match — slow on big libraries).
@@ -346,7 +456,7 @@ def _register_routes(app: FastAPI) -> None:
         except StorageError as exc:
             raise HTTPException(502, f"Storage error: {exc}")
 
-        local_root: Path | None = storage.local_root
+        songs_metadata_index = _load_songs_metadata_index(app, [obj.name for obj in objects])
         files = []
         for obj in objects:
             info: dict[str, Any] = {
@@ -354,30 +464,12 @@ def _register_routes(app: FastAPI) -> None:
                 "stem": obj.stem,
                 "format": obj.format,
                 "has_rig": partition_has_rig(obj.name, rig_index),
+                "favorite": obj.name in favorites,
             }
             info = enrich_file_info(info, songs)
-            # Fingering sidecar status (local storage + .gp files only; skip
-            # _fingered.gp variants — those are outputs, not source files).
-            has_fingering = False
-            fingering_is_current = False
-            if (
-                local_root is not None
-                and obj.name.endswith(".gp")
-                and not obj.stem.endswith("_fingered")
-            ):
-                src = local_root / obj.name
-                meta = _read_fingering_meta(src)
-                if meta is not None:
-                    has_fingering = True
-                    fingering_is_current = _fingering_meta_is_current(meta, src)
-                elif _gp_has_embedded_fingering(src):
-                    # Fingerings embedded in the file but no sidecar — present,
-                    # but version unknown (flagged not-current so the UI shows
-                    # the "obsolète/à vérifier" marker).
-                    has_fingering = True
-                    fingering_is_current = False
-            info["has_fingering"] = has_fingering
-            info["fingering_is_current"] = fingering_is_current
+            song_meta = songs_metadata_index.get(obj.name)
+            if song_meta:
+                info.setdefault("meta", {}).update(song_meta)
             files.append(info)
         return JSONResponse(files)
 
@@ -390,6 +482,7 @@ def _register_routes(app: FastAPI) -> None:
         """
         storage: StorageBackend = _current_storage(app)
         songs = _load_catalog(app)
+        favorites = _load_favorites(app)
         rig_index = build_rig_index(find_rigs_dir(app.state.fixtures_dir))
 
         try:
@@ -400,7 +493,7 @@ def _register_routes(app: FastAPI) -> None:
                 yield _json.dumps({"error": message}) + "\n"
             return StreamingResponse(_err(), media_type="application/x-ndjson")
 
-        local_root: Path | None = storage.local_root
+        songs_metadata_index = _load_songs_metadata_index(app, [obj.name for obj in objects])
 
         async def _generate() -> Any:
             for obj in objects:
@@ -409,25 +502,12 @@ def _register_routes(app: FastAPI) -> None:
                     "stem": obj.stem,
                     "format": obj.format,
                     "has_rig": partition_has_rig(obj.name, rig_index),
+                    "favorite": obj.name in favorites,
                 }
                 info = enrich_file_info(info, songs)
-                has_fingering = False
-                fingering_is_current = False
-                if (
-                    local_root is not None
-                    and obj.name.endswith(".gp")
-                    and not obj.stem.endswith("_fingered")
-                ):
-                    src = local_root / obj.name
-                    meta = _read_fingering_meta(src)
-                    if meta is not None:
-                        has_fingering = True
-                        fingering_is_current = _fingering_meta_is_current(meta, src)
-                    elif _gp_has_embedded_fingering(src):
-                        has_fingering = True
-                        fingering_is_current = False
-                info["has_fingering"] = has_fingering
-                info["fingering_is_current"] = fingering_is_current
+                song_meta = songs_metadata_index.get(obj.name)
+                if song_meta:
+                    info.setdefault("meta", {}).update(song_meta)
                 yield _json.dumps(info) + "\n"
                 await asyncio.sleep(0)  # yield control between files
 
@@ -625,71 +705,6 @@ def _register_routes(app: FastAPI) -> None:
                 "midi": [list(message) for message in messages],
             }
         )
-
-    @app.post("/api/rig/generate")
-    async def generate_rig(request: Request) -> JSONResponse:
-        """Generate a GP-180 rig via the local AI wrapper (tools/codex_song_rig.py).
-
-        Body: ``{"artist": str, "title": str, "genre"?: str, "target_guitar"?: str,
-        "refresh"?: bool}``. Returns the wrapper's raw JSON object on success.
-
-        The wrapper is launched as a child process (never a shell) and is slow
-        I/O, so the blocking call is offloaded to a worker thread to keep the
-        event loop responsive. On failure a 502 is returned with the child
-        stderr in the detail — the frontend keeps the previously shown rig.
-        """
-        try:
-            body = await request.json()
-        except Exception:
-            raise HTTPException(400, "Invalid JSON body")
-
-        artist = str(body.get("artist") or "").strip()
-        title = str(body.get("title") or "").strip()
-        if not artist or not title:
-            raise HTTPException(400, "Both 'artist' and 'title' are required")
-        genre = str(body.get("genre") or "").strip() or None
-        target_guitar = str(body.get("target_guitar") or "").strip() or None
-        refresh = bool(body.get("refresh"))
-
-        cfg = _settings.load()
-        service = SongRigGenerationService(
-            python_exe=cfg.get("rig_ai_python") or None,
-            tools_dir=cfg.get("rig_ai_tools_dir") or None,
-            provider=cfg.get("rig_ai_provider") or None,
-            timeout=cfg.get("rig_ai_timeout") or None,
-        )
-        # Grounded pipeline: look up verified facts for this song; when present the
-        # prompt is grounded and the hard facts are written deterministically, then
-        # the rig is validated against the GP-180 palette. Songs without facts are
-        # still generated but flagged ``grounded=False`` and graded down (never an
-        # inflated "A"). Falls back to plain generation if the facts DB is absent.
-        facts = None
-        facts_db = Path(cfg.get("rig_facts_db") or "") if cfg.get("rig_facts_db") else \
-            Path(__file__).resolve().parents[3] / "data" / "song_facts.json"
-        try:
-            if facts_db.is_file():
-                facts = JsonFactsProvider(facts_db).get_facts(artist, title)
-        except (OSError, ValueError):
-            facts = None
-        try:
-            res = await asyncio.to_thread(
-                generate_grounded_rig,
-                service,
-                artist,
-                title,
-                facts=facts,
-                genre=genre,
-                target_guitar=target_guitar,
-                refresh=refresh,
-            )
-        except RigGenerationError as exc:
-            detail = str(exc)
-            if exc.stderr:
-                detail = f"{detail}\n{exc.stderr.strip()}"
-            raise HTTPException(502, detail)
-        # Unified view shape (same as /api/rig) plus grounding metadata so the UI
-        # can badge the rig as ancré / non-ancré and surface device validation flags.
-        return JSONResponse(res.view)
 
     @app.post("/api/rig/save")
     async def save_rig(request: Request) -> JSONResponse:
@@ -2207,6 +2222,16 @@ def _register_routes(app: FastAPI) -> None:
         except Exception:
             raise HTTPException(400, "Invalid JSON body")
 
+        locked_keys = set(body) & set(_settings.environment_overrides())
+        if locked_keys:
+            raise HTTPException(
+                409,
+                {
+                    "code": "setting_managed_by_environment",
+                    "settings": sorted(locked_keys),
+                },
+            )
+
         if "partitions_dir" in body:
             p = Path(body["partitions_dir"])
             if not p.exists():
@@ -2345,6 +2370,36 @@ def _register_routes(app: FastAPI) -> None:
             row.get("filename") for row in load_index_from_text(text).values()
         })
         return JSONResponse({"updated": updated, "added": added, "total": total})
+
+    @app.get("/api/favorites")
+    async def list_favorites() -> JSONResponse:
+        """Return the current user's favorite partitions (filenames)."""
+        favorites = _load_favorites(app)
+        return JSONResponse({"favorites": sorted(favorites)})
+
+    @app.post("/api/favorites/{filename}")
+    async def add_favorite(filename: str) -> JSONResponse:
+        """Mark *filename* as a favorite."""
+        try:
+            safe_name = safe_score_name(filename)
+        except StorageValidationError as exc:
+            raise HTTPException(400, str(exc))
+        favorites = _load_favorites(app)
+        favorites.add(safe_name)
+        _save_favorites(app, favorites)
+        return JSONResponse({"favorites": sorted(favorites)})
+
+    @app.delete("/api/favorites/{filename}")
+    async def remove_favorite(filename: str) -> JSONResponse:
+        """Unmark *filename* as a favorite (no-op if it wasn't one)."""
+        try:
+            safe_name = safe_score_name(filename)
+        except StorageValidationError as exc:
+            raise HTTPException(400, str(exc))
+        favorites = _load_favorites(app)
+        favorites.discard(safe_name)
+        _save_favorites(app, favorites)
+        return JSONResponse({"favorites": sorted(favorites)})
 
     # -- Fingering review & continuous improvement ----------------------------
 
@@ -2520,6 +2575,115 @@ def _register_routes(app: FastAPI) -> None:
 
         _solve_cache_clear()  # next solve picks up the new lock/bias
         return JSONResponse({"saved": True, "stem": filepath.stem})
+
+    # ── Training module (scales/chords warm-up — reuses the M3 pattern libraries) ──
+
+    @app.get("/api/training/scales")
+    async def training_scales() -> JSONResponse:
+        names = sorted(_list_scales())
+        return JSONResponse(
+            [{"name": n, "label": n.replace("_", " ").title()} for n in names]
+        )
+
+    @app.get("/api/training/scale/{name}")
+    async def training_scale_boxes(name: str, root: str = Query("E")) -> JSONResponse:
+        boxes = _scale_boxes_for_root(name, root)
+        if boxes is None:
+            raise HTTPException(404, f"Unknown scale or root: {name} / {root}")
+        return JSONResponse({"name": name, "root": root.upper(), "boxes": boxes})
+
+    @app.get("/api/training/chord/{name}")
+    async def training_chord(name: str) -> JSONResponse:
+        voicings = _all_chord_voicings(name)
+        if not voicings:
+            raise HTTPException(404, f"Unknown chord: {name}")
+        return JSONResponse({
+            "name": name,
+            "voicings": [_serialize_chord_diagram(v) for v in voicings],
+        })
+
+    # ── Écoute du jeu (notation en mode guidé — voir docs/ecoute.md) ──────
+
+    @app.websocket("/ws/listen")
+    async def listen_socket(websocket: WebSocket) -> None:
+        """Notation du jeu en direct.
+
+        WebSocket et non requête/réponse parce que le retour doit arriver
+        pendant qu'on joue : un verdict rendu en fin de morceau n'aide personne
+        à corriger la mesure suivante.
+
+        Protocole — client → serveur :
+          ``{"type": "start", "notes": [...], "hop_sec": …, "tolerance_sec": …}``
+          ``{"type": "frames", "frames": [[t, hz, conf, rms, voiced], …]}``
+          ``{"type": "stop"}``
+        serveur → client : ``ready``, ``verdicts``, ``score``, ``error``.
+
+        Les dates des trames sont des positions dans le morceau, latence déjà
+        compensée : le client est le seul à connaître son horloge de capture,
+        sa position de playback et la latence calibrée de son périphérique.
+        """
+        await websocket.accept()
+        session: ListeningSession | None = None
+        try:
+            while True:
+                message = await websocket.receive_json()
+                kind = message.get("type") if isinstance(message, dict) else None
+
+                if kind == "start":
+                    try:
+                        notes = parse_notes(message.get("notes"))
+                        session = ListeningSession.from_notes(
+                            notes,
+                            hop_sec=float(message.get("hop_sec") or DEFAULT_HOP_SEC),
+                            tolerance_sec=float(
+                                message.get("tolerance_sec") or TOLERANCE_SEC
+                            ),
+                        )
+                    except (SessionError, TypeError, ValueError) as exc:
+                        await websocket.send_json({"type": "error", "message": str(exc)})
+                        continue
+                    await websocket.send_json(
+                        {"type": "ready", "events": len(session.events)}
+                    )
+
+                elif kind == "frames":
+                    if session is None:
+                        await websocket.send_json(
+                            {"type": "error", "message": "session non démarrée"}
+                        )
+                        continue
+                    try:
+                        frames = parse_frames(message.get("frames"))
+                    except SessionError as exc:
+                        await websocket.send_json({"type": "error", "message": str(exc)})
+                        continue
+                    verdicts = session.feed(frames)
+                    if verdicts:
+                        await websocket.send_json({
+                            "type": "verdicts",
+                            "verdicts": [verdict_to_dict(v) for v in verdicts],
+                        })
+
+                elif kind == "stop":
+                    if session is None:
+                        await websocket.send_json(
+                            {"type": "error", "message": "session non démarrée"}
+                        )
+                        continue
+                    remaining, score = session.finish()
+                    await websocket.send_json({
+                        "type": "score",
+                        "verdicts": [verdict_to_dict(v) for v in remaining],
+                        "score": score_to_dict(score),
+                    })
+                    session = None
+
+                elif kind == "close":
+                    break
+        except WebSocketDisconnect:
+            # Onglet fermé ou réseau coupé en pleine prise : rien à sauver, la
+            # session vit entièrement dans ce gestionnaire.
+            return
 
 
 # ---------------------------------------------------------------------------
@@ -2700,6 +2864,62 @@ def _load_catalog(app: FastAPI) -> dict[str, dict[str, Any]]:
         except (StorageNotFoundError, HTTPException, StorageError, UnicodeError):
             pass  # fall through to the configured local index_path
     return load_index(_settings.load().get("index_path", ""))
+
+
+def _load_favorites(app: FastAPI) -> set[str]:
+    """Load the favorite-partitions list from the current request's storage.
+
+    Best-effort: missing file or a storage hiccup both read as "no favorites"
+    rather than surfacing an error on every library listing.
+    """
+    try:
+        storage = _current_storage(app)
+        data = storage.read_bytes(FAVORITES_NAME)
+        names = _json.loads(data.decode("utf-8"))
+        return {str(name) for name in names} if isinstance(names, list) else set()
+    except (StorageNotFoundError, HTTPException, StorageError, UnicodeError, ValueError):
+        return set()
+
+
+def _save_favorites(app: FastAPI, favorites: set[str]) -> None:
+    """Persist the favorite-partitions list to the current request's storage."""
+    storage = _current_storage(app)
+    payload = _json.dumps(sorted(favorites)).encode("utf-8")
+    try:
+        storage.write_bytes(FAVORITES_NAME, payload)
+    except StorageError as exc:
+        raise HTTPException(502, f"Storage error: {exc}")
+
+
+def _load_songs_metadata_index(
+    app: FastAPI, filenames: list[str]
+) -> dict[str, dict[str, Any]]:
+    """Load+reconcile ``songs_metadata.json`` against the given filenames.
+
+    Mirrors ``_load_catalog``'s multiuser/local split: multi-user mode reads the
+    catalog from the logged-in user's own storage, falling back to the local
+    partitions directory (single-user mode, or a user with no catalog yet).
+    Recomputed fresh on every call — the library can change while the server
+    runs, so a stale reconciliation would drift from reality.
+    """
+    entries: list[dict[str, Any]] = []
+    if getattr(app.state, "multiuser", False):
+        try:
+            storage = _current_storage(app)
+            data = storage.read_bytes(_songs_metadata.CATALOG_FILENAME)
+            entries = _songs_metadata.load_songs_metadata_from_text(data.decode("utf-8-sig"))
+        except (StorageNotFoundError, HTTPException, StorageError, UnicodeError):
+            entries = []
+    if not entries:
+        local_root = _current_storage(app).local_root
+        if local_root is not None:
+            entries = _songs_metadata.load_songs_metadata(
+                local_root / _songs_metadata.CATALOG_FILENAME
+            )
+    if not entries:
+        return {}
+    index, _missing, _new_files = _songs_metadata.reconcile_songs_metadata(entries, filenames)
+    return index
 
 
 def _rig_bank_json_path(app: FastAPI) -> Path:
@@ -3297,8 +3517,7 @@ def _get_chord_finger_classifier() -> object | None:
     if _CHORD_FINGER_CLASSIFIER_LOADED:
         return _CHORD_FINGER_CLASSIFIER
     _CHORD_FINGER_CLASSIFIER_LOADED = True
-    from pathlib import Path
-    model_dir = Path(__file__).resolve().parents[3] / "data" / "models"
+    model_dir = resolve_model_dir()
     model_path = model_dir / "finger_classifier.onnx"
     spec_path = model_dir / "finger_classifier_spec.json"
     if not model_path.exists():
@@ -3325,8 +3544,7 @@ def _get_player_cost_model() -> object | None:
     if _PLAYER_COST_MODEL_LOADED:
         return _PLAYER_COST_MODEL
     _PLAYER_COST_MODEL_LOADED = True
-    from pathlib import Path
-    model_dir = Path(__file__).resolve().parents[3] / "data" / "models"
+    model_dir = resolve_model_dir()
     model_path = model_dir / "transition_cost_v3.onnx"
     spec_path = model_dir / "transition_cost_v3_spec.json"
     if not model_path.exists():
@@ -3353,8 +3571,7 @@ def _get_phrase_window_fingerer() -> object | None:
     if _PHRASE_WINDOW_FINGERER_LOADED:
         return _PHRASE_WINDOW_FINGERER
     _PHRASE_WINDOW_FINGERER_LOADED = True
-    from pathlib import Path
-    model_dir = Path(__file__).resolve().parents[3] / "data" / "models"
+    model_dir = resolve_model_dir()
     manifest_path = model_dir / "phrase_window_fingering_v2_manifest.json"
     if not manifest_path.exists():
         return None
@@ -3366,6 +3583,19 @@ def _get_phrase_window_fingerer() -> object | None:
     except (ImportError, FileNotFoundError, AssertionError, KeyError):
         _PHRASE_WINDOW_FINGERER = None
     return _PHRASE_WINDOW_FINGERER
+
+
+def _warm_required_model_bundle() -> None:
+    """Load every production predictor once and keep its CPU sessions resident."""
+    missing: list[str] = []
+    if _get_chord_finger_classifier() is None:
+        missing.append("finger_classifier")
+    if _get_player_cost_model() is None:
+        missing.append("transition_cost_v3")
+    if _get_phrase_window_fingerer() is None:
+        missing.append("phrase_window_v2")
+    if missing:
+        raise ModelBundleError("Unable to load required CPU models: " + ", ".join(missing))
 
 
 def _biased_generator_and_cost(

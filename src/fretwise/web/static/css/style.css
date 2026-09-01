@@ -157,6 +157,23 @@ html, body { height: 100%; font-family: var(--ui); color: var(--fg-0); backgroun
 .ic-btn:hover { background: var(--bg-2); color: var(--fg-0); border-color: var(--line-2); }
 .ic-btn[data-on="1"] { background: var(--bg-3); border-color: var(--line-1); color: var(--fg-0); }
 
+/* Home: the one nav control meant to be spotted at a glance from any page —
+   an always-on tint instead of the icon-row default of "invisible until
+   hover" (an --fg-2 outline against the wood-grain header disappears at a
+   glance; the request was specifically for something visible without
+   looking for it). */
+.ic-btn-home {
+  width: 32px; height: 32px;
+  color: var(--signal);
+  border-color: color-mix(in oklch, var(--signal) 35%, transparent);
+  background: color-mix(in oklch, var(--signal) 10%, transparent);
+}
+.ic-btn-home:hover {
+  color: var(--signal);
+  background: color-mix(in oklch, var(--signal) 20%, transparent);
+  border-color: var(--signal);
+}
+
 /* Header export buttons: larger, with a short label beside the icon so PDF /
    GP / XML are easy to tell apart. */
 .ic-btn-export {
@@ -1345,7 +1362,8 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 }
 
 .lib-search-bar input[type="search"],
-.lib-search-bar select {
+.lib-search-bar select,
+.lib-filter-reset {
   padding: 7px 12px;
   border-radius: var(--r-3);
   border: 1px solid var(--line-2);
@@ -1358,6 +1376,80 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 }
 
 .lib-search-bar input[type="search"] { flex: 1 1 200px; }
+
+.lib-filter-reset {
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s, background 0.12s, color 0.12s;
+}
+.lib-filter-reset:hover {
+  background: var(--bg-3);
+  border-color: var(--signal);
+}
+
+.lib-fav-filter {
+  padding: 7px 12px;
+  border-radius: var(--r-3);
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  color: var(--fg-0);
+  font-size: 13px;
+  font-family: var(--ui);
+  cursor: pointer;
+  white-space: nowrap;
+  transition: border-color 0.2s, background 0.12s, color 0.12s;
+}
+.lib-fav-filter:hover {
+  background: var(--bg-3);
+  border-color: var(--signal);
+}
+.lib-fav-filter.is-active {
+  background: var(--signal, #d8a24a);
+  border-color: var(--signal, #d8a24a);
+  color: var(--bg-0);
+}
+
+.lib-active-filters {
+  display: none;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px 6px;
+}
+.lib-filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: min(320px, 100%);
+  min-height: 28px;
+  padding: 4px 8px;
+  border-radius: var(--r-3);
+  border: 1px solid oklch(0.54 0.14 60 / 0.48);
+  background: oklch(0.84 0.16 75 / 0.18);
+  color: oklch(0.28 0.06 55);
+  font: 600 12px/1.2 var(--ui);
+  cursor: pointer;
+}
+.lib-filter-chip:hover {
+  background: oklch(0.84 0.16 75 / 0.26);
+  border-color: oklch(0.54 0.14 60 / 0.72);
+}
+.lib-filter-chip span {
+  color: oklch(0.38 0.05 50 / 0.78);
+  font-weight: 500;
+}
+.lib-filter-chip strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.lib-filter-chip em {
+  font-style: normal;
+  font-size: 14px;
+  line-height: 1;
+  opacity: 0.72;
+}
 
 /* Song metadata workflow: a compact dropdown trigger styled to match the
    search/filter controls + the dark dropdown theme (.instr-dropdown). */
@@ -1422,8 +1514,10 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 }
 
 .lib-search-bar input:focus,
-.lib-search-bar select:focus {
+.lib-search-bar select:focus,
+.lib-filter-reset:focus {
   border-color: var(--signal);
+  outline: none;
 }
 
 /* A–Z alphabetical index bar. Sits inside .lib-sticky-strip, so it rides the
@@ -1572,38 +1666,6 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   color: #ffffff;
 }
 
-/* Position-marker inlays: subtle pale dots at fret 3 / 5 / 7 / 9, and a
- * double dot at fret 12 (~24-row octave). Pure ::before pseudo on the
- * first cell so we don't touch row markup. */
-.lib-row:nth-child(3) .lib-cell-title::before,
-.lib-row:nth-child(5) .lib-cell-title::before,
-.lib-row:nth-child(7) .lib-cell-title::before,
-.lib-row:nth-child(9) .lib-cell-title::before,
-.lib-row:nth-child(15) .lib-cell-title::before,
-.lib-row:nth-child(17) .lib-cell-title::before,
-.lib-row:nth-child(19) .lib-cell-title::before,
-.lib-row:nth-child(21) .lib-cell-title::before {
-  content: "";
-  display: inline-block;
-  width: 6px; height: 6px;
-  margin-right: 8px;
-  border-radius: 50%;
-  background: radial-gradient(circle, rgba(245, 240, 230, 0.85) 0%, rgba(200, 195, 180, 0.5) 60%, rgba(120, 115, 100, 0.2) 100%);
-  box-shadow: 0 0 4px rgba(245, 240, 230, 0.35);
-  vertical-align: middle;
-}
-/* Octave marker: double dot at row 12. */
-.lib-row:nth-child(12) .lib-cell-title::before {
-  content: "● ●";
-  display: inline-block;
-  margin-right: 6px;
-  color: rgba(245, 240, 230, 0.65);
-  font-size: 7px;
-  letter-spacing: 2px;
-  vertical-align: middle;
-  text-shadow: 0 0 3px rgba(245, 240, 230, 0.3);
-}
-
 .lib-cell-title { cursor: pointer; color: #ffffff; }
 .lib-title-text {
   font-weight: 600;
@@ -1613,7 +1675,28 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 .lib-row:hover .lib-title-text { color: oklch(0.92 0.13 78); }
 
 .lib-cell-artist,
-.lib-cell-year { color: rgba(255, 255, 255, 0.78); }
+.lib-cell-guitare,
+.lib-cell-difficulte { color: rgba(255, 255, 255, 0.78); }
+
+.lib-filter-cell {
+  cursor: pointer;
+  transition: color 0.12s, background 0.12s;
+}
+.lib-filter-cell:hover {
+  color: #ffffff;
+  background: rgba(220, 180, 100, 0.16) !important;
+}
+.lib-filter-cell.is-filtered {
+  color: oklch(0.95 0.13 82);
+  background: oklch(0.84 0.16 75 / 0.16) !important;
+  box-shadow:
+    inset 0 -1px 0 rgba(220, 220, 230, 0.22),
+    inset 0 -2px 0 rgba(80, 80, 90, 0.18),
+    inset 0 0 0 1px oklch(0.84 0.16 75 / 0.22);
+}
+.lib-filter-cell.is-filtered .lib-badge {
+  border-color: oklch(0.84 0.16 75 / 0.66);
+}
 
 .lib-badge {
   display: inline-block;
@@ -1635,28 +1718,6 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   border: 1px solid rgba(255, 255, 255, 0.16);
 }
 
-/* Fingering presence marker — distinctive hand icon next to the title */
-.lib-finger-mark {
-  position: relative;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 22px;
-  height: 22px;
-  margin-left: 7px;
-  border-radius: 6px;
-  vertical-align: middle;
-}
-.lib-finger-mark.is-ok {
-  color: oklch(0.85 0.15 150);
-  background: oklch(0.35 0.12 150 / 0.30);
-  border: 1px solid oklch(0.55 0.15 150 / 0.5);
-}
-.lib-finger-mark.is-old {
-  color: oklch(0.90 0.14 65);
-  background: oklch(0.40 0.15 55 / 0.30);
-  border: 1px solid oklch(0.65 0.18 60 / 0.5);
-}
 /* Chord diagram badge — shown when the file has embedded chord diagrams */
 .lib-chord-mark {
   display: inline-flex;
@@ -1673,17 +1734,6 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   flex-shrink: 0;
 }
 .lib-chord-ic { display: block; }
-
-.lib-finger-mark .lib-finger-ic { display: block; }
-.lib-finger-warn {
-  position: absolute;
-  top: -5px;
-  right: -5px;
-  font-size: 10px;
-  line-height: 1;
-  color: oklch(0.95 0.16 75);
-  text-shadow: 0 0 2px #000;
-}
 
 /* Checkbox column */
 .col-check { width: 32px; text-align: center; }
@@ -1750,11 +1800,12 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 .lib-cell-actions {
   display: flex;
   gap: 4px;
-  min-width: 72px;
+  min-width: 96px;
 }
 
 .lib-btn-info,
-.lib-btn-dl {
+.lib-btn-dl,
+.lib-btn-fav {
   background: none;
   border: 1px solid var(--line-2);
   border-radius: var(--r-2);
@@ -1766,10 +1817,16 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 }
 
 .lib-btn-info:hover,
-.lib-btn-dl:hover {
+.lib-btn-dl:hover,
+.lib-btn-fav:hover {
   background: var(--bg-2);
   color: var(--signal);
   border-color: var(--signal);
+}
+
+.lib-btn-fav.is-fav {
+  color: var(--signal, #d8a24a);
+  border-color: var(--signal, #d8a24a);
 }
 
 .lib-empty {
@@ -1921,6 +1978,309 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
 }
 
 .settings-field { margin-bottom: 16px; }
+
+/* ── Training page (scale/chord warm-up) ─────────────────────────────── */
+
+.training-wrap {
+  max-width: 880px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+.training-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.training-mode-seg {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-3);
+  padding: 3px;
+}
+.training-mode-seg .view-seg-btn { padding: 6px 14px; font-size: 12px; }
+
+.training-root-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 20px;
+}
+.training-root-btn {
+  min-width: 36px;
+  height: 36px;
+  padding: 0 8px;
+  border-radius: var(--r-2);
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  color: var(--fg-1);
+  font-family: var(--ui);
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.training-root-btn:hover { background: var(--bg-3); color: var(--fg-0); }
+.training-root-btn.training-root-active {
+  background: var(--signal);
+  border-color: var(--signal);
+  color: #16130a;
+}
+
+.training-body {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.training-type-col {
+  flex: 0 0 200px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.training-recent {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.training-recent-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fg-2);
+}
+.training-recent-chip {
+  align-self: flex-start;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid var(--line-2);
+  background: var(--bg-1);
+  color: var(--fg-1);
+  font-family: var(--ui);
+  font-size: 11.5px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s;
+}
+.training-recent-chip:hover { background: var(--bg-3); color: var(--fg-0); }
+
+.training-type-list {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  max-height: 420px;
+  overflow-y: auto;
+}
+.training-type-btn {
+  text-align: left;
+  padding: 8px 12px;
+  border-radius: var(--r-2);
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--fg-1);
+  font-family: var(--ui);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.training-type-btn:hover { background: var(--bg-2); color: var(--fg-0); }
+.training-type-btn.training-type-active {
+  background: var(--bg-2);
+  border-color: var(--line-1);
+  color: var(--fg-0);
+  font-weight: 600;
+}
+
+.training-diagram-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-4);
+  padding: 24px;
+  min-height: 360px;
+  justify-content: center;
+}
+
+.training-carousel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.training-carousel-btn {
+  width: auto;
+  height: auto;
+  min-height: 30px;
+  padding: 4px 12px;
+}
+.training-carousel-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.training-box-counter {
+  font-family: var(--ui);
+  font-size: 12px;
+  color: var(--fg-2);
+  min-width: 40px;
+  text-align: center;
+}
+
+.training-diagram { display: flex; justify-content: center; }
+.training-diagram svg { max-width: 100%; height: auto; }
+
+/* chordDiagramSVG draws dark text/lines for the cream score paper it's
+   normally shown on (the chord-bar popup); give it that paper here too
+   instead of sitting unreadable on the training page's dark panel. */
+.training-diagram--paper {
+  background: var(--bg-score);
+  border-radius: var(--r-3);
+  padding: 14px 18px;
+}
+
+.training-diagram-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  flex-wrap: wrap;
+}
+.training-diagram-title {
+  font-family: var(--ui);
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--fg-0);
+  margin: 0;
+}
+.training-diagram-head-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.training-play-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in oklch, var(--signal) 45%, transparent);
+  background: color-mix(in oklch, var(--signal) 14%, transparent);
+  color: var(--signal);
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.12s, transform 0.08s;
+  flex-shrink: 0;
+}
+.training-play-btn:hover { background: color-mix(in oklch, var(--signal) 24%, transparent); }
+.training-play-btn:active { transform: scale(0.94); }
+.training-play-btn:disabled { opacity: 0.5; cursor: default; }
+.training-play-btn.is-loading { animation: training-play-pulse 0.9s ease-in-out infinite; }
+@keyframes training-play-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.training-label-seg {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-3);
+  padding: 2px;
+}
+.training-label-seg .view-seg-btn { padding: 3px 10px; font-size: 11px; }
+
+.training-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 14px;
+  justify-content: center;
+  font-family: var(--ui);
+  font-size: 11px;
+  color: var(--fg-2, var(--fg-1));
+}
+.training-legend-item { display: inline-flex; align-items: center; gap: 5px; }
+.training-legend-dot {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 9.5px;
+  font-weight: 700;
+  color: #111;
+}
+.training-legend-root {
+  background: var(--bg-3);
+  border: 2.4px solid var(--fg-0);
+}
+.training-legend-open {
+  background: var(--bg-1);
+  border: 1.6px solid var(--fg-1);
+  color: var(--fg-0);
+}
+
+/* Staff run under the fretboard box. Wide runs scroll rather than shrink —
+   noteheads stop being legible well before the container does. */
+.training-staff {
+  width: 100%;
+  overflow-x: auto;
+  overflow-y: visible;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  margin-bottom: 6px;
+}
+.training-staff svg { flex: none; }
+.training-staff-label {
+  font-family: var(--ui);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fg-2, var(--fg-1));
+  align-self: center;
+}
+
+.training-howto {
+  font-family: var(--ui);
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--fg-1);
+  text-align: center;
+  max-width: 46ch;
+  margin: 0;
+}
+
+.training-empty, .training-loading {
+  font-family: var(--ui);
+  font-size: 13px;
+  color: var(--fg-2);
+}
+
+.training-kbd-hint {
+  font-family: var(--ui);
+  font-size: 11px;
+  color: var(--fg-2);
+  text-align: center;
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .training-body { flex-direction: column; }
+  .training-type-col { flex: 1 1 auto; width: 100%; }
+  .training-type-list { max-height: 220px; }
+}
 
 .settings-action-row {
   display: flex;
@@ -2231,6 +2591,423 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   color: var(--fg-2);
 }
 
+/* ── Écoute du jeu (notation en direct) ──────────────────────────────── */
+
+/* Couche de marqueurs superposée au canevas de partition. Elle vit dans
+   #tab-container et suit donc son défilement ; pointer-events:none pour que
+   la partition reste cliquable dessous. */
+.listen-overlay {
+  position: absolute;
+  pointer-events: none;
+  z-index: 3;
+}
+
+.listen-mark {
+  position: absolute;
+  width: 9px;
+  height: 9px;
+  margin: -14px 0 0 -4px;   /* juste au-dessus de la portée, centré sur la note */
+  border-radius: 50%;
+  box-shadow: 0 0 0 2px var(--bg-score);
+}
+.listen-mark-wrong_pitch { background: var(--warn); }
+.listen-mark-missed {
+  background: transparent;
+  border: 2px solid var(--warn);
+  box-shadow: 0 0 0 2px var(--bg-score);
+}
+.listen-mark-extra { background: var(--signal); }
+
+.listen-panel {
+  position: fixed;
+  right: 16px;
+  bottom: 96px;
+  width: 320px;
+  max-height: 60vh;
+  display: flex;
+  flex-direction: column;
+  background: var(--bg-1);
+  border: 1px solid var(--line-1);
+  border-radius: var(--r-4);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  z-index: 120;
+  overflow: hidden;
+}
+.listen-panel[hidden] { display: none; }
+
+.listen-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--line-2);
+}
+.listen-panel-title {
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--fg-2);
+}
+.listen-close { width: 24px; height: 24px; font-size: 15px; }
+
+.listen-status {
+  margin: 0;
+  padding: 8px 12px;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--fg-2);
+}
+.listen-status:empty { display: none; }
+.listen-status-error { color: var(--warn); }
+.listen-status-warn { color: var(--signal); }
+
+.listen-score { padding: 4px 12px 10px; }
+.listen-progress { font-size: 12px; color: var(--fg-2); }
+.listen-score-value {
+  font-size: 40px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--fg-0);
+  font-variant-numeric: tabular-nums;
+}
+.listen-score-value span { font-size: 14px; color: var(--fg-3); font-weight: 400; }
+.listen-score-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 2px 10px;
+  margin: 10px 0 6px;
+  font-size: 11px;
+  color: var(--fg-2);
+}
+.listen-score-grid b { color: var(--fg-0); font-variant-numeric: tabular-nums; }
+.listen-score-line { font-size: 11px; color: var(--fg-3); line-height: 1.5; }
+
+.listen-list {
+  flex: 1;
+  overflow-y: auto;
+  border-top: 1px solid var(--line-3);
+}
+.listen-empty { margin: 12px; font-size: 11px; color: var(--fg-3); }
+.listen-row {
+  display: grid;
+  grid-template-columns: 46px 78px 1fr;
+  gap: 6px;
+  align-items: baseline;
+  width: 100%;
+  padding: 6px 12px;
+  border: 0;
+  border-left: 2px solid transparent;
+  background: transparent;
+  color: var(--fg-2);
+  font-family: var(--ui);
+  font-size: 11px;
+  text-align: left;
+  cursor: pointer;
+}
+.listen-row:hover { background: var(--bg-2); color: var(--fg-0); }
+.listen-row-wrong_pitch { border-left-color: var(--warn); }
+.listen-row-missed { border-left-color: var(--fg-3); }
+.listen-row-extra { border-left-color: var(--signal); }
+.listen-row-at { color: var(--fg-3); font-variant-numeric: tabular-nums; }
+.listen-row-kind { color: var(--fg-1); }
+.listen-row-detail { color: var(--fg-3); }
+
+/* ── Tuner page (accordeur) ──────────────────────────────────────────── */
+
+.tuner-wrap {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 24px 20px;
+}
+
+/* Les boutons de cette page sont textuels : neutraliser le gabarit 32×32 des
+   boutons d'icône que .tx-btn impose (même correctif que .settings-wrap .tx-btn,
+   sans lequel deux libellés se superposent dans une case carrée). */
+.tuner-wrap .tx-btn {
+  width: auto;
+  height: auto;
+  min-height: 32px;
+  padding: 6px 14px;
+  white-space: nowrap;
+}
+
+.tuner-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.tuner-mode-seg {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-3);
+  padding: 3px;
+}
+.tuner-mode-seg .view-seg-btn { padding: 6px 14px; font-size: 12px; }
+
+.tuner-source-row {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+.tuner-source-label { font-size: 12px; color: var(--fg-2); }
+.tuner-device-select {
+  flex: 1 1 220px;
+  min-width: 0;
+  height: 32px;
+  padding: 0 8px;
+  border-radius: var(--r-2);
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  color: var(--fg-1);
+  font-family: var(--ui);
+  font-size: 12px;
+}
+.tuner-toggle { min-width: 92px; justify-content: center; }
+.tuner-toggle.tuner-toggle-on {
+  background: var(--signal-soft);
+  border-color: var(--signal);
+  color: var(--signal);
+}
+.tuner-a4 {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 12px;
+  color: var(--fg-2);
+}
+.tuner-a4 input {
+  width: 62px;
+  height: 32px;
+  padding: 0 6px;
+  border-radius: var(--r-2);
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  color: var(--fg-1);
+  font-family: var(--ui);
+  font-size: 12px;
+}
+
+.tuner-latency-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 6px;
+}
+.tuner-latency-label { font-size: 12px; color: var(--fg-2); }
+.tuner-latency-value {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--fg-0);
+  font-variant-numeric: tabular-nums;
+  min-width: 88px;
+}
+.tuner-latency-value.tuner-latency-unset {
+  font-weight: 400;
+  color: var(--fg-3);
+}
+.tuner-wrap .tuner-latency-btn {
+  font-size: 11px;
+  min-height: 26px;
+  padding: 4px 10px;
+}
+.tuner-latency-help {
+  margin: 0 0 14px;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--fg-3);
+}
+
+.tuner-status {
+  min-height: 18px;
+  margin: 0 0 14px;
+  font-size: 12px;
+  color: var(--fg-2);
+  line-height: 1.45;
+}
+.tuner-status-error { color: var(--warn); }
+.tuner-status-warn { color: var(--signal); }
+
+.tuner-gauge {
+  background: var(--bg-1);
+  border: 1px solid var(--line-2);
+  border-radius: var(--r-4);
+  padding: 22px 20px 16px;
+  margin-bottom: 16px;
+}
+
+.tuner-readout {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 14px;
+  margin-bottom: 18px;
+}
+.tuner-note {
+  font-family: var(--ui);
+  font-size: 56px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--fg-1);
+  font-variant-numeric: tabular-nums;
+  transition: color 0.15s;
+}
+.tuner-cents {
+  font-size: 15px;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg-2);
+  min-width: 92px;
+}
+
+/* Vert = juste, ambre = proche, rouge = à corriger. Même code sur la note,
+   l'écart, l'aiguille et la pastille de corde. */
+.tuner-ok { color: var(--ok); }
+.tuner-close { color: var(--signal); }
+.tuner-sharp, .tuner-flat { color: var(--warn); }
+
+.tuner-needle-track {
+  position: relative;
+  height: 42px;
+  border-radius: var(--r-2);
+  background: var(--bg-0);
+  border: 1px solid var(--line-3);
+  overflow: hidden;
+}
+/* Fenêtre du juste : ±5 cents, soit 5 % de part et d'autre du centre. */
+.tuner-needle-zone {
+  position: absolute;
+  left: 45%;
+  width: 10%;
+  top: 0;
+  bottom: 0;
+  background: oklch(0.74 0.14 145 / .14);
+}
+.tuner-needle-centre {
+  position: absolute;
+  left: 50%;
+  top: 4px;
+  bottom: 4px;
+  width: 1px;
+  background: var(--line-1);
+}
+.tuner-needle {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  width: 4px;
+  margin-left: -2px;
+  left: 50%;
+  border-radius: 2px;
+  background: var(--fg-3);
+  transition: left 0.08s linear, background 0.15s;
+}
+.tuner-needle-ok { background: var(--ok); }
+.tuner-needle-close { background: var(--signal); }
+.tuner-needle-sharp, .tuner-needle-flat { background: var(--warn); }
+
+.tuner-scale-row {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+  font-size: 10px;
+  color: var(--fg-3);
+}
+.tuner-freq {
+  margin: 10px 0 0;
+  text-align: center;
+  font-size: 11px;
+  color: var(--fg-3);
+  font-variant-numeric: tabular-nums;
+}
+
+.tuner-strings {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 8px;
+}
+.tuner-string {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  min-width: 52px;
+  padding: 8px 6px;
+  border-radius: var(--r-2);
+  border: 1px solid var(--line-2);
+  background: var(--bg-2);
+  color: var(--fg-2);
+  font-family: var(--ui);
+  cursor: pointer;
+  transition: background 0.12s, border-color 0.12s, color 0.12s;
+}
+.tuner-string:hover { background: var(--bg-3); color: var(--fg-0); }
+.tuner-string-num { font-size: 10px; color: var(--fg-3); }
+.tuner-string-note { font-size: 15px; font-weight: 600; }
+.tuner-string-active {
+  border-color: currentColor;
+  background: var(--bg-3);
+  color: var(--fg-0);
+}
+.tuner-string-active.tuner-ok { border-color: var(--ok); }
+.tuner-string-active.tuner-close { border-color: var(--signal); }
+.tuner-string-active.tuner-sharp,
+.tuner-string-active.tuner-flat { border-color: var(--warn); }
+/* Cible verrouillée par un clic : le suivi automatique est suspendu. */
+.tuner-string-locked { box-shadow: inset 0 0 0 1px var(--signal); }
+
+.tuner-tuning-src {
+  margin: 0 0 16px;
+  text-align: center;
+  font-size: 11px;
+  color: var(--fg-3);
+}
+
+.tuner-level-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.tuner-level-label { font-size: 11px; color: var(--fg-3); }
+.tuner-level-track {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--bg-0);
+  border: 1px solid var(--line-3);
+  overflow: hidden;
+}
+.tuner-level-fill {
+  height: 100%;
+  width: 0;
+  background: var(--ok);
+  transition: width 0.06s linear;
+}
+.tuner-level-fill.tuner-level-weak { background: var(--fg-3); }
+.tuner-clip {
+  visibility: hidden;
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--warn);
+}
+
+.tuner-hint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--fg-3);
+}
+
 /* ═══════════════════════════════════════════════
    RESPONSIVE / ADAPTIVE DESIGN
    Breakpoints: mobile <640px, tablet 640-1024px
@@ -2241,7 +3018,7 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   button, a, .lib-row, .track-card {
     min-height: 44px;
   }
-  .lib-btn-info, .lib-btn-dl {
+  .lib-btn-info, .lib-btn-dl, .lib-btn-fav {
     min-width: 44px;
     min-height: 44px;
     font-size: 16px;
@@ -2253,7 +3030,7 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
   .song-info-panel { width: 300px; }
 
   .lib-cell-artist,
-  .lib-cell-year { display: none; }
+  .lib-cell-difficulte { display: none; }
 
   .settings-wrap { padding: 16px; }
 }
@@ -2293,7 +3070,8 @@ body.has-multitrack-bar #tab-container { padding-bottom: 100px; }
     color: var(--fg-2);
   }
   .lib-cell-genre { flex: 0 0 auto; }
-  .lib-cell-year { flex: 0 0 auto; font-size: 12px; color: var(--fg-2); }
+  .lib-cell-guitare { flex: 0 0 auto; font-size: 12px; color: var(--fg-2); }
+  .lib-cell-difficulte { flex: 0 0 auto; font-size: 12px; color: var(--fg-2); }
   .lib-cell-format { flex: 0 0 auto; }
   .lib-cell-actions {
     position: absolute;

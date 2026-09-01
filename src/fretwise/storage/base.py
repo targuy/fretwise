@@ -35,6 +35,11 @@ SUPPORTED_SCORE_EXTS: frozenset[str] = frozenset({
 # metadata-enrichment workflow can persist it next to the user's scores.
 CATALOG_NAME: str = "songs.tsv"
 
+# Per-user/per-library favorite-partitions list (JSON array of filenames).
+# Same carve-out as CATALOG_NAME: not a score, but a fixed companion file the
+# storage layer must allow reading/writing.
+FAVORITES_NAME: str = "favorites.json"
+
 
 class StorageError(Exception):
     """Base error for the storage layer."""
@@ -96,9 +101,10 @@ def safe_score_name(name: str) -> str:
     base = Path(name).name
     if not base or base in {".", ".."}:
         raise StorageValidationError(f"Invalid filename: {name!r}")
-    # The metadata catalog is a fixed, non-score companion file; allow it through
-    # so the song-catalog workflow can persist it alongside the user's scores.
-    if base == CATALOG_NAME:
+    # The metadata catalog and favorites list are fixed, non-score companion
+    # files; allow them through so their workflows can persist alongside the
+    # user's scores.
+    if base in (CATALOG_NAME, FAVORITES_NAME):
         return base
     if Path(base).suffix.lower() not in SUPPORTED_SCORE_EXTS:
         raise StorageValidationError(f"Unsupported file type: {base}")
@@ -162,6 +168,7 @@ class StorageBackend(ABC):
 
 __all__ = [
     "CATALOG_NAME",
+    "FAVORITES_NAME",
     "SUPPORTED_SCORE_EXTS",
     "StorageBackend",
     "StorageBackendUnavailable",

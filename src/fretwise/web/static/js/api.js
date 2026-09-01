@@ -372,6 +372,24 @@ export async function fetchGmInstruments() {
   return res.json();
 }
 
+export async function fetchFavorites() {
+  const res = await fetch('/api/favorites', { cache: 'no-store' });
+  if (!res.ok) throw new Error('Failed to fetch favorites');
+  return res.json();
+}
+
+export async function addFavorite(filename) {
+  const res = await fetch(`/api/favorites/${encodeURIComponent(filename)}`, { method: 'POST' });
+  if (!res.ok) throw new Error('Failed to add favorite');
+  return res.json();
+}
+
+export async function removeFavorite(filename) {
+  const res = await fetch(`/api/favorites/${encodeURIComponent(filename)}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to remove favorite');
+  return res.json();
+}
+
 export async function fetchSoundfonts() {
   const res = await fetch('/api/soundfonts');
   if (!res.ok) throw new Error('Failed to fetch soundfonts');
@@ -543,6 +561,45 @@ export async function postReviewChoice(filename, trackId, body) {
     throw new Error(err.detail || 'Save failed');
   }
   return res.json();
+}
+
+// ── Training module (scale/chord warm-up) ───────────────────────────────────
+
+// These responses are cheap to compute and are derived from library data that
+// changes with the code, so they are left on normal revalidation. Forcing the
+// cache would pin a browser to whatever shapes it saw first, across deploys.
+
+/** List of {name, label} for every scale in the pattern library. */
+export async function fetchTrainingScales() {
+  const res = await fetch('/api/training/scales');
+  if (!res.ok) throw new Error('Failed to load scales');
+  return res.json();
+}
+
+/** Box positions for `scaleName` transposed to `root` (e.g. "E", "Bb"). */
+export async function fetchTrainingScaleBoxes(scaleName, root) {
+  const url = `/api/training/scale/${encodeURIComponent(scaleName)}?root=${encodeURIComponent(root)}`;
+  const res = await fetch(url);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Scale lookup failed' }));
+    throw new Error(err.detail || 'Scale lookup failed');
+  }
+  return res.json();
+}
+
+/**
+ * Every known playable voicing for a chord name (e.g. "C#m7"), lowest fret
+ * first — the curated open shape (if any) followed by movable barre
+ * alternates elsewhere on the neck.
+ */
+export async function fetchTrainingChord(chordName) {
+  const res = await fetch(`/api/training/chord/${encodeURIComponent(chordName)}`);
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({ detail: 'Chord lookup failed' }));
+    throw new Error(err.detail || 'Chord lookup failed');
+  }
+  const data = await res.json();
+  return data.voicings || [];
 }
 
 export async function activateSoundfont(name) {

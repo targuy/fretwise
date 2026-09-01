@@ -135,6 +135,14 @@
 
   <!-- Icon buttons -->
   <div class="header-right">
+    <!-- Home — always visible (unlike btn-header-back, viewer-only), so
+         there's a one-click way back to the library from any page. -->
+    <button class="ic-btn ic-btn-home" id="btn-home" title="Accueil — liste des morceaux" aria-label="Accueil, liste des morceaux">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 11.5 12 4l9 7.5"/>
+        <path d="M5.5 9.5V19a1 1 0 0 0 1 1H9a1 1 0 0 0 1-1v-4.5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1V19a1 1 0 0 0 1 1h2.5a1 1 0 0 0 1-1V9.5"/>
+      </svg>
+    </button>
     <!-- Theme picker trigger (wired at Step 5) -->
     <button class="ic-btn" id="btn-theme-picker" title="Change theme" aria-label="Theme picker">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
@@ -199,6 +207,19 @@
         <path d="M21 12H9"/>
       </svg>
     </button>
+    <!-- Tuner (écoute l'entrée audio : carte son, interface USB, webcam) -->
+    <button class="ic-btn" id="btn-tuner" title="Accordeur" aria-label="Accordeur">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M8 3v8a4 4 0 008 0V3"/>
+        <path d="M12 15v6"/>
+      </svg>
+    </button>
+    <!-- Training (scale/chord warm-up module) -->
+    <button class="ic-btn" id="btn-training" title="Entraînement — gammes et accords" aria-label="Entraînement">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M6 7v10M4 9v6M18 7v10M20 9v6M9 12h6"/>
+      </svg>
+    </button>
     <!-- Settings -->
     <button class="ic-btn" id="btn-settings" title="Settings" aria-label="Settings">
       <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
@@ -220,12 +241,17 @@
     <div class="lib-header">
       <div class="lib-search-bar">
         <input id="lib-search" type="search" placeholder="Search by title, artist, genre…" autocomplete="off" />
+        <button id="lib-fav-filter" class="lib-fav-filter" type="button" title="Afficher uniquement les favoris" aria-pressed="false">★ Favoris</button>
         <select id="lib-genre-filter">
           <option value="">All genres</option>
         </select>
         <select id="lib-format-filter">
           <option value="">All formats</option>
         </select>
+        <select id="lib-filter-add" title="Ajouter un filtre">
+          <option value="">Ajouter filtre…</option>
+        </select>
+        <button id="lib-filter-reset" class="lib-filter-reset" type="button" title="Réinitialiser les filtres" style="display:none">Réinitialiser</button>
         <div class="lib-meta-wrap">
           <button type="button" id="lib-meta-btn" class="lib-meta-btn"
                   title="Enrich your catalog with your own LLM: Export list → run the prompt in your LLM → import the JSON"
@@ -238,6 +264,7 @@
       <span id="lib-meta-status" class="lib-meta-status" aria-live="polite"></span>
       <input type="file" id="lib-meta-import-input" accept=".json,application/json" style="display:none">
     </div>
+    <div class="lib-active-filters" id="lib-active-filters" aria-live="polite"></div>
     <div class="lib-az-bar" id="lib-az-bar" role="navigation" aria-label="Alphabetical index"></div>
     <!-- Selection bar — appears at the top of the list when ≥1 file is checked -->
     <div id="lib-selection-bar" class="lib-selection-bar" style="display:none" aria-live="polite">
@@ -258,7 +285,8 @@
           <th data-col="title" class="sortable">Title <span class="sort-arrow"></span></th>
           <th data-col="artist" class="sortable">Artist <span class="sort-arrow"></span></th>
           <th data-col="genre" class="sortable">Genre <span class="sort-arrow"></span></th>
-          <th data-col="year" class="sortable">Year <span class="sort-arrow"></span></th>
+          <th data-col="type_guitare" class="sortable">Guitar <span class="sort-arrow"></span></th>
+          <th data-col="difficulte" class="sortable">Difficulty <span class="sort-arrow"></span></th>
           <th data-col="format" class="sortable">Format <span class="sort-arrow"></span></th>
           <th class="col-actions">Actions</th>
         </tr>
@@ -347,6 +375,7 @@
     <div id="core-svg-view" style="display:none; position:absolute; inset:0; overflow:auto; z-index:2;"></div>
     <iframe id="hand3d-view-frame" data-src="/static/hand_viz.html?view=3d" title="3D hand view" style="display:none"></iframe>
     <canvas id="slope-canvas" style="display:none"></canvas>
+    <canvas id="rain-canvas" style="display:none"></canvas>
     <canvas id="tab-canvas"></canvas>
     <canvas id="cursor-canvas"></canvas>
   </div>
@@ -417,6 +446,14 @@
     <button class="tx-btn" id="btn-metronome" title="Metronome">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M8 3h8l3 18H5z"/><path d="M12 8l5 11"/></svg>
     </button>
+    <!-- Écouter mon jeu : capte la guitare et note la prise (voir docs/ecoute.md) -->
+    <button class="tx-btn" id="btn-listen" title="Écouter mon jeu et le noter">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M3 12a9 9 0 0118 0"/>
+        <path d="M3 12v3a2 2 0 002 2h1v-5H5a2 2 0 00-2 2z"/>
+        <path d="M21 12v3a2 2 0 01-2 2h-1v-5h1a2 2 0 012 2z"/>
+      </svg>
+    </button>
     <button class="tx-btn" id="btn-follow" title="Following playhead (click to explore freely)" aria-pressed="true">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/><path d="M5.6 5.6l2.1 2.1M16.3 16.3l2.1 2.1M5.6 18.4l2.1-2.1M16.3 7.7l2.1-2.1"/></svg>
     </button>
@@ -435,6 +472,7 @@
       <button class="view-seg-btn view-seg-active" data-mode="standard_tablature" title="Standard + Tab (default)">Mixed</button>
       <button class="view-seg-btn" data-mode="tablature" title="Tablature only">Tab</button>
       <button class="view-seg-btn" data-mode="slope" title="Perspective playback lane">Slope</button>
+      <button class="view-seg-btn" data-mode="rain" title="Falling notes on fretboard">Rain</button>
       <button class="view-seg-btn" data-mode="hand_3d" title="3D fretting hand">3D</button>
     </div>
     <!-- Density control — how many beats of upcoming notes are visible at
@@ -457,6 +495,7 @@
       <option value="tablature_rhythm">Tab + Rhythm</option>
       <option value="tablature">Tab</option>
       <option value="slope">Slope</option>
+      <option value="rain">Rain</option>
       <option value="hand_3d">3D</option>
     </select>
     <!-- Hidden PDF + back (functionality via header buttons) -->

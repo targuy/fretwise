@@ -5,7 +5,7 @@
  * Orchestra: renderer + playback + toolbar
  */
 
-import { activateRigProfile, activateSoundfont, cleanupLibrary, connectStorage, deleteSoundfont, disconnectStorage, downloadFile, fetchExportGp, fetchExportMusicXml, fetchExportMusicXmlAll, fetchExportPdf, fetchFiles, fetchGearVerificationPrompt, fetchGmInstruments, fetchLlmPrompt, fetchMe, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSongListDownload, fetchSoundfonts, fetchStorage, fetchTracks, fetchSaveGp, fetchRig, fetchRigBank, fetchRigMidiOutputs, fetchRuntime, recommendRigProfile, saveGearSheet, saveRigBinding, saveRigProfile, importSongMetadata, saveSettings, uploadFile, uploadSoundfont } from './api.js';
+import { activateRigProfile, activateSoundfont, addFavorite, cleanupLibrary, connectStorage, deleteSoundfont, disconnectStorage, downloadFile, fetchExportGp, fetchExportMusicXml, fetchExportMusicXmlAll, fetchExportPdf, fetchFiles, fetchGearVerificationPrompt, fetchGmInstruments, fetchLlmPrompt, fetchMe, fetchNotes, fetchSettings, fetchSongInfo, fetchSolve, fetchSongListDownload, fetchSoundfonts, fetchStorage, fetchTracks, fetchSaveGp, fetchRig, fetchRigBank, fetchRigMidiOutputs, fetchRuntime, recommendRigProfile, removeFavorite, saveGearSheet, saveRigBinding, saveRigProfile, importSongMetadata, saveSettings, uploadFile, uploadSoundfont } from './api.js';
 import { getMaskedMeasures, renderAuditBanner, resetAuditBanner, statusBanner } from './audit.js';
 import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { SlopeRenderer } from './slope-renderer.js';
@@ -16,6 +16,10 @@ import { task as notifyTask, toast as notifyToast } from './notify.js';
 import { MODES, MODE_LABELS, DEFAULT_MODE, isGuitarKind, trackKindLabel } from './modeConfig.js';
 import { applyLeatherIcons } from './icons.js';
 import { initReview, resetReview } from './review.js';
+import { chordDiagramSVG } from './fretboard-diagram.js';
+import { initTraining } from './training.js';
+import { initTuner, setTunerActive } from './tuner.js';
+import { initListening, resetListening, toggleListening } from './listening.js';
 import { chooseMidiOutput, connectedMidiOutputs, requestWebMidiAccess, sendMidiMessages, supportsWebMidi } from './web-midi.js';
 
 // ── State ───────────────────────────────────────────────────────────
@@ -378,11 +382,21 @@ let _lastHandVizSeekPostMs = 0;
 function showPage(page) {
   const isViewer = page === 'viewer';
   const isSettings = page === 'settings';
+  const isTraining = page === 'training';
+  const isTuner = page === 'tuner';
   fileSelector.style.display  = page === 'files'    ? '' : 'none';
   trackSelector.style.display = page === 'tracks'   ? '' : 'none';
   tabViewer.style.display     = isViewer ? '' : 'none';
   toolbar.style.display       = isViewer ? '' : 'none';
   if (settingsPage)     settingsPage.style.display     = isSettings ? '' : 'none';
+  const trainingPage = $('#training-page');
+  if (trainingPage)     trainingPage.style.display      = isTraining ? '' : 'none';
+  const tunerPage = $('#tuner-page');
+  if (tunerPage)        tunerPage.style.display         = isTuner ? '' : 'none';
+  // Le module d'écoute libère l'entrée audio dès qu'on quitte la page : une
+  // interface tenue ouverte reste indisponible pour le DAW ou l'accordeur
+  // physique, et l'onglet garde son témoin micro allumé.
+  setTunerActive(isTuner);
   if (headerMeta)       headerMeta.style.display       = isViewer ? '' : 'none';
   if (btnHeaderBack)    btnHeaderBack.style.display    = isViewer ? '' : 'none';
   if (btnDownloadGp)    btnDownloadGp.style.display    = isViewer ? '' : 'none';
@@ -392,9 +406,13 @@ function showPage(page) {
   if (typeof _updateTrackTabsChevrons === 'function') {
     requestAnimationFrame(_updateTrackTabsChevrons);
   }
-  // Update settings nav: "Back to song" only active when a track is loaded
+  // "Back to song" nav is only active when a track is loaded — settings and
+  // training pages both offer it, same rule.
+  const hasActiveSong = currentTrackId != null && currentFile != null;
   const setBackViewer = $('#set-back-viewer');
-  if (setBackViewer) setBackViewer.disabled = !(currentTrackId != null && currentFile != null);
+  if (setBackViewer) setBackViewer.disabled = !hasActiveSong;
+  const trBackViewer = $('#tr-back-viewer');
+  if (trBackViewer) trBackViewer.disabled = !hasActiveSong;
   // Ensure the old bottom bar class doesn't shift bottom elements
   document.body.classList.remove('has-multitrack-bar');
 }
@@ -407,6 +425,15 @@ let _libSort = { col: 'title', dir: 1 };
 let _libSearch = '';
 let _libGenreFilter = '';
 let _libFormatFilter = '';
+const LIB_FILTER_COLUMNS = {
+  artist: 'Artist',
+  genre: 'Genre',
+  type_guitare: 'Guitar',
+  difficulte: 'Difficulty',
+  format: 'Format',
+};
+let _libColumnFilters = new Map(Object.keys(LIB_FILTER_COLUMNS).map(col => [col, new Set()]));
+let _libFavOnly = false;
 // Multi-select state for batch fingering calculation
 let _selectedFiles = new Set();
 // Pagination: rows per page adapts to viewport height at load time.
@@ -444,10 +471,17 @@ async function loadFiles() {
 function _populateLibFilters() {
   const genres = new Set();
   const formats = new Set();
+  const valuesByColumn = new Map(Object.keys(LIB_FILTER_COLUMNS).map(col => [col, new Set()]));
   for (const f of _allFiles) {
     if (f.meta?.genre) genres.add(f.meta.genre);
     if (f.format) formats.add(f.format);
+    for (const col of Object.keys(LIB_FILTER_COLUMNS)) {
+      const value = _libFieldValue(f, col);
+      if (value) valuesByColumn.get(col)?.add(value);
+    }
   }
+  _pruneLibColumnFilters();
+  _syncLibFilterSelects();
   const genreSel = $('#lib-genre-filter');
   if (genreSel) {
     genreSel.innerHTML = '<option value="">All genres</option>';
@@ -456,6 +490,7 @@ function _populateLibFilters() {
       o.value = g; o.textContent = g;
       genreSel.appendChild(o);
     });
+    genreSel.value = _libGenreFilter;
   }
   const fmtSel = $('#lib-format-filter');
   if (fmtSel) {
@@ -465,7 +500,123 @@ function _populateLibFilters() {
       o.value = f; o.textContent = f;
       fmtSel.appendChild(o);
     });
+    fmtSel.value = _libFormatFilter;
   }
+  const addSel = $('#lib-filter-add');
+  if (addSel) {
+    addSel.innerHTML = '<option value="">Ajouter filtre…</option>';
+    for (const [col, label] of Object.entries(LIB_FILTER_COLUMNS)) {
+      const values = [...(valuesByColumn.get(col) || [])].sort();
+      if (!values.length) continue;
+      const group = document.createElement('optgroup');
+      group.label = label;
+      for (const value of values) {
+        const o = document.createElement('option');
+        o.value = `${col}\t${value}`;
+        o.textContent = value;
+        group.appendChild(o);
+      }
+      addSel.appendChild(group);
+    }
+  }
+  _renderLibActiveFilters();
+}
+
+function _libFieldValue(file, col) {
+  if (col === 'format') return file.format || '';
+  return file.meta?.[col] || '';
+}
+
+function _libHasColumnFilters() {
+  for (const values of _libColumnFilters.values()) {
+    if (values.size > 0) return true;
+  }
+  return false;
+}
+
+function _libFiltersActive() {
+  return Boolean(_libSearch || _libHasColumnFilters());
+}
+
+function _isLibColumnFilterActive(col, value) {
+  return Boolean(value && _libColumnFilters.get(col)?.has(value));
+}
+
+function _toggleLibColumnFilter(col, value) {
+  if (!LIB_FILTER_COLUMNS[col] || !value) return;
+  const values = _libColumnFilters.get(col);
+  if (!values) return;
+  if (values.has(value)) values.delete(value);
+  else values.add(value);
+  _syncLibFilterSelects();
+  _libPage = 0;
+  _renderLibTable();
+}
+
+function _clearLibFilters() {
+  _libSearch = '';
+  for (const values of _libColumnFilters.values()) values.clear();
+  _syncLibFilterSelects();
+  const search = $('#lib-search');
+  const addSel = $('#lib-filter-add');
+  if (search) search.value = '';
+  if (addSel) addSel.value = '';
+  _libPage = 0;
+  _renderLibTable();
+}
+
+function _syncLibFilterSelects() {
+  const genreValues = _libColumnFilters.get('genre');
+  const formatValues = _libColumnFilters.get('format');
+  _libGenreFilter = genreValues?.size === 1 ? [...genreValues][0] : '';
+  _libFormatFilter = formatValues?.size === 1 ? [...formatValues][0] : '';
+  const genreSel = $('#lib-genre-filter');
+  const fmtSel = $('#lib-format-filter');
+  if (genreSel) genreSel.value = _libGenreFilter;
+  if (fmtSel) fmtSel.value = _libFormatFilter;
+}
+
+function _pruneLibColumnFilters() {
+  const available = new Map(Object.keys(LIB_FILTER_COLUMNS).map(col => [col, new Set()]));
+  for (const f of _allFiles) {
+    for (const col of Object.keys(LIB_FILTER_COLUMNS)) {
+      const value = _libFieldValue(f, col);
+      if (value) available.get(col)?.add(value);
+    }
+  }
+  for (const [col, values] of _libColumnFilters.entries()) {
+    for (const value of [...values]) {
+      if (!available.get(col)?.has(value)) values.delete(value);
+    }
+  }
+}
+
+function _renderLibActiveFilters() {
+  const wrap = $('#lib-active-filters');
+  const reset = $('#lib-filter-reset');
+  if (!wrap) return;
+  const chips = [];
+  for (const [col, label] of Object.entries(LIB_FILTER_COLUMNS)) {
+    const values = _libColumnFilters.get(col);
+    if (!values) continue;
+    for (const value of [...values].sort()) {
+      chips.push(`
+        <button type="button" class="lib-filter-chip" data-filter-col="${_esc(col)}" data-filter-value="${_esc(value)}" title="Retirer ${_esc(label)}: ${_esc(value)}">
+          <span>${_esc(label)}</span>
+          <strong>${_esc(value)}</strong>
+          <em aria-hidden="true">×</em>
+        </button>
+      `);
+    }
+  }
+  wrap.innerHTML = chips.join('');
+  wrap.style.display = chips.length ? 'flex' : 'none';
+  if (reset) reset.style.display = _libFiltersActive() ? '' : 'none';
+  wrap.querySelectorAll('.lib-filter-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      _toggleLibColumnFilter(btn.dataset.filterCol || '', btn.dataset.filterValue || '');
+    });
+  });
 }
 
 // Choose the empty-state message. Distinguishes "no search match" (the library
@@ -473,8 +624,7 @@ function _populateLibFilters() {
 // the latter distinguishes a not-yet-connected cloud backend from an empty
 // cloud folder vs the single-user local-directory case.
 function _emptyLibraryMessage() {
-  const filtersActive = _libSearch || _libGenreFilter || _libFormatFilter;
-  if (_allFiles.length > 0 && filtersActive) {
+  if (_allFiles.length > 0 && _libFiltersActive()) {
     return 'No scores match your search or filters.';
   }
   const s = _storageStatus;
@@ -499,8 +649,10 @@ function _renderLibTable() {
     const genre = (f.meta?.genre || '').toLowerCase();
     const q = _libSearch.toLowerCase();
     if (q && !title.includes(q) && !artist.includes(q) && !genre.includes(q) && !(f.name || '').toLowerCase().includes(q)) return false;
-    if (_libGenreFilter && (f.meta?.genre || '') !== _libGenreFilter) return false;
-    if (_libFormatFilter && (f.format || '') !== _libFormatFilter) return false;
+    if (_libFavOnly && !f.favorite) return false;
+    for (const [col, values] of _libColumnFilters.entries()) {
+      if (values.size > 0 && !values.has(_libFieldValue(f, col))) return false;
+    }
     return true;
   });
 
@@ -529,6 +681,7 @@ function _renderLibTable() {
     _libRows = [];
     _renderAzBar([]);
     _renderPager(0);
+    _renderLibActiveFilters();
     return;
   }
   if (empty) empty.style.display = 'none';
@@ -555,18 +708,13 @@ function _renderLibTable() {
     const typeGuitare = f.meta?.type_guitare || '—';
     const difficulte = f.meta?.difficulte || '—';
     const format = f.format || '?';
+    const artistFilterClass = _isLibColumnFilterActive('artist', f.meta?.artist || '') ? ' is-filtered' : '';
+    const genreFilterClass = _isLibColumnFilterActive('genre', f.meta?.genre || '') ? ' is-filtered' : '';
+    const guitarFilterClass = _isLibColumnFilterActive('type_guitare', f.meta?.type_guitare || '') ? ' is-filtered' : '';
+    const difficultyFilterClass = _isLibColumnFilterActive('difficulte', f.meta?.difficulte || '') ? ' is-filtered' : '';
+    const formatFilterClass = _isLibColumnFilterActive('format', f.format || '') ? ' is-filtered' : '';
 
-    const isGpFile = f.name.endsWith('.gp');
-    const hasFingering = isGpFile && f.has_fingering;
-    const isCurrent = hasFingering && f.fingering_is_current;
     const isChecked = _selectedFiles.has(f.name);
-    // Distinctive hand icon marks partitions that carry saved fingerings:
-    // green = up to date, amber (with ⚠) = made by an older algorithm version.
-    const handIcon = '<svg class="lib-finger-ic" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M18 11V6a2 2 0 00-4 0v5"/><path d="M14 10V4a2 2 0 00-4 0v6"/><path d="M10 10.5V6a2 2 0 00-4 0v8"/><path d="M6 14v1a6 6 0 0012 0v-2"/></svg>';
-    const fingerBadge = !isGpFile || !hasFingering ? '' :
-      isCurrent
-        ? `<span class="lib-finger-mark is-ok" title="Doigtés enregistrés, à jour (algo v${FINGERING_ALGO_VERSION || '?'})" aria-label="Doigtés à jour">${handIcon}</span>`
-        : `<span class="lib-finger-mark is-old" title="Doigtés enregistrés avec une version antérieure de l'algorithme — recalculer recommandé" aria-label="Doigtés obsolètes">${handIcon}<span class="lib-finger-warn">⚠</span></span>`;
     // Chord diagram badge — shown when a previous solve revealed embedded chords
     const chordIcon = '<svg class="lib-chord-ic" width="13" height="13" viewBox="0 0 13 13" fill="none" xmlns="http://www.w3.org/2000/svg"><line x1="3" y1="1" x2="3" y2="12" stroke="currentColor" stroke-width="1.2"/><line x1="6.5" y1="1" x2="6.5" y2="12" stroke="currentColor" stroke-width="1.2"/><line x1="10" y1="1" x2="10" y2="12" stroke="currentColor" stroke-width="1.2"/><line x1="1" y1="3.5" x2="12" y2="3.5" stroke="currentColor" stroke-width="1.2"/><line x1="1" y1="7" x2="12" y2="7" stroke="currentColor" stroke-width="1.2"/><line x1="1" y1="10.5" x2="12" y2="10.5" stroke="currentColor" stroke-width="1.2"/><circle cx="3" cy="7" r="1.6" fill="currentColor"/><circle cx="6.5" cy="3.5" r="1.6" fill="currentColor"/><circle cx="10" cy="10.5" r="1.6" fill="currentColor"/></svg>';
     const chordBadge = _chordFilesSet.has(f.name)
@@ -575,18 +723,40 @@ function _renderLibTable() {
 
     tr.innerHTML = `
       <td class="lib-cell-check"><input type="checkbox" class="lib-row-check" data-file="${_esc(f.name)}" ${isChecked ? 'checked' : ''} aria-label="Sélectionner ${_esc(title)}"></td>
-      <td class="lib-cell-title"><span class="lib-title-text">${_esc(title)}</span>${fingerBadge}${chordBadge}</td>
-      <td class="lib-cell-artist">${_esc(artist)}</td>
-      <td class="lib-cell-genre"><span class="lib-badge lib-badge-genre">${_esc(genre)}</span></td>
-      <td class="lib-cell-guitare">${_esc(typeGuitare)}</td>
-      <td class="lib-cell-difficulte">${_esc(difficulte)}</td>
-      <td class="lib-cell-format"><span class="lib-badge lib-badge-fmt">${_esc(format)}</span></td>
+      <td class="lib-cell-title"><span class="lib-title-text">${_esc(title)}</span>${chordBadge}</td>
+      <td class="lib-cell-artist lib-filter-cell${artistFilterClass}" data-filter-col="artist" data-filter-value="${_esc(f.meta?.artist || '')}" title="Filtrer: ${_esc(artist)}">${_esc(artist)}</td>
+      <td class="lib-cell-genre lib-filter-cell${genreFilterClass}" data-filter-col="genre" data-filter-value="${_esc(f.meta?.genre || '')}" title="Filtrer: ${_esc(genre)}"><span class="lib-badge lib-badge-genre">${_esc(genre)}</span></td>
+      <td class="lib-cell-guitare lib-filter-cell${guitarFilterClass}" data-filter-col="type_guitare" data-filter-value="${_esc(f.meta?.type_guitare || '')}" title="Filtrer: ${_esc(typeGuitare)}">${_esc(typeGuitare)}</td>
+      <td class="lib-cell-difficulte lib-filter-cell${difficultyFilterClass}" data-filter-col="difficulte" data-filter-value="${_esc(f.meta?.difficulte || '')}" title="Filtrer: ${_esc(difficulte)}">${_esc(difficulte)}</td>
+      <td class="lib-cell-format lib-filter-cell${formatFilterClass}" data-filter-col="format" data-filter-value="${_esc(f.format || '')}" title="Filtrer: ${_esc(format)}"><span class="lib-badge lib-badge-fmt">${_esc(format)}</span></td>
       <td class="lib-cell-actions">
+        <button class="lib-btn-fav${f.favorite ? ' is-fav' : ''}" title="${f.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris'}" data-file="${_esc(f.name)}">★</button>
         <button class="lib-btn-info" title="Song info" data-file="${_esc(f.name)}">ℹ</button>
         <button class="lib-btn-rig" title="Profil GP-180" data-file="${_esc(f.name)}"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><rect x="2" y="8" width="20" height="10" rx="2"/><path d="M6 8V6a2 2 0 012-2h8a2 2 0 012 2v2"/><circle cx="8" cy="13" r="1.5" fill="currentColor"/><circle cx="13" cy="13" r="1.5" fill="currentColor"/><circle cx="18" cy="13" r="1.5" fill="currentColor"/></svg></button>
         <button class="lib-btn-dl" title="Download ${_esc(f.name)}" data-file="${_esc(f.name)}">⬇</button>
       </td>
     `;
+
+    const _favBtn = tr.querySelector('.lib-btn-fav');
+    if (_favBtn) {
+      _favBtn.addEventListener('click', async (e) => {
+        e.stopPropagation();
+        const wasFavorite = !!f.favorite;
+        f.favorite = !wasFavorite;
+        _favBtn.classList.toggle('is-fav', f.favorite);
+        _favBtn.title = f.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris';
+        try {
+          if (f.favorite) await addFavorite(f.name);
+          else await removeFavorite(f.name);
+          if (_libFavOnly && !f.favorite) _renderLibTable();
+        } catch (err) {
+          console.error('toggle favorite error:', err);
+          f.favorite = wasFavorite;
+          _favBtn.classList.toggle('is-fav', f.favorite);
+          _favBtn.title = f.favorite ? 'Retirer des favoris' : 'Ajouter aux favoris';
+        }
+      });
+    }
 
     const _rigBtn = tr.querySelector('.lib-btn-rig');
     if (_rigBtn) {
@@ -608,6 +778,13 @@ function _renderLibTable() {
     });
 
     tr.querySelector('.lib-cell-title').addEventListener('click', () => selectFile(f.name));
+
+    tr.querySelectorAll('.lib-filter-cell').forEach(cell => {
+      cell.addEventListener('click', (e) => {
+        e.stopPropagation();
+        _toggleLibColumnFilter(cell.dataset.filterCol || '', cell.dataset.filterValue || '');
+      });
+    });
 
     tr.querySelector('.lib-btn-info').addEventListener('click', (e) => {
       e.stopPropagation();
@@ -640,6 +817,7 @@ function _renderLibTable() {
 
   _renderAzBar(rows);
   _renderPager(pageCount);
+  _renderLibActiveFilters();
   // After layout settles, push the sticky strip height down to CSS so the
   // table's sticky <thead> stacks under it without overlap.
   requestAnimationFrame(_updateStickyOffsets);
@@ -781,7 +959,7 @@ async function _calcFingeringsForSelected() {
   }
   if (btn) btn.disabled = false;
   _clearSelection();
-  // Reload the file list so fingering badges update.
+  // Reload the file list after batch saves so catalog/storage state is fresh.
   await loadFiles();
 }
 
@@ -3248,23 +3426,27 @@ if (btnMetronome) {
   });
 }
 
-if (btnBackViewer) {
-  btnBackViewer.addEventListener('click', () => {
-    if (playback) playback.stop();
-    renderer = null;
-    playback = null;
-    loadFiles();
-  });
+/** Leave whatever song/track is loaded and return to the library list. */
+function _backToLibrary() {
+  if (playback) playback.stop();
+  renderer = null;
+  playback = null;
+  // Without this, "back to song" nav (settings/training) stayed enabled
+  // after leaving the viewer — it would flip the page to 'viewer' with no
+  // renderer left to draw anything.
+  currentFile = null;
+  currentTrackId = null;
+  loadFiles();
 }
 
-if (btnHeaderBack) {
-  btnHeaderBack.addEventListener('click', () => {
-    if (playback) playback.stop();
-    renderer = null;
-    playback = null;
-    loadFiles();
-  });
-}
+if (btnBackViewer) btnBackViewer.addEventListener('click', _backToLibrary);
+if (btnHeaderBack) btnHeaderBack.addEventListener('click', _backToLibrary);
+
+// Persistent Home button — visible on every page (unlike btnHeaderBack, which
+// only shows in the viewer), so there is always a one-click way back to the
+// library regardless of how deep the user navigated (settings, training…).
+const btnHome = $('#btn-home');
+if (btnHome) btnHome.addEventListener('click', _backToLibrary);
 
 if (btnHeaderGp) {
   btnHeaderGp.addEventListener('click', exportGP);
@@ -3359,10 +3541,6 @@ async function _insertFingerings() {
     for (const key of Array.from(_solveCache.keys())) {
       if (key.startsWith(prefix)) _solveCache.delete(key);
     }
-    // Reflect the new fingering in the in-memory library immediately so the
-    // list badge is up to date no matter how the user navigates back (bug #1).
-    const fEntry = _allFiles.find((f) => f.name === file);
-    if (fEntry) { fEntry.has_fingering = true; fEntry.fingering_is_current = true; }
     await selectTrack(primaryTrack, _reviewTrackName);   // current tab shown ASAP
     // Bug #3: now compute the OTHER guitar tracks asynchronously in the
     // background, so the user reads the current tab while the rest fill in and
@@ -4764,133 +4942,6 @@ function sanitize(str) {
   return el.innerHTML;
 }
 
-// ── Chord diagram SVG renderer ──────────────────────────────────────
-
-function _toRoman(n) {
-  const pairs = [[10,'X'],[9,'IX'],[8,'VIII'],[7,'VII'],[6,'VI'],
-                 [5,'V'],[4,'IV'],[3,'III'],[2,'II'],[1,'I']];
-  let r = '';
-  for (const [v, s] of pairs) while (n >= v) { r += s; n -= v; }
-  return r;
-}
-
-/**
- * Returns an inline SVG string for a chord diagram.
- * @param {object} cd  Chord diagram data (name, frets, fingers, base_fret, string_count)
- * @param {number} sc  Scale factor (1 = strip size, ~1.9 = popup size)
- */
-function chordDiagramSVG(cd, sc = 1) {
-  const nStr  = cd.string_count || 6;
-  const nFret = 5;
-  const S     = Math.round(13 * sc);
-  const F     = Math.round(13 * sc);
-  const ML    = Math.round(8  * sc);
-  const dotR  = Math.round(5  * sc);
-  const boxW  = (nStr - 1) * S;
-  const boxH  = nFret * F;
-  const gridY = Math.round(30 * sc);
-  const hasPos = cd.base_fret > 1;
-  const svgW  = ML + boxW + ML + (hasPos ? Math.round(22 * sc) : 0);
-  const svgH  = gridY + boxH + Math.round(8 * sc);
-  const fSz   = Math.max(6, Math.round(7  * sc));   // finger-number font
-  const nameSz= Math.max(9, Math.round(13 * sc));   // chord-name font
-
-  const strX = i => ML + (nStr - 1 - i) * S;
-
-  // Finger color mapped to program CSS variables (--f1…--f4)
-  const dotFill  = (f) => (f >= 1 && f <= 4) ? `var(--f${f})` : '#444';
-  const dotText  = '#111'; // all finger colors are light → dark text readable
-
-  let p = `<svg width="${svgW}" height="${svgH}" xmlns="http://www.w3.org/2000/svg" style="display:block">`;
-
-  // Chord name
-  p += `<text x="${ML + boxW / 2}" y="${Math.round(14 * sc)}"
-    font-family="Arial,sans-serif" font-weight="bold" font-size="${nameSz}"
-    text-anchor="middle" fill="#222">${sanitize(cd.name)}</text>`;
-
-  // Nut bar or fret label
-  if (!hasPos) {
-    p += `<rect x="${ML}" y="${gridY - Math.round(3 * sc)}" width="${boxW}" height="${Math.round(3.5 * sc)}"
-      fill="#333" rx="0.5"/>`;
-  } else {
-    const posSz = Math.max(7, Math.round(9 * sc));
-    p += `<text x="${ML + boxW + 5}" y="${gridY + F / 2 + Math.round(4 * sc)}"
-      font-family="Arial,sans-serif" font-size="${posSz}" fill="#555">${_toRoman(cd.base_fret)}fr</text>`;
-  }
-
-  // Grid: string lines
-  for (let i = 0; i < nStr; i++) {
-    const x = strX(i);
-    p += `<line x1="${x}" y1="${gridY}" x2="${x}" y2="${gridY + boxH}" stroke="#bbb" stroke-width="0.8"/>`;
-  }
-
-  // Grid: fret lines
-  for (let f = 0; f <= nFret; f++) {
-    const y = gridY + f * F;
-    p += `<line x1="${ML}" y1="${y}" x2="${ML + boxW}" y2="${y}" stroke="#bbb" stroke-width="0.8"/>`;
-  }
-
-  // Muted (×) and open (○) markers above grid
-  const markY = Math.round(26 * sc);
-  const openCY = Math.round(21 * sc);
-  const openR  = Math.round(3.5 * sc);
-  const markSz = Math.max(7, Math.round(9 * sc));
-  for (let i = 0; i < nStr; i++) {
-    const x = strX(i);
-    const fv = cd.frets[i];
-    if (fv === -1) {
-      p += `<text x="${x}" y="${markY}" font-family="Arial,sans-serif"
-        font-size="${markSz}" font-weight="bold" text-anchor="middle" fill="#555">x</text>`;
-    } else if (fv === 0) {
-      p += `<circle cx="${x}" cy="${openCY}" r="${openR}" fill="none" stroke="#555" stroke-width="1.2"/>`;
-    }
-  }
-
-  // Barre detection: ≥2 strings at the lowest fretted fret
-  const frettedNotes = cd.frets.map((fv, i) => ({ i, fv })).filter(n => n.fv > 0);
-  const barreSet = new Set();
-  if (frettedNotes.length >= 2) {
-    const minFret = Math.min(...frettedNotes.map(n => n.fv));
-    const barreSt = frettedNotes.filter(n => n.fv === minFret);
-    if (barreSt.length >= 2) {
-      const row = minFret - Math.max(cd.base_fret, 1);
-      if (row >= 0 && row < nFret) {
-        const cy  = gridY + row * F + F / 2;
-        const xs  = barreSt.map(n => strX(n.i));
-        const bx0 = Math.min(...xs), bx1 = Math.max(...xs);
-        const bf  = cd.fingers?.[barreSt[0].i] || 0;
-        p += `<rect x="${bx0 - dotR}" y="${cy - dotR}"
-          width="${bx1 - bx0 + 2 * dotR}" height="${2 * dotR}"
-          rx="${dotR}" fill="${dotFill(bf)}"/>`;
-        if (bf) p += `<text x="${(bx0 + bx1) / 2}" y="${cy + dotR * 0.42}"
-          font-family="Arial,sans-serif" font-size="${fSz}" font-weight="bold"
-          text-anchor="middle" fill="${dotText}">${bf}</text>`;
-        for (const n of barreSt) barreSet.add(n.i);
-      }
-    }
-  }
-
-  // Individual finger dots
-  for (let i = 0; i < nStr; i++) {
-    const fv = cd.frets[i];
-    if (fv <= 0 || barreSet.has(i)) continue;
-    const row = fv - Math.max(cd.base_fret, 1);
-    if (row < 0 || row >= nFret) continue;
-    const cx     = strX(i);
-    const cy     = gridY + row * F + F / 2;
-    const finger = cd.fingers?.[i] || 0;
-    p += `<circle cx="${cx}" cy="${cy}" r="${dotR}" fill="${dotFill(finger)}"/>`;
-    if (finger) {
-      p += `<text x="${cx}" y="${cy + dotR * 0.42}"
-        font-family="Arial,sans-serif" font-size="${fSz}" font-weight="bold"
-        text-anchor="middle" fill="${dotText}">${finger}</text>`;
-    }
-  }
-
-  p += '</svg>';
-  return p;
-}
-
 // ── Chord popup: show inline, close on outside click ──────────────
 
 let _chordDataMap = {};
@@ -5060,11 +5111,51 @@ document.querySelectorAll('#lib-table th.sortable').forEach(th => {
 const libSearch = $('#lib-search');
 if (libSearch) libSearch.addEventListener('input', () => { _libSearch = libSearch.value; _libPage = 0; _renderLibTable(); });
 
+const libFavFilter = $('#lib-fav-filter');
+if (libFavFilter) libFavFilter.addEventListener('click', () => {
+  _libFavOnly = !_libFavOnly;
+  libFavFilter.classList.toggle('is-active', _libFavOnly);
+  libFavFilter.setAttribute('aria-pressed', String(_libFavOnly));
+  _libPage = 0;
+  _renderLibTable();
+});
+
 const libGenreFilter = $('#lib-genre-filter');
-if (libGenreFilter) libGenreFilter.addEventListener('change', () => { _libGenreFilter = libGenreFilter.value; _libPage = 0; _renderLibTable(); });
+if (libGenreFilter) libGenreFilter.addEventListener('change', () => {
+  _libGenreFilter = libGenreFilter.value;
+  const values = _libColumnFilters.get('genre');
+  if (values) {
+    values.clear();
+    if (_libGenreFilter) values.add(_libGenreFilter);
+  }
+  _libPage = 0;
+  _renderLibTable();
+});
 
 const libFormatFilter = $('#lib-format-filter');
-if (libFormatFilter) libFormatFilter.addEventListener('change', () => { _libFormatFilter = libFormatFilter.value; _libPage = 0; _renderLibTable(); });
+if (libFormatFilter) libFormatFilter.addEventListener('change', () => {
+  _libFormatFilter = libFormatFilter.value;
+  const values = _libColumnFilters.get('format');
+  if (values) {
+    values.clear();
+    if (_libFormatFilter) values.add(_libFormatFilter);
+  }
+  _libPage = 0;
+  _renderLibTable();
+});
+
+const libFilterAdd = $('#lib-filter-add');
+if (libFilterAdd) libFilterAdd.addEventListener('change', () => {
+  const raw = libFilterAdd.value || '';
+  const sep = raw.indexOf('\t');
+  if (sep > 0) {
+    _toggleLibColumnFilter(raw.slice(0, sep), raw.slice(sep + 1));
+  }
+  libFilterAdd.value = '';
+});
+
+const libFilterReset = $('#lib-filter-reset');
+if (libFilterReset) libFilterReset.addEventListener('click', _clearLibFilters);
 
 const songInfoClose = $('#song-info-close');
 if (songInfoClose) songInfoClose.addEventListener('click', () => $('#song-info-panel')?.classList.remove('open'));
@@ -5162,6 +5253,21 @@ if (btnSettings) {
     showPage('settings');
     initSettingsPage();
   });
+}
+
+const btnTraining = $('#btn-training');
+if (btnTraining) {
+  btnTraining.addEventListener('click', () => showPage('training'));
+}
+
+const btnTuner = $('#btn-tuner');
+if (btnTuner) {
+  btnTuner.addEventListener('click', () => showPage('tuner'));
+}
+
+const btnListen = $('#btn-listen');
+if (btnListen) {
+  btnListen.addEventListener('click', () => toggleListening());
 }
 
 // ── Settings page navigation ────────────────────────────────────────
@@ -5637,5 +5743,36 @@ initReview({
     if (renderer && typeof renderer.scrollToMeasure === 'function') {
       renderer.scrollToMeasure(zeroBased);
     }
+  },
+});
+
+// Training module (scales/chords warm-up) — builds its own page DOM on init,
+// same pattern as initReview() above.
+initTraining({
+  goBackToFiles: () => loadFiles(),
+  goBackToViewer: () => showPage('viewer'),
+  hasActiveSong: () => currentTrackId != null && currentFile != null,
+});
+
+// Accordeur — même schéma. getTuning() lui donne l'accordage réel de la piste
+// ouverte (drop D, 7 cordes…), pour qu'il vise les cordes du morceau et pas un
+// EADGBE supposé.
+// Écoute du jeu — la notation en direct a besoin de la partition affichée
+// (notes attendues) et du PlaybackEngine (carte de tempo + position courante).
+initListening({
+  getRenderer: () => renderer,
+  getPlayback: () => playback,
+  goToSongSec: (sec) => {
+    if (playback) playback.goToMeasure(playback.measureForSongSec(sec));
+  },
+});
+
+initTuner({
+  goBackToFiles: () => loadFiles(),
+  goBackToViewer: () => showPage('viewer'),
+  hasActiveSong: () => currentTrackId != null && currentFile != null,
+  getTuning: () => {
+    const track = (currentTracks || []).find((t) => t.id === currentTrackId);
+    return track && Array.isArray(track.tuning) && track.tuning.length ? track.tuning : null;
   },
 });
