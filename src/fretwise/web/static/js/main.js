@@ -358,6 +358,7 @@ function _setTempoText(baseTempo) {
 // Header extras
 const headerMeta       = $('#header-meta');
 const headerMetaTitle  = $('#header-meta-title');
+const headerFavBtn     = $('#header-fav-btn');
 const headerMetaTrack  = $('#header-meta-track');
 const headerMetaTempo  = $('#header-meta-tempo');
 const btnHeaderBack    = $('#btn-header-back');
@@ -365,6 +366,41 @@ const btnHeaderPdf     = $('#btn-header-pdf');
 const btnHeaderGp      = $('#btn-header-gp');
 const btnHeaderSave    = $('#btn-header-save');
 const btnHeaderMusicXml = $('#btn-header-musicxml');
+
+function _updateHeaderFavButton() {
+  if (!headerFavBtn) return;
+  const isFav = !!_allFiles.find(f => f.name === currentFile)?.favorite;
+  headerFavBtn.classList.toggle('is-fav', isFav);
+  headerFavBtn.title = isFav ? 'Retirer des favoris' : 'Ajouter aux favoris';
+  headerFavBtn.setAttribute('aria-pressed', String(isFav));
+}
+
+if (headerFavBtn) {
+  headerFavBtn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    if (!currentFile) return;
+    const f = _allFiles.find(x => x.name === currentFile);
+    const wasFavorite = !!f?.favorite;
+    if (f) f.favorite = !wasFavorite;
+    _updateHeaderFavButton();
+    try {
+      if (!wasFavorite) await addFavorite(currentFile);
+      else await removeFavorite(currentFile);
+      // Keep the library row (if rendered) in sync so returning to it doesn't
+      // show a stale star.
+      const rowBtn = document.querySelector(
+        `.lib-row[data-file="${CSS.escape(currentFile)}"] .lib-btn-fav`);
+      if (rowBtn) {
+        rowBtn.classList.toggle('is-fav', !wasFavorite);
+        rowBtn.title = wasFavorite ? 'Ajouter aux favoris' : 'Retirer des favoris';
+      }
+    } catch (err) {
+      console.error('toggle favorite error:', err);
+      if (f) f.favorite = wasFavorite;
+      _updateHeaderFavButton();
+    }
+  });
+}
 
 // Header
 const btnLegend     = $('#btn-legend');
@@ -1302,6 +1338,7 @@ async function selectTrack(trackId, trackName) {
   if (trackBadge) trackBadge.textContent = trackName || `Track ${trackId}`;
   if (metaMode) metaMode.textContent = 'PERFORMANCE';
   if (headerMetaTitle) headerMetaTitle.textContent = cleanTitle;
+  _updateHeaderFavButton();
   if (headerMetaTrack) headerMetaTrack.textContent = trackName || `Track ${trackId}`;
 
   tabCanvas.width = 100;
@@ -2462,6 +2499,7 @@ function initRenderer(data) {
 
   // Update title/artist from API response
   if (data.title) { songTitle.textContent = data.title; if (headerMetaTitle) headerMetaTitle.textContent = data.title; }
+  _updateHeaderFavButton();
   if (data.artist) { songArtist.textContent = data.artist; if (headerMetaTrack) headerMetaTrack.textContent = data.artist; }
   _setTempoText(data.tempo || 120);
   if (metaMode) metaMode.textContent = 'PERFORMANCE';
