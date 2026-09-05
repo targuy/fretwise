@@ -4,8 +4,7 @@ Covers the three behaviours added when fingering generation became explicit:
 
 1. Embedded ``<LeftFingering>`` in a GP file is read back (so a partition that
    already carries fingers shows them on open, without re-running Viterbi).
-2. ``/api/files`` flags such files as having (non-current) fingerings.
-3. ``/api/library/cleanup`` strips legacy ``_fingered`` suffixes and moves
+2. ``/api/library/cleanup`` strips legacy ``_fingered`` suffixes and moves
    duplicates to ``.trash`` (recoverable), preferring the cleaner-named file.
 """
 from __future__ import annotations
@@ -141,6 +140,21 @@ def test_embedded_reader_handles_missing_and_plain_files(tmp_path: Path) -> None
     junk.write_text("not a zip")
     assert _gp_has_embedded_fingering(junk) is False
     assert _read_embedded_gp_fingerings(junk) == {}
+
+
+def test_files_endpoint_omits_library_fingering_badge_fields(tmp_path: Path) -> None:
+    _write_gp(tmp_path / "song.gp", _GPIF_WITH_FINGERS)
+    app = create_app(tmp_path)
+    import asyncio
+    import json
+
+    endpoint = _route_endpoint(app, "/api/files")
+    resp = asyncio.run(endpoint())
+
+    files = {f["name"]: f for f in json.loads(bytes(resp.body))}
+    assert "song.gp" in files
+    assert "has_fingering" not in files["song.gp"]
+    assert "fingering_is_current" not in files["song.gp"]
 
 
 def test_gp_save_merge_preserves_existing_track_fingerings(tmp_path: Path) -> None:
@@ -299,23 +313,6 @@ def test_annotate_serialized_review_status_marks_impossible_and_suspect() -> Non
         "impossible",
         "impossible",
     ]
-
-
-def test_files_endpoint_flags_embedded_fingerings(tmp_path: Path) -> None:
-    _write_gp(tmp_path / "with.gp", _GPIF_WITH_FINGERS)
-    _write_gp(tmp_path / "without.gp", _GPIF_NO_FINGERS)
-    app = create_app(tmp_path)
-    import asyncio
-
-    endpoint = _route_endpoint(app, "/api/files")
-    resp = asyncio.run(endpoint())
-    import json
-
-    files = {f["name"]: f for f in json.loads(bytes(resp.body))}
-    assert files["with.gp"]["has_fingering"] is True
-    # Embedded-only → present but version unknown → not current.
-    assert files["with.gp"]["fingering_is_current"] is False
-    assert files["without.gp"]["has_fingering"] is False
 
 
 def test_cleanup_strips_fingered_and_trashes_duplicates(tmp_path: Path) -> None:
