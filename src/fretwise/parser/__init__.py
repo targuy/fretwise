@@ -19,27 +19,39 @@ from fretwise.parser.guitarpro_adapter import GuitarProAdapter
 from fretwise.parser.midi_adapter import MidiAdapter
 from fretwise.parser.musicxml_adapter import MusicXmlAdapter
 
-_ADAPTERS: list[BaseParser] = [
-    GuitarProAdapter(),
-    GpifAdapter(),
-    MusicXmlAdapter(),
-    MidiAdapter(),
+# Classes, not instances: adapters store per-parse results (track_name,
+# chord_markers, lyric_markers, key_signature_fifths, …) as mutable instance
+# attributes. A module-level singleton instance would be shared across every
+# request for the app's lifetime, and /api/solve is a sync route (run in a
+# thread pool by FastAPI) — concurrent requests for different tracks/files
+# would race on that shared state and corrupt each other's metadata.
+# get_adapter() instantiates fresh below so each parse gets its own adapter.
+_ADAPTER_CLASSES: list[type[BaseParser]] = [
+    GuitarProAdapter,
+    GpifAdapter,
+    MusicXmlAdapter,
+    MidiAdapter,
 ]
 
 
 def get_adapter(path: Path) -> BaseParser:
-    """Return the appropriate parser adapter for *path*.
+    """Return a fresh parser adapter instance for *path*.
+
+    A new instance is returned on every call — see the note on
+    ``_ADAPTER_CLASSES`` for why adapters must never be shared across calls.
 
     Args:
         path: Path to a score file.
 
     Returns:
-        The first adapter that supports the file's extension.
+        A new instance of the first adapter class that supports the file's
+        extension.
 
     Raises:
         UnsupportedFormatError: If no adapter supports the extension.
     """
-    for adapter in _ADAPTERS:
+    for adapter_cls in _ADAPTER_CLASSES:
+        adapter = adapter_cls()
         if adapter.supports(path):
             return adapter
 
