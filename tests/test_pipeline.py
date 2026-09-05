@@ -2,6 +2,11 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
+import pytest
+
+from fretwise.ml.phrase_window import LearnedPhraseWindowFingerer
 from fretwise.models import (
     Articulation,
     Dynamic,
@@ -137,6 +142,32 @@ def test_run_pipeline_with_guard_report_preserves_results_and_stats() -> None:
     assert payload.stats["parsed"] == 1
     assert payload.biomechanical_report.checked_notes == 1
     assert payload.biomechanical_report.is_clean
+
+
+def test_phrase_window_runtime_failure_falls_back_to_rule_result(
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    model = LearnedPhraseWindowFingerer.from_model_dir(Path("data/models"), version="v2")
+
+    def fail_inference(*args: object, **kwargs: object) -> None:
+        raise RuntimeError("injected ONNX failure")
+
+    monkeypatch.setattr(
+        "fretwise.ml.phrase_window.resolve_phrase_window_fingers",
+        fail_inference,
+    )
+
+    payload = run_pipeline_with_guard_report(
+        [_note(60, 0.0, 0)],
+        _StubGenerator(),  # type: ignore[arg-type]
+        _StubOptimizer(),  # type: ignore[arg-type]
+        phrase_window_fingerer=model,
+    )
+
+    assert len(payload.results) == 1
+    assert payload.stats["phrase_window_fallback"] == 1
+    assert "using rules" in caplog.text
 
 
 def test_run_pipeline_keeps_unfingerable_source_tab_note_for_review() -> None:

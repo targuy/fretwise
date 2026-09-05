@@ -455,8 +455,9 @@ class LearnedChordFingerClassifier(ChordFingerClassifier):
                 f"{spec_path}::feature_names."
             )
 
-        import onnxruntime as ort
-        self._session = ort.InferenceSession(str(model_p))
+        from fretwise.ml.runtime import create_cpu_session
+
+        self._session = create_cpu_session(model_p)
         self._input_name = self._session.get_inputs()[0].name
 
     def predict_fingers(
@@ -704,8 +705,9 @@ class LearnedPlayerCost(PlayerCostModel):
                 f"_PHASE3_FEATURE_NAMES with {spec_path}::feature_names."
             )
 
-        import onnxruntime as ort
-        self._session = ort.InferenceSession(str(model_p))
+        from fretwise.ml.runtime import create_cpu_session
+
+        self._session = create_cpu_session(model_p)
         self._input_name = self._session.get_inputs()[0].name
         # Output 0 = labels (int64), output 1 = probabilities (float32[N, 5]).
         # We always want probabilities for cost computation.

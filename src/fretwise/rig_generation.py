@@ -60,8 +60,8 @@ DEFAULT_TIMEOUT_SECONDS = 300
 class RigGenerationError(Exception):
     """Raised when the wrapper fails, times out, or returns unusable output.
 
-    ``stderr`` carries the child process diagnostics when available so the caller
-    can surface them to the user without losing the previously stored rig.
+    ``stderr`` carries child-process diagnostics for server-side logging and tests.
+    Web callers must never reflect those diagnostics to clients.
     """
 
     def __init__(

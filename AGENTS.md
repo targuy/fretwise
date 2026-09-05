@@ -544,3 +544,10 @@ Stop: "stop caveman" or "normal mode"
 Auto-Clarity: drop caveman for security warnings, irreversible actions, user confused. Resume after.
 
 Boundaries: code/commits/PRs written normal.
+
+## Déploiement web mblanche
+
+Après chaque développement FretWise qui modifie le web ou le backend, charger
+`$fretwise-mblanche-deploy` avant clôture. Il impose préflight et vérification
+runtime; exécuter déploiement production seulement si demande inclut livraison,
+publication ou déploiement.

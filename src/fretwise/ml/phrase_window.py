@@ -382,7 +382,7 @@ class LearnedPhraseWindowFingerer:
         if spec_path:
             self._validate_spec(Path(spec_path))
 
-        import onnxruntime as ort
+        from fretwise.ml.runtime import create_cpu_session
 
         heads: dict[str, str] = manifest["heads"]
         model_dir = manifest_p.parent
@@ -392,11 +392,11 @@ class LearnedPhraseWindowFingerer:
             head_p = model_dir / head_file
             if not head_p.exists():
                 raise FileNotFoundError(f"Slot head not found: {head_p}")
-            self._slot_sessions.append(ort.InferenceSession(str(head_p)))
+            self._slot_sessions.append(create_cpu_session(head_p))
         anchor_p = model_dir / heads["anchor_head"]
         if not anchor_p.exists():
             raise FileNotFoundError(f"Anchor head not found: {anchor_p}")
-        self._anchor_session = ort.InferenceSession(str(anchor_p))
+        self._anchor_session = create_cpu_session(anchor_p)
 
         self._slot_inputs = [s.get_inputs()[0].name for s in self._slot_sessions]
         self._anchor_input = self._anchor_session.get_inputs()[0].name

@@ -37,6 +37,7 @@ from fretwise.export import (
 )
 from fretwise.export.gp_writer import fingerings_by_source_id, write_gp_with_fingerings
 from fretwise.generator import StateGenerator
+from fretwise.model_bundle import resolve_model_dir
 from fretwise.models import Finger, FingeringResult, FingeringState
 from fretwise.optimizer import ViterbiOptimizer
 from fretwise.parser import get_adapter
@@ -56,8 +57,7 @@ def _load_chord_finger_classifier() -> object | None:
     Returns None silently when the model file or onnxruntime are not available,
     so the CLI keeps working with the rule-based pipeline.
     """
-    from pathlib import Path
-    model_dir = Path(__file__).resolve().parents[2] / "data" / "models"
+    model_dir = resolve_model_dir()
     model_path = model_dir / "finger_classifier.onnx"
     spec_path = model_dir / "finger_classifier_spec.json"
     if not model_path.exists():
@@ -122,8 +122,7 @@ def _load_player_cost_model() -> object | None:
     contributes when the active CostWeights preset has ``gamma > 0``
     (performance / learning modes).
     """
-    from pathlib import Path
-    model_dir = Path(__file__).resolve().parents[2] / "data" / "models"
+    model_dir = resolve_model_dir()
     model_path = model_dir / "transition_cost_v3.onnx"
     spec_path = model_dir / "transition_cost_v3_spec.json"
     if not model_path.exists():
@@ -147,8 +146,7 @@ def _load_phrase_window_fingerer() -> LearnedPhraseWindowFingerer | None:
     silently when the bundle or onnxruntime are unavailable — the pipeline
     then stays rule-only.
     """
-    from pathlib import Path
-    model_dir = Path(__file__).resolve().parents[2] / "data" / "models"
+    model_dir = resolve_model_dir()
     manifest_path = model_dir / "phrase_window_fingering_v2_manifest.json"
     if not manifest_path.exists():
         return None
@@ -1185,7 +1183,7 @@ def _web_allowed_hosts(host: str) -> list[str] | None:
         return None  # create_app applies the loopback-only default / env var
     if host == "0.0.0.0":  # noqa: S104 - user explicitly opted into all interfaces
         click.echo(
-            "Warning: binding to 0.0.0.0 exposes the unauthenticated API on all "
+            "Warning: binding to 0.0.0.0 exposes the web service on all "
             "interfaces. Set FRETWISE_ALLOWED_HOSTS to the hostname(s) clients "
             "use (or '*' to disable the Host-header guard).",
             err=True,

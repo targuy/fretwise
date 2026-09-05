@@ -31,14 +31,23 @@ _DEFAULTS: dict[str, Any] = {
     "storage_s3": {},             # {bucket, prefix, endpoint_url, region}
     "storage_webdav": {},         # {base_url}
     "storage_gdrive": {},         # {folder_id}
-    # --- Local AI rig generation (see fretwise.rig_generation) ---
-    # All optional: "" / 0 means "use the wrapper/service default".
-    "rig_ai_provider": "",        # "" = wrapper default (ollama); else codex|lmstudio|openai|mcp
-    "rig_ai_python": "",          # "" = the running interpreter (sys.executable)
-    "rig_ai_tools_dir": "",       # "" = <repo>/tools
-    "rig_ai_timeout": 0,          # 0 = service default (300s)
     "gears_dir": "",              # "" = <repo>/data/gears (per-model rig sheets)
 }
+
+_ENVIRONMENT_SETTINGS = {
+    "partitions_dir": "FRETWISE_PARTITIONS_DIR",
+    "soundfonts_dir": "FRETWISE_SOUNDFONTS_DIR",
+    "gears_dir": "FRETWISE_GEARS_DIR",
+}
+
+
+def environment_overrides() -> dict[str, str]:
+    """Return deployment-owned settings supplied through environment variables."""
+    return {
+        key: value
+        for key, env_name in _ENVIRONMENT_SETTINGS.items()
+        if (value := os.environ.get(env_name, "").strip())
+    }
 
 
 def load() -> dict[str, Any]:
@@ -50,6 +59,9 @@ def load() -> dict[str, Any]:
             settings.update({k: v for k, v in data.items() if k in _DEFAULTS})
         except (json.JSONDecodeError, OSError):
             pass
+    # Deployment paths win over a persisted desktop config. This prevents a
+    # copied Windows config.json from redirecting a NAS container to stale paths.
+    settings.update(environment_overrides())
     return settings
 
 
@@ -57,8 +69,9 @@ def save(updates: dict[str, Any]) -> dict[str, Any]:
     """Save settings to disk. Returns merged settings."""
     current = load()
     valid_keys = set(_DEFAULTS)
+    locked_keys = set(environment_overrides())
     for k, v in updates.items():
-        if k in valid_keys:
+        if k in valid_keys and k not in locked_keys:
             current[k] = v
     _CONFIG_DIR.mkdir(parents=True, exist_ok=True)
     _CONFIG_FILE.write_text(json.dumps(current, indent=2, ensure_ascii=False), encoding="utf-8")

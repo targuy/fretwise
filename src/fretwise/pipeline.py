@@ -7,6 +7,7 @@ sorted by onset for rendering.
 
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 
 from fretwise.biomechanics import BiomechanicalReport, validate_fingering_results
@@ -33,6 +34,7 @@ from fretwise.scoring import (
 from fretwise.segmentation import Position, segment_into_positions
 
 _UNFINGERABLE_SOURCE_COST = 1_000_000.0
+_LOGGER = logging.getLogger(__name__)
 
 
 @dataclass(frozen=True)
@@ -285,9 +287,13 @@ def run_pipeline(
             resolve_phrase_window_fingers,
         )
         if isinstance(phrase_window_fingerer, LearnedPhraseWindowFingerer):
-            all_results = resolve_phrase_window_fingers(
-                all_results, phrase_window_fingerer, stats_out=pw_stats,
-            )
+            try:
+                all_results = resolve_phrase_window_fingers(
+                    all_results, phrase_window_fingerer, stats_out=pw_stats,
+                )
+            except Exception as exc:  # noqa: BLE001 - preserve rule-only result
+                _LOGGER.warning("Phrase-window CPU inference failed; using rules: %s", exc)
+                pw_stats["phrase_window_fallback"] = 1
 
     # Sedentary/planted fingers — read-only w.r.t. FingeringState.  Runs on the
     # merged, fully-resolved list so every active finger decision is final and
