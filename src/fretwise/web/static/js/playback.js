@@ -8,7 +8,10 @@
 // switch back to a previously loaded bank — skip the multi-hundred-MB download.
 // Bounded to ONE bank so we never retain 2× a 400 MB buffer; switching banks
 // drops the previous one. Module-level so it survives engine re-creation.
-const _SF2_BUFFER_CACHE = new Map();
+// Exported so other lightweight synth consumers (e.g. training.js's scale/
+// chord preview) can reuse an already-downloaded bank instead of re-fetching
+// a file that can run to hundreds of MB.
+export const SF2_BUFFER_CACHE = new Map();
 
 export class PlaybackEngine {
   /**
@@ -284,6 +287,46 @@ export class PlaybackEngine {
     const i = Math.max(0, Math.min(m, this.totalMeasures - 1));
     const spb = this._slotSecPerBeatBase[i];
     return (spb > 0 ? spb : (60 / this.tempo)) / this.speed;
+  }
+
+  /**
+   * Wall-clock seconds (same base as getCurrentTimeSec) for an absolute note
+   * onset expressed in note-onset units — i.e. the time base every `results[]`
+   * entry carries.
+   *
+   * Public because the listening module has to place the *expected* notes on
+   * exactly the clock the cursor runs on. Deriving them from a single average
+   * tempo, as the hand-viz payload does, would drift by a full beat on any
+   * score with a tempo change — and a scoring pass would blame the player for
+   * it. This walks the same per-measure timeline the scheduler uses.
+   *
+   * @param {number} onsetBeats absolute onset in note-onset (quarter-beat) units.
+   * @returns {number} seconds from the first rendered measure, current speed applied.
+   */
+  songSecForOnsetBeats(onsetBeats) {
+    this._ensureTimeline();
+    const target = onsetBeats - this._measureBaseBeat;
+    const starts = this._slotStartBeat;
+    let lo = 0;
+    let hi = starts.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi + 1) >> 1;
+      if (starts[mid] <= target) lo = mid; else hi = mid - 1;
+    }
+    const slot = Math.min(lo, this.totalMeasures - 1);
+    return this._measureStartSec(slot)
+      + (target - starts[slot]) * this._measureSecPerBeat(slot);
+  }
+
+  /**
+   * Cursor slot containing a song position — public counterpart of
+   * songSecForOnsetBeats, so a caller holding a time (a scoring verdict, a
+   * bookmark) can jump there without reaching into the timeline internals.
+   * @param {number} sec seconds from the first rendered measure.
+   * @returns {number} cursor slot index.
+   */
+  measureForSongSec(sec) {
+    return this._secToMeasure(sec);
   }
 
   /** AudioContext time at which song position `songSec` (speed-scaled seconds
@@ -1318,7 +1361,7 @@ export class PlaybackEngine {
       const tFetch = performance.now();
       const resp = await fetch('/api/soundfont');
       if (!resp.ok) throw new Error(`SF2 fetch: HTTP ${resp.status}`);
-      let sf2Buffer = _SF2_BUFFER_CACHE.get(resp.url);
+      let sf2Buffer = SF2_BUFFER_CACHE.get(resp.url);
       if (sf2Buffer) {
         this.onSynthProgress?.(1, (sf2Buffer.byteLength / 1048576).toFixed(1),
           (sf2Buffer.byteLength / 1048576).toFixed(1));
@@ -1326,8 +1369,8 @@ export class PlaybackEngine {
           + `(${(sf2Buffer.byteLength / 1048576).toFixed(1)} MB, no download)`);
       } else {
         sf2Buffer = await this._fetchWithProgress(resp);
-        _SF2_BUFFER_CACHE.clear();                       // keep at most one bank
-        _SF2_BUFFER_CACHE.set(resp.url, sf2Buffer);
+        SF2_BUFFER_CACHE.clear();                       // keep at most one bank
+        SF2_BUFFER_CACHE.set(resp.url, sf2Buffer);
         console.log(`[FretWise] SF2 downloaded in ${(performance.now() - tFetch).toFixed(0)} ms: `
           + `${resp.url} (${(sf2Buffer.byteLength / 1048576).toFixed(1)} MB)`);
       }

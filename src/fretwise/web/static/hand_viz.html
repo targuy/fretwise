@@ -25,6 +25,43 @@
     #hud .artist { color: var(--muted); font-size: 14px; }
     #hud .meta { color: var(--muted); font-size: 13px; }
     #hud .spacer { flex: 1; }
+    #hand-lookahead {
+      display: none; align-items: center; gap: 12px;
+      margin: 0 0 12px; padding: 8px 10px;
+      background: #17191d; border: 1px solid #2b2e35; border-radius: 7px;
+      overflow: hidden;
+    }
+    #hand-lookahead[data-ready="true"] { display: flex; }
+    .lookahead-label {
+      flex: 0 0 auto; color: #b9bec6; font-size: 11px; font-weight: 700;
+      letter-spacing: 0.08em; text-transform: uppercase; writing-mode: vertical-rl;
+      transform: rotate(180deg);
+    }
+    #lookahead-items {
+      display: flex; align-items: stretch; gap: 7px; min-width: 0;
+      overflow: hidden;
+    }
+    .lookahead-event {
+      flex: 0 0 52px; min-width: 52px; padding: 4px 3px 5px;
+      background: #101216; border: 1px solid #30343b; border-radius: 5px;
+      text-align: center;
+    }
+    .lookahead-event.near { border-color: #f4a03a; }
+    .lookahead-name {
+      display: block; overflow: hidden; color: #eef0f3; font-size: 11px;
+      font-weight: 700; line-height: 14px; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .lookahead-time { display: block; color: #8f969f; font-size: 10px; line-height: 12px; }
+    .lookahead-strings {
+      display: grid; grid-template-rows: repeat(6, 1fr); gap: 2px; margin-top: 4px;
+    }
+    .lookahead-dot {
+      display: block; width: 14px; height: 14px; margin: 0 auto;
+      border: 1px solid #4a4f58; border-radius: 50%; box-sizing: border-box;
+      color: #141518; font-size: 9px; font-weight: 800; line-height: 12px;
+    }
+    .lookahead-dot.fretted { background: #f4a03a; border-color: #f7bd68; }
+    .lookahead-dot.open { background: #4b83d4; border-color: #74a6ea; }
     button.ctrl {
       background: #2c2f34; color: var(--text);
       border: 1px solid #3b3e44; border-radius: 6px;
@@ -111,6 +148,10 @@
       #hud { padding-bottom: 6px; gap: 8px; }
       #hud .title { font-size: 16px; }
       #hud .artist, #hud .meta, #hud-track, #legend, #notelog { display: none; }
+      #hand-lookahead { margin-bottom: 8px; padding: 5px 7px; gap: 7px; }
+      .lookahead-label { font-size: 9px; }
+      .lookahead-event { flex-basis: 46px; min-width: 46px; padding: 3px 2px; }
+      .lookahead-dot { width: 14px; height: 14px; font-size: 9px; line-height: 12px; }
       button.ctrl { font-size: 12px; padding: 4px 10px; }
       #scene-wrap { padding: 6px; }
       #timeline { margin-top: 8px; }
@@ -131,6 +172,10 @@
       background: #17191d;
       border-bottom: 1px solid #2b2e35;
       flex: 0 0 auto;
+    }
+    body.dedicated-3d #hand-lookahead {
+      margin: 0; padding: 5px 14px; border: 0; border-bottom: 1px solid #2b2e35;
+      border-radius: 0; background: #121418; flex: 0 0 132px;
     }
     body.dedicated-3d #btn-play,
     body.dedicated-3d #btn-rewind,
@@ -176,6 +221,11 @@
     <button class="ctrl" id="btn-3d" title="Basculer entre la vue 3D et la vue 2D">3D : off</button>
     <button class="ctrl primary" id="btn-play">Lecture</button>
   </div>
+
+  <section id="hand-lookahead" aria-label="Prochaines notes et accords">
+    <div class="lookahead-label">À venir</div>
+    <div id="lookahead-items"></div>
+  </section>
 
   <div id="scene-wrap">
     <!-- 3D mount (Milestone 5).  Empty + hidden by default; only populated when
@@ -646,6 +696,34 @@ function buildChordGroups(frames) {
     while (i < frames.length && frames[i].hand_position === hp) i++;
   }
   return groups;
+}
+
+/* Group the next musical attacks for the compact preview outside the animation.
+   It deliberately uses the same frame payload as the 2D and 3D hand rigs. */
+function buildLookaheadGroups(frames) {
+  const sorted = [...frames].sort((a, b) => a.onset_sec - b.onset_sec);
+  const groups = [];
+  const ONSET_EPSILON = 0.03;
+  for (const frame of sorted) {
+    const onset = Number(frame.onset_sec) || 0;
+    let group = groups[groups.length - 1];
+    if (!group || Math.abs(group.startSec - onset) > ONSET_EPSILON) {
+      group = { startSec: onset, frames: [] };
+      groups.push(group);
+    }
+    group.frames.push(frame);
+  }
+  return groups.map((group, index) => {
+    const pitches = group.frames.map((frame) => Number.isFinite(frame.pitch)
+      ? frame.pitch
+      : midiForPosition(frame.string, frame.fret));
+    const pcs = [...new Set(pitches.map((pitch) => ((pitch % 12) + 12) % 12))];
+    const firstPitch = pitches[0] || 60;
+    const name = group.frames.length > 1
+      ? (detectChordName(pcs) || "Accord")
+      : NOTE_NAMES[((firstPitch % 12) + 12) % 12] + (Math.floor(firstPitch / 12) - 1);
+    return { ...group, id: index, name };
+  });
 }
 
 /* ---------- Fretboard maths ---------------------------------------------- */
@@ -2320,6 +2398,7 @@ function formatHUD(data) {
 let CURRENT_DATA         = null;  // current dataset
 let CURRENT_SIM          = null;  // hand simulator bound to that data
 let CURRENT_CHORD_GROUPS = [];    // pre-computed chord groups for current data
+let CURRENT_LOOKAHEAD_GROUPS = []; // attacks shown outside the animation
 let CURRENT_TOTAL        = 10;    // current max_seconds
 let playT                = 0;     // internal clock (standalone mode)
 let playing              = true;
@@ -2757,6 +2836,7 @@ function installData(data) {
   configureGeometry(data);
   CURRENT_SIM          = new HandSimulator();
   CURRENT_CHORD_GROUPS = (data && data.frames) ? buildChordGroups(data.frames) : [];
+  CURRENT_LOOKAHEAD_GROUPS = (data && data.frames) ? buildLookaheadGroups(data.frames) : [];
   CURRENT_TOTAL        = (data && data.meta && data.meta.max_seconds) || 10;
   playT                = 0;
   EXT_SYNCED           = !!(data && data.meta && data.meta.synced);
@@ -2935,6 +3015,52 @@ window.addEventListener("message", (ev) => {
   const _flashEn  = chordFlash && chordFlash.querySelector ? chordFlash.querySelector(".cf-en") : null;
   const _flashFr  = chordFlash && chordFlash.querySelector ? chordFlash.querySelector(".cf-fr") : null;
   let   _flashKey = null;
+  const handLookahead = document.getElementById("hand-lookahead");
+  const lookaheadItems = document.getElementById("lookahead-items");
+  let _lookaheadKey = null;
+
+  function lookaheadDots(frames) {
+    const byString = new Map();
+    for (const frame of frames) {
+      if (!byString.has(frame.string)) byString.set(frame.string, frame);
+    }
+    let html = "";
+    for (let string = 1; string <= 6; string++) {
+      const frame = byString.get(string);
+      const fret = frame && Number(frame.fret);
+      const state = frame ? (fret === 0 ? " open" : " fretted") : "";
+      const label = frame ? String(Math.max(0, fret)) : "";
+      html += `<span class="lookahead-dot${state}">${label}</span>`;
+    }
+    return html;
+  }
+
+  function updateLookahead(tNow, groups) {
+    if (!handLookahead || !lookaheadItems) return;
+    const next = (groups || []).filter((group) => group.startSec >= tNow - 0.02).slice(0, 4);
+    if (!next.length) {
+      handLookahead.dataset.ready = "false";
+      _lookaheadKey = null;
+      return;
+    }
+    const key = next.map((group) => group.id).join(",");
+    if (key === _lookaheadKey) {
+      lookaheadItems.querySelectorAll(".lookahead-time").forEach((node, index) => {
+        node.textContent = `+${Math.max(0, next[index].startSec - tNow).toFixed(1)}s`;
+      });
+      return;
+    }
+    _lookaheadKey = key;
+    handLookahead.dataset.ready = "true";
+    lookaheadItems.innerHTML = next.map((group, index) => {
+      const lead = Math.max(0, group.startSec - tNow);
+      const near = index === 0 ? " near" : "";
+      return `<div class="lookahead-event${near}"><span class="lookahead-name">${group.name}</span>` +
+        `<span class="lookahead-time">+${lead.toFixed(1)}s</span>` +
+        `<div class="lookahead-strings">${lookaheadDots(group.frames)}</div></div>`;
+    }).join("");
+  }
+
   function updateChordFlash(tNow, chordGroups) {
     if (!chordGroups || !chordGroups.length) { hideChordFlash(); return; }
     let cg = null;
@@ -3085,6 +3211,7 @@ window.addEventListener("message", (ev) => {
         lastHudFrameMs = now;
         // Chord-name flash: HTML overlay, visible in both SVG (2D) and 3D modes.
         updateChordFlash(tNow, CURRENT_CHORD_GROUPS);
+        updateLookahead(tNow, CURRENT_LOOKAHEAD_GROUPS);
         tlFill.style.width = (100 * Math.min(1, tNow / Math.max(1, CURRENT_TOTAL))) + "%";
       }
       if (updateLog) {
