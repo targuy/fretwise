@@ -69,6 +69,9 @@ class GuitarProAdapter(BaseParser):
     #: Per-measure time signatures: {1-based measure number → (numerator, denominator)}.
     #: Set after each call to parse().
     measure_time_signatures: dict[int, tuple[int, int]] = {}
+    #: Key signature as fifths (+sharps/-flats), read from the first measure header.
+    #: Set after each call to parse().
+    key_signature_fifths: int = 0
 
     def supports(self, path: Path) -> bool:
         """Return True for .gp3, .gp4, and .gp5 files."""
@@ -119,6 +122,7 @@ class GuitarProAdapter(BaseParser):
         self.section_markers = _extract_section_markers(track)
         self.chord_markers = _extract_beat_chord_markers(song, track)
         self.measure_time_signatures = _extract_measure_time_signatures(track)
+        self.key_signature_fifths = _extract_key_signature_fifths(track)
         return _extract_note_events(song, track)
 
 
@@ -253,6 +257,23 @@ def _measure_tempo(
         return float(measure.header.tempo.value)
     except AttributeError:
         return current_tempo
+
+
+def _extract_key_signature_fifths(track: guitarpro.Track) -> int:  # type: ignore[name-defined]
+    """Return the key signature as fifths from the first measure header.
+
+    ``MeasureHeader.keySignature`` is a ``KeySignature`` enum whose ``.value``
+    is ``(fifths, isMinor)`` — positive fifths mean sharps, negative mean
+    flats, matching the SMuFL/music21 convention (e.g. +2 = D major).
+    Mode (major/minor) is not distinguished, matching the GPIF adapter.
+    """
+    if not track.measures:
+        return 0
+    try:
+        fifths, _is_minor = track.measures[0].header.keySignature.value
+        return int(fifths)
+    except (AttributeError, IndexError, TypeError, ValueError):
+        return 0
 
 
 def _duration_in_beats(duration: guitarpro.Duration) -> float:  # type: ignore[name-defined]

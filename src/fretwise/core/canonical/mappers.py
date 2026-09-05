@@ -192,6 +192,24 @@ def _fifths_to_key_signature(fifths: int) -> KeySignature:
     return KeySignature(tonic=tonic, mode="major", fifths=fifths)
 
 
+# French tonic names for display, keyed by circle-of-fifths position.
+_FRENCH_SHARP_TONICS = ["Do", "Sol", "Ré", "La", "Mi", "Si", "Fa#", "Do#"]
+_FRENCH_FLAT_TONICS = ["Do", "Fa", "Sib", "Mib", "Lab", "Réb", "Solb", "Dob"]
+
+
+def key_signature_display_name(fifths: int) -> str:
+    """Return a French display label for a key signature, e.g. "Sib majeur".
+
+    Mode is always "majeur" — the relative minor is not distinguished
+    (matching the fifths-only key extraction from GP3/4/5/7/8 sources).
+    """
+    if fifths >= 0:
+        tonic = _FRENCH_SHARP_TONICS[min(fifths, len(_FRENCH_SHARP_TONICS) - 1)]
+    else:
+        tonic = _FRENCH_FLAT_TONICS[min(abs(fifths), len(_FRENCH_FLAT_TONICS) - 1)]
+    return f"{tonic} majeur"
+
+
 def _measure_index_for_note(note: LegacyNoteEvent, *, beats_per_measure: int) -> int:
     if note.measure_index is not None and note.measure_index > 0:
         return int(note.measure_index) - 1

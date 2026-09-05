@@ -44,6 +44,7 @@ from fretwise.control_surface import (
 )
 from fretwise.core import run_core_pipeline_from_raw
 from fretwise.core.backends import render_scene_to_pdf_bytes
+from fretwise.core.canonical.mappers import key_signature_display_name
 from fretwise.core.graphics import RepresentationMode
 from fretwise.core.ingest import legacy_parse_to_raw_score
 from fretwise.core.notation_mode import is_valid_mode as _is_valid_notation_mode
@@ -1160,6 +1161,8 @@ def _register_routes(app: FastAPI) -> None:
             render_error = str(exc)
 
         auto_title, auto_artist = _infer_title_artist(filepath)
+        key_signature_fifths = int(getattr(base["adapter"], "key_signature_fifths", 0) or 0)
+        key_signature_name = key_signature_display_name(key_signature_fifths)
 
         serialized_results = _annotate_serialized_review_status(
             serialized_results, audit,
@@ -1169,6 +1172,8 @@ def _register_routes(app: FastAPI) -> None:
         payload: dict[str, Any] = {
             "title": auto_title,
             "artist": auto_artist,
+            "key_signature_fifths": key_signature_fifths,
+            "key_signature_name": key_signature_name,
             "track_name": base["track_name"],
             "midi_program": base["midi_program"],
             "kind": base["kind"],

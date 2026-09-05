@@ -317,6 +317,7 @@ const rngZoom       = $('#rng-zoom');
 const zoomLabel     = $('#zoom-label');
 const songTitle     = $('#song-title');
 const songArtist    = $('#song-artist');
+const songKey       = $('#song-key');
 const trackBadge    = $('#meta-instrument');
 const metaMode      = $('#meta-mode');
 const metaViewMode  = $('#meta-view-mode');
@@ -2501,6 +2502,14 @@ function initRenderer(data) {
   if (data.title) { songTitle.textContent = data.title; if (headerMetaTitle) headerMetaTitle.textContent = data.title; }
   _updateHeaderFavButton();
   if (data.artist) { songArtist.textContent = data.artist; if (headerMetaTrack) headerMetaTrack.textContent = data.artist; }
+  if (songKey) {
+    if (data.key_signature_name) {
+      songKey.textContent = data.key_signature_name;
+      songKey.style.display = '';
+    } else {
+      songKey.style.display = 'none';
+    }
+  }
   _setTempoText(data.tempo || 120);
   if (metaMode) metaMode.textContent = 'PERFORMANCE';
 
