@@ -95,7 +95,7 @@ provider at all**.
 
 ```
 FRETWISE_ADMIN=benoit
-FRETWISE_ADMIN_PASSWD=pima.6212
+FRETWISE_ADMIN_PASSWD=<strong-random-password>
 ```
 
 The username is the login identifier and the password is read **only** from the

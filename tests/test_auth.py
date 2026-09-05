@@ -243,15 +243,15 @@ def test_load_auth_config_admin_username_password(monkeypatch: Any) -> None:
     ):
         monkeypatch.delenv(var, raising=False)
     monkeypatch.setenv("FRETWISE_ADMIN", "Benoit")
-    monkeypatch.setenv("FRETWISE_ADMIN_PASSWD", "pima.6212")
+    monkeypatch.setenv("FRETWISE_ADMIN_PASSWD", "test-admin-password-47!")
 
     cfg = load_auth_config()
     assert cfg.enabled is True
     assert cfg.has_local_admin is True
     assert cfg.admin_email == "benoit"                  # username, normalized, used as key
     assert cfg.is_admin_email("benoit") is True
-    assert cfg.admin_password_hash and cfg.admin_password_hash != "pima.6212"
-    assert verify_password("pima.6212", cfg.admin_password_hash) is True
+    assert cfg.admin_password_hash and cfg.admin_password_hash != "test-admin-password-47!"
+    assert verify_password("test-admin-password-47!", cfg.admin_password_hash) is True
     assert verify_password("wrong", cfg.admin_password_hash) is False
 
 

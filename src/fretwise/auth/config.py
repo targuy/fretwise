@@ -12,6 +12,14 @@ Relevant environment variables::
     FRETWISE_BASE_URL            public base URL, for OAuth redirect_uri
     FRETWISE_DATA_DIR            where users + encrypted secrets live
     FRETWISE_STORAGE_CACHE_ROOT  transient per-user download cache root
+    FRETWISE_SESSION_COOKIE_NAME  session cookie name (default: fretwise-session)
+    FRETWISE_AUTH_SESSION_MAX_AGE_SECONDS
+                                 max-age in seconds for session cookie
+    FRETWISE_AUTH_LOGIN_ATTEMPTS  max failed login attempts before temporary lockout
+    FRETWISE_AUTH_LOGIN_WINDOW_SECONDS
+                                 window (seconds) to count failed attempts
+    FRETWISE_AUTH_LOGIN_LOCKOUT_SECONDS
+                                 lockout duration after failed-attempt threshold
 
     # Local admin login (no Google/OIDC required)
     FRETWISE_ADMIN_EMAIL         email for the pre-seeded local admin account
@@ -46,6 +54,16 @@ class OIDCProvider:
 
 def _env_bool(key: str) -> bool:
     return os.environ.get(key, "").strip().lower() in {"1", "true", "yes", "on"}
+
+
+def _env_int(key: str, default: int) -> int:
+    raw = os.environ.get(key, "").strip()
+    if not raw:
+        return default
+    value = int(raw)
+    if value < 0:
+        raise ValueError(f"{key} must be >= 0")
+    return value
 
 
 def _load_providers() -> list[OIDCProvider]:
@@ -98,6 +116,12 @@ class AuthConfig:
     # ensured on startup so the app is usable without any OIDC provider.
     admin_email: str = ""
     admin_password_hash: str = ""
+    # Session & auth-hardening.
+    session_cookie_name: str = "fretwise-session"
+    session_max_age_seconds: int = 12 * 60 * 60
+    login_attempts: int = 5
+    login_window_seconds: int = 60 * 5
+    login_lockout_seconds: int = 60 * 10
 
     def provider(self, name: str) -> OIDCProvider | None:
         for p in self.providers:
@@ -120,7 +144,7 @@ def load_auth_config() -> AuthConfig:
     # Local admin account, configured in the (gitignored) .env. Primary form is a
     # plain username + password:
     #     FRETWISE_ADMIN=benoit
-    #     FRETWISE_ADMIN_PASSWD=pima.6212
+    #     FRETWISE_ADMIN_PASSWD=<strong-random-password>
     # The plaintext is read only from the environment (never committed) and hashed
     # here at startup, so the on-disk account store holds a hash, not the password.
     # The username is used directly as the local-login identifier (the email/
@@ -159,6 +183,14 @@ def load_auth_config() -> AuthConfig:
         admin_emails=frozenset(admin_emails),
         admin_email=admin_email,
         admin_password_hash=admin_password_hash,
+        session_cookie_name=os.environ.get("FRETWISE_SESSION_COOKIE_NAME", "fretwise-session").strip()
+        or "fretwise-session",
+        session_max_age_seconds=_env_int(
+            "FRETWISE_AUTH_SESSION_MAX_AGE_SECONDS", 12 * 60 * 60,
+        ),
+        login_attempts=_env_int("FRETWISE_AUTH_LOGIN_ATTEMPTS", 5),
+        login_window_seconds=_env_int("FRETWISE_AUTH_LOGIN_WINDOW_SECONDS", 60 * 5),
+        login_lockout_seconds=_env_int("FRETWISE_AUTH_LOGIN_LOCKOUT_SECONDS", 60 * 10),
     )
 
 

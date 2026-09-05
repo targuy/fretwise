@@ -76,6 +76,8 @@
           if (resendRow) resendRow.hidden = false;
         } else if (status === 401) {
           showBanner("error", data.detail || "Invalid email or password.");
+        } else if (status === 429) {
+          showBanner("error", data.detail || "Too many login attempts. Please retry later.");
         } else {
           showBanner("error", data.detail || "Sign in failed. Please try again.");
         }

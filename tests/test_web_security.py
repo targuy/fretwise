@@ -155,6 +155,9 @@ def _clear_auth_env(monkeypatch: Any) -> None:
         "FRETWISE_OIDC_ISSUER", "FRETWISE_OIDC_CLIENT_ID", "FRETWISE_OIDC_CLIENT_SECRET",
         "FRETWISE_ADMIN_EMAILS", "FRETWISE_ADMIN_EMAIL", "FRETWISE_ADMIN_PASSWORD_HASH",
         "FRETWISE_SECRET_KEY", "FRETWISE_BASE_URL",
+        "FRETWISE_SESSION_COOKIE_NAME", "FRETWISE_AUTH_SESSION_MAX_AGE_SECONDS",
+        "FRETWISE_AUTH_LOGIN_ATTEMPTS", "FRETWISE_AUTH_LOGIN_WINDOW_SECONDS",
+        "FRETWISE_AUTH_LOGIN_LOCKOUT_SECONDS",
     ):
         monkeypatch.delenv(var, raising=False)
 
@@ -203,6 +206,32 @@ def test_local_admin_no_oidc_seeds_admin_and_logs_in(monkeypatch: Any, tmp_path:
         assert me["authenticated"] is True and me["is_admin"] is True
         # Admin gets the server-local library as a storage option.
         assert "local" in me["available_backends"]
+
+
+def test_local_admin_login_lockout(monkeypatch: Any, tmp_path: Path) -> None:
+    """After repeated failed passwords, login must return 429 with Retry-After."""
+    pytest.importorskip("itsdangerous")
+    from starlette.testclient import TestClient
+    from fretwise.auth.passwords import hash_password
+
+    _clear_auth_env(monkeypatch)
+    monkeypatch.setenv("FRETWISE_SECRET_KEY", "test-secret-key")
+    monkeypatch.setenv("FRETWISE_DATA_DIR", str(tmp_path / "data"))
+    monkeypatch.setenv("FRETWISE_ADMIN_EMAIL", "admin@example.com")
+    monkeypatch.setenv("FRETWISE_ADMIN_PASSWORD_HASH", hash_password("test-admin-password"))
+    monkeypatch.setenv("FRETWISE_AUTH_LOGIN_ATTEMPTS", "3")
+    monkeypatch.setenv("FRETWISE_AUTH_LOGIN_WINDOW_SECONDS", "120")
+    monkeypatch.setenv("FRETWISE_AUTH_LOGIN_LOCKOUT_SECONDS", "5")
+
+    app = create_app(tmp_path / "partitions")
+    with TestClient(app) as client:
+        bad_payload = {"email": "admin@example.com", "password": "wrong-password"}
+        for _ in range(3):
+            bad = client.post("/api/auth/login", json=bad_payload)
+            assert bad.status_code == 401
+        locked = client.post("/api/auth/login", json=bad_payload)
+        assert locked.status_code == 429
+        assert int(locked.headers["Retry-After"]) > 0
 
 
 def test_local_admin_reseed_is_idempotent_across_app_creates(

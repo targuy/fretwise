@@ -11,8 +11,11 @@ from __future__ import annotations
 
 import json
 import logging
+import threading
+from collections import deque
 from contextvars import ContextVar
 from pathlib import Path
+from time import time
 from typing import Any
 
 # FastAPI is always available here: this module is only imported by the web app
@@ -43,6 +46,9 @@ _STATIC_DIR = Path(__file__).resolve().parents[1] / "web" / "static"
 # middleware below (which runs in the same task as the endpoint, so the value
 # reaches both async and threadpool/sync endpoints).
 _REQUEST_USER: ContextVar[User | None] = ContextVar("fretwise_request_user", default=None)
+_FAILED_LOGINS: dict[str, deque[float]] = {}
+_LOCKED_LOGINS: dict[str, float] = {}
+_FAILED_LOGIN_LOCK = threading.Lock()
 
 # /api paths reachable without authentication when multi-user mode is on.
 _PUBLIC_API_PATHS = frozenset({
@@ -57,6 +63,58 @@ _PUBLIC_API_PATHS = frozenset({
 def current_request_user() -> User | None:
     """Return the user authenticated for the current request, if any."""
     return _REQUEST_USER.get()
+
+
+def _login_key(request: Request, email: str) -> str:
+    login = normalize_email(email) or "anonymous"
+    ip = request.client.host if request.client and request.client.host else "unknown"
+    return f"{ip}|{login}"
+
+
+def _login_lockout_remaining(key: str, now: float, config: AuthConfig) -> int:
+    if (
+        config.login_attempts <= 0
+        or config.login_window_seconds <= 0
+        or config.login_lockout_seconds <= 0
+    ):
+        return 0
+    with _FAILED_LOGIN_LOCK:
+        until = _LOCKED_LOGINS.get(key)
+        if until is None:
+            return 0
+        remaining = int(until - now)
+        if remaining <= 0:
+            _LOCKED_LOGINS.pop(key, None)
+            _FAILED_LOGINS.pop(key, None)
+            return 0
+        return remaining
+
+
+def _register_login_failure(key: str, now: float, config: AuthConfig) -> None:
+    if (
+        config.login_attempts <= 0
+        or config.login_window_seconds <= 0
+        or config.login_lockout_seconds <= 0
+    ):
+        return
+    with _FAILED_LOGIN_LOCK:
+        attempts = _FAILED_LOGINS.get(key)
+        if attempts is None:
+            attempts = deque()
+            _FAILED_LOGINS[key] = attempts
+        cutoff = now - config.login_window_seconds
+        while attempts and attempts[0] < cutoff:
+            attempts.popleft()
+        attempts.append(now)
+        if len(attempts) >= config.login_attempts:
+            _FAILED_LOGINS.pop(key, None)
+            _LOCKED_LOGINS[key] = now + config.login_lockout_seconds
+
+
+def _register_login_success(key: str) -> None:
+    with _FAILED_LOGIN_LOCK:
+        _FAILED_LOGINS.pop(key, None)
+        _LOCKED_LOGINS.pop(key, None)
 
 
 class UserContextMiddleware:
@@ -154,6 +212,8 @@ def setup_auth(
     app.add_middleware(
         SessionMiddleware,
         secret_key=config.secret_key,
+        session_cookie=config.session_cookie_name,
+        max_age=config.session_max_age_seconds,
         same_site="lax",
         https_only=config.base_url.startswith("https://"),
     )
@@ -236,14 +296,26 @@ def setup_auth(
             raise HTTPException(400, "Invalid JSON body")
         email = normalize_email(str(body.get("email", "")))
         password = str(body.get("password", ""))
+        login_key = _login_key(request, email)
+        lock_remaining = _login_lockout_remaining(login_key, time(), config)
+        if lock_remaining:
+            raise HTTPException(
+                429,
+                "Too many failed login attempts. Retry later.",
+                headers={"Retry-After": str(lock_remaining)},
+            )
         existing = account_store.get(email)
         if existing is not None and not existing.is_active and verify_password(
             password, existing.password_hash
         ):
+            _register_login_failure(login_key, time(), config)
             raise HTTPException(403, "Account not activated — check your email.")
         account = account_store.verify_login(email, password)
         if account is None:
+            _register_login_failure(login_key, time(), config)
             raise HTTPException(401, "Invalid email or password.")
+        request.session.clear()
+        _register_login_success(login_key)
         user = user_store.get_or_create(
             account.user_id, email=account.email,
             is_admin=config.is_admin_email(account.email),
