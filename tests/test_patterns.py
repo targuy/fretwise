@@ -6,13 +6,14 @@ import pytest
 
 from fretwise.models import Finger, FingeringState, NoteEvent
 from fretwise.patterns import PatternMatcher
-from fretwise.patterns.chord_library import lookup_chord
+from fretwise.patterns.chord_library import all_voicings, lookup_chord
 from fretwise.patterns.chord_recognition import recognize_chord
 from fretwise.patterns.scale_library import (
     ScaleMatch,
     get_scale,
     list_scales,
     recognize_scale,
+    scale_boxes_for_root,
 )
 
 
@@ -195,6 +196,41 @@ class TestChordLibrary:
         assert diagram.frets == [3, 0, 0, 0, 2, 3]
 
 
+class TestAllVoicings:
+    def test_open_chord_leads_with_the_curated_shape(self) -> None:
+        """E has a curated open voicing — it must come first (lowest position)."""
+        voicings = all_voicings("E")
+        assert len(voicings) >= 2
+        assert voicings[0].frets == [0, 0, 1, 2, 2, 0]
+        assert voicings[0].base_fret == 1
+        assert all(v.base_fret >= voicings[0].base_fret for v in voicings)
+
+    def test_no_open_chord_still_offers_barre_positions(self) -> None:
+        """C#m has no curated open voicing — both movable families must appear."""
+        voicings = all_voicings("C#m")
+        assert len(voicings) == 2
+        # E-shape (root on string 6) and A-shape (root on string 5) land at
+        # different anchor frets for the same chord.
+        assert {v.base_fret for v in voicings} == {4, 9}
+
+    def test_sorted_by_base_fret_ascending(self) -> None:
+        voicings = all_voicings("Bbsus4")
+        frets = [v.base_fret for v in voicings]
+        assert frets == sorted(frets)
+
+    def test_unknown_chord_returns_empty(self) -> None:
+        assert all_voicings("Xdim#11b9") == []
+
+    def test_every_voicing_is_playable_by_lookup_chord_semantics(self) -> None:
+        """Each returned diagram must be internally consistent: one finger per
+        distinct fret, frets aligned with fingers, no fret below the barre."""
+        for voicing in all_voicings("F#m7"):
+            fretted = [f for f in voicing.frets if f > 0]
+            if fretted:
+                assert min(fretted) == voicing.base_fret or voicing.base_fret == 1
+            assert len(voicing.fingers) == len(voicing.frets)
+
+
 # ---------------------------------------------------------------------------
 # Scale library
 # ---------------------------------------------------------------------------
@@ -209,13 +245,11 @@ class TestScaleLibrary:
         s = get_scale("major")
         assert s is not None
         assert s.intervals == frozenset({0, 2, 4, 5, 7, 9, 11})
-        assert len(s.positions) >= 1
 
     def test_get_scale_minor_pentatonic(self) -> None:
         s = get_scale("minor_pentatonic")
         assert s is not None
         assert s.intervals == frozenset({0, 3, 5, 7, 10})
-        assert len(s.positions) >= 3  # 5 box positions
 
     def test_get_scale_blues(self) -> None:
         s = get_scale("blues")
@@ -224,6 +258,143 @@ class TestScaleLibrary:
 
     def test_get_scale_nonexistent(self) -> None:
         assert get_scale("nonexistent_scale") is None
+
+
+# ---------------------------------------------------------------------------
+# Scale box transposition (training module)
+# ---------------------------------------------------------------------------
+
+
+_OPEN_PC = {1: 4, 2: 11, 3: 7, 4: 2, 5: 9, 6: 4}
+_ROOT_PC = {
+    "C": 0, "C#": 1, "D": 2, "D#": 3, "E": 4, "F": 5,
+    "F#": 6, "G": 7, "G#": 8, "A": 9, "A#": 10, "B": 11,
+}
+
+
+class TestScaleBoxesForRoot:
+    def test_unknown_scale_returns_none(self) -> None:
+        assert scale_boxes_for_root("nonexistent_scale", "E") is None
+
+    def test_unknown_root_returns_none(self) -> None:
+        assert scale_boxes_for_root("major", "H") is None
+
+    @pytest.mark.parametrize("scale_name", list_scales())
+    @pytest.mark.parametrize("root", ["C", "E", "G", "A#"])
+    def test_every_generated_note_is_in_scale(self, scale_name: str, root: str) -> None:
+        """No box may contain a note outside the scale.
+
+        This is the invariant the hand-authored ``positions:`` YAML violated:
+        it had no consumer, so nothing ever checked it against the intervals.
+        """
+        scale = get_scale(scale_name)
+        assert scale is not None
+        allowed = {(_ROOT_PC[root] + i) % 12 for i in scale.intervals}
+        boxes = scale_boxes_for_root(scale_name, root)
+        assert boxes
+        for box in boxes:
+            for note in box["notes"]:
+                pc = (_OPEN_PC[note["string"]] + note["fret"]) % 12
+                assert pc in allowed, (
+                    f"{scale_name}/{box['name']} string {note['string']} "
+                    f"fret {note['fret']} is out of scale"
+                )
+
+    def test_g_major_position_1_matches_known_box(self) -> None:
+        # Classic G major position 1: low-E string fretted at 3, 5, 7.
+        boxes = scale_boxes_for_root("major", "G")
+        assert boxes is not None
+        pos1 = next(b for b in boxes if b["name"] == "position_1")
+        low_e_frets = sorted(n["fret"] for n in pos1["notes"] if n["string"] == 6)
+        assert low_e_frets == [3, 5, 7]
+
+    def test_a_minor_pentatonic_box_1_is_the_textbook_shape(self) -> None:
+        """The most-practised shape on the instrument — pin it exactly."""
+        boxes = scale_boxes_for_root("minor_pentatonic", "A")
+        assert boxes is not None
+        pos1 = boxes[0]
+        by_string = {
+            s: sorted(n["fret"] for n in pos1["notes"] if n["string"] == s)
+            for s in range(1, 7)
+        }
+        assert by_string == {
+            6: [5, 8], 5: [5, 7], 4: [5, 7], 3: [5, 7], 2: [5, 8], 1: [5, 8],
+        }
+
+    def test_position_1_starts_on_the_tonic(self) -> None:
+        for scale_name in ("major", "minor_pentatonic", "blues"):
+            boxes = scale_boxes_for_root(scale_name, "G")
+            assert boxes
+            low_e = min(n["fret"] for n in boxes[0]["notes"] if n["string"] == 6)
+            assert (_OPEN_PC[6] + low_e) % 12 == _ROOT_PC["G"]
+
+    @pytest.mark.parametrize("scale_name", list_scales())
+    @pytest.mark.parametrize("root", ["C", "E", "G", "A#"])
+    def test_boxes_stay_within_a_hand_span(self, scale_name: str, root: str) -> None:
+        """A box the hand cannot hold is not a box.
+
+        The binding constraint is per string: each string must be reachable
+        from one hand position (≤ 5 frets). The overall footprint is allowed
+        to be wider, because three-notes-per-string shapes legitimately pivot
+        the hand as they climb — but not by much, which is what catches
+        degree-walk drift (six-note scales otherwise smear a box across nine
+        frets by the time they reach the high E).
+        """
+        boxes = scale_boxes_for_root(scale_name, root)
+        assert boxes
+        for box in boxes:
+            width = box["max_fret"] - box["min_fret"] + 1
+            assert width <= 6, f"{scale_name}/{box['name']} spans {width} frets"
+
+    def test_every_string_is_playable(self) -> None:
+        """No negative frets, and every string carries at least two notes."""
+        for scale_name in list_scales():
+            for box in scale_boxes_for_root(scale_name, "C") or []:
+                for s in range(1, 7):
+                    on_string = [n["fret"] for n in box["notes"] if n["string"] == s]
+                    assert len(on_string) >= 2
+                    assert min(on_string) >= 0
+
+    def test_pentatonic_yields_its_five_classic_boxes(self) -> None:
+        """Five boxes, all distinct. Collapsing two onto one window loses one."""
+        for root in ("A", "E", "C"):
+            boxes = scale_boxes_for_root("minor_pentatonic", root)
+            assert boxes is not None
+            assert len(boxes) == 5, [b["min_fret"] for b in boxes]
+            starts = [b["min_fret"] for b in boxes]
+            assert len(set(starts)) == 5
+
+    def test_positions_climb_the_neck_without_wrapping(self) -> None:
+        """Stepping to the next position must go up, never back to the nut."""
+        for scale_name in ("major", "minor_pentatonic", "blues"):
+            boxes = scale_boxes_for_root(scale_name, "A")
+            assert boxes
+            starts = [b["min_fret"] for b in boxes]
+            assert starts == sorted(starts), f"{scale_name} positions wrap: {starts}"
+            assert starts[-1] > starts[0]
+
+    def test_root_notes_are_flagged(self) -> None:
+        boxes = scale_boxes_for_root("major", "G")
+        assert boxes is not None
+        pos1 = next(b for b in boxes if b["name"] == "position_1")
+        root_note = next(n for n in pos1["notes"] if n["string"] == 6 and n["fret"] == 3)
+        assert root_note["is_root"] is True
+        non_root = next(n for n in pos1["notes"] if n["string"] == 6 and n["fret"] == 5)
+        assert non_root["is_root"] is False
+
+    def test_case_insensitive_root(self) -> None:
+        assert scale_boxes_for_root("major", "g") == scale_boxes_for_root("major", "G")
+
+    def test_flat_root_name(self) -> None:
+        # Bb (pc=10) should resolve like A# would.
+        assert scale_boxes_for_root("major", "Bb") == scale_boxes_for_root("major", "A#")
+
+    def test_all_boxes_have_min_max_fret(self) -> None:
+        boxes = scale_boxes_for_root("minor_pentatonic", "A")
+        assert boxes is not None
+        for box in boxes:
+            assert box["min_fret"] <= box["max_fret"]
+            assert box["notes"]
 
 
 # ---------------------------------------------------------------------------

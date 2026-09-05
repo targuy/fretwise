@@ -213,6 +213,24 @@ def _generate_movable(root_pc: int, quality: str, name: str) -> ChordDiagram | N
     return candidates[0][2]
 
 
+def _lookup_curated(name: str) -> ChordDiagram | None:
+    """Exact / case-insensitive match against the curated open-voicing set only.
+
+    Factored out of :func:`lookup_chord` (steps 1-2) so :func:`all_voicings`
+    can ask "does this chord have a hand-curated shape?" without pulling in
+    the slash-chord and movable-generation fallbacks meant for a single
+    best-guess lookup.
+    """
+    lib = _get_library()
+    if name in lib:
+        return lib[name]
+    name_lower = name.lower()
+    for key, diagram in lib.items():
+        if key.lower() == name_lower:
+            return diagram
+    return None
+
+
 def lookup_chord(name: str) -> ChordDiagram | None:
     """Look up a chord by name, returning the preferred voicing or None.
 
@@ -235,17 +253,10 @@ def lookup_chord(name: str) -> ChordDiagram | None:
     if not name:
         return None
 
-    lib = _get_library()
-
-    # 1. Exact match (curated open voicing — preferred).
-    if name in lib:
-        return lib[name]
-
-    # 2. Case-insensitive (preserve accidentals — only lowercase root).
-    name_lower = name.lower()
-    for key, diagram in lib.items():
-        if key.lower() == name_lower:
-            return diagram
+    # 1-2. Curated open voicing (exact, then case-insensitive).
+    curated = _lookup_curated(name)
+    if curated is not None:
+        return curated
 
     # 3. Slash chord: try the chord without the bass note.
     #    Guard against quality suffixes that contain "/" (e.g. "6/9", "m6/9"):
@@ -271,6 +282,59 @@ def lookup_chord(name: str) -> ChordDiagram | None:
 
     logger.debug("No voicing found for chord '%s'.", name)
     return None
+
+
+def all_voicings(name: str) -> list[ChordDiagram]:
+    """Every known playable position for a chord, lowest fret first.
+
+    ``lookup_chord`` picks one best guess; this is for a player asking "where
+    ELSE can I play this" — e.g. C#m has no open voicing, but it is playable
+    as an E-shape barre at fret 9 or an A-shape barre at fret 4, and this
+    returns both. A chord that also has a curated open voicing (e.g. "E")
+    gets that as position 1, with the barre alternates after it.
+
+    Movable shapes come in at most two families per quality (E-shape anchored
+    on string 6, A-shape on string 5) — see ``movable_shapes:`` in
+    ``chord_voicings.yaml`` — so this returns at most 3 voicings, never a long
+    list to page through.
+
+    Args:
+        name: Chord name (e.g. "E", "C#m7", "Bbsus4").
+
+    Returns:
+        ChordDiagrams sorted by ``base_fret`` ascending. Empty if the name
+        cannot be parsed into a (root, quality) pair with no curated voicing.
+    """
+    seen: set[tuple[int, ...]] = set()
+    out: list[ChordDiagram] = []
+
+    curated = _lookup_curated(name)
+    if curated is not None:
+        out.append(curated)
+        seen.add(tuple(curated.frets))
+
+    match = _NAME_RE.match(name)
+    if match:
+        root_pc = _NAME_TO_PC.get(match.group(1).upper())
+        quality = _normalise_quality(match.group(2))
+        if root_pc is not None and quality is not None:
+            for shape in _get_movable().get(quality, []):
+                open_root_pc = _OPEN_PC[shape.root_string - 1]
+                anchor = (root_pc - open_root_pc) % 12
+                if anchor == 0:
+                    anchor = 12  # root on the open string → the octave shape
+                frets = [o + anchor if o >= 0 else -1 for o in shape.offsets]
+                key = tuple(frets)
+                if key in seen:
+                    continue
+                seen.add(key)
+                out.append(ChordDiagram(
+                    name=name, frets=frets, fingers=_derive_fingers(frets),
+                    string_count=6, base_fret=anchor, source_id=0,
+                ))
+
+    out.sort(key=lambda d: d.base_fret)
+    return out
 
 
 def _looks_like_bass_note(text: str) -> bool:

@@ -240,6 +240,12 @@ def test_parse_rig_active_effect_falls_back_to_category_image() -> None:
     assert reg["RVB"]["image"] == "reverb.png"
 
 
+def test_server_compose_mounts_non_versioned_pedal_art_read_only() -> None:
+    """Container deployment must provide ignored pedal artwork at runtime."""
+    compose = Path("docker/compose.web.yml").read_text(encoding="utf-8")
+    assert "/volume2/docker/fretwise/state/pedals:/app/data/pedals:ro" in compose
+
+
 @pytest.mark.parametrize(
     "name, expected",
     [
