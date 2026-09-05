@@ -428,6 +428,8 @@ def _render_text_instance(*, text) -> list[str]:
     if metadata.get("kind") == "chord_name":
         attrs.append('class="fw-chord-name"')
         attrs.append(f'data-chord="{escape(raw_text)}"')
+    if metadata.get("kind") == "lyric":
+        attrs.append('class="fw-lyric"')
     if metadata.get("kind") == "note" and metadata.get("tab_string") is not None:
         attrs.append('class="fw-tab-note"')
         attrs.append(f'data-event-id="{escape(str(metadata.get("event_id", "")))}"')

@@ -64,6 +64,7 @@ def normalize_raw_score(raw_score: RawScore) -> NormalizedScore:
         has_anacrusis=raw_score.has_anacrusis,
         section_markers=dict(raw_score.section_markers),
         chord_markers=dict(raw_score.chord_markers),
+        lyric_markers=dict(raw_score.lyric_markers),
         chord_diagrams=list(raw_score.chord_diagrams),
         source_trace_map=normalized_trace_map,
         normalization_log=log,

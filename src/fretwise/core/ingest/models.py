@@ -151,6 +151,7 @@ class RawScore:
     has_anacrusis: bool = False
     section_markers: dict[int, str] = field(default_factory=dict)
     chord_markers: dict[str, str] = field(default_factory=dict)
+    lyric_markers: dict[str, str] = field(default_factory=dict)
     chord_diagrams: list[ChordDiagram] = field(default_factory=list)
     unknown_fields: dict[str, Any] = field(default_factory=dict)
     source_trace_map: SourceTraceMap = field(default_factory=SourceTraceMap)
@@ -173,6 +174,7 @@ class NormalizedScore:
     has_anacrusis: bool = False
     section_markers: dict[int, str] = field(default_factory=dict)
     chord_markers: dict[str, str] = field(default_factory=dict)
+    lyric_markers: dict[str, str] = field(default_factory=dict)
     chord_diagrams: list[ChordDiagram] = field(default_factory=list)
     source_trace_map: SourceTraceMap = field(default_factory=SourceTraceMap)
     #: Per-measure time signatures: {1-based measure number → (numerator, denominator)}.
@@ -195,6 +197,7 @@ class CompletedScore:
     has_anacrusis: bool = False
     section_markers: dict[int, str] = field(default_factory=dict)
     chord_markers: dict[str, str] = field(default_factory=dict)
+    lyric_markers: dict[str, str] = field(default_factory=dict)
     chord_diagrams: list[ChordDiagram] = field(default_factory=list)
     source_trace_map: SourceTraceMap = field(default_factory=SourceTraceMap)
     completion_log: CompletionLog = field(default_factory=CompletionLog)

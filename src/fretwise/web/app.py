@@ -1026,6 +1026,9 @@ def _register_routes(app: FastAPI) -> None:
                 "chord_markers": dict(
                     getattr(adapter, "chord_markers", {}) or {}
                 ),
+                "lyric_markers": dict(
+                    getattr(adapter, "lyric_markers", {}) or {}
+                ),
                 "tempo": events[0].tempo if events else 120.0,
                 "beats_per_measure": float(
                     getattr(adapter, "beats_per_measure", 4.0)
@@ -4016,6 +4019,7 @@ def _run_core_pipeline_for_events(
     source_beats_per_measure = float(getattr(adapter, "beats_per_measure", 4.0) or 4.0)
     section_markers: dict[int, str] = dict(getattr(adapter, "section_markers", {}) or {})
     chord_markers: dict[str, str] = dict(getattr(adapter, "chord_markers", {}) or {})
+    lyric_markers: dict[str, str] = dict(getattr(adapter, "lyric_markers", {}) or {})
     chord_diagrams: list[ChordDiagram] = list(getattr(adapter, "chord_diagrams", []) or [])
     raw_score = legacy_parse_to_raw_score(
         filepath,
@@ -4028,6 +4032,7 @@ def _run_core_pipeline_for_events(
         has_anacrusis=bool(getattr(adapter, "has_anacrusis", False)),
         section_markers=section_markers,
         chord_markers=chord_markers,
+        lyric_markers=lyric_markers,
         chord_diagrams=chord_diagrams,
         measure_time_signatures=dict(getattr(adapter, "measure_time_signatures", {}) or {}),
     )

@@ -228,6 +228,8 @@ def layout_to_render_scene(
                 dynamic_y = tab_y + 5.0 * tab_spacing + 18.0
             else:
                 dynamic_y = staff_std_y + 6.0 * staff_spacing + 12.0
+            # Lyrics (vocal tracks only) sit on their own row below dynamics.
+            lyric_y = dynamic_y + 15.0
             # Compute key-signature layout before time_signature_x so that the
             # time signature can be pushed right when accidentals are present.
             key_fifths = score.key_signature.fifths
@@ -380,6 +382,7 @@ def layout_to_render_scene(
                 accidental_columns_by_onset: dict[float, list[float]] = {}
                 shown_accidentals_by_step: dict[int, str | None] = {}
                 shown_chord_labels_by_onset: set[float] = set()
+                shown_lyrics_by_onset: set[float] = set()
                 shown_strum_marks_by_onset: set[float] = set()
                 rhythm_duration_by_onset_voice = _rhythm_duration_by_onset_voice(
                     measure_layout.event_layouts
@@ -756,6 +759,24 @@ def layout_to_render_scene(
                                     )
                                 )
                                 last_dynamic_by_voice[voice_number] = dynamic_mark
+
+                            lyric = str(event_layout.metadata.get("lyric", "")).strip()
+                            if lyric and onset_key not in shown_lyrics_by_onset:
+                                notes_layer.text_instances.append(
+                                    TextInstance(
+                                        text=lyric,
+                                        x=note_x,
+                                        y=lyric_y,
+                                        font_family="Times-Roman",
+                                        font_size=10.0,
+                                        metadata={
+                                            "kind": "lyric",
+                                            "onset": onset_key,
+                                            "text_anchor": "middle",
+                                        },
+                                    )
+                                )
+                                shown_lyrics_by_onset.add(onset_key)
 
                             standard_rhythm_events.append(
                                 (

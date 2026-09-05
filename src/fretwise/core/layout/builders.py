@@ -37,6 +37,25 @@ class _MeasurePack:
     collision_issues: list[CollisionIssue]
 
 
+def _score_has_lyrics(score: Score) -> bool:
+    """Return True if any event anywhere in the score carries a lyric hint.
+
+    Lyrics are matched against a track's own notes by onset (see
+    ``completed_to_canonical_score``), so any track kind may end up carrying
+    a "lyric" layout hint — this checks note events directly rather than
+    track kind.
+    """
+    for track in score.tracks:
+        for staff_group in track.staff_groups:
+            for staff in staff_group.staves:
+                for measure in staff.measures:
+                    for voice in measure.voices:
+                        for event in voice.events:
+                            if any(hint.key == "lyric" for hint in getattr(event, "layout_hints", [])):
+                                return True
+    return False
+
+
 def canonical_to_page_layout(
     score: Score,
     *,
@@ -57,7 +76,12 @@ def canonical_to_page_layout(
         )
     # Adjust system height based on rendering mode so vertical spacing is appropriate.
     # Delegate to notation_mode.system_height_for_mode — single source of truth.
-    layout_rules = replace(layout_rules, system_height=system_height_for_mode(mode))
+    # A score carrying lyrics reserves an extra row below dynamics for them
+    # (only relevant when the staff itself is shown — TAB-only has no lyrics row).
+    lyric_row_height = 18.0 if (has_standard(mode) and _score_has_lyrics(score)) else 0.0
+    layout_rules = replace(
+        layout_rules, system_height=system_height_for_mode(mode) + lyric_row_height
+    )
     # Standard notation (stems, accidentals, ties) requires wider measure slots than
     # pure TAB.  Replace the three spacing knobs atomically so all downstream helpers
     # (raw_measure_width, event_anchor_x, collision enforcer) see consistent values.

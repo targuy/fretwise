@@ -193,6 +193,10 @@ class GpifAdapter(BaseParser):
     #: Beat-level chord name annotations: {onset_str → chord_name}.
     #: Set after each call to parse() or parse_track().
     chord_markers: dict[str, str] = {}
+    #: Beat-level lyric syllable annotations: {onset_str → syllable}, from the
+    #: track's own <Lyrics> block (voice 0 only). Empty for non-vocal tracks
+    #: or tracks with no lyrics. Set after each call to parse() or parse_track().
+    lyric_markers: dict[str, str] = {}
     #: Measure duration in quarter-note beats (e.g. 3.0 for 6/8, 4.0 for 4/4).
     #: Set after each call to parse() or parse_track().
     beats_per_measure: float = 4.0
@@ -269,6 +273,12 @@ class GpifAdapter(BaseParser):
         diag_name_map = {str(cd.source_id): cd.name for cd in self.chord_diagrams}
         self.chord_markers = _extract_gpif_beat_chord_markers(
             root, track_index, rhythm_map, diag_name_map
+        )
+        lyrics_track_idx = _find_lyrics_track_idx(root)
+        self.lyric_markers = (
+            _extract_gpif_lyrics_by_onset(root, lyrics_track_idx, rhythm_map)
+            if lyrics_track_idx is not None
+            else {}
         )
 
         return _extract_events(root, track_index, open_pitches, tempo_map, rhythm_map, note_map)
@@ -391,6 +401,12 @@ class GpifAdapter(BaseParser):
         diag_name_map = {str(cd.source_id): cd.name for cd in self.chord_diagrams}
         self.chord_markers = _extract_gpif_beat_chord_markers(
             root, track_index, rhythm_map, diag_name_map
+        )
+        lyrics_track_idx = _find_lyrics_track_idx(root)
+        self.lyric_markers = (
+            _extract_gpif_lyrics_by_onset(root, lyrics_track_idx, rhythm_map)
+            if lyrics_track_idx is not None
+            else {}
         )
 
         return _extract_events(root, track_index, open_pitches, tempo_map, rhythm_map, note_map)
@@ -1473,6 +1489,135 @@ def _extract_gpif_beat_chord_markers(
                 name = diag_name_map.get(ref, "")
                 if name:
                     markers[f"{beat_onset:.6f}"] = name
+            beat_onset += beat_duration
+
+        onset += measure_duration
+
+    return markers
+
+
+def _tokenize_lyrics(text: str) -> list[str]:
+    """Split raw GP lyric text into displayable syllables.
+
+    Guitar Pro's lyric convention: whitespace separates words/syllable-groups,
+    a hyphen inside a word marks a syllable boundary within that word. The
+    hyphen is kept on every non-final syllable of a word so "Thunder" renders
+    as "Thun-" / "der" across two notes, matching standard sheet-music style.
+    """
+    syllables: list[str] = []
+    for word in text.split():
+        parts = [p for p in word.split("-") if p]
+        for i, part in enumerate(parts):
+            syllables.append(part + "-" if i < len(parts) - 1 else part)
+    return syllables
+
+
+def _find_lyrics_track_idx(root: ET.Element) -> int | None:
+    """Return the 0-based index of the first track carrying non-empty lyrics.
+
+    Guitar Pro attaches ``<Lyrics>`` to whichever track the author wrote them
+    on (usually the vocal track), not to every track being viewed. A guitar
+    track's own ``<Lyrics>`` block is normally empty, so lyrics must be
+    resolved independently of which track the user is currently displaying.
+    """
+    for idx, track in enumerate(root.findall("Tracks/Track")):
+        lyrics_el = track.find("Lyrics")
+        if lyrics_el is None:
+            continue
+        for line_el in lyrics_el.findall("Line"):
+            text_el = line_el.find("Text")
+            if text_el is not None and (text_el.text or "").strip():
+                return idx
+    return None
+
+
+def _extract_gpif_lyrics_by_onset(
+    root: ET.Element,
+    track_idx: int,
+    rhythm_map: dict[str, float],
+) -> dict[str, str]:
+    """Return {onset_str → syllable} from the given track's <Lyrics> block (voice 0 only).
+
+    ``track_idx`` must be the lyrics-carrying track (see
+    :func:`_find_lyrics_track_idx`) — its own bars/beats are walked to align
+    syllables to onsets, since a beat sequence only makes sense against the
+    track it belongs to. The resulting onsets are on the score's shared
+    measure/tempo grid, so they can be matched against any other track's
+    note onsets when rendering that other track's staff.
+
+    Only the first non-empty <Line> is used (no multi-verse switching), and
+    only beats with actual notes (not rests) consume a syllable — syllables
+    and notes are zipped in order starting from the first note of the track.
+    """
+    tracks = root.findall("Tracks/Track")
+    if track_idx >= len(tracks):
+        return {}
+    lyrics_el = tracks[track_idx].find("Lyrics")
+    if lyrics_el is None:
+        return {}
+
+    raw_text = ""
+    for line_el in lyrics_el.findall("Line"):
+        text_el = line_el.find("Text")
+        candidate = (text_el.text or "").strip() if text_el is not None else ""
+        if candidate:
+            raw_text = candidate
+            break
+    if not raw_text:
+        return {}
+
+    syllables = _tokenize_lyrics(raw_text)
+    if not syllables:
+        return {}
+
+    markers: dict[str, str] = {}
+    bars_index = {b.get("id"): b for b in root.findall("Bars/Bar")}
+    voices_index = {v.get("id"): v for v in root.findall("Voices/Voice")}
+    beats_index = {b.get("id"): b for b in root.findall("Beats/Beat")}
+    onset = 0.0
+    syllable_idx = 0
+
+    for masterbar in root.findall("MasterBars/MasterBar"):
+        measure_duration = _measure_beats(masterbar)
+        if syllable_idx >= len(syllables):
+            break
+
+        bar_ids_text = masterbar.findtext("Bars") or ""
+        bar_ids = bar_ids_text.split()
+        if track_idx >= len(bar_ids):
+            onset += measure_duration
+            continue
+
+        bar_id = bar_ids[track_idx]
+        bar_el = bars_index.get(bar_id)
+        if bar_el is None:
+            onset += measure_duration
+            continue
+
+        voice_ids = (bar_el.findtext("Voices") or "").split()
+        if not voice_ids or voice_ids[0] == "-1":
+            onset += measure_duration
+            continue
+
+        voice_el = voices_index.get(voice_ids[0])  # voice 0 only
+        if voice_el is None:
+            onset += measure_duration
+            continue
+
+        beat_onset = onset
+        for beat_id in (voice_el.findtext("Beats") or "").split():
+            if syllable_idx >= len(syllables):
+                break
+            beat_el = beats_index.get(beat_id)
+            if beat_el is None:
+                continue
+            rhythm_ref = beat_el.find("Rhythm")
+            rid = rhythm_ref.get("ref", "") if rhythm_ref is not None else ""
+            beat_duration = rhythm_map.get(rid, 1.0)
+            notes_text = (beat_el.findtext("Notes") or "").strip()
+            if notes_text:
+                markers[f"{beat_onset:.6f}"] = syllables[syllable_idx]
+                syllable_idx += 1
             beat_onset += beat_duration
 
         onset += measure_duration

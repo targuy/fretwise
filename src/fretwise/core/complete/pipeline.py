@@ -28,6 +28,7 @@ def complete_normalized_score(normalized_score: NormalizedScore) -> CompletedSco
         has_anacrusis=normalized_score.has_anacrusis,
         section_markers=dict(normalized_score.section_markers),
         chord_markers=dict(normalized_score.chord_markers),
+        lyric_markers=dict(normalized_score.lyric_markers),
         chord_diagrams=list(normalized_score.chord_diagrams),
         source_trace_map=normalized_score.source_trace_map.copy(),
         completion_log=completion_log,

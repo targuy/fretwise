@@ -1432,6 +1432,96 @@ def test_canonical_to_render_scene_standard_draws_chord_names_from_markers() -> 
     assert chord_labels[0].text == "A5"
 
 
+def test_canonical_to_render_scene_standard_draws_lyrics_for_vocal_track() -> None:
+    raw_score = legacy_parse_to_raw_score(
+        Path("lyric-marker.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, duration=1.0)],
+        lyric_markers={"0.000000": "Hel-"},
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score, representation_mode=RepresentationMode.STANDARD, track_kind="vocal",
+    )
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    lyrics = [
+        text
+        for text in staff.layer_groups[1].text_instances
+        if text.metadata.get("kind") == "lyric"
+    ]
+
+    assert len(lyrics) == 1
+    assert lyrics[0].text == "Hel-"
+
+
+def test_canonical_to_render_scene_mixed_mode_also_draws_lyrics() -> None:
+    """"Mixed" (standard + tab) view must show lyrics under the staff too."""
+    raw_score = legacy_parse_to_raw_score(
+        Path("lyric-marker-mixed.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, duration=1.0)],
+        lyric_markers={"0.000000": "world"},
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score,
+        representation_mode=RepresentationMode.STANDARD_TAB,
+        track_kind="vocal",
+    )
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    lyrics = [
+        text
+        for text in staff.layer_groups[1].text_instances
+        if text.metadata.get("kind") == "lyric"
+    ]
+
+    assert len(lyrics) == 1
+    assert lyrics[0].text == "world"
+
+
+def test_canonical_to_render_scene_tab_only_never_draws_lyrics() -> None:
+    """TAB-only mode has no staff, so lyrics (a staff annotation) never render."""
+    raw_score = legacy_parse_to_raw_score(
+        Path("lyric-marker-tab.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, duration=1.0, string_hint=2, fret_hint=2)],
+        lyric_markers={"0.000000": "world"},
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score, representation_mode=RepresentationMode.TAB, track_kind="vocal",
+    )
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    lyrics = [
+        text
+        for layer in staff.layer_groups
+        for text in layer.text_instances
+        if text.metadata.get("kind") == "lyric"
+    ]
+
+    assert lyrics == []
+
+
+def test_canonical_to_render_scene_draws_lyrics_for_guitar_track_too() -> None:
+    """A guitar track's staff shows the song's lyrics too (matched by onset),
+    so a guitarist can follow along while playing tab/standard notation."""
+    raw_score = legacy_parse_to_raw_score(
+        Path("lyric-marker-guitar.gp"),
+        source_format="gpif",
+        events=[_note(pitch=64, onset=0.0, duration=1.0)],
+        lyric_markers={"0.000000": "Hel-"},
+    )
+    result = run_core_pipeline_from_raw(
+        raw_score, representation_mode=RepresentationMode.STANDARD, track_kind="guitar",
+    )
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    lyrics = [
+        text
+        for text in staff.layer_groups[1].text_instances
+        if text.metadata.get("kind") == "lyric"
+    ]
+
+    assert len(lyrics) == 1
+    assert lyrics[0].text == "Hel-"
+
+
 def test_chord_name_label_clears_a_high_note_instead_of_colliding() -> None:
     """A chord label rises above its default offset when the beat's chord
     notates a high note (ledger lines above the staff) — a fixed offset

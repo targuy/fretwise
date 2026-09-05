@@ -82,7 +82,13 @@ def completed_to_canonical_score(
     time_denominator = getattr(completed_score, "time_denominator", 4)
     time_numerator = int(round(completed_score.beats_per_measure * time_denominator / 4.0))
     default_time_signature = TimeSignature(numerator=time_numerator, denominator=time_denominator)
-    chord_markers_by_onset = _normalize_chord_markers(completed_score.chord_markers)
+    chord_markers_by_onset = _normalize_onset_markers(completed_score.chord_markers)
+    # Lyrics come from the song's own vocal track (resolved by the adapter,
+    # independent of which track is being displayed) and are matched here by
+    # onset against whichever track's notes are being rendered — so a guitar
+    # track's staff/tab can show the song's lyrics too, wherever a note of
+    # that track happens to land on the same beat as a sung syllable.
+    lyric_markers_by_onset = _normalize_onset_markers(completed_score.lyric_markers)
     measure_number_offset = -1 if completed_score.has_anacrusis else 0
     mts = completed_score.measure_time_signatures  # {1-based → (num, den)}
 
@@ -90,8 +96,9 @@ def completed_to_canonical_score(
     for note_index, note in enumerate(completed_score.notes):
         measure_idx = _measure_index_for_note(note, beats_per_measure=beats_per_measure)
         chord_name = chord_markers_by_onset.get(round(note.onset, 6))
+        lyric = lyric_markers_by_onset.get(round(note.onset, 6))
         for canonical_note in _map_note(
-            note_index, note, chord_name=chord_name, guitar_octave=guitar_octave
+            note_index, note, chord_name=chord_name, lyric=lyric, guitar_octave=guitar_octave
         ):
             measures.setdefault(measure_idx, []).append((note_index, canonical_note))
 
@@ -222,17 +229,19 @@ def _safe_beats_per_measure(beats_per_measure: float) -> int:
     return int(round(beats_per_measure))
 
 
-def _normalize_chord_markers(chord_markers: dict[str, str]) -> dict[float, str]:
+def _normalize_onset_markers(markers: dict[str, str]) -> dict[float, str]:
+    """Parse a {onset_str: text} marker dict (chord names, lyric syllables, …)
+    into {onset_float: text}, dropping blank/unparseable entries."""
     by_onset: dict[float, str] = {}
-    for onset_text, chord_name in chord_markers.items():
-        name = str(chord_name or "").strip()
-        if not name:
+    for onset_text, value in markers.items():
+        text = str(value or "").strip()
+        if not text:
             continue
         try:
             onset = round(float(onset_text), 6)
         except (TypeError, ValueError):
             continue
-        by_onset[onset] = name
+        by_onset[onset] = text
     return by_onset
 
 
@@ -241,6 +250,7 @@ def _map_note(
     note: LegacyNoteEvent,
     *,
     chord_name: str | None = None,
+    lyric: str | None = None,
     guitar_octave: bool = True,
 ) -> list[CanonicalNoteEvent]:
     """Map one legacy note to its canonical event(s).
@@ -270,6 +280,8 @@ def _map_note(
     layout_hints: list[LayoutHint] = []
     if chord_name:
         layout_hints.append(LayoutHint(key="chord_name", value=chord_name))
+    if lyric:
+        layout_hints.append(LayoutHint(key="lyric", value=lyric))
     if note.note_step:
         layout_hints.append(LayoutHint(key="pitch_step", value=str(note.note_step).upper()))
     if note.note_accidental:

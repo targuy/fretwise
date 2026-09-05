@@ -300,6 +300,45 @@ def test_completed_to_canonical_score_maps_chord_marker_to_layout_hint() -> None
     assert chord_hints[0].value == "A5"
 
 
+def test_completed_to_canonical_score_maps_lyric_marker_for_vocal_track() -> None:
+    completed = CompletedScore(
+        source_path="song.gp",
+        source_format="gpif",
+        notes=[_note(pitch=64, onset=0.0, duration=1.0)],
+        beats_per_measure=4.0,
+        lyric_markers={"0.000000": "Hel-"},
+    )
+
+    score = completed_to_canonical_score(completed, track_kind="vocal")
+    event = score.tracks[0].staff_groups[0].staves[0].measures[0].voices[0].events[0]
+    lyric_hints = [hint for hint in event.layout_hints if hint.key == "lyric"]
+
+    assert len(lyric_hints) == 1
+    assert lyric_hints[0].value == "Hel-"
+
+
+def test_completed_to_canonical_score_maps_lyric_marker_for_guitar_track_too() -> None:
+    # The song's vocal lyrics are matched by onset against whichever track is
+    # being displayed — a guitar track's staff/tab shows them too, wherever a
+    # note lands on the same beat as a sung syllable (lets a guitarist follow
+    # the lyrics while playing tab, since Guitar Pro ties lyrics to a single
+    # track regardless of which one is currently viewed).
+    completed = CompletedScore(
+        source_path="song.gp",
+        source_format="gpif",
+        notes=[_note(pitch=64, onset=0.0, duration=1.0)],
+        beats_per_measure=4.0,
+        lyric_markers={"0.000000": "Hel-"},
+    )
+
+    score = completed_to_canonical_score(completed, track_kind="guitar")
+    event = score.tracks[0].staff_groups[0].staves[0].measures[0].voices[0].events[0]
+    lyric_hints = [hint for hint in event.layout_hints if hint.key == "lyric"]
+
+    assert len(lyric_hints) == 1
+    assert lyric_hints[0].value == "Hel-"
+
+
 def test_completed_to_canonical_score_maps_note_spelling_layout_hints() -> None:
     completed = CompletedScore(
         source_path="song.gp",

@@ -1253,6 +1253,7 @@ def _run_core_pipeline_for_events(
         has_anacrusis=bool(getattr(adapter, "has_anacrusis", False)),
         section_markers=dict(getattr(adapter, "section_markers", {}) or {}),
         chord_markers=dict(getattr(adapter, "chord_markers", {}) or {}),
+        lyric_markers=dict(getattr(adapter, "lyric_markers", {}) or {}),
         chord_diagrams=list(getattr(adapter, "chord_diagrams", []) or []),
         measure_time_signatures=dict(getattr(adapter, "measure_time_signatures", {}) or {}),
     )

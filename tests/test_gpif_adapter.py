@@ -23,6 +23,8 @@ from fretwise.parser.gpif_adapter import (
     _build_rhythm_map,
     _build_tempo_map,
     _classify_track_kind,
+    _extract_gpif_lyrics_by_onset,
+    _find_lyrics_track_idx,
     _harmonic_node_offset,
     _list_all_tracks,
     _measure_beats,
@@ -30,6 +32,7 @@ from fretwise.parser.gpif_adapter import (
     _parse_harmonic,
     _parse_int_fret,
     _parse_note_articulation,
+    _tokenize_lyrics,
     classify_kind_for_program,
 )
 
@@ -1062,3 +1065,235 @@ class TestListAllTracks:
         events = self.adapter.parse_track(f, 3)  # vocal track, now tuningless
         assert len(events) == 1
         assert events[0].pitch == 60
+
+
+# ---------------------------------------------------------------------------
+# Lyrics
+# ---------------------------------------------------------------------------
+
+
+class TestTokenizeLyrics:
+    def test_splits_words_on_whitespace(self) -> None:
+        assert _tokenize_lyrics("hello world") == ["hello", "world"]
+
+    def test_hyphenated_word_keeps_trailing_hyphen_except_last_syllable(self) -> None:
+        assert _tokenize_lyrics("Thun-der") == ["Thun-", "der"]
+
+    def test_collapses_runs_of_whitespace_and_newlines(self) -> None:
+        assert _tokenize_lyrics("hello   world\nfriend") == ["hello", "world", "friend"]
+
+    def test_empty_text_returns_empty_list(self) -> None:
+        assert _tokenize_lyrics("") == []
+        assert _tokenize_lyrics("   ") == []
+
+
+_LYRICS_GPIF = """<?xml version="1.0" encoding="utf-8"?>
+<GPIF>
+  <MasterTrack>
+    <Automations>
+      <Automation>
+        <Type>Tempo</Type><Bar>0</Bar><Position>0</Position>
+        <Value>120 2</Value>
+      </Automation>
+    </Automations>
+  </MasterTrack>
+  <Tracks>
+    <Track id="0">
+      <Name>Lead Vocals</Name>
+      <InstrumentSet><Type>voice</Type></InstrumentSet>
+      <Lyrics dispatched="true">
+        <Line>
+          <Text><![CDATA[]]></Text>
+          <Offset>0</Offset>
+        </Line>
+        <Line>
+          <Text><![CDATA[Hel-lo world friend]]></Text>
+          <Offset>0</Offset>
+        </Line>
+      </Lyrics>
+      <Staves><Staff><Properties>
+        <Property name="Tuning"><Pitches>40 45 50 55 59 64</Pitches></Property>
+      </Properties></Staff></Staves>
+    </Track>
+  </Tracks>
+  <MasterBars>
+    <MasterBar><Time>4/4</Time><Bars>0</Bars></MasterBar>
+    <MasterBar><Time>4/4</Time><Bars>1</Bars></MasterBar>
+  </MasterBars>
+  <Bars>
+    <Bar id="0"><Clef>G2</Clef><Voices>0 -1 -1 -1</Voices></Bar>
+    <Bar id="1"><Clef>G2</Clef><Voices>1 -1 -1 -1</Voices></Bar>
+  </Bars>
+  <Voices>
+    <Voice id="0"><Beats>0 1 2</Beats></Voice>
+    <Voice id="1"><Beats>3 4</Beats></Voice>
+  </Voices>
+  <Beats>
+    <Beat id="0"><Rhythm ref="0"/><Notes>0</Notes></Beat>
+    <Beat id="1"><Rhythm ref="0"/><Notes></Notes></Beat>
+    <Beat id="2"><Rhythm ref="0"/><Notes>1</Notes></Beat>
+    <Beat id="3"><Rhythm ref="0"/><Notes>2</Notes></Beat>
+    <Beat id="4"><Rhythm ref="0"/><Notes>3</Notes></Beat>
+  </Beats>
+  <Notes>
+    <Note id="0"><Properties>
+      <Property name="Midi"><Number>60</Number></Property>
+    </Properties></Note>
+    <Note id="1"><Properties>
+      <Property name="Midi"><Number>62</Number></Property>
+    </Properties></Note>
+    <Note id="2"><Properties>
+      <Property name="Midi"><Number>64</Number></Property>
+    </Properties></Note>
+    <Note id="3"><Properties>
+      <Property name="Midi"><Number>65</Number></Property>
+    </Properties></Note>
+  </Notes>
+  <Rhythms>
+    <Rhythm id="0"><NoteValue>Quarter</NoteValue></Rhythm>
+  </Rhythms>
+</GPIF>"""
+
+
+class TestExtractGpifLyricsByOnset:
+    """_extract_gpif_lyrics_by_onset zips syllables onto note onsets, skipping rests."""
+
+    def test_first_non_empty_line_used_rests_skipped(self) -> None:
+        root = _xml(_LYRICS_GPIF)
+        markers = _extract_gpif_lyrics_by_onset(root, track_idx=0, rhythm_map={"0": 1.0})
+        # Beat 1 (onset 1.0) is a rest and must be skipped — "lo" lands on
+        # beat 2 (onset 2.0), not on the rest.
+        assert markers == {
+            "0.000000": "Hel-",
+            "2.000000": "lo",
+            "4.000000": "world",
+            "5.000000": "friend",
+        }
+
+    def test_missing_lyrics_element_returns_empty(self) -> None:
+        gpif = _LYRICS_GPIF.replace(
+            '<Lyrics dispatched="true">'
+            "\n        <Line>\n          <Text><![CDATA[]]></Text>\n"
+            "          <Offset>0</Offset>\n        </Line>\n        <Line>\n"
+            "          <Text><![CDATA[Hel-lo world friend]]></Text>\n"
+            "          <Offset>0</Offset>\n        </Line>\n      </Lyrics>",
+            "",
+        )
+        root = _xml(gpif)
+        assert _extract_gpif_lyrics_by_onset(root, track_idx=0, rhythm_map={"0": 1.0}) == {}
+
+    def test_out_of_range_track_index_returns_empty(self) -> None:
+        root = _xml(_LYRICS_GPIF)
+        assert _extract_gpif_lyrics_by_onset(root, track_idx=99, rhythm_map={}) == {}
+
+
+_TWO_TRACK_LYRICS_GPIF = """<?xml version="1.0" encoding="utf-8"?>
+<GPIF>
+  <MasterTrack>
+    <Automations>
+      <Automation>
+        <Type>Tempo</Type><Bar>0</Bar><Position>0</Position>
+        <Value>120 2</Value>
+      </Automation>
+    </Automations>
+  </MasterTrack>
+  <Tracks>
+    <Track id="0">
+      <Name>Lead Guitar</Name>
+      <InstrumentSet><Type>electricGuitar</Type></InstrumentSet>
+      <Staves><Staff><Properties>
+        <Property name="Tuning"><Pitches>40 45 50 55 59 64</Pitches></Property>
+      </Properties></Staff></Staves>
+    </Track>
+    <Track id="1">
+      <Name>Lead Vocals</Name>
+      <InstrumentSet><Type>voice</Type></InstrumentSet>
+      <Lyrics dispatched="true">
+        <Line>
+          <Text><![CDATA[Hel-lo]]></Text>
+          <Offset>0</Offset>
+        </Line>
+      </Lyrics>
+      <Staves><Staff><Properties>
+        <Property name="Tuning"><Pitches>40 45 50 55 59 64</Pitches></Property>
+      </Properties></Staff></Staves>
+    </Track>
+  </Tracks>
+  <MasterBars>
+    <MasterBar><Time>4/4</Time><Bars>0 1</Bars></MasterBar>
+  </MasterBars>
+  <Bars>
+    <Bar id="0"><Clef>G2</Clef><Voices>0 -1 -1 -1</Voices></Bar>
+    <Bar id="1"><Clef>G2</Clef><Voices>1 -1 -1 -1</Voices></Bar>
+  </Bars>
+  <Voices>
+    <Voice id="0"><Beats>0 1</Beats></Voice>
+    <Voice id="1"><Beats>2 3</Beats></Voice>
+  </Voices>
+  <Beats>
+    <Beat id="0"><Rhythm ref="0"/><Notes>0</Notes></Beat>
+    <Beat id="1"><Rhythm ref="0"/><Notes>1</Notes></Beat>
+    <Beat id="2"><Rhythm ref="0"/><Notes>2</Notes></Beat>
+    <Beat id="3"><Rhythm ref="0"/><Notes>3</Notes></Beat>
+  </Beats>
+  <Notes>
+    <Note id="0"><Properties>
+      <Property name="String"><String>4</String></Property>
+      <Property name="Fret"><Fret>5</Fret></Property>
+      <Property name="Midi"><Number>64</Number></Property>
+    </Properties></Note>
+    <Note id="1"><Properties>
+      <Property name="String"><String>4</String></Property>
+      <Property name="Fret"><Fret>7</Fret></Property>
+      <Property name="Midi"><Number>66</Number></Property>
+    </Properties></Note>
+    <Note id="2"><Properties>
+      <Property name="Midi"><Number>60</Number></Property>
+    </Properties></Note>
+    <Note id="3"><Properties>
+      <Property name="Midi"><Number>62</Number></Property>
+    </Properties></Note>
+  </Notes>
+  <Rhythms>
+    <Rhythm id="0"><NoteValue>Quarter</NoteValue></Rhythm>
+  </Rhythms>
+</GPIF>"""
+
+
+class TestFindLyricsTrackIdx:
+    def test_finds_the_track_carrying_non_empty_lyrics(self) -> None:
+        root = _xml(_TWO_TRACK_LYRICS_GPIF)
+        assert _find_lyrics_track_idx(root) == 1
+
+    def test_returns_none_when_no_track_has_lyrics(self) -> None:
+        gpif = _TWO_TRACK_LYRICS_GPIF.replace(
+            '<Lyrics dispatched="true">\n        <Line>\n'
+            "          <Text><![CDATA[Hel-lo]]></Text>\n"
+            "          <Offset>0</Offset>\n        </Line>\n      </Lyrics>",
+            "",
+        )
+        root = _xml(gpif)
+        assert _find_lyrics_track_idx(root) is None
+
+
+class TestCrossTrackLyricResolution:
+    """A guitar track's own parse must expose lyrics owned by a DIFFERENT
+    (vocal) track — Guitar Pro ties lyrics to one track regardless of which
+    track the user is currently viewing."""
+
+    def _write_gp(self, tmp_path: Path, gpif: str) -> Path:
+        f = tmp_path / "song.gp"
+        f.write_bytes(_make_gpif_zip(gpif))
+        return f
+
+    def test_parse_track_on_guitar_track_exposes_vocal_track_lyrics(
+        self, tmp_path: Path,
+    ) -> None:
+        f = self._write_gp(tmp_path, _TWO_TRACK_LYRICS_GPIF)
+        adapter = GpifAdapter()
+        events = adapter.parse_track(f, 0)  # guitar track, id 0
+
+        assert len(events) == 2
+        # Both syllables land on the guitar's own onsets (0.0 and 1.0), since
+        # the vocal track's beats share the same measure/tempo grid.
+        assert adapter.lyric_markers == {"0.000000": "Hel-", "1.000000": "lo"}
