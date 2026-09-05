@@ -16,6 +16,7 @@ export const MODES = /** @type {const} */ ({
   STANDARD_TABLATURE: 'standard_tablature',
   TABLATURE_RHYTHM: 'tablature_rhythm',
   SLOPE: 'slope',
+  RAIN: 'rain',
   HAND_3D: 'hand_3d',
 });
 
@@ -26,6 +27,7 @@ export const MODE_LABELS = /** @type {Record<string, string>} */ ({
   standard_tablature: 'Standard + Tab',
   tablature_rhythm: 'Tab + Rhythm',
   slope: 'Slope',
+  rain: 'Rain',
   hand_3d: '3D',
 });
 
@@ -43,6 +45,7 @@ export function hasTab(mode) {
     || mode === MODES.TABLATURE_RHYTHM
     || mode === MODES.STANDARD_TABLATURE
     || mode === MODES.SLOPE
+    || mode === MODES.RAIN
     || mode === MODES.HAND_3D;
 }
 

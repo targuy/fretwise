@@ -24,6 +24,7 @@ Carte du **code réel** (complète les specs ci-dessus) :
 | `docs/architecture.md` | Architecture globale post-consolidation : les trois domaines `partitions/`/`gears/`/`dataset/`, contrats inter-modules, environnements pixi |
 | `docs/usage.md` | Guide des workflows par domaine (partitions, gears, dataset) avec variables d'environnement |
 | `docs/Chansons_creation_workflow.md` | Workflow détaillé de bout en bout pour une chanson : identification → téléchargement → intégration → gears → doigtés (avec diagramme) |
+| `docs/ecoute.md` | Module d'écoute : capture navigateur générique (carte son / interface USB / webcam), détection de hauteur YIN + contrat de parité Python ↔ worklet, accordeur, et conception des phases notation du jeu / DAW |
 
 **Règle :** toute décision d'implémentation doit être traceable à l'une de ces spécifications. En cas d'ambiguïté, demander une clarification plutôt qu'inventer.
 
