@@ -142,6 +142,7 @@ from fretwise.storage import (
     safe_score_name,
 )
 from fretwise.storage.local import LocalStorageBackend
+from fretwise.web.device_routes import register_device_routes
 
 from . import settings as _settings
 from . import songs_metadata as _songs_metadata
@@ -333,6 +334,8 @@ def create_app(
     _log_songs_metadata_startup(app)
 
     _register_routes(app)
+    register_device_routes(app, _require_admin)
+
     return app
 
 
