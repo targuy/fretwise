@@ -17,6 +17,7 @@ import { MODES, MODE_LABELS, DEFAULT_MODE, isGuitarKind, trackKindLabel } from '
 import { applyLeatherIcons } from './icons.js';
 import { initReview, resetReview } from './review.js';
 import { chordDiagramSVG } from './fretboard-diagram.js';
+import { initHeadrush } from './headrush.js';
 import { initTraining } from './training.js';
 import { initTuner, setTunerActive } from './tuner.js';
 import { initListening, resetListening, toggleListening } from './listening.js';
@@ -4079,6 +4080,8 @@ function _renderRig(data) {
       : 'Créer une fiche avec une IA…';
   }
   const generated = data.is_generated === true;
+  // The HeadRush panel needs the song identity and this is where it is known.
+  window.__fretwiseSong = { artist: data.artist || '', title: data.song || '' };
   const title = document.getElementById('rig-panel-title');
   if (title) title.textContent = `Rig GP-180${generated ? ' (IA)' : ''} — ${data.artist || '?'} · ${data.song || '?'}`;
 
@@ -4247,11 +4250,31 @@ if (btnRig) btnRig.addEventListener('click', _toggleRig);
   }
 }
 
+// ── HeadRush Core panel ─────────────────────────────────────────────────
+// Owns its own DOM; main.js only tells it which song is open and lets the
+// existing "verify with AI" button route to it when the Core is the selected
+// unit. The two workflows are not interchangeable (different schema, different
+// transport), so they never share a panel.
+const headrush = initHeadrush({
+  getSong: () => {
+    const meta = window.__fretwiseSong || {};
+    return { artist: meta.artist || '', title: meta.title || '' };
+  },
+});
+
 // ── Gear AI-verification floating panel ─────────────────────────────────
 {
   const gearVerifyBtn = document.getElementById('rig-verify-ai-btn');
   const gearVerifyPanel = document.getElementById('gear-verify-panel');
   const gearVerifyClose = document.getElementById('gear-verify-close');
+  // When the HeadRush Core is the selected unit, the same button opens its own
+  // panel: the schema and the transport differ, so the GP-180 flow cannot serve it.
+  gearVerifyBtn?.addEventListener('click', (event) => {
+    if (!headrush.isActive()) return;
+    event.stopImmediatePropagation();
+    event.preventDefault();
+    headrush.open();
+  }, true);
   const gearVerifyPromptEl = document.getElementById('gear-verify-prompt');
   const gearVerifyTitleEl = document.getElementById('gear-verify-title');
   const gearVerifyHintEl = document.getElementById('gear-verify-hint');

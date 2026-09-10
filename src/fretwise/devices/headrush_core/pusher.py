@@ -304,3 +304,66 @@ def summarize_state(transport: DeviceWriteTransport) -> dict[str, Any]:
         "dirty": rigs.get("dirty"),
         "cpuPercent": round(float(cpu) * 200.0, 1),
     }
+
+
+def promote_loaded_rig(
+    transport: DeviceWriteTransport,
+    name: str,
+    *,
+    colour: int = -1,
+) -> str:
+    """Save the loaded rig under a new name and return the GUID it was given.
+
+    ``saveRigAs`` always mints a **new** GUID — it is the only call that
+    duplicates. That is what makes it the promotion primitive (sandbox becomes a
+    named rig) and also why it must never be used to update: re-running it would
+    pile up a new rig on every regeneration. Updating goes through
+    :func:`apply_plan` on the song's existing GUID followed by ``saveRig``.
+
+    Args:
+        transport: Write-capable transport.
+        name: Name for the promoted rig; must carry the reserved prefix.
+        colour: Device colour index, ``-1`` to keep the current one.
+
+    Returns:
+        The GUID of the newly created rig.
+
+    Raises:
+        WriteRefused: The name lacks the guard prefix, or the device declined.
+        DeviceBusy: The device did not report the new rig as loaded afterwards.
+    """
+    if not name.startswith(GENERATED_PREFIX):
+        raise WriteRefused(
+            f"un rig promu doit être nommé {GENERATED_PREFIX!r}… — reçu {name!r}"
+        )
+    before = str(transport.properties("/Evil/API/Rigs").get("loadedID", ""))
+    if transport.invoke("/Evil/API/Rigs", "saveRigAs", [name, colour]) is False:
+        raise WriteRefused(f"l'appareil a refusé saveRigAs({name!r})")
+    time.sleep(2.0)
+    rigs = transport.properties("/Evil/API/Rigs")
+    new_id = str(rigs.get("loadedID", ""))
+    if not new_id or new_id == before:
+        raise DeviceBusy(
+            "saveRigAs n'a pas produit de nouveau rig chargé — état de l'appareil incertain"
+        )
+    if str(rigs.get("loadedName", "")) != name:
+        raise DeviceBusy(
+            f"le rig chargé est {rigs.get('loadedName')!r}, attendu {name!r}"
+        )
+    return new_id
+
+
+def set_program_change(transport: DeviceWriteTransport, program_change: int) -> None:
+    """Assign a MIDI Program Change to the loaded rig and commit it.
+
+    A PUT alone is not persisted for this property — it reverts on the next rig
+    load — so ``saveRig`` follows unconditionally. ``dirty`` does not flag it,
+    which is why there is no point checking.
+
+    Raises:
+        WriteRefused: ``program_change`` is outside 0..127.
+    """
+    if not 0 <= program_change <= 127:
+        raise WriteRefused(f"Program Change hors 0..127 : {program_change}")
+    transport.set_properties("/Evil/API/Rigs", {"loadedProgMIDICC": program_change})
+    transport.invoke("/Evil/API/Rigs", "saveRig", [])

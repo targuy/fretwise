@@ -10,8 +10,14 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
 from pathlib import Path
 
+from fretwise.devices.headrush_core.bindings import (
+    BindingStore,
+    binding_hash,
+    default_store_path,
+)
 from fretwise.devices.headrush_core.catalog import (
     build_catalog,
     catalog_path,
@@ -27,7 +33,13 @@ from fretwise.devices.headrush_core.client import (
 )
 from fretwise.devices.headrush_core.plan import PlanError, build_plan, load_binding
 from fretwise.devices.headrush_core.prompt import PromptError, build_rig_prompt, parse_rig_response
-from fretwise.devices.headrush_core.pusher import apply_plan, plan_token, summarize_state
+from fretwise.devices.headrush_core.pusher import (
+    apply_plan,
+    plan_token,
+    promote_loaded_rig,
+    set_program_change,
+    summarize_state,
+)
 from fretwise.devices.headrush_core.snapshot import (
     capture_rig,
     default_snapshot_path,
@@ -528,4 +540,125 @@ def prompt_main(argv: list[str] | None = None) -> int:
     print()
     print("  etape suivante :")
     print(f"    pixi run python scripts/device_plan.py {destination}")
+    return 0
+
+
+def provision_main(argv: list[str] | None = None) -> int:
+    """Push a binding and make it a named rig in the library.
+
+    Creates on first run (sandbox -> ``saveRigAs``), updates in place afterwards
+    (load the song's GUID -> mutate -> ``saveRig``). The distinction matters:
+    ``saveRigAs`` mints a new GUID every time, so using it to update would leave a
+    duplicate rig on the device at each regeneration.
+
+    Args:
+        argv: Command-line arguments, excluding the program name.
+
+    Returns:
+        ``0`` on success, ``1`` on a device or gate error, ``2`` on a read-back
+        mismatch or a refused plan.
+    """
+    _configure_stdout()
+    parser = argparse.ArgumentParser(
+        prog="device_provision",
+        description=(
+            "Ecrit un binding sur l'appareil et le promeut en rig nomme. "
+            "SIMULE par defaut : --apply --confirm pour ecrire."
+        ),
+    )
+    parser.add_argument("binding", type=Path, help="document fretwise.device.binding.v1")
+    _add_host_argument(parser)
+    parser.add_argument("--catalog", type=Path, default=None)
+    parser.add_argument("--data-root", type=Path, default=_REPO_ROOT / "data")
+    parser.add_argument("--apply", action="store_true", help="ecrire reellement")
+    parser.add_argument("--confirm", action="store_true", help="confirmation explicite")
+    parser.add_argument("--pc", type=int, default=None, help="Program Change a assigner")
+    parser.add_argument("--colour", type=int, default=-1, help="couleur du rig sur l'ecran")
+    args = parser.parse_args(argv)
+
+    catalog_file = args.catalog
+    if catalog_file is None:
+        folder = _REPO_ROOT / "data" / "devices" / "headrush-core" / "catalog"
+        found = sorted(folder.glob("*.json"))
+        if not found:
+            print(f"erreur : aucun catalogue dans {folder}")
+            return 1
+        catalog_file = found[-1]
+    catalog = load_catalog(catalog_file)
+
+    try:
+        document = load_binding(args.binding)
+    except (PlanError, OSError, ValueError) as exc:
+        print(f"erreur : {exc}")
+        return 1
+    plan = build_plan(document, catalog)
+    if not plan.is_applicable:
+        print(plan.render())
+        return 2
+
+    song = document.get("song") or {}
+    artist = str(song.get("artist") or "")
+    title = str(song.get("title") or "")
+    if not artist and not title:
+        print("erreur : le binding n'a pas de bloc 'song' (artist/title)")
+        return 1
+
+    store = BindingStore.load(default_store_path(args.data_root))
+    known = store.get(artist, title)
+    digest = binding_hash(document)
+    mode = "mise a jour" if known else "creation"
+
+    print(f"{mode.upper()} — {artist} — {title}")
+    print(f"  rig cible : {plan.rig_name}")
+    if known:
+        print(f"  rig existant : {known.rig_id} ({known.rig_name})")
+        if known.binding_hash == digest:
+            print("  binding inchange depuis la derniere ecriture — rien a faire")
+            return 0
+    if not args.apply:
+        print(plan.render())
+        print()
+        print("  (simulation — relancer avec --apply --confirm)")
+        return 0
+
+    client = CoreWriteClient(args.host, timeout=30.0)
+    try:
+        if known:
+            client.invoke("/Evil/API/Rigs", "loadRigConfirm", [known.rig_id, ""])
+            time.sleep(3.0)
+            loaded = str(client.properties("/Evil/API/Rigs").get("loadedID", ""))
+            if loaded != known.rig_id:
+                print(f"refuse : le rig {known.rig_id} n'a pas ete charge (dialogue ouvert ?)")
+                return 1
+        report = apply_plan(
+            plan, catalog, client, dry_run=False, confirm=args.confirm, save=bool(known)
+        )
+        if not report.ok:
+            print(report.render())
+            return 2
+        rig_id = known.rig_id if known else promote_loaded_rig(
+            client, plan.rig_name, colour=args.colour
+        )
+        if args.pc is not None:
+            set_program_change(client, args.pc)
+    except DeviceError as exc:
+        print(f"refuse : {exc}")
+        return 1
+
+    entry = store.record(
+        artist,
+        title,
+        rig_id=rig_id,
+        rig_name=plan.rig_name,
+        binding_hash=digest,
+        app_version=catalog.app_version,
+        program_change=args.pc,
+    )
+    store.save()
+    print(report.render())
+    print()
+    print(f"  rig      : {entry.rig_name}")
+    print(f"  GUID     : {entry.rig_id}")
+    print(f"  MIDI PROG: {entry.program_change if entry.program_change is not None else '—'}")
+    print(f"  table    : {store.path}")
     return 0

@@ -264,10 +264,27 @@ def _param_body(
     for key, value in wanted.items():
         param = block.param(key)
         if param is None:
-            errors.append(f"{block.name} n'a pas de paramètre {key!r}")
+            errors.append(f"{block.name} n'a pas de paramètre {key!r}{_did_you_mean(block, key)}")
             continue
         try:
             body[key] = device_value(param, value)
         except ParamError as exc:
             errors.append(f"{block.name}.{key} : {exc}")
     return body, notes, errors
+
+
+def _did_you_mean(block: BlockSchema, key: str) -> str:
+    """Suggest the closest real parameter name.
+
+    An LLM that writes `Middle` for `Mid`, or `Level` for `OutGain`, has the right
+    intent and the wrong vocabulary. Naming the nearest match turns a refusal into
+    something the user can paste straight back into their model.
+    """
+    import difflib
+
+    names = [p.name for p in block.params if not p.read_only]
+    close = difflib.get_close_matches(key, names, n=2, cutoff=0.6)
+    if not close:
+        musical = [n for n in names if not n.startswith(("Slt", "Pre", "Post"))][:6]
+        return f" — disponibles : {', '.join(musical)}…" if musical else ""
+    return f" — vouliez-vous dire {' ou '.join(repr(c) for c in close)} ?"

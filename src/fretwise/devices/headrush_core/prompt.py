@@ -75,6 +75,66 @@ def _catalog_vocabulary(catalog: Catalog) -> str:
     return "\n".join(lines)
 
 
+#: Plumbing every block carries. Listing it would triple the prompt and none of it
+#: belongs in a tone sheet: slot EQ, pre/post trim, doubling, preset name, colour.
+_PLUMBING = ("PreGain", "PostGain", "PresetName", "Colour", "In-Bus", "Doubling",
+             "DoubleMode", "Balance", "Width", "StereoAmp", "FileMissing", "Tails")
+
+
+def _param_line(catalog: Catalog, module: str) -> str:
+    """Render one block's tunable parameters, with their real ranges.
+
+    Without this the model invents plausible names — the first real reply used
+    `Middle` (the block is `Mid`), `Level` on a Cab (it is `OutGain`) and `Decay`
+    on a C-Verb (a convolution reverb has no decay knob). Every block name it
+    chose was correct, because those *were* in the prompt.
+    """
+    block = catalog.block(module)
+    if block is None:
+        return ""
+    bits: list[str] = []
+    for param in block.params:
+        name = param.name
+        if (
+            param.read_only
+            or name in _PLUMBING
+            or name.startswith("Slt")
+            or (name.endswith("2") and not name.endswith("_2"))
+        ):
+            continue
+        if param.options:
+            bits.append(f"{name} (liste, {len(param.options)} valeurs)")
+        elif param.type == "boolean":
+            bits.append(f"{name} (true/false)")
+        elif param.minimum is not None and param.maximum is not None:
+            unit = (param.unit_format or "").replace("%.0f", "").replace("%.1f", "")
+            unit = unit.replace("%.2f", "").replace("%%", "%").strip()
+            low = f"{param.minimum:g}"
+            high = f"{param.maximum:g}"
+            bits.append(f"{name} {low}-{high}{(' ' + unit) if unit else ''}")
+        else:
+            bits.append(name)
+    return f"- **{module}** : {', '.join(bits)}" if bits else ""
+
+
+def _block_parameters(catalog: Catalog) -> str:
+    """Render the parameter index the model needs to fill any block it picks."""
+    lines = [
+        "### Paramètres de chaque bloc (noms EXACTS)",
+        "",
+        "N'écris que des paramètres de cette liste. Les bornes sont en unités "
+        "d'affichage : c'est ce que tu dois donner.",
+        "",
+    ]
+    for category in _OFFERED_CATEGORIES:
+        for module in catalog.category_blocks.get(category, ()):
+            line = _param_line(catalog, module)
+            if line:
+                lines.append(line)
+    lines.append("")
+    return "\n".join(lines)
+
+
 def _layout_rules() -> str:
     """Render the slot rules measured on the device's own 119-rig corpus."""
     head = "\n".join(
@@ -145,6 +205,7 @@ def build_rig_prompt(
         _layout_rules(),
         "",
         _catalog_vocabulary(catalog),
+        _block_parameters(catalog),
         "## Format de sortie",
         "",
         "```json",

@@ -55,8 +55,22 @@ def test_devices_endpoint_lists_both_units_with_their_transport(client: TestClie
     assert by_id["headrush_core"]["transport"] == "http"
 
 
-def test_active_device_defaults_to_the_gp180(client: TestClient):
-    assert client.get("/api/devices").json()["active"] == "valeton_gp180"
+def test_active_device_is_one_of_the_declared_units(client: TestClient):
+    """Asserts the shape, not the value.
+
+    The value is a user setting living in ~/.fretwise/config.json, so pinning it
+    here makes the suite fail for anyone who selected the other unit — as it did
+    the first time the UI was exercised against a real settings file.
+    """
+    active = client.get("/api/devices").json()["active"]
+    assert active in {"valeton_gp180", "headrush_core"}
+
+
+def test_gp180_stays_the_default_for_a_fresh_install():
+    """The default itself is a constant and can be asserted safely."""
+    from fretwise.web.settings import _DEFAULTS
+
+    assert _DEFAULTS["gear_device"] == "valeton_gp180"
 
 
 def test_devices_endpoint_reports_catalog_availability(client: TestClient):

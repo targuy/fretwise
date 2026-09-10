@@ -591,6 +591,50 @@
   </div>
 </div>
 
+<!-- ═══════════════ HEADRUSH CORE FLOATING PANEL ═══════════════ -->
+<div id="headrush-panel" class="floating-panel" style="display:none;width:720px">
+  <div class="floating-panel-header" id="headrush-drag">
+    <span class="floating-panel-title" id="headrush-title">HeadRush Core</span>
+    <div class="floating-panel-actions">
+      <button class="floating-panel-btn" id="headrush-close" title="Fermer">×</button>
+    </div>
+  </div>
+  <div class="rig-body">
+    <p class="gear-verify-hint">
+      1. Copiez le prompt et collez-le dans votre LLM. 2. Collez sa réponse JSON.
+      3. Validez : FretWise la confronte au catalogue lu sur votre appareil.
+      Rien n'est écrit dans l'ampli depuis cette page.
+    </p>
+    <div class="gear-verify-field">
+      <div class="gear-verify-field-row">
+        <label for="headrush-guidance">Consigne (optionnelle)</label>
+        <button id="headrush-regen-btn" class="tx-btn" type="button">Régénérer</button>
+      </div>
+      <input id="headrush-guidance" class="settings-input" type="text"
+             placeholder="ex. plus sombre, moins de gain, sans delay…">
+    </div>
+    <div class="gear-verify-field">
+      <div class="gear-verify-field-row">
+        <label for="headrush-prompt">Prompt à copier</label>
+        <button id="headrush-copy-btn" class="tx-btn" type="button">Copier</button>
+      </div>
+      <textarea id="headrush-prompt" class="gear-verify-textarea" readonly rows="7"></textarea>
+    </div>
+    <div class="gear-verify-field">
+      <label for="headrush-paste">Réponse JSON du LLM</label>
+      <textarea id="headrush-paste" class="gear-verify-textarea" rows="9"
+                placeholder="Collez ici le JSON renvoyé par le LLM…"></textarea>
+    </div>
+    <div class="gear-verify-actions">
+      <button id="headrush-validate-btn" class="tx-btn" type="button">Valider</button>
+      <button id="headrush-download-btn" class="tx-btn" type="button"
+              style="display:none">Télécharger le rig</button>
+      <span id="headrush-status" class="gear-verify-status"></span>
+    </div>
+    <div id="headrush-result" class="headrush-result"></div>
+  </div>
+</div>
+
 <!-- ═══════════════ SETTINGS PAGE ═══════════════ -->
 <div id="settings-page" class="page" style="display:none">
   <div class="settings-wrap">
@@ -599,6 +643,22 @@
       <button id="set-back-files" class="tx-btn settings-nav-btn">⌂ Liste des morceaux</button>
     </nav>
     <h2 class="settings-title">Settings</h2>
+    <section id="settings-gear-section" class="settings-section">
+      <h3>Pédalier</h3>
+      <div class="settings-field">
+        <label for="set-gear-device">Appareil piloté</label>
+        <select id="set-gear-device" class="settings-input">
+          <option value="valeton_gp180">Valeton GP-180</option>
+          <option value="headrush_core">HeadRush Core</option>
+        </select>
+        <p class="settings-hint">
+          Les deux ne sont pas interchangeables : le GP-180 s'active par Program Change
+          MIDI depuis ce poste, le HeadRush Core n'a aucune entrée MIDI côté PC et se
+          pilote en HTTP. Ce choix évite d'afficher des commandes inopérantes.
+        </p>
+        <p id="set-headrush-state" class="settings-hint"></p>
+      </div>
+    </section>
     <section id="settings-cloud-section" class="settings-section" style="display:none">
       <h3>Cloud Storage</h3>
       <div class="settings-field">
