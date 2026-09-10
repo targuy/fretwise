@@ -9,6 +9,8 @@ without ever reaching the instrument.
 from __future__ import annotations
 
 import json
+import subprocess
+from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
@@ -165,3 +167,37 @@ def test_ingest_never_touches_the_instrument(client: TestClient):
         json={"artist": "A", "title": "B", "response": _binding_json()},
     )
     assert r.status_code == 200
+
+
+# --- the artifact must actually reach the image -------------------------------
+
+
+def test_dockerignore_lets_the_device_catalog_into_the_build_context():
+    """The prompt routes read a file from `data/`, which `.dockerignore` blanket-excludes.
+
+    `data/*` drops everything and each runtime directory is re-included by hand.
+    `data/devices/` was missing from that list, so the deployed container answered
+    `catalogAvailable: false` and the prompt route returned 503 — the routes worked,
+    the file simply never shipped. This asserts the re-include stays.
+    """
+    lines = [
+        line.strip()
+        for line in Path(".dockerignore").read_text(encoding="utf-8").splitlines()
+        if line.strip() and not line.strip().startswith("#")
+    ]
+    assert "data/*" in lines, "the blanket exclusion this test guards against is gone"
+    assert "!data/devices/" in lines
+    assert "!data/devices/**" in lines
+    # Backups are dated captures, not runtime data: they must stay out.
+    assert "data/devices/*/backups/" in lines
+
+
+def test_catalog_directory_holds_a_committed_artifact():
+    """A catalog must be tracked, or the image ships the route without its data."""
+    committed = subprocess.run(
+        ["git", "ls-files", "data/devices/headrush-core/catalog"],
+        capture_output=True,
+        text=True,
+        check=False,
+    ).stdout.split()
+    assert any(f.endswith(".json") for f in committed), committed
