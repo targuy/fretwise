@@ -111,6 +111,45 @@ Variables d'environnement : `FRETWISE_DATASET_ROOT`, `FRETWISE_HANDOFF_DIR`.
 
 ---
 
+## Matériel — `device_*` (→ `fretwise.devices`)
+
+Pilotage des multi-effets physiques sur le réseau local. Conception, carte des
+objets de l'API et questions ouvertes : **`docs/headrush_core.md`**.
+
+| Script | Rôle |
+|---|---|
+| `device_probe.py` | Inventaire **lecture seule** du HeadRush Core : firmware, rig chargé, chaîne des 14 slots avec leur CC de bypass, réglages MIDI, compteur CPU, alertes de configuration. `--rigs` liste les rigs, `--json` sort la structure brute |
+| `device_catalog_dump.py` | Génère le catalogue complet de l'appareil (278 module types, blocs, paramètres avec bornes/unités/pas/énumérations) dans `data/devices/headrush-core/catalog/<AppVersion>.json` |
+| `device_push.py` | Applique un rig sur l'appareil. **Simule par défaut** : l'écriture exige les trois verrous — variable `FRETWISE_HEADRUSH_ALLOW_WRITE`, `--confirm`, et `--apply`. N'écrit que dans un rig nommé `#FW - …`, refuse si un dialogue de sauvegarde est ouvert ou si le firmware ne correspond pas au catalogue, relit chaque valeur écrite, et n'appelle `saveRig` qu'avec `--save` |
+| `device_plan.py` | Construit **hors ligne** le plan d'écriture d'un rig depuis un document `fretwise.device.binding.v1` : résout chaque module et chaque valeur contre le catalogue, place les slots, valide l'ordre, et émet la suite exacte d'appels. Ne touche pas l'appareil. Code de sortie 2 si le plan porte des erreurs |
+| `device_backup.py` | Sauvegarde **lecture seule** du rig chargé (chaîne, tous les paramètres de bloc, réglages rig, scènes) dans `data/devices/headrush-core/backups/<rigId>.json`. `--diff AVANT APRÈS` compare deux sauvegardes et sort en code 2 s'il y a des différences |
+
+```powershell
+pixi run python scripts/device_probe.py
+pixi run python scripts/device_probe.py --rigs
+pixi run python scripts/device_catalog_dump.py
+pixi run python scripts/device_backup.py
+pixi run python scripts/device_backup.py --diff avant.json apres.json
+pixi run python scripts/device_plan.py data/devices/headrush-core/rigs/mon-morceau.json
+pixi run python scripts/device_push.py data/devices/headrush-core/rigs/mon-morceau.json
+```
+
+`device_backup.py` ne sauvegarde que le rig **chargé** : l'API n'expose que
+celui-là, et en charger un autre serait une écriture. C'est néanmoins la pièce
+qui compte en premier — c'est elle qui permettra de remettre en état un rig
+bac à sable avant que la phase d'écriture n'y touche.
+
+Variables d'environnement : `FRETWISE_CORE_HOST` (nom ou IP ; défaut
+`headrushcore.local`). **Préférer une IP littérale** : `*.local` est usurpable sur
+un réseau partagé.
+
+> **Ces deux scripts n'écrivent jamais sur l'appareil.** `CoreClient` n'expose
+> aucun PUT, et son appel de méthode est restreint à une liste blanche de lectures
+> pures (`PURE_METHODS`) — tenter `loadRig`, `saveRigAs` ou `setModuleTypeInternal`
+> lève `UnsafeMethodError` avant même d'ouvrir une connexion.
+
+---
+
 ## Utilitaires historiques (dev / QA / assets)
 
 | Groupe | Scripts | Rôle |
