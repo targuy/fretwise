@@ -238,8 +238,8 @@ Les trois projets utilitaires ont été consolidés dans FretWise
 - [ ] Export Guitar Pro from scratch (bloque MusicXML → GP, cf. plan court terme CLAUDE.md)
 
 ### Reste à faire — nettoyage (code mort / orphelins identifiés)
-Racine du repo : `_archive_dupes.py`, `_diff_missing.py`, `_find_dupes.py`
-(one-shots pointant l'ancien lib iCloud — remplacés par `fretwise.partitions`),
+Racine du repo : ~~`_archive_dupes.py`, `_diff_missing.py`, `_find_dupes.py`~~
+**(fait 2026-09-10 : sortis du dépôt)**,
 `inspect_measures.py`, `app_full.diff`, `patch_gears.diff`, `killing_solve.json`,
 `debug.png`, `rising_sun_test.svg`, `sultans_test.svg`, `WASimClient.log*` (hors
 sujet), fichiers vides `canonical-` et `scene`, `_tmp_after_fingerings/`,
