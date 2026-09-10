@@ -32,12 +32,37 @@ _DEFAULTS: dict[str, Any] = {
     "storage_webdav": {},         # {base_url}
     "storage_gdrive": {},         # {folder_id}
     "gears_dir": "",              # "" = <repo>/data/gears (per-model rig sheets)
+    # --- Multi-effects unit driven by FretWise -------------------------------
+    # Which pedalboard the rig UI targets. The two are not interchangeable: the
+    # GP-180 is addressed by MIDI Program Change from the PC and its sheets are
+    # `songsgear.fretwise.gear.v2`; the HeadRush Core has no MIDI input from the
+    # PC at all (verified: no USB-MIDI endpoint) and is driven over HTTP with
+    # `fretwise.device.binding.v1` documents. Showing both at once would offer
+    # controls that cannot work for the selected hardware.
+    "gear_device": "valeton_gp180",   # valeton_gp180 | headrush_core
+    "headrush_host": "",              # "" = $FRETWISE_CORE_HOST, else headrushcore.local
+}
+
+#: Devices the rig UI knows how to drive, and how each is reached.
+GEAR_DEVICES: dict[str, dict[str, str]] = {
+    "valeton_gp180": {
+        "label": "Valeton GP-180",
+        "transport": "midi",
+        "sheet_schema": "songsgear.fretwise.gear.v2",
+    },
+    "headrush_core": {
+        "label": "HeadRush Core",
+        "transport": "http",
+        "sheet_schema": "fretwise.device.binding.v1",
+    },
 }
 
 _ENVIRONMENT_SETTINGS = {
     "partitions_dir": "FRETWISE_PARTITIONS_DIR",
     "soundfonts_dir": "FRETWISE_SOUNDFONTS_DIR",
     "gears_dir": "FRETWISE_GEARS_DIR",
+    "gear_device": "FRETWISE_GEAR_DEVICE",
+    "headrush_host": "FRETWISE_CORE_HOST",
 }
 
 

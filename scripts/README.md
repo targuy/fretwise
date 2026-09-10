@@ -121,6 +121,7 @@ objets de l'API et questions ouvertes : **`docs/headrush_core.md`**.
 | `device_probe.py` | Inventaire **lecture seule** du HeadRush Core : firmware, rig chargé, chaîne des 14 slots avec leur CC de bypass, réglages MIDI, compteur CPU, alertes de configuration. `--rigs` liste les rigs, `--json` sort la structure brute |
 | `device_catalog_dump.py` | Génère le catalogue complet de l'appareil (278 module types, blocs, paramètres avec bornes/unités/pas/énumérations) dans `data/devices/headrush-core/catalog/<AppVersion>.json` |
 | `device_push.py` | Applique un rig sur l'appareil. **Simule par défaut** : l'écriture exige les trois verrous — variable `FRETWISE_HEADRUSH_ALLOW_WRITE`, `--confirm`, et `--apply`. N'écrit que dans un rig nommé `#FW - …`, refuse si un dialogue de sauvegarde est ouvert ou si le firmware ne correspond pas au catalogue, relit chaque valeur écrite, et n'appelle `saveRig` qu'avec `--save` |
+| `device_prompt.py` | Émet le **prompt LLM** d'un rig pour une chanson, contraint par le catalogue réel de l'appareil (noms de blocs et libellés d'énumération exacts). `--ingest` valide la réponse collée et écrit un binding. **Aucun appel API** : le prompt va dans le LLM que tu as déjà ouvert |
 | `device_plan.py` | Construit **hors ligne** le plan d'écriture d'un rig depuis un document `fretwise.device.binding.v1` : résout chaque module et chaque valeur contre le catalogue, place les slots, valide l'ordre, et émet la suite exacte d'appels. Ne touche pas l'appareil. Code de sortie 2 si le plan porte des erreurs |
 | `device_backup.py` | Sauvegarde **lecture seule** du rig chargé (chaîne, tous les paramètres de bloc, réglages rig, scènes) dans `data/devices/headrush-core/backups/<rigId>.json`. `--diff AVANT APRÈS` compare deux sauvegardes et sort en code 2 s'il y a des différences |
 
@@ -132,7 +133,18 @@ pixi run python scripts/device_backup.py
 pixi run python scripts/device_backup.py --diff avant.json apres.json
 pixi run python scripts/device_plan.py data/devices/headrush-core/rigs/mon-morceau.json
 pixi run python scripts/device_push.py data/devices/headrush-core/rigs/mon-morceau.json
+
+# flux LLM copier-coller
+pixi run python scripts/device_prompt.py "AC/DC" "Highway To Hell" > prompt.md
+#   ... coller prompt.md dans son LLM, recuperer le JSON ...
+pixi run python scripts/device_prompt.py "AC/DC" "Highway To Hell" --ingest reponse.txt
 ```
+
+**Choix de l'appareil** : le réglage `gear_device` (`~/.fretwise/config.json`, ou
+`FRETWISE_GEAR_DEVICE`) vaut `valeton_gp180` ou `headrush_core`. Les deux ne sont pas
+interchangeables — le GP-180 s'adresse en Program Change MIDI depuis le PC et ses fiches
+sont des `gear.v2` ; le Core n'a aucune entrée MIDI depuis le PC et se pilote en HTTP avec
+des `fretwise.device.binding.v1`. Le réglage évite d'afficher des commandes inopérantes.
 
 `device_backup.py` ne sauvegarde que le rig **chargé** : l'API n'expose que
 celui-là, et en charger un autre serait une écriture. C'est néanmoins la pièce

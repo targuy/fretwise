@@ -573,7 +573,7 @@ un « son » et pas une chanson.
 
 | Banque Chocolate | Rôle | Messages |
 |---|---|---|
-| **A** — SET | 4 chansons du set | PC (plage FOOT) |
+| **A** — SET | 4 chansons du set | PC (plage FOOT) — *actuellement 01A = rig précédent (CC 16), 01D = rig suivant (CC 17)* |
 | **B** — SECTIONS | scènes | CC 21–24 (**FAIT**) |
 | **C** — BLOCS | bypass ponctuel (tête de chaîne figée) | CC 77 (wah), 78 (drive), 80 (ampli), 81 (cab) |
 | **D** — UTILITAIRE | tap, looper, drums, **D4 = PC 126 PANIC** | CC 64 / 70 / 42 / PC 126 |
@@ -582,6 +582,13 @@ D4 en PC 126 plutôt qu'en CC16 « rig up » : le bouton de secours ne doit repo
 aucune HYPOTHÈSE.
 
 Sur le Core : FS1 CLEAN, FS2 RHYTHM, FS3 LEAD, FS4 signature du morceau, FS5 tap/tuner.
+
+**FAIT — Câblage en place (2026-09-10).** Le M-Vave Chocolate Plus est branché
+**en USB au PC et en MIDI DIN au Core** — donc le chemin au pied existe, et le PC
+peut en plus *lire* le pédalier (Windows l'énumère sous `FootCtrlPlus`,
+`USB\VID_4353&PID_4B4D&MI_01`). Configuration actuelle : **01A = rig précédent
+(CC 16), 01D = rig suivant (CC 17)** — les deux hypothèses du manuel v5.1.0 se
+trouvent ainsi confirmées à l'usage.
 
 **FAIT** — Les CC de type footswitch exigent **127 puis 0** (momentané). Le manuel
 v5.1.0 p. 72 est explicite : *« If you only send the press data value, the current

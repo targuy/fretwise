@@ -26,6 +26,7 @@ from fretwise.devices.headrush_core.client import (
     DeviceSnapshot,
 )
 from fretwise.devices.headrush_core.plan import PlanError, build_plan, load_binding
+from fretwise.devices.headrush_core.prompt import PromptError, build_rig_prompt, parse_rig_response
 from fretwise.devices.headrush_core.pusher import apply_plan, plan_token, summarize_state
 from fretwise.devices.headrush_core.snapshot import (
     capture_rig,
@@ -34,6 +35,7 @@ from fretwise.devices.headrush_core.snapshot import (
     load_snapshot,
     write_snapshot,
 )
+from fretwise.gears.naming import gears_key
 
 _REPO_ROOT = Path(__file__).resolve().parents[4]
 
@@ -441,3 +443,89 @@ def push_main(argv: list[str] | None = None) -> int:
         print(f"  avant : {before}")
         print(f"  apres : {summarize_state(client)}")
     return 0 if report.ok else 2
+
+
+def prompt_main(argv: list[str] | None = None) -> int:
+    """Emit an LLM prompt for a song, or ingest the response pasted back.
+
+    FretWise calls no provider: the prompt goes to whatever LLM the user already
+    has open, and the JSON comes back through ``--ingest``.
+
+    Args:
+        argv: Command-line arguments, excluding the program name.
+
+    Returns:
+        ``0`` on success, ``1`` on error, ``2`` when a pasted response is refused.
+    """
+    _configure_stdout()
+    parser = argparse.ArgumentParser(
+        prog="device_prompt",
+        description=(
+            "Genere le prompt LLM d'un rig HeadRush Core, ou valide la reponse collee. "
+            "Aucun appel API : le prompt est contraint par le catalogue reel de l'appareil."
+        ),
+    )
+    parser.add_argument("artist", help="artiste")
+    parser.add_argument("title", help="titre")
+    parser.add_argument("--catalog", type=Path, default=None, help="catalogue a utiliser")
+    parser.add_argument(
+        "--ingest",
+        type=Path,
+        default=None,
+        metavar="FICHIER",
+        help="valider la reponse collee (fichier, ou - pour l'entree standard)",
+    )
+    parser.add_argument("--out", type=Path, default=None, help="ou ecrire le binding valide")
+    parser.add_argument("--guidance", default="", help="consigne libre ajoutee au prompt")
+    parser.add_argument(
+        "--existing", type=Path, default=None, help="binding a corriger plutot qu'a recreer"
+    )
+    args = parser.parse_args(argv)
+
+    catalog_file = args.catalog
+    if catalog_file is None:
+        folder = _REPO_ROOT / "data" / "devices" / "headrush-core" / "catalog"
+        candidates = sorted(folder.glob("*.json"))
+        if not candidates:
+            print(f"erreur : aucun catalogue dans {folder} — lancer device_catalog_dump.py")
+            return 1
+        catalog_file = candidates[-1]
+    catalog = load_catalog(catalog_file)
+
+    if args.ingest is None:
+        existing = None
+        if args.existing is not None:
+            existing = json.loads(args.existing.read_text(encoding="utf-8"))
+        print(
+            build_rig_prompt(
+                args.artist, args.title, catalog, existing=existing, guidance=args.guidance
+            )
+        )
+        return 0
+
+    raw = sys.stdin.read() if str(args.ingest) == "-" else args.ingest.read_text(encoding="utf-8")
+    try:
+        binding, warnings = parse_rig_response(
+            raw, catalog, artist=args.artist, title=args.title
+        )
+    except PromptError as exc:
+        print(f"refuse : {exc}")
+        return 2
+
+    destination = args.out
+    if destination is None:
+        key = gears_key(args.artist, args.title)
+        destination = _REPO_ROOT / "data" / "devices" / "headrush-core" / "rigs" / f"{key}.json"
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(
+        json.dumps(binding, indent=1, ensure_ascii=False) + chr(10), encoding="utf-8"
+    )
+    print(f"binding valide ecrit : {destination}")
+    print(f"  rig    : {binding.get('rig', {}).get('name')}")
+    print(f"  blocs  : {len(binding.get('blocks', []))}")
+    for w in warnings:
+        print(f"  note   : {w}")
+    print()
+    print("  etape suivante :")
+    print(f"    pixi run python scripts/device_plan.py {destination}")
+    return 0

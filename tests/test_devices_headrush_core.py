@@ -70,12 +70,19 @@ from fretwise.devices.headrush_core.plan import (
     build_plan,
     load_binding,
 )
+from fretwise.devices.headrush_core.prompt import (
+    PromptError,
+    build_rig_prompt,
+    parse_rig_response,
+)
 from fretwise.devices.headrush_core.pusher import (
     WRITE_ENV_VAR,
     WriteRefused,
     apply_plan,
     plan_token,
 )
+from fretwise.web import settings as web_settings
+from fretwise.web.settings import GEAR_DEVICES
 
 # --- fake device -------------------------------------------------------------
 
@@ -1001,3 +1008,118 @@ def test_plan_token_changes_with_the_plan():
     first = plan_token(plan)
     plan.steps.pop()
     assert plan_token(plan) != first
+
+
+# --- copy-paste LLM workflow --------------------------------------------------
+
+
+def _prompt_catalog() -> Any:
+    return replace(
+        build_catalog(FakeTransport(), with_categories=False),
+        category_blocks={"Amp": ("Amp",), "Delay": ("BBD Delay",)},
+    )
+
+
+def test_prompt_lists_only_names_the_device_really_has():
+    """The GP-180 prompt was grounded in prose and offered blocks that do not exist."""
+    text = build_rig_prompt("AC/DC", "Highway To Hell", _prompt_catalog())
+    assert "Amp" in text and "BBD Delay" in text
+    for invented in ("Klone", "Tube Scream", "Cry Baby Wah", "Blue Comp"):
+        assert invented not in text
+
+
+def test_prompt_spells_out_the_amp_enumeration_verbatim():
+    text = build_rig_prompt("A", "B", _prompt_catalog())
+    assert "82 Lead 800" in text
+    assert "59 Tweed Deluxe" in text
+
+
+def test_prompt_pins_the_firmware_it_was_built_for():
+    text = build_rig_prompt("A", "B", _prompt_catalog())
+    assert "5.1.0.2a63755" in text
+
+
+def test_prompt_asks_for_display_units_not_normalised_floats():
+    text = build_rig_prompt("A", "B", _prompt_catalog())
+    assert "unités d'affichage" in text
+
+
+def test_prompt_includes_the_existing_document_when_correcting():
+    existing = {"rig": {"name": "#FW - X"}, "blocks": [{"module": "Amp"}]}
+    text = build_rig_prompt("A", "B", _prompt_catalog(), existing=existing)
+    assert "Corriger" in text
+    assert "corrige-le plutôt" in text
+
+
+def _llm_reply(**over: Any) -> str:
+    doc = {
+        "schemaVersion": BINDING_SCHEMA_VERSION,
+        "device": {"deviceId": "headrush-core", "appVersion": "5.1.0.2a63755"},
+        "rig": {"name": "#FW - A - B"},
+        "blocks": [{"module": "Amp", "params": {"GainA": 62.0, "Type": "82 Lead 800"}}],
+    }
+    doc.update(over)
+    return "Voici :\n\n```json\n" + json.dumps(doc) + "\n```\n"
+
+
+def test_parse_accepts_a_fenced_reply_with_prose_around_it():
+    binding, warnings = parse_rig_response(_llm_reply(), _prompt_catalog())
+    assert binding["rig"]["name"] == "#FW - A - B"
+    assert warnings == []
+
+
+def test_parse_refuses_an_invented_block_name():
+    reply = _llm_reply(blocks=[{"module": "Klone", "params": {}}])
+    with pytest.raises(PromptError, match="inconnu"):
+        parse_rig_response(reply, _prompt_catalog())
+
+
+def test_parse_refuses_an_invented_enum_label():
+    reply = _llm_reply(blocks=[{"module": "Amp", "params": {"Type": "JCM800 Lead"}}])
+    with pytest.raises(PromptError, match="not a valid option"):
+        parse_rig_response(reply, _prompt_catalog())
+
+
+def test_parse_refuses_an_out_of_range_value():
+    reply = _llm_reply(blocks=[{"module": "Amp", "params": {"GainA": 150.0}}])
+    with pytest.raises(PromptError, match="outside"):
+        parse_rig_response(reply, _prompt_catalog())
+
+
+def test_parse_repairs_a_missing_guard_prefix():
+    """A model that drops the prefix must not produce a document that could
+    overwrite a hand-made rig."""
+    binding, _ = parse_rig_response(
+        _llm_reply(rig={"name": "AC/DC - Highway"}), _prompt_catalog()
+    )
+    assert binding["rig"]["name"].startswith(GENERATED_PREFIX)
+
+
+def test_parse_names_the_rig_from_the_song_when_the_model_omitted_it():
+    binding, _ = parse_rig_response(
+        _llm_reply(rig={}), _prompt_catalog(), artist="AC/DC", title="Highway"
+    )
+    assert binding["rig"]["name"] == GENERATED_PREFIX + "AC/DC - Highway"
+
+
+def test_parse_refuses_a_reply_with_no_json():
+    with pytest.raises(PromptError, match="aucun objet JSON"):
+        parse_rig_response("Désolé, je ne peux pas répondre.", _prompt_catalog())
+
+
+def test_parse_refuses_malformed_json():
+    with pytest.raises(PromptError, match="JSON invalide"):
+        parse_rig_response("```json\n{\"blocks\": [,]}\n```", _prompt_catalog())
+
+
+# --- device preference --------------------------------------------------------
+
+
+def test_gear_device_default_is_the_gp180_so_nothing_changes_silently():
+    assert web_settings._DEFAULTS["gear_device"] == "valeton_gp180"
+
+
+def test_both_devices_are_declared_with_their_transport():
+    assert GEAR_DEVICES["valeton_gp180"]["transport"] == "midi"
+    assert GEAR_DEVICES["headrush_core"]["transport"] == "http"
+    assert GEAR_DEVICES["headrush_core"]["sheet_schema"] == BINDING_SCHEMA_VERSION
