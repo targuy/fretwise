@@ -35,6 +35,7 @@ from fretwise.devices.headrush_core import (
     write_catalog,
     write_snapshot,
 )
+from fretwise.devices.headrush_core.bindings import BindingStore, binding_hash
 from fretwise.devices.headrush_core.catalog import ParamSchema, load_catalog
 from fretwise.devices.headrush_core.chain import (
     FREE_SLOTS,
@@ -74,6 +75,11 @@ from fretwise.devices.headrush_core.prompt import (
     PromptError,
     build_rig_prompt,
     parse_rig_response,
+)
+from fretwise.devices.headrush_core.provision import (
+    SANDBOX_NAME,
+    provision_rig,
+    suggest_program_change,
 )
 from fretwise.devices.headrush_core.pusher import (
     WRITE_ENV_VAR,
@@ -1008,6 +1014,170 @@ def test_plan_token_changes_with_the_plan():
     first = plan_token(plan)
     plan.steps.pop()
     assert plan_token(plan) != first
+
+
+# --- provisioning: create from the sandbox, update in place --------------------
+
+
+class FakeProvisionTransport(FakeWriteTransport):
+    """A fake device that also loads rigs and duplicates them with saveRigAs."""
+
+    def __init__(self, *, sandbox: bool = True, **overrides: Any) -> None:
+        super().__init__(**overrides)
+        rigs = self._properties["/Evil/API/Rigs"]
+        if sandbox:
+            rigs["AllRigIds"] = [*rigs["AllRigIds"], "id-scratch"]
+            rigs["AllRigNames"] = [*rigs["AllRigNames"], SANDBOX_NAME]
+        # A hand-made rig is loaded: creation must switch to the sandbox first.
+        rigs["loadedID"] = "id-b"
+        rigs["loadedName"] = "Lorenzo solo 1"
+
+    def invoke(self, path: str, method: str, arguments: list[Any]) -> Any:
+        result = super().invoke(path, method, arguments)
+        rigs = self._properties["/Evil/API/Rigs"]
+        if method == "loadRigConfirm":
+            index = rigs["AllRigIds"].index(arguments[0])
+            rigs["loadedID"] = arguments[0]
+            rigs["loadedName"] = rigs["AllRigNames"][index]
+        elif method == "saveRigAs":
+            new_id = f"id-new-{len(rigs['AllRigIds'])}"
+            rigs["AllRigIds"].append(new_id)
+            rigs["AllRigNames"].append(arguments[0])
+            rigs["loadedID"] = new_id
+            rigs["loadedName"] = arguments[0]
+        return result
+
+
+def _song_binding() -> dict[str, Any]:
+    return {**_binding(), "song": {"artist": "AC/DC", "title": "Highway To Hell"}}
+
+
+def _provision(transport: FakeProvisionTransport, store: BindingStore, **kwargs: Any) -> Any:
+    _, catalog = _plan_and_catalog(transport)
+    options: dict[str, Any] = {
+        "known": None, "confirm": True, "write_enabled": True, "settle_s": 0.0, "load_wait_s": 0.0,
+    }
+    options.update(kwargs)
+    return provision_rig(_song_binding(), catalog, transport, store, **options)
+
+
+def test_provision_create_loads_the_sandbox_then_saves_as_a_new_rig(monkeypatch, tmp_path):
+    monkeypatch.delenv(WRITE_ENV_VAR, raising=False)
+    transport = FakeProvisionTransport()
+    store = BindingStore(path=tmp_path / "bindings.json")
+    result = _provision(transport, store, program_change=40)
+    assert result.ok and result.mode == "create"
+    methods = [m for _, m, _ in transport.invocations]
+    assert methods[0] == "loadRigConfirm"
+    assert transport.invocations[0][2] == ["id-scratch", ""]
+    assert "saveRigAs" in methods
+    assert methods.index("saveRigAs") > methods.index("setModuleTypeInternal")
+    entry = store.get("AC/DC", "Highway To Hell")
+    assert entry is not None and entry.rig_id.startswith("id-new-")
+    assert entry.program_change == 40
+    assert (tmp_path / "bindings.json").exists()
+
+
+def test_provision_never_writes_the_sandbox_itself(monkeypatch, tmp_path):
+    """saveRig on the sandbox would change the template every creation starts from."""
+    transport = FakeProvisionTransport()
+    _provision(transport, BindingStore(path=tmp_path / "b.json"))
+    rigs = transport._properties["/Evil/API/Rigs"]
+    save_calls = [m for _, m, _ in transport.invocations if m == "saveRig"]
+    assert save_calls == []
+    assert rigs["loadedName"] == _binding()["rig"]["name"]
+
+
+def test_provision_refuses_before_loading_anything_when_writes_are_disabled(
+    monkeypatch, tmp_path
+):
+    monkeypatch.delenv(WRITE_ENV_VAR, raising=False)
+    transport = FakeProvisionTransport()
+    with pytest.raises(WriteRefused, match="1/3"):
+        _provision(transport, BindingStore(path=tmp_path / "b.json"), write_enabled=False)
+    assert transport.invocations == [] and transport.writes == []
+
+
+def test_provision_refuses_a_stale_token_before_loading_anything(tmp_path):
+    transport = FakeProvisionTransport()
+    with pytest.raises(WriteRefused, match="3/3"):
+        _provision(transport, BindingStore(path=tmp_path / "b.json"), confirm_token="dead")
+    assert transport.invocations == []
+
+
+def test_provision_refuses_without_a_sandbox_rig(tmp_path):
+    transport = FakeProvisionTransport(sandbox=False)
+    with pytest.raises(WriteRefused, match="SCRATCH"):
+        _provision(transport, BindingStore(path=tmp_path / "b.json"))
+    assert transport.invocations == [] and transport.writes == []
+
+
+def test_provision_refuses_while_the_save_dialog_is_open(tmp_path):
+    transport = FakeProvisionTransport()
+    transport._properties["/Evil/API/RigSaveDialog"] = {"displayDialog": True}
+    with pytest.raises(WriteRefused, match="dialogue"):
+        _provision(transport, BindingStore(path=tmp_path / "b.json"))
+    assert transport.invocations == []
+
+
+def test_provision_update_loads_the_songs_rig_and_saves_in_place(tmp_path):
+    """saveRigAs here would leave a duplicate rig on every regeneration."""
+    transport = FakeProvisionTransport()
+    transport._properties["/Evil/API/Rigs"]["AllRigNames"][0] = "#FW - AC/DC - Old"
+    store = BindingStore(path=tmp_path / "b.json")
+    known = store.record(
+        "AC/DC", "Highway To Hell",
+        rig_id="id-a", rig_name="#FW - AC/DC - Old", binding_hash="old", app_version="x",
+    )
+    result = _provision(transport, store, known=known)
+    assert result.ok and result.mode == "update"
+    assert transport.invocations[0][2] == ["id-a", ""]
+    methods = [m for _, m, _ in transport.invocations]
+    assert "saveRig" in methods and "saveRigAs" not in methods
+    assert store.get("AC/DC", "Highway To Hell").rig_id == "id-a"
+
+
+def test_provision_unchanged_rig_writes_nothing(tmp_path):
+    transport = FakeProvisionTransport()
+    store = BindingStore(path=tmp_path / "b.json")
+    known = store.record(
+        "AC/DC", "Highway To Hell", rig_id="id-a", rig_name="#FW - X",
+        binding_hash=binding_hash(_song_binding()), app_version="x",
+    )
+    result = _provision(transport, store, known=known)
+    assert result.mode == "unchanged"
+    assert transport.invocations == [] and transport.writes == []
+
+
+def test_provision_program_change_only_touches_nothing_else(tmp_path):
+    transport = FakeProvisionTransport()
+    store = BindingStore(path=tmp_path / "b.json")
+    known = store.record(
+        "AC/DC", "Highway To Hell", rig_id="id-a", rig_name="#FW - X",
+        binding_hash=binding_hash(_song_binding()), app_version="x", program_change=3,
+    )
+    result = _provision(transport, store, known=known, program_change=7)
+    assert result.mode == "program_change"
+    methods = [m for _, m, _ in transport.invocations]
+    assert "setModuleTypeInternal" not in methods
+    assert ("/Evil/API/Rigs", {"loadedProgMIDICC": 7}) in transport.writes
+    assert store.get("AC/DC", "Highway To Hell").program_change == 7
+
+
+def test_suggested_program_change_skips_assigned_and_reserved_numbers():
+    assert suggest_program_change({0, 1, 2}) == 3
+    assert suggest_program_change(set(), available=[112, 113, 5]) == 5
+    assert suggest_program_change(set(), available=[112, 127]) is None
+
+
+def test_write_setting_opens_lock_one_without_the_environment(monkeypatch):
+    monkeypatch.delenv(WRITE_ENV_VAR, raising=False)
+    transport = FakeWriteTransport()
+    plan, catalog = _plan_and_catalog(transport)
+    report = apply_plan(
+        plan, catalog, transport, dry_run=False, confirm=True, settle_s=0.0, write_enabled=True
+    )
+    assert report.ok
 
 
 # --- copy-paste LLM workflow --------------------------------------------------

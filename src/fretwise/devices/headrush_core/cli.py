@@ -10,12 +10,10 @@ from __future__ import annotations
 import argparse
 import json
 import sys
-import time
 from pathlib import Path
 
 from fretwise.devices.headrush_core.bindings import (
     BindingStore,
-    binding_hash,
     default_store_path,
 )
 from fretwise.devices.headrush_core.catalog import (
@@ -33,11 +31,14 @@ from fretwise.devices.headrush_core.client import (
 )
 from fretwise.devices.headrush_core.plan import PlanError, build_plan, load_binding
 from fretwise.devices.headrush_core.prompt import PromptError, build_rig_prompt, parse_rig_response
+from fretwise.devices.headrush_core.provision import (
+    SANDBOX_NAME,
+    provision_mode,
+    provision_rig,
+)
 from fretwise.devices.headrush_core.pusher import (
     apply_plan,
     plan_token,
-    promote_loaded_rig,
-    set_program_change,
     summarize_state,
 )
 from fretwise.devices.headrush_core.snapshot import (
@@ -605,16 +606,21 @@ def provision_main(argv: list[str] | None = None) -> int:
 
     store = BindingStore.load(default_store_path(args.data_root))
     known = store.get(artist, title)
-    digest = binding_hash(document)
-    mode = "mise a jour" if known else "creation"
+    mode = provision_mode(document, known, args.pc)
+    labels = {
+        "create": "creation (depuis " + SANDBOX_NAME + ")",
+        "update": "mise a jour",
+        "unchanged": "inchange",
+        "program_change": "Program Change seul",
+    }
 
-    print(f"{mode.upper()} — {artist} — {title}")
+    print(f"{labels[mode].upper()} — {artist} — {title}")
     print(f"  rig cible : {plan.rig_name}")
     if known:
         print(f"  rig existant : {known.rig_id} ({known.rig_name})")
-        if known.binding_hash == digest:
-            print("  binding inchange depuis la derniere ecriture — rien a faire")
-            return 0
+    if mode == "unchanged":
+        print("  binding inchange depuis la derniere ecriture — rien a faire")
+        return 0
     if not args.apply:
         print(plan.render())
         print()
@@ -623,42 +629,27 @@ def provision_main(argv: list[str] | None = None) -> int:
 
     client = CoreWriteClient(args.host, timeout=30.0)
     try:
-        if known:
-            client.invoke("/Evil/API/Rigs", "loadRigConfirm", [known.rig_id, ""])
-            time.sleep(3.0)
-            loaded = str(client.properties("/Evil/API/Rigs").get("loadedID", ""))
-            if loaded != known.rig_id:
-                print(f"refuse : le rig {known.rig_id} n'a pas ete charge (dialogue ouvert ?)")
-                return 1
-        report = apply_plan(
-            plan, catalog, client, dry_run=False, confirm=args.confirm, save=bool(known)
+        result = provision_rig(
+            document,
+            catalog,
+            client,
+            store,
+            known=known,
+            confirm=args.confirm,
+            program_change=args.pc,
+            colour=args.colour,
         )
-        if not report.ok:
-            print(report.render())
-            return 2
-        rig_id = known.rig_id if known else promote_loaded_rig(
-            client, plan.rig_name, colour=args.colour
-        )
-        if args.pc is not None:
-            set_program_change(client, args.pc)
     except DeviceError as exc:
         print(f"refuse : {exc}")
         return 1
 
-    entry = store.record(
-        artist,
-        title,
-        rig_id=rig_id,
-        rig_name=plan.rig_name,
-        binding_hash=digest,
-        app_version=catalog.app_version,
-        program_change=args.pc,
-    )
-    store.save()
-    print(report.render())
+    if result.report is not None:
+        print(result.report.render())
+    if not result.ok:
+        return 2
     print()
-    print(f"  rig      : {entry.rig_name}")
-    print(f"  GUID     : {entry.rig_id}")
-    print(f"  MIDI PROG: {entry.program_change if entry.program_change is not None else '—'}")
+    print(f"  rig      : {result.rig_name}")
+    print(f"  GUID     : {result.rig_id}")
+    print(f"  MIDI PROG: {result.program_change if result.program_change is not None else '—'}")
     print(f"  table    : {store.path}")
     return 0

@@ -90,6 +90,18 @@ class ApplyReport:
         return "\n".join(lines)
 
 
+def write_allowed(write_enabled: bool | None = None) -> bool:
+    """Return whether lock 1 is open.
+
+    Args:
+        write_enabled: The installation's own opt-in (the web app's "allow writes"
+            setting). ``None`` means the caller has no such setting, and only the
+            environment variable counts. Either one opens the lock; neither is on
+            by default.
+    """
+    return bool(write_enabled) or bool(os.environ.get(WRITE_ENV_VAR))
+
+
 def plan_token(plan: Plan) -> str:
     """Return a digest of a plan's steps, used to detect a stale plan."""
     payload = json.dumps(
@@ -122,15 +134,17 @@ def _check_gates(
     *,
     confirm: bool,
     confirm_token: str | None,
+    write_enabled: bool | None = None,
 ) -> None:
     """Raise unless every safety gate is satisfied."""
     if not plan.is_applicable:
         raise WriteRefused(
             "le plan porte des erreurs : " + " · ".join(plan.errors)
         )
-    if not os.environ.get(WRITE_ENV_VAR):
+    if not write_allowed(write_enabled):
         raise WriteRefused(
-            f"{WRITE_ENV_VAR} n'est pas défini — verrou 1/3, aucune écriture"
+            f"écriture désactivée ({WRITE_ENV_VAR} absent, option non cochée) — "
+            "verrou 1/3, aucune écriture"
         )
     if not confirm:
         raise WriteRefused("confirm=False — verrou 2/3, aucune écriture")
@@ -235,6 +249,7 @@ def apply_plan(
     confirm_token: str | None = None,
     save: bool = False,
     settle_s: float = 1.2,
+    write_enabled: bool | None = None,
 ) -> ApplyReport:
     """Apply a plan to the device, or simulate it.
 
@@ -250,6 +265,8 @@ def apply_plan(
             not persist, so leaving this False means the change is live but
             temporary.
         settle_s: Pause after each chain edit, letting the engine rebuild.
+        write_enabled: First lock as an installation setting; see
+            :func:`write_allowed`.
 
     Returns:
         An :class:`ApplyReport`.
@@ -265,7 +282,14 @@ def apply_plan(
             report.applied.append(f"[simulé] {step.describe}")
         return report
 
-    _check_gates(transport, plan, catalog, confirm=confirm, confirm_token=confirm_token)
+    _check_gates(
+        transport,
+        plan,
+        catalog,
+        confirm=confirm,
+        confirm_token=confirm_token,
+        write_enabled=write_enabled,
+    )
     before = device_token(transport)
 
     for step in plan.steps:
@@ -311,6 +335,7 @@ def promote_loaded_rig(
     name: str,
     *,
     colour: int = -1,
+    wait_s: float = 2.0,
 ) -> str:
     """Save the loaded rig under a new name and return the GUID it was given.
 
@@ -324,6 +349,8 @@ def promote_loaded_rig(
         transport: Write-capable transport.
         name: Name for the promoted rig; must carry the reserved prefix.
         colour: Device colour index, ``-1`` to keep the current one.
+        wait_s: Pause before reading the new rig back; the device writes it to
+            flash first.
 
     Returns:
         The GUID of the newly created rig.
@@ -339,7 +366,7 @@ def promote_loaded_rig(
     before = str(transport.properties("/Evil/API/Rigs").get("loadedID", ""))
     if transport.invoke("/Evil/API/Rigs", "saveRigAs", [name, colour]) is False:
         raise WriteRefused(f"l'appareil a refusé saveRigAs({name!r})")
-    time.sleep(2.0)
+    time.sleep(wait_s)
     rigs = transport.properties("/Evil/API/Rigs")
     new_id = str(rigs.get("loadedID", ""))
     if not new_id or new_id == before:

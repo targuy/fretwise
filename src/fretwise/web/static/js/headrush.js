@@ -63,12 +63,163 @@ export async function fetchRigView(artist, title) {
   }
 }
 
+async function postJson(url, body) {
+  const res = await fetch(url, {
+    method: 'POST',
+    credentials: 'same-origin',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json().catch(() => ({}));
+  return { res, data };
+}
+
+function detailOf(data, res) {
+  const d = data?.detail;
+  if (d && typeof d === 'object') return d.detail || d.code || `Erreur ${res.status}`;
+  return d || `Erreur ${res.status}`;
+}
+
+/**
+ * Fill the push box with the server's preview, and wire the confirm button.
+ *
+ * Nothing is written until "Confirmer" — and the apply call carries the plan
+ * token of this preview, so a rig re-validated meanwhile is refused, not pushed.
+ */
+function renderPushBox(box, payload, p, onChanged) {
+  const dev = p.device || {};
+  const blockers = [];
+  if (!dev.reachable) {
+    blockers.push(`Appareil injoignable à ${p.host} — ${dev.detail || ''} ` +
+      'Vérifiez qu’il est allumé et son adresse dans Préférences › Pédalier.');
+  } else {
+    if (!dev.firmwareMatches) {
+      blockers.push(`Firmware ${dev.appVersion} différent du catalogue : régénérer le catalogue.`);
+    }
+    if (dev.saveDialogOpen) {
+      blockers.push('Un dialogue de sauvegarde est ouvert sur l’appareil : Save ou Discard d’abord.');
+    }
+    if (p.mode === 'create' && !dev.sandboxPresent) {
+      blockers.push(`Aucun rig « ${p.sandbox} » sur l’appareil : créez-en un vide à la main ` +
+        '(il sert de modèle et n’est jamais modifié).');
+    }
+  }
+  if (!p.applicable) blockers.push(...(p.errors || []));
+  if (!p.writeEnabled) {
+    blockers.push('Écriture désactivée : cochez « Autoriser l’écriture » dans Préférences › Pédalier.');
+  }
+  const notes = [];
+  if (dev.reachable && dev.loadedDirty) {
+    notes.push(`Le rig chargé (« ${dev.loadedRig} ») a des modifications non sauvegardées : ` +
+      'le chargement risque d’être bloqué par le dialogue de sauvegarde.');
+  }
+  const steps = p.steps || [];
+  const what = {
+    create: `Création : charge « ${p.sandbox} », écrit ${steps.length} étapes, relit tout, ` +
+      `puis « Save As » sous « ${p.rig} ».` +
+      (dev.reachable ? ` Le rig en cours (« ${dev.loadedRig} ») est quitté sans être modifié.` : ''),
+    update: `Mise à jour du rig existant « ${p.known?.rigName || p.rig} » : chargement, ` +
+      `${steps.length} étapes, relecture, Save.`,
+    unchanged: 'Ce rig est déjà à jour sur l’appareil : seul un Program Change différent sera écrit.',
+    program_change: 'Rig inchangé : seul le Program Change sera écrit.',
+  }[p.mode] || p.mode;
+  const deviceLine = dev.reachable
+    ? `${esc(dev.deviceName)} à ${esc(p.host)} · firmware ${esc(dev.appVersion)} · ` +
+      `rig chargé : ${esc(dev.loadedRig)}`
+    : '';
+  box.innerHTML =
+    `<div class="hr-push-title">Envoyer « ${esc(p.rig)} » sur le HeadRush</div>` +
+    (deviceLine ? `<div class="hr-push-dev">${deviceLine}</div>` : '') +
+    `<p class="hr-push-what">${esc(what)}</p>` +
+    (blockers.length ? `<ul class="hr-push-block">${blockers.map((b) => `<li>${esc(b)}</li>`).join('')}</ul>` : '') +
+    (notes.length ? `<ul class="hr-warn">${notes.map((n) => `<li>${esc(n)}</li>`).join('')}</ul>` : '') +
+    '<label class="hr-push-pc">Program Change ' +
+    `<input type="number" min="0" max="127" step="1" value="${esc(p.suggestedProgramChange ?? '')}">` +
+    '<span class="settings-hint">affiché +1 sur l’écran · vide = ne pas l’attribuer</span></label>' +
+    `<details><summary>${steps.length} étapes</summary><pre class="hr-cmd">${esc(steps.join('\n'))}</pre></details>` +
+    '<div class="hr-push-actions">' +
+    '<button type="button" class="tx-btn hr-push-confirm">Confirmer l’envoi</button>' +
+    '<button type="button" class="tx-btn hr-push-cancel">Annuler</button></div>' +
+    '<p class="hr-push-status"></p>';
+  const confirmBtn = box.querySelector('.hr-push-confirm');
+  const status = box.querySelector('.hr-push-status');
+  const pcInput = box.querySelector('.hr-push-pc input');
+  if (blockers.length) confirmBtn.disabled = true;
+  box.querySelector('.hr-push-cancel').addEventListener('click', () => {
+    box.hidden = true;
+    box.innerHTML = '';
+  });
+  confirmBtn.addEventListener('click', async () => {
+    const raw = pcInput.value.trim();
+    if (raw !== '' && !(Number.isInteger(Number(raw)) && Number(raw) >= 0 && Number(raw) <= 127)) {
+      status.textContent = 'Program Change : entier de 0 à 127.';
+      return;
+    }
+    confirmBtn.disabled = true;
+    status.className = 'hr-push-status';
+    status.textContent = 'Écriture sur l’appareil… (10 à 30 s, ne pas toucher au Core)';
+    try {
+      const { res, data } = await postJson('/api/devices/headrush/push', {
+        artist: payload.artist,
+        title: payload.title,
+        apply: true,
+        confirm: true,
+        token: p.token,
+        programChange: raw === '' ? null : Number(raw),
+      });
+      if (!res.ok) {
+        status.className = 'hr-push-status error';
+        status.textContent = `Refusé : ${detailOf(data, res)}`;
+        confirmBtn.disabled = false;
+        return;
+      }
+      if (!data.ok) {
+        status.className = 'hr-push-status error';
+        status.textContent = 'Écarts à la relecture, rien n’a été sauvegardé : ' +
+          (data.mismatches || []).join(' · ');
+        return;
+      }
+      const pc = data.programChange !== null && data.programChange !== undefined
+        ? ` · PC ${data.programChange}` : '';
+      const verb = { create: 'Créé', update: 'Mis à jour', program_change: 'Program Change écrit' }[data.mode]
+        || 'Déjà à jour';
+      status.className = 'hr-push-status ok';
+      status.textContent = `${verb} sur l’appareil : « ${data.rigName} »${pc}`;
+      setTimeout(() => onChanged?.(), 1500);
+    } catch (err) {
+      status.className = 'hr-push-status error';
+      status.textContent = `Erreur réseau : ${err}`;
+      confirmBtn.disabled = false;
+    }
+  });
+}
+
+async function openPush(box, payload, onChanged) {
+  box.hidden = false;
+  box.innerHTML = '<p class="settings-hint">Lecture de l’appareil…</p>';
+  try {
+    const { res, data } = await postJson('/api/devices/headrush/push', {
+      artist: payload.artist, title: payload.title,
+    });
+    if (!res.ok) {
+      box.innerHTML = `<p class="hr-push-status error">${esc(detailOf(data, res))}</p>`;
+      return;
+    }
+    renderPushBox(box, payload, data, onChanged);
+  } catch (err) {
+    box.innerHTML = `<p class="hr-push-status error">Erreur réseau : ${esc(err)}</p>`;
+  }
+}
+
 /**
  * Render a stored rig inside the Rig panel: one card per slot, in chain order,
- * with the CC that bypasses it, whether it is already on the device, and — when
- * it is not — the command that puts it there.
+ * with the CC that bypasses it, whether it is already on the device, and the
+ * button that creates or updates it there.
+ *
+ * @param {object} [options]
+ * @param {() => void} [options.onChanged] the rig was written to the device.
  */
-export function renderRigView(container, payload) {
+export function renderRigView(container, payload, { onChanged } = {}) {
   if (!container) return;
   if (!payload || payload.error) {
     container.innerHTML = `<p class="hr-empty">${esc(payload?.error || 'Indisponible.')}</p>`;
@@ -100,17 +251,25 @@ export function renderRigView(container, payload) {
   )).join('');
   const problems = (view.errors || []).length
     ? `<pre class="hr-errors">${esc(view.errors.join('\n'))}</pre>` : '';
-  const push = prov ? '' : (
-    '<p class="settings-hint">Pour l’envoyer sur le Core : téléchargez le rig dans ' +
-    '<code>data/devices/headrush-core/rigs/</code>, puis sur le PC relié à l’appareil :</p>' +
+  const canWrite = !!payload.push?.writeEnabled;
+  const pushLabel = prov ? '⇪ Mettre à jour sur le HeadRush' : '⇪ Créer sur le HeadRush';
+  const pushHint = canWrite ? '' : (
+    '<p class="settings-hint">Écriture désactivée : cochez « Autoriser l’écriture » dans ' +
+    'Préférences › Pédalier. Ou, sur le PC relié à l’appareil :</p>' +
     `<pre class="hr-cmd">${esc(payload.provisionCommand || '')}</pre>`
   );
   container.innerHTML =
     `<div class="hr-head"><span class="hr-rig">${esc(view.rig || '')}</span>${badge}${conf}` +
-    '<button type="button" class="tx-btn hr-download-stored">Télécharger le rig</button></div>' +
-    `${tone}<div class="hr-slots">${slots}</div>${problems}${push}`;
+    '<span class="hr-head-actions">' +
+    `<button type="button" class="tx-btn hr-push-btn"${canWrite ? '' : ' disabled'}>${pushLabel}</button>` +
+    '<button type="button" class="tx-btn hr-download-stored">Télécharger le rig</button></span></div>' +
+    `${tone}<div class="hr-slots">${slots}</div>${problems}` +
+    '<div class="hr-push" hidden></div>' + pushHint;
   container.querySelector('.hr-download-stored')?.addEventListener('click', () => {
     downloadJson(payload.binding, `${payload.key || 'rig'}.json`);
+  });
+  container.querySelector('.hr-push-btn')?.addEventListener('click', () => {
+    openPush(container.querySelector('.hr-push'), payload, onChanged);
   });
 }
 
@@ -153,6 +312,11 @@ export function initHeadrush({ getSong, onSaved, onDeviceChange }) {
   const guidanceEl = $('headrush-guidance');
   const downloadBtn = $('headrush-download-btn');
 
+  const hostInput = $('set-headrush-host');
+  const writeBox = $('set-headrush-write');
+  const connEl = $('set-headrush-conn');
+  const HOST_RE = /^[A-Za-z0-9](?:[A-Za-z0-9.-]{0,251}[A-Za-z0-9])?(?::\d{1,5})?$/;
+
   let activeDevice = 'valeton_gp180';
   let lastBinding = null;
   let lastFilename = 'rig.json';
@@ -177,6 +341,9 @@ export function initHeadrush({ getSong, onSaved, onDeviceChange }) {
           ? 'Catalogue présent : le prompt est généré depuis votre appareil.'
           : 'Aucun catalogue. Lancez scripts/device_catalog_dump.py, appareil allumé.';
       }
+      const core = data.headrush || {};
+      if (hostInput && document.activeElement !== hostInput) hostInput.value = core.host || '';
+      if (writeBox) writeBox.checked = !!core.writeEnabled;
     } catch { /* offline: keep the last known state */ }
   }
 
@@ -298,6 +465,61 @@ export function initHeadrush({ getSong, onSaved, onDeviceChange }) {
       onDeviceChange?.(activeDevice);
     } catch (err) {
       if (state) state.textContent = `Erreur réseau : ${err}`;
+    }
+  });
+
+  async function saveSetting(body) {
+    const { res, data } = await postJson('/api/settings', body);
+    if (res.ok) return true;
+    if (connEl) {
+      connEl.textContent = data?.detail?.code === 'setting_managed_by_environment'
+        ? 'Réglage imposé par une variable d’environnement du serveur.'
+        : `Impossible d’enregistrer (${res.status}).`;
+    }
+    return false;
+  }
+
+  $('set-headrush-host-save')?.addEventListener('click', async () => {
+    const value = hostInput.value.trim();
+    if (!HOST_RE.test(value)) {
+      connEl.textContent = 'Adresse invalide : une IP ou un nom, port optionnel (ex. 192.168.1.34).';
+      return;
+    }
+    if (await saveSetting({ headrush_host: value })) {
+      connEl.textContent = `Adresse enregistrée : ${value}`;
+      await refreshDevices();
+      onDeviceChange?.(activeDevice);
+    }
+  });
+
+  writeBox?.addEventListener('change', async () => {
+    if (!(await saveSetting({ headrush_allow_write: writeBox.checked }))) {
+      writeBox.checked = !writeBox.checked;
+      return;
+    }
+    connEl.textContent = writeBox.checked
+      ? 'Écriture autorisée : le panneau Rig propose « Créer sur le HeadRush ».'
+      : 'Écriture désactivée.';
+    await refreshDevices();
+    onDeviceChange?.(activeDevice);
+  });
+
+  $('set-headrush-test')?.addEventListener('click', async () => {
+    connEl.textContent = 'Connexion…';
+    try {
+      const res = await fetch('/api/devices/headrush/status', { credentials: 'same-origin' });
+      const d = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        connEl.textContent = detailOf(d, res);
+        return;
+      }
+      connEl.textContent = d.reachable
+        ? `✓ ${d.deviceName} à ${d.host} — firmware ${d.appVersion}` +
+          `${d.firmwareMatches ? '' : ' (différent du catalogue !)'} — rig chargé : ${d.loadedRig}` +
+          ` — ${d.rigCount} rigs — « ${d.sandbox} » ${d.sandboxPresent ? 'présent' : 'ABSENT'}`
+        : `✗ Injoignable à ${d.host} : ${d.detail}`;
+    } catch (err) {
+      connEl.textContent = `Erreur réseau : ${err}`;
     }
   });
 

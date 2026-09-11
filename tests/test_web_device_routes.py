@@ -11,6 +11,7 @@ from __future__ import annotations
 import json
 import subprocess
 from pathlib import Path
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
@@ -187,20 +188,28 @@ def test_ingest_never_touches_the_instrument(client: TestClient):
 
 
 @pytest.fixture
-def rig_store(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+def settings_over(monkeypatch: pytest.MonkeyPatch) -> dict[str, object]:
+    """Override individual settings without touching ~/.fretwise/config.json."""
+    from fretwise.web import settings as _settings
+
+    original = _settings.get
+    over: dict[str, object] = {}
+
+    def fake_get(key: str, default: object = None) -> object:
+        return over[key] if key in over else original(key, default)
+
+    monkeypatch.setattr(_settings, "get", fake_get)
+    return over
+
+
+@pytest.fixture
+def rig_store(tmp_path: Path, settings_over: dict[str, object]) -> Path:
     """Point the rig store at a temporary gears directory.
 
     Without this the save tests would write into the repository (or, on the NAS,
     into the real persistent volume).
     """
-    from fretwise.web import settings as _settings
-
-    original = _settings.get
-
-    def fake_get(key: str, default: object = None) -> object:
-        return str(tmp_path) if key == "gears_dir" else original(key, default)
-
-    monkeypatch.setattr(_settings, "get", fake_get)
+    settings_over["gears_dir"] = str(tmp_path)
     return tmp_path / "_devices" / "headrush-core" / "rigs"
 
 
@@ -292,6 +301,196 @@ def test_stored_rigs_stay_out_of_git_and_the_image():
     for name in (".gitignore", ".dockerignore"):
         lines = Path(name).read_text(encoding="utf-8").splitlines()
         assert "data/gears/_devices/" in [line.strip() for line in lines], name
+
+
+# --- pushing to the instrument ------------------------------------------------
+
+
+class _FakeCore:
+    """In-memory Core; module ids come from the plan, so it fits the real catalog."""
+
+    def __init__(self) -> None:
+        self.props: dict[str, dict[str, Any]] = {
+            "/Evil/Gui": {"AppVersion": "5.1.0.2a63755", "DeviceName": "HeadRush Core_3570"},
+            "/Evil/API/Rigs": {
+                "AllRigIds": ["id-hand", "id-scratch"],
+                "AllRigNames": ["Lorenzo solo 1", "#FW - SCRATCH"],
+                "loadedID": "id-hand",
+                "loadedName": "Lorenzo solo 1",
+                "availableProgMIDICC": list(range(128)),
+                "dirty": False,
+            },
+            "/Evil/API/RigSaveDialog": {"displayDialog": False},
+            "/Evil/Engine/Patch/Chain": {f"ModuleType{n}": 0 for n in range(1, 15)},
+        }
+        self.invocations: list[tuple[str, str, list[Any]]] = []
+
+    def subtree(self, path: str) -> dict[str, Any]:
+        return {}
+
+    def meta(self, path: str) -> dict[str, Any]:
+        return {}
+
+    def query(self, path: str, method: str, arguments: list[Any]) -> Any:
+        return None
+
+    def properties(self, path: str) -> dict[str, Any]:
+        return dict(self.props.get(path, {}))
+
+    def set_properties(self, path: str, values: dict[str, Any]) -> None:
+        self.props.setdefault(path, {}).update(values)
+
+    def invoke(self, path: str, method: str, arguments: list[Any]) -> Any:
+        self.invocations.append((path, method, arguments))
+        rigs = self.props["/Evil/API/Rigs"]
+        if method == "setModuleTypeInternal":
+            self.props["/Evil/Engine/Patch/Chain"][f"ModuleType{arguments[0] + 1}"] = arguments[1]
+        elif method == "loadRigConfirm":
+            index = rigs["AllRigIds"].index(arguments[0])
+            rigs["loadedID"] = arguments[0]
+            rigs["loadedName"] = rigs["AllRigNames"][index]
+        elif method == "saveRigAs":
+            rigs["AllRigIds"].append("id-new")
+            rigs["AllRigNames"].append(arguments[0])
+            rigs["loadedID"] = "id-new"
+            rigs["loadedName"] = arguments[0]
+        return True
+
+
+@pytest.fixture
+def core(monkeypatch: pytest.MonkeyPatch) -> _FakeCore:
+    import time
+
+    from fretwise.web import device_routes
+
+    fake = _FakeCore()
+    monkeypatch.setattr(device_routes, "make_read_client", lambda host: fake)
+    monkeypatch.setattr(device_routes, "make_write_client", lambda host: fake)
+    monkeypatch.setattr(time, "sleep", lambda _seconds: None)
+    monkeypatch.delenv("FRETWISE_HEADRUSH_ALLOW_WRITE", raising=False)
+    return fake
+
+
+MUSE = {"artist": "Muse", "title": "Knights Of Cydonia"}
+PUSH = "/api/devices/headrush/push"
+
+
+def _save_muse(client: TestClient) -> str:
+    r = client.post(
+        "/api/devices/headrush/ingest",
+        json={**MUSE, "response": _binding_json(), "save": True},
+    )
+    assert r.status_code == 200
+    return str(client.post(PUSH, json=MUSE).json()["token"])
+
+
+def test_push_preview_plans_a_creation_without_writing(
+    client: TestClient, rig_store: Path, core: _FakeCore
+):
+    _save_muse(client)
+    preview = client.post(PUSH, json=MUSE).json()
+    assert preview["mode"] == "create"
+    assert preview["device"]["reachable"] and preview["device"]["sandboxPresent"]
+    assert preview["token"] and preview["steps"]
+    # 32 belongs to AC/DC in the shipped table; 0 is the lowest free number.
+    assert preview["suggestedProgramChange"] == 0
+    assert core.invocations == []
+
+
+def test_push_apply_is_refused_while_writes_are_disabled(
+    client: TestClient, rig_store: Path, core: _FakeCore, settings_over: dict[str, object]
+):
+    settings_over["headrush_allow_write"] = False
+    token = _save_muse(client)
+    r = client.post(PUSH, json={**MUSE, "apply": True, "confirm": True, "token": token})
+    assert r.status_code == 409
+    assert r.json()["detail"]["code"] == "write_disabled"
+    assert core.invocations == []
+
+
+def test_push_apply_creates_the_rig_and_records_it(
+    client: TestClient, rig_store: Path, core: _FakeCore, settings_over: dict[str, object]
+):
+    settings_over["headrush_allow_write"] = True
+    token = _save_muse(client)
+    r = client.post(
+        PUSH,
+        json={**MUSE, "apply": True, "confirm": True, "token": token, "programChange": 5},
+    )
+    assert r.status_code == 200, r.text
+    body = r.json()
+    assert body["ok"] and body["mode"] == "create" and body["rigId"] == "id-new"
+    assert core.props["/Evil/API/Rigs"]["loadedProgMIDICC"] == 5
+    assert core.invocations[0][1:] == ("loadRigConfirm", ["id-scratch", ""])
+    # Recorded in the persistent store, where the Rig panel reads it back.
+    assert (rig_store.parent / "bindings.json").exists()
+    provisioned = client.get("/api/devices/headrush/rig", params=MUSE).json()["provisioned"]
+    assert provisioned["rigId"] == "id-new" and provisioned["programChange"] == 5
+
+
+def test_push_apply_with_a_stale_token_writes_nothing(
+    client: TestClient, rig_store: Path, core: _FakeCore, settings_over: dict[str, object]
+):
+    settings_over["headrush_allow_write"] = True
+    _save_muse(client)
+    r = client.post(PUSH, json={**MUSE, "apply": True, "confirm": True, "token": "0" * 64})
+    assert r.status_code == 409
+    assert r.json()["detail"]["code"] == "write_refused"
+    assert core.invocations == []
+
+
+def test_push_apply_requires_the_previewed_token(
+    client: TestClient, rig_store: Path, core: _FakeCore, settings_over: dict[str, object]
+):
+    settings_over["headrush_allow_write"] = True
+    _save_muse(client)
+    r = client.post(PUSH, json={**MUSE, "apply": True, "confirm": True})
+    assert r.status_code == 400
+    assert core.invocations == []
+
+
+def test_push_needs_a_stored_rig(client: TestClient, rig_store: Path, core: _FakeCore):
+    r = client.post(PUSH, json={"artist": "Nobody", "title": "Nothing"})
+    assert r.status_code == 404
+
+
+def test_status_reports_an_unreachable_core(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch, settings_over: dict[str, object]
+):
+    from fretwise.devices.headrush_core.client import DeviceUnreachableError
+    from fretwise.web import device_routes
+
+    class Down:
+        def properties(self, path: str) -> dict[str, Any]:
+            raise DeviceUnreachableError("no answer")
+
+    monkeypatch.setattr(device_routes, "make_read_client", lambda host: Down())
+    settings_over["headrush_host"] = "192.168.1.34"
+    body = client.get("/api/devices/headrush/status").json()
+    assert body["reachable"] is False
+    assert body["host"] == "192.168.1.34"
+
+
+def test_device_host_rejects_anything_but_a_bare_host(
+    client: TestClient, settings_over: dict[str, object]
+):
+    """The server builds a URL from this setting; it must not carry a path or a scheme."""
+    settings_over["headrush_host"] = "evil.example/api?x="
+    assert client.get("/api/devices/headrush/status").status_code == 400
+
+
+def test_empty_host_setting_falls_back_to_the_default_address(
+    client: TestClient, settings_over: dict[str, object]
+):
+    settings_over["headrush_host"] = ""
+    assert client.get("/api/devices").json()["headrush"]["host"] == "192.168.1.34"
+
+
+def test_writes_to_the_instrument_are_off_by_default():
+    from fretwise.web.settings import _DEFAULTS
+
+    assert _DEFAULTS["headrush_allow_write"] is False
+    assert _DEFAULTS["headrush_host"] == "192.168.1.34"
 
 
 # --- the artifact must actually reach the image -------------------------------

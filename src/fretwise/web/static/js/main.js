@@ -3724,7 +3724,9 @@ async function _renderHeadrushRig(data) {
   const view = document.getElementById('rig-headrush-view');
   if (view) view.innerHTML = '<p class="settings-hint">Chargement du rig…</p>';
   const payload = await headrush.fetchRigView(artist, song);
-  headrush.renderRigView(view, payload);
+  headrush.renderRigView(view, payload, {
+    onChanged: () => { if (_lastRigFile) _loadRig(_lastRigFile); },
+  });
   const btn = document.getElementById('rig-verify-ai-btn');
   if (btn) {
     const has = !!payload?.binding;

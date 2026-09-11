@@ -976,6 +976,31 @@ qui insère un module décale tous les identifiants.
 les index entiers. Un index périmé écrit silencieusement le mauvais bloc ; un nom
 périmé lève une exception.
 
+**FAIT — Envoi depuis l'interface web** (`POST /api/devices/headrush/push`,
+bouton « ⇪ Créer / Mettre à jour sur le HeadRush » du panneau Rig). Même séquence
+que `scripts/device_provision.py`, factorisée dans `devices/headrush_core/provision.py` :
+
+| Cas | Séquence |
+|---|---|
+| création (chanson absente de `bindings.json`) | `loadRigConfirm(#FW - SCRATCH)` → chaîne + paramètres → relecture → `saveRigAs(nom)` (nouveau GUID ; le bac à sable reste intact sur la flash) → PC optionnel + `saveRig` |
+| mise à jour | `loadRigConfirm(GUID connu)` → chaîne + paramètres → relecture → `saveRig` |
+| inchangé | rien, sauf un Program Change différent |
+
+Clôtures côté FretWise, l'API du Core n'ayant aucune authentification :
+- verrou 1 = réglage `headrush_allow_write` (**désactivé par défaut**, Préférences ›
+  Pédalier) ou la variable d'environnement ;
+- route réservée aux admins ; toujours un **aperçu** (lecture seule : état de
+  l'appareil, plan, PC suggéré, jeton) puis un **apply** portant `confirm` + le jeton
+  de l'aperçu — un rig revalidé entre-temps est refusé ;
+- verrous bon marché (écriture, confirmation, jeton, dialogue ouvert, bac à sable
+  présent) vérifiés **avant** le premier chargement de rig : un refus laisse
+  l'appareil tel quel ;
+- un seul envoi à la fois (verrou serveur) ; adresse `headrush_host` validée comme
+  hôte nu (IP ou nom, port optionnel), défaut `192.168.1.34` — le conteneur du NAS
+  n'a pas le mDNS ;
+- la table des rigs de l'interface va dans le volume persistant
+  (`<gears_dir>/_devices/headrush-core/bindings.json`), jamais dans l'image.
+
 ### 5.6 Tests
 
 - **Parité `params.py`** — les 11 algos reproduits en float32 contre un golden JSON,

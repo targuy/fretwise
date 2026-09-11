@@ -5,36 +5,59 @@ Registered from :func:`fretwise.web.app.create_app` rather than living in
 
 What is exposed: listing the units FretWise knows, building the copy-paste LLM
 prompt for a song, validating the JSON the user pastes back, storing the
-validated rig, and reading it back laid out slot by slot for the Rig panel. All
-of it works from the catalog artifact shipped in the image, so none of it needs
-network access to the instrument.
+validated rig, reading it back laid out slot by slot for the Rig panel, and —
+behind an admin check and an explicit opt-in — creating or updating that rig on
+the instrument itself.
 
-Driving the hardware is deliberately **not** exposed. The Core's local API has no
-authentication, so a route that proxied writes would turn a FretWise instance into
-an open door onto someone's amplifier. Pushing a stored rig stays in
-``scripts/device_provision.py``, which runs on the machine that owns the
-instrument and carries its own confirmation gates.
+The Core's local API has no authentication, so the write route is fenced on the
+FretWise side: ``headrush_allow_write`` must be switched on in the settings (off by
+default), the caller must be an admin, every push is a preview followed by a
+confirmed apply carrying the previewed plan token, and the applier only ever
+writes into rigs named ``#FW - …``. The device address is a setting validated as a
+bare host, so the server cannot be pointed at an arbitrary URL.
 """
 
 from __future__ import annotations
 
 import json
+import re
+import threading
 from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse, Response
+from starlette.concurrency import run_in_threadpool
 
 from fretwise.devices.headrush_core.bindings import BindingStore
 from fretwise.devices.headrush_core.catalog import Catalog, load_catalog
+from fretwise.devices.headrush_core.client import (
+    CoreClient,
+    CoreWriteClient,
+    DeviceError,
+    DeviceWriteTransport,
+)
 from fretwise.devices.headrush_core.plan import build_plan
 from fretwise.devices.headrush_core.prompt import (
     PromptError,
     build_rig_prompt,
     parse_rig_response,
 )
+from fretwise.devices.headrush_core.provision import (
+    SANDBOX_NAME,
+    find_known,
+    provision_mode,
+    provision_rig,
+    suggest_program_change,
+)
+from fretwise.devices.headrush_core.pusher import (
+    DeviceBusy,
+    WriteRefused,
+    plan_token,
+    write_allowed,
+)
 from fretwise.gears.naming import gears_key
-from fretwise.web.settings import GEAR_DEVICES
+from fretwise.web.settings import DEFAULT_HEADRUSH_HOST, GEAR_DEVICES
 
 #: Repository (or image) root: ``src/fretwise/web/device_routes.py`` -> root.
 _ROOT = Path(__file__).resolve().parents[3]
@@ -182,6 +205,124 @@ def _rig_view(binding: dict[str, Any], catalog: Catalog) -> dict[str, Any]:
     }
 
 
+#: A host name or IP literal, optionally with a port — nothing that could carry a
+#: path, a scheme or credentials into the URL the server builds.
+_HOST_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9.-]{0,251}[A-Za-z0-9])?(?::\d{1,5})?$")
+
+#: One write at a time: the device has no transaction, and two interleaved
+#: provisioning runs would each read back the other's writes.
+_push_lock = threading.Lock()
+
+def make_read_client(host: str) -> CoreClient:
+    """Return a read-only client; replaced in tests by an in-memory fake."""
+    return CoreClient(host, timeout=5.0)
+
+
+def make_write_client(host: str) -> DeviceWriteTransport:
+    """Return a write-capable client; replaced in tests by an in-memory fake."""
+    return CoreWriteClient(host, timeout=30.0)
+
+
+def _configured_host() -> str:
+    """Return the Core's address from the settings, falling back to the default.
+
+    An empty value (a config file written before the setting had a default)
+    falls back too, rather than meaning "no device".
+    """
+    from fretwise.web import settings as _settings
+
+    return str(_settings.get("headrush_host") or "").strip() or DEFAULT_HEADRUSH_HOST
+
+
+def _core_host() -> str:
+    """Return the configured address, refusing anything that is not a bare host."""
+    host = _configured_host()
+    if not _HOST_RE.match(host):
+        raise HTTPException(
+            400,
+            {
+                "code": "invalid_device_host",
+                "detail": f"adresse HeadRush invalide : {host!r} "
+                "(attendu : IP ou nom, port optionnel)",
+            },
+        )
+    return host
+
+
+def _write_enabled() -> bool:
+    """Return whether this installation may write to the Core (lock 1)."""
+    from fretwise.web import settings as _settings
+
+    return write_allowed(bool(_settings.get("headrush_allow_write")))
+
+
+def _binding_stores() -> list[BindingStore]:
+    """Return the song tables to consult: the persistent one first, then the image's."""
+    stores: list[BindingStore] = []
+    seen: set[Path] = set()
+    for base in (_store_dir(), _BUNDLED_DIR):
+        path = base / "bindings.json"
+        if path in seen:
+            continue
+        seen.add(path)
+        try:
+            stores.append(BindingStore.load(path))
+        except (OSError, ValueError):
+            continue
+    return stores
+
+
+def _read_device(host: str, catalog: Catalog) -> dict[str, Any]:
+    """Read what a push depends on from the device. Never raises."""
+    try:
+        client = make_read_client(host)
+        gui = client.properties("/Evil/Gui")
+        rigs = client.properties("/Evil/API/Rigs")
+        dialog = client.properties("/Evil/API/RigSaveDialog")
+    except DeviceError as exc:
+        return {"reachable": False, "detail": str(exc)}
+    names = [str(n) for n in (rigs.get("AllRigNames") or [])]
+    app_version = str(gui.get("AppVersion", ""))
+    available = rigs.get("availableProgMIDICC") or []
+    return {
+        "reachable": True,
+        "appVersion": app_version,
+        "deviceName": str(gui.get("DeviceName", "")),
+        "firmwareMatches": app_version == catalog.app_version,
+        "loadedRig": str(rigs.get("loadedName", "")),
+        "loadedDirty": bool(rigs.get("dirty")),
+        "saveDialogOpen": bool(dialog.get("displayDialog")),
+        "sandboxPresent": SANDBOX_NAME in names,
+        "rigCount": len(names),
+        "availableProgramChanges": [int(pc) for pc in available if isinstance(pc, int)],
+    }
+
+
+def _song_document(binding: dict[str, Any], artist: str, title: str) -> dict[str, Any]:
+    """Return the binding keyed by the song open in the UI.
+
+    The song table is looked up with the UI's artist and title; a model that
+    spelled the artist differently in ``song`` would otherwise record the rig
+    under a key the Rig panel never asks for.
+    """
+    song = dict(binding.get("song") or {})
+    song.update({"artist": artist, "title": title})
+    return {**binding, "song": song}
+
+
+def _program_change(raw: Any) -> int | None:
+    """Parse the optional Program Change of a push request."""
+    if raw is None or raw == "":
+        return None
+    try:
+        value = int(raw)
+    except (TypeError, ValueError):
+        raise HTTPException(400, "programChange doit être un entier 0..127") from None
+    if not 0 <= value <= 127:
+        raise HTTPException(400, "programChange doit être un entier 0..127")
+    return value
+
+
 def _provision_command(artist: str, title: str) -> str:
     """Return the command that pushes a stored rig from the instrument's machine."""
     return (
@@ -197,12 +338,10 @@ def register_device_routes(app: FastAPI, require_admin: Any) -> None:
     Args:
         app: The FastAPI application.
         require_admin: ``app.py``'s guard, passed in rather than imported to keep
-            this module free of a circular import. No route here needs it today —
-            storing a rig is gated like the GP-180 "validate and save" flow, i.e.
-            by authentication alone — but a future route that mutates server-wide
-            state must use it.
+            this module free of a circular import. Storing a rig is gated by
+            authentication alone, like the GP-180 "validate and save" flow;
+            writing to the instrument is admin-only.
     """
-    del require_admin  # accepted for the signature; see the docstring
 
     @app.get("/api/devices")
     async def list_devices() -> JSONResponse:
@@ -227,6 +366,11 @@ def register_device_routes(app: FastAPI, require_admin: Any) -> None:
                     }
                     for device_id, info in GEAR_DEVICES.items()
                 ],
+                "headrush": {
+                    "host": _configured_host(),
+                    "writeEnabled": _write_enabled(),
+                    "sandbox": SANDBOX_NAME,
+                },
             }
         )
 
@@ -296,8 +440,139 @@ def register_device_routes(app: FastAPI, require_admin: Any) -> None:
                 "view": view,
                 "provisioned": _provisioned(artist, title),
                 "provisionCommand": _provision_command(artist, title),
+                "push": {"host": _configured_host(), "writeEnabled": _write_enabled()},
             }
         )
+
+    @app.get("/api/devices/headrush/status")
+    async def headrush_status() -> JSONResponse:
+        """Read the Core's state: reachable, firmware, loaded rig, pending dialog.
+
+        Read-only. Used by the settings' "test the connection" button and before
+        a push, so problems are named before anything is written.
+        """
+        host = _core_host()
+        device = await run_in_threadpool(_read_device, host, _load_headrush_catalog())
+        return JSONResponse(
+            {"host": host, "writeEnabled": _write_enabled(), "sandbox": SANDBOX_NAME, **device}
+        )
+
+    @app.post("/api/devices/headrush/push")
+    async def headrush_push(request: Request) -> JSONResponse:
+        """Create or update a song's rig on the Core, from its stored binding.
+
+        Two calls. Without ``apply`` it is a preview: the plan, whether it will
+        create or update, the device's current state, a suggested Program Change
+        and the plan token. With ``"apply": true, "confirm": true, "token": ...``
+        it writes — only if the installation allows writes, only for an admin,
+        and only if the stored rig still matches the token that was previewed.
+
+        Body: ``{artist, title, apply?, confirm?, token?, programChange?}``.
+        """
+        require_admin(app)
+        try:
+            body = await request.json()
+        except Exception:
+            raise HTTPException(400, "Invalid JSON body") from None
+        if not isinstance(body, dict):
+            raise HTTPException(400, "Invalid JSON body")
+        artist = str(body.get("artist") or "")
+        title = str(body.get("title") or "")
+        if not artist.strip() and not title.strip():
+            raise HTTPException(400, "artist ou title requis")
+        stored, _ = _read_rig(artist, title)
+        if stored is None:
+            raise HTTPException(
+                404, {"code": "no_rig", "detail": "aucun rig HeadRush enregistré pour ce morceau"}
+            )
+        catalog = _load_headrush_catalog()
+        document = _song_document(stored, artist, title)
+        plan = build_plan(document, catalog)
+        program_change = _program_change(body.get("programChange"))
+        stores = _binding_stores()
+        known = find_known(stores, artist, title)
+        host = _core_host()
+        enabled = _write_enabled()
+
+        if not body.get("apply"):
+            device = await run_in_threadpool(_read_device, host, catalog)
+            assigned: set[int] = set()
+            for store in stores:
+                assigned |= store.assigned_program_changes()
+            if known is not None and known.program_change is not None:
+                suggested: int | None = known.program_change
+            else:
+                available = device.get("availableProgramChanges") if device["reachable"] else None
+                suggested = suggest_program_change(assigned, available)
+            return JSONResponse(
+                {
+                    "mode": provision_mode(document, known, program_change),
+                    "rig": plan.rig_name,
+                    "applicable": plan.is_applicable,
+                    "errors": list(plan.errors),
+                    "warnings": list(plan.warnings),
+                    "steps": [step.describe for step in plan.steps],
+                    "token": plan_token(plan),
+                    "known": (
+                        {
+                            "rigId": known.rig_id,
+                            "rigName": known.rig_name,
+                            "programChange": known.program_change,
+                        }
+                        if known
+                        else None
+                    ),
+                    "suggestedProgramChange": suggested,
+                    "host": host,
+                    "writeEnabled": enabled,
+                    "sandbox": SANDBOX_NAME,
+                    "device": device,
+                }
+            )
+
+        if not enabled:
+            raise HTTPException(
+                409,
+                {
+                    "code": "write_disabled",
+                    "detail": "écriture désactivée : cocher « Autoriser l’écriture » "
+                    "dans Préférences › Pédalier",
+                },
+            )
+        token = str(body.get("token") or "")
+        if not body.get("confirm") or not token:
+            raise HTTPException(400, "confirm et token (issu de l'aperçu) sont requis")
+        if not _push_lock.acquire(blocking=False):
+            raise HTTPException(
+                409, {"code": "device_busy", "detail": "un envoi est déjà en cours"}
+            )
+        try:
+            write_store = BindingStore.load(_store_dir() / "bindings.json")
+            result = await run_in_threadpool(
+                lambda: provision_rig(
+                    document,
+                    catalog,
+                    make_write_client(host),
+                    write_store,
+                    known=known,
+                    confirm=True,
+                    confirm_token=token,
+                    program_change=program_change,
+                    write_enabled=enabled,
+                )
+            )
+        except (WriteRefused, DeviceBusy) as exc:
+            code = "write_refused" if isinstance(exc, WriteRefused) else "device_busy"
+            raise HTTPException(409, {"code": code, "detail": str(exc)}) from exc
+        except DeviceError as exc:
+            raise HTTPException(
+                502, {"code": "device_unreachable", "detail": f"{host} : {exc}"}
+            ) from exc
+        except (OSError, ValueError) as exc:
+            raise HTTPException(500, f"table des rigs illisible : {exc}") from exc
+        finally:
+            _push_lock.release()
+        return JSONResponse(result.to_json())
 
     @app.post("/api/devices/headrush/ingest")
     async def headrush_ingest(request: Request) -> JSONResponse:

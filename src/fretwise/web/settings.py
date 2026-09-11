@@ -16,6 +16,8 @@ _SETTINGS_DEFAULTS = _fw_config().web.settings_defaults
 DEFAULT_PARTITIONS_DIR = str(Path(__file__).resolve().parents[3] / "partitions")
 DEFAULT_INDEX_PATH = ""
 DEFAULT_SOUNDFONTS_DIR = str(_SETTINGS_DEFAULTS.soundfonts_dir)
+#: Address of the HeadRush Core on the home LAN; editable in the settings.
+DEFAULT_HEADRUSH_HOST = "192.168.1.34"
 
 _DEFAULTS: dict[str, Any] = {
     "partitions_dir": DEFAULT_PARTITIONS_DIR,
@@ -40,7 +42,13 @@ _DEFAULTS: dict[str, Any] = {
     # `fretwise.device.binding.v1` documents. Showing both at once would offer
     # controls that cannot work for the selected hardware.
     "gear_device": "valeton_gp180",   # valeton_gp180 | headrush_core
-    "headrush_host": "",              # "" = $FRETWISE_CORE_HOST, else headrushcore.local
+    # IP literal rather than headrushcore.local: mDNS does not cross into a Docker
+    # bridge network, so the NAS container can only reach the Core by address.
+    "headrush_host": DEFAULT_HEADRUSH_HOST,
+    # Lock 1 of the device applier, as an installation setting (the environment
+    # variable FRETWISE_HEADRUSH_ALLOW_WRITE also opens it). Off by default: the
+    # Core's API has no authentication, so writing to it is an explicit opt-in.
+    "headrush_allow_write": False,
 }
 
 #: Devices the rig UI knows how to drive, and how each is reached.
