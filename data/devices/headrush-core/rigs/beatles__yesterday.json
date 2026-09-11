@@ -1,0 +1,124 @@
+{
+ "schemaVersion": "fretwise.device.binding.v1",
+ "device": {
+  "deviceId": "headrush-core",
+  "appVersion": "5.1.0.2a63755"
+ },
+ "rig": {
+  "name": "#FW - beatles - yesterday",
+  "programChange": null
+ },
+ "song": {
+  "artist": "beatles",
+  "title": "yesterday"
+ },
+ "tone": {
+  "summary": "Son acoustique très naturel, intime et relativement sec, visant la Epiphone Texan à table épicéa et corps acajou utilisée par Paul McCartney, avec attaque douce, médiums boisés et très peu d'effet.",
+  "mustHave": [
+   "caractère acoustique acier de type Epiphone Texan",
+   "attaque naturelle et dynamique",
+   "médiums boisés sans dureté",
+   "grave contrôlé",
+   "réverbe courte et discrète",
+   "son restant très proche et intime"
+  ],
+  "avoid": [
+   "saturation audible",
+   "compression forte",
+   "grave de type grosse dreadnought",
+   "aigus piézo agressifs",
+   "chorus",
+   "delay audible",
+   "réverbe longue ou brillante"
+  ]
+ },
+ "confidence": "medium/high",
+ "sources": [
+  "Gibson/Epiphone — documentation de la Texan et association historique du modèle avec Paul McCartney ; construction épicéa massif et acajou massif",
+  "Sound On Sound — Mixing Live Legends : Yesterday est traité comme un morceau intime centré sur la voix et la guitare acoustique de Paul McCartney",
+  "The Beatles Bible — documentation consacrée aux guitares utilisées par les Beatles et à l'utilisation de l'Epiphone Texan par Paul McCartney"
+ ],
+ "blocks": [
+  {
+   "module": "DynIII Comp",
+   "why": "Compression légère pour stabiliser les accords et les notes sans supprimer la dynamique naturelle de la partie acoustique.",
+   "params": {
+    "On": true,
+    "Threshold": -24,
+    "Ratio": 2,
+    "Attack": 28,
+    "Release": 180,
+    "Knee": 8,
+    "Gain": 1
+   }
+  },
+  {
+   "module": "Amp",
+   "why": "Préamplification extrêmement propre et peu poussée servant surtout à donner du corps et une réponse organique avant la simulation acoustique.",
+   "params": {
+    "On": true,
+    "Type": "65 Black Prince",
+    "GainA": 18,
+    "Master": 58,
+    "Bass": 43,
+    "Mid": 55,
+    "Treble": 48,
+    "Presence": 40,
+    "Bright": false,
+    "Bottom": false,
+    "Trim": -4,
+    "Level": 50
+   }
+  },
+  {
+   "module": "Cab",
+   "why": "Petit baffle ouvert choisi pour conserver une réponse légère et peu chargée avant la transformation acoustique.",
+   "params": {
+    "On": true,
+    "CabType": "1x12 Black Panel Lux",
+    "MicType": "Cond 67",
+    "OnAxis": false,
+    "Breakup": 0,
+    "AmpCompGain": 0,
+    "OutGain": -2
+   }
+  },
+  {
+   "module": "Acoust Sim",
+   "why": "Bloc principal du rig : transforme le caractère d'une guitare électrique en timbre acoustique acier plus proche de la Texan de McCartney.",
+   "params": {
+    "On": true,
+    "Body": 58,
+    "Tone": 47,
+    "Level": 52
+   }
+  },
+  {
+   "module": "Para EQ",
+   "why": "Corrige le côté artificiel de la simulation acoustique, retire du bas-médium encombrant et adoucit la zone d'attaque afin d'obtenir le caractère intime de l'enregistrement.",
+   "params": {
+    "On": true,
+    "Freq1": 90,
+    "Gain1": -3,
+    "Q1": 0.7,
+    "Freq3": 850,
+    "Gain3": 1.5,
+    "Q3": 0.8,
+    "Freq4": 5200,
+    "Gain4": -2.5,
+    "Q4": 0.7
+   }
+  },
+  {
+   "module": "C-Verb",
+   "why": "Ajoute seulement une petite ambiance de studio afin de conserver la proximité et la sobriété caractéristiques de Yesterday.",
+   "params": {
+    "On": true,
+    "Dry": 0,
+    "HighPassFrequency": 140,
+    "LowPassFrequency": 6500,
+    "Mix": -20
+   }
+  }
+ ]
+}
