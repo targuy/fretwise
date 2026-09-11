@@ -1,0 +1,159 @@
+{
+ "schemaVersion": "fretwise.device.binding.v1",
+ "device": {
+  "deviceId": "headrush-core",
+  "appVersion": "5.1.0.2a63755"
+ },
+ "rig": {
+  "name": "#FW - imagine dragon - radioactive",
+  "programChange": null
+ },
+ "song": {
+  "artist": "imagine dragon",
+  "title": "radioactive"
+ },
+ "tone": {
+  "summary": "Guitare rock britannique dense mais contrôlée, centrée sur les médiums et hauts-médiums, avec grave fortement contenu pour laisser la place au synthé et à la basse qui produisent l'essentiel du gigantesque drop de Radioactive.",
+  "mustHave": [
+   "attaque nette et percussive",
+   "crunch britannique de type Vox AC30 plutôt qu'une saturation metal",
+   "grave serré pour ne pas concurrencer le synthé et la basse",
+   "médiums présents pour que la guitare reste audible dans l'arrangement très produit",
+   "élargissement stéréo discret",
+   "réverbe courte et peu envahissante"
+  ],
+  "avoid": [
+   "essayer de reproduire avec la guitare seule le sub-bass et le drop électronique du disque",
+   "gain excessif de type high-gain moderne",
+   "grave massif ou résonance importante",
+   "delay audible avec beaucoup de répétitions",
+   "réverbe longue qui masque l'attaque"
+  ]
+ },
+ "confidence": "medium/high",
+ "sources": [
+  "GRAMMY — The making of Imagine Dragons' Radioactive : Dan Reynolds explique la collaboration avec Alex Da Kid, l'approche rock/hip-hop, l'enregistrement à Westlake et la construction du morceau autour d'un drop très percussif. ",
+  "Apple Music — crédits de Radioactive : Wayne Sermon et J Browz aux guitares, Ben McKee à la basse et au synthétiseur, Daniel Platzman aux drums/drum machine, Alex Da Kid à la production. ",
+  "Premier Guitar Rig Rundown — le rig de Wayne Sermon est construit autour de plusieurs Vox AC30 vintage en wet/dry/wet, avec haut-parleurs de type Celestion Blue. ",
+  "Premier Guitar / HeadRush — le pedalboard de Sermon comporte notamment une Timmy ; sur HeadRush Core, Jimmy OD est explicitement inspiré de la MXR Timmy.  ",
+  "Berklee — Imagine Dragons décrit Radioactive comme une chanson pouvant fonctionner simplement guitare/voix avant son habillage de production, et souligne le mélange rock, hip-hop, synthés et production électronique. ",
+  "Contraintes FretWise et listes exactes de modules/paramètres fournies par l'utilisateur. "
+ ],
+ "blocks": [
+  {
+   "module": "Gate",
+   "why": "Nettoyer les silences et conserver l'impact très sec des attaques sans transformer le jeu en gate metal.",
+   "params": {
+    "On": true,
+    "Threshold": -55,
+    "FilterThreshhold": -75,
+    "Release": 120
+   }
+  },
+  {
+   "module": "DynIII Comp",
+   "why": "Stabiliser les attaques et donner la régularité nécessaire à une guitare intégrée dans une production très compressée, tout en gardant du punch.",
+   "params": {
+    "On": true,
+    "Threshold": -18,
+    "Ratio": 3,
+    "Attack": 22,
+    "Release": 150,
+    "Knee": 8,
+    "Gain": 2
+   }
+  },
+  {
+   "module": "Jimmy OD",
+   "why": "Jimmy OD est inspiré de la Timmy, famille d'overdrive documentée sur le pedalboard de Wayne Sermon ; ici elle sert surtout à pousser l'AC30 et à resserrer le grave.",
+   "params": {
+    "On": true,
+    "Gain": 32,
+    "Bass": 38,
+    "Treble": 60,
+    "Volume": 64
+   }
+  },
+  {
+   "module": "Amp",
+   "why": "Le 66 AC Hi Boost correspond directement à la famille Vox AC30 vintage autour de laquelle Sermon a construit son son live ; son crunch brillant et médium fonctionne mieux ici qu'un ampli high-gain.",
+   "params": {
+    "On": true,
+    "Type": "66 AC Hi Boost",
+    "GainA": 57,
+    "Master": 67,
+    "Bass": 38,
+    "Mid": 59,
+    "Treble": 64,
+    "Presence": 55,
+    "Bright": true,
+    "Level": 53,
+    "Trim": -2
+   }
+  },
+  {
+   "module": "Cab",
+   "why": "Le 2x12 AC Blue complète logiquement l'AC30 et se rapproche des Celestion Blue documentés dans le backline de Sermon ; le 57 garde l'attaque agressive nécessaire au morceau.",
+   "params": {
+    "On": true,
+    "CabType": "2x12 AC Blue",
+    "MicType": "Dyn 57",
+    "OnAxis": false,
+    "Breakup": 20,
+    "AmpCompGain": 0,
+    "OutGain": 0
+   }
+  },
+  {
+   "module": "Para EQ",
+   "why": "Retirer le bas-médium qui entrerait en conflit avec la basse et les synthés, puis pousser légèrement la zone de présence pour retrouver le rôle de texture tranchante de la guitare.",
+   "params": {
+    "On": true,
+    "Freq1": 105,
+    "Gain1": -5,
+    "Q1": 0.7,
+    "Freq3": 1450,
+    "Gain3": 2.5,
+    "Q3": 0.9,
+    "Freq4": 6500,
+    "Gain4": -2,
+    "Q4": 0.7
+   }
+  },
+  {
+   "module": "Stereo Doubler",
+   "why": "Créer une largeur proche du rôle spatial d'un système wet/dry/wet sans ajouter un chorus évident ni brouiller le riff.",
+   "params": {
+    "On": true,
+    "Intensity": 27,
+    "Separation": 18
+   }
+  },
+  {
+   "module": "AIR Delay",
+   "why": "Ajouter uniquement une profondeur très courte derrière la guitare ; le morceau ne demande pas de répétitions de delay clairement audibles.",
+   "params": {
+    "On": true,
+    "Delay": 115,
+    "Feedback": 9,
+    "Mix": 9,
+    "LoCut": 180,
+    "FdbkHighCut": 5200,
+    "FdbkReso": 0,
+    "Ratio": 0,
+    "Sync": false
+   }
+  },
+  {
+   "module": "Eleven Reverb",
+   "why": "Placer la guitare dans l'espace du mix tout en gardant le caractère frontal et percussif indispensable à Radioactive.",
+   "params": {
+    "On": true,
+    "Decay": 22,
+    "Mix": 11,
+    "Pre-Delay": 18,
+    "Tone": 52
+   }
+  }
+ ]
+}

@@ -125,6 +125,7 @@ objets de l'API et questions ouvertes : **`docs/headrush_core.md`**.
 | `device_plan.py` | Construit **hors ligne** le plan d'écriture d'un rig depuis un document `fretwise.device.binding.v1` : résout chaque module et chaque valeur contre le catalogue, place les slots, valide l'ordre, et émet la suite exacte d'appels. Ne touche pas l'appareil. Code de sortie 2 si le plan porte des erreurs |
 | `device_backup.py` | Sauvegarde **lecture seule** du rig chargé (chaîne, tous les paramètres de bloc, réglages rig, scènes) dans `data/devices/headrush-core/backups/<rigId>.json`. `--diff AVANT APRÈS` compare deux sauvegardes et sort en code 2 s'il y a des différences |
 | `headrush_studio.py` | **HeadRush Studio**, l'application autonome de conception et d'envoi des rigs : liste des rigs par morceau, prompt LLM + validation, vue slot par slot, création/mise à jour sur l'appareil (aperçu puis confirmation), liste des rigs du Core avec chargement pour écoute. Serveur local sur `127.0.0.1:8765`, ouvre le navigateur. Double-clic : `tools/headrush_studio.cmd` |
+| `device_images.py` | Récupère **en lecture seule** les images des blocs servies par le Core (`/files/Evil/Web/Blocks/img/…` : une par pédale, par modèle d'ampli, par baffle) dans le cache local `data/devices/headrush-core/images/` (non suivi par git, hors image Docker). Facultatif : les apps les récupèrent à la première demande ; le préchargement les rend disponibles appareil éteint |
 
 ```powershell
 pixi run headrush-studio                      # HeadRush Studio, http://127.0.0.1:8765

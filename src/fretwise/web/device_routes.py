@@ -22,11 +22,12 @@ from __future__ import annotations
 import json
 import re
 import threading
+import urllib.parse
 from pathlib import Path
 from typing import Any
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import JSONResponse, Response
+from fastapi.responses import FileResponse, JSONResponse, Response
 from starlette.concurrency import run_in_threadpool
 
 from fretwise.devices.headrush_core.bindings import BindingStore
@@ -37,6 +38,7 @@ from fretwise.devices.headrush_core.client import (
     DeviceError,
     DeviceWriteTransport,
 )
+from fretwise.devices.headrush_core.images import ImageCache, image_relpath, image_variant
 from fretwise.devices.headrush_core.plan import GENERATED_PREFIX, build_plan
 from fretwise.devices.headrush_core.prompt import (
     PromptError,
@@ -170,6 +172,26 @@ def _provisioned(artist: str, title: str) -> dict[str, Any] | None:
     return None
 
 
+_image_caches: dict[Path, ImageCache] = {}
+
+
+def _image_cache() -> ImageCache:
+    """Return the block-picture cache, next to the rig store (persistent in prod)."""
+    directory = _store_dir() / "images"
+    if directory not in _image_caches:
+        _image_caches[directory] = ImageCache(directory)
+    return _image_caches[directory]
+
+
+def _image_url(module: str, params: dict[str, Any]) -> str:
+    """Return the app URL of a block's picture (amp and cab pictures follow the model)."""
+    query = {"module": module}
+    variant = image_variant(module, params)
+    if variant:
+        query["variant"] = variant
+    return "/api/devices/headrush/block-image?" + urllib.parse.urlencode(query)
+
+
 def _rig_view(binding: dict[str, Any], catalog: Catalog) -> dict[str, Any]:
     """Lay a binding out the way the device will: one entry per slot, with its CC."""
     plan = build_plan(binding, catalog)
@@ -200,6 +222,7 @@ def _rig_view(binding: dict[str, Any], catalog: Catalog) -> dict[str, Any]:
                 "category": placement.category,
                 "params": params_by_module.get(placement.module, {}),
                 "why": why_by_module.get(placement.module, ""),
+                "image": _image_url(placement.module, params_by_module.get(placement.module, {})),
             }
             for placement in plan.placements
         ],
@@ -636,6 +659,32 @@ def register_device_routes(app: FastAPI, require_admin: Any) -> None:
         finally:
             _push_lock.release()
         return JSONResponse(result.to_json())
+
+    @app.get("/api/devices/headrush/block-image")
+    async def headrush_block_image(module: str, variant: str = "") -> Response:
+        """Serve a block's picture: from the cache, else fetched once from the Core.
+
+        ``module`` and ``variant`` are checked against the catalog before any URL
+        is built. 404 when the picture is neither cached nor obtainable — the UI
+        then simply shows the text.
+        """
+        catalog = _load_headrush_catalog()
+        try:
+            relpath = image_relpath(catalog, module, variant)
+        except ValueError as exc:
+            raise HTTPException(400, str(exc)) from exc
+        cache = _image_cache()
+        path = cache.get(relpath)
+        if path is None:
+            host = _core_host()
+            path = await run_in_threadpool(
+                cache.fetch, relpath, lambda url_path: make_read_client(host).file(url_path)
+            )
+        if path is None:
+            raise HTTPException(404, "image indisponible (appareil injoignable ou sans image)")
+        return FileResponse(
+            path, media_type="image/webp", headers={"Cache-Control": "private, max-age=604800"}
+        )
 
     @app.get("/api/devices/headrush/rigs")
     async def headrush_rigs() -> JSONResponse:

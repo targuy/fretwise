@@ -256,6 +256,7 @@ export function renderRigView(container, payload, { onChanged, emptyHint } = {})
   const slots = (view.blocks || []).map((b) => (
     `<div class="hr-slot" title="${esc(b.why || '')}">` +
       `<div class="hr-slot-n">Slot ${esc(b.slot)} · CC${esc(b.cc)} · ${esc(b.category)}</div>` +
+      (b.image ? `<img class="hr-slot-img" src="${esc(b.image)}" alt="" loading="lazy">` : '') +
       `<div class="hr-slot-mod">${esc(b.module)}</div>` +
       `<div class="hr-slot-params">${paramsText(b.params)}</div>` +
     '</div>'
@@ -276,6 +277,11 @@ export function renderRigView(container, payload, { onChanged, emptyHint } = {})
     '<button type="button" class="tx-btn hr-download-stored">Télécharger le rig</button></span></div>' +
     `${tone}<div class="hr-slots">${slots}</div>${problems}` +
     '<div class="hr-push" hidden></div>' + pushHint;
+  // A picture the Core cannot provide (switched off, unknown model) leaves the text alone.
+  container.querySelectorAll('.hr-slot-img').forEach((img) => {
+    if (img.complete && img.naturalWidth === 0 && img.src) img.remove();
+    else img.addEventListener('error', () => img.remove(), { once: true });
+  });
   container.querySelector('.hr-download-stored')?.addEventListener('click', () => {
     downloadJson(payload.binding, `${payload.key || 'rig'}.json`);
   });

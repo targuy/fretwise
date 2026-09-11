@@ -324,6 +324,11 @@ class _FakeCore:
             "/Evil/Engine/Patch/Chain": {f"ModuleType{n}": 0 for n in range(1, 15)},
         }
         self.invocations: list[tuple[str, str, list[Any]]] = []
+        self.files: list[str] = []
+
+    def file(self, path: str) -> bytes:
+        self.files.append(path)
+        return b"RIFF\x10\x00\x00\x00WEBPVP8 fake-picture"
 
     def subtree(self, path: str) -> dict[str, Any]:
         return {}
@@ -484,6 +489,59 @@ def test_empty_host_setting_falls_back_to_the_default_address(
 ):
     settings_over["headrush_host"] = ""
     assert client.get("/api/devices").json()["headrush"]["host"] == "192.168.1.34"
+
+
+def test_rig_view_points_each_slot_at_its_picture(client: TestClient, rig_store: Path):
+    _ = client.post(
+        "/api/devices/headrush/ingest",
+        json={**MUSE, "response": _binding_json(), "save": True},
+    )
+    blocks = client.get("/api/devices/headrush/rig", params=MUSE).json()["view"]["blocks"]
+    images = {b["module"]: b["image"] for b in blocks}
+    assert images["Amp"] == (
+        "/api/devices/headrush/block-image?module=Amp&variant=82+Lead+800+100W"
+    )
+    assert images["Cab"].endswith("variant=4x12+Green+25W")
+
+
+def test_block_image_is_fetched_once_then_cached(
+    client: TestClient, rig_store: Path, core: _FakeCore
+):
+    r = client.get("/api/devices/headrush/block-image", params={"module": "Pressor"})
+    assert r.status_code == 200
+    assert r.headers["content-type"] == "image/webp"
+    assert core.files == ["/files/Evil/Web/Blocks/img/Pressor.webp"]
+    again = client.get("/api/devices/headrush/block-image", params={"module": "Pressor"})
+    assert again.status_code == 200 and core.files == ["/files/Evil/Web/Blocks/img/Pressor.webp"]
+    # Cached under the persistent store, never in the repository.
+    assert any((rig_store.parent / "images").iterdir())
+
+
+def test_block_image_refuses_names_outside_the_catalog(client: TestClient, core: _FakeCore):
+    r = client.get("/api/devices/headrush/block-image", params={"module": "../../api/v1"})
+    assert r.status_code == 400
+    assert core.files == []
+
+
+def test_block_image_is_404_when_the_device_cannot_provide_it(
+    client: TestClient, rig_store: Path, monkeypatch: pytest.MonkeyPatch
+):
+    from fretwise.devices.headrush_core.client import DeviceUnreachableError
+    from fretwise.web import device_routes
+
+    class Down:
+        def file(self, path: str) -> bytes:
+            raise DeviceUnreachableError("off")
+
+    monkeypatch.setattr(device_routes, "make_read_client", lambda host: Down())
+    r = client.get("/api/devices/headrush/block-image", params={"module": "Gate"})
+    assert r.status_code == 404
+
+
+def test_cached_block_images_stay_out_of_git_and_the_image():
+    for name in (".gitignore", ".dockerignore"):
+        lines = [line.strip() for line in Path(name).read_text(encoding="utf-8").splitlines()]
+        assert "data/devices/*/images/" in lines, name
 
 
 def test_writes_to_the_instrument_are_off_by_default():

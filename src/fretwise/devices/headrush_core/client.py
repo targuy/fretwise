@@ -70,6 +70,10 @@ class DeviceProtocolError(DeviceError):
     """The device answered, but not with what the API contract promises."""
 
 
+class DeviceNotFoundError(DeviceProtocolError):
+    """The device answered 404: the requested file does not exist on it."""
+
+
 class UnsafeMethodError(DeviceError):
     """A caller tried to invoke an object-method that is not known to be pure."""
 
@@ -290,6 +294,33 @@ class CoreClient:
         if not isinstance(payload, dict) or "methodReturnValue" not in payload:
             raise DeviceProtocolError(f"{url} returned no methodReturnValue")
         return payload["methodReturnValue"]
+
+    def file(self, path: str) -> bytes:
+        """GET one static file the device serves under ``/files/`` (block pictures).
+
+        Args:
+            path: Absolute URL path, already percent-encoded, e.g.
+                ``/files/Evil/Web/Blocks/img/Pressor.webp``.
+
+        Raises:
+            ValueError: ``path`` is outside ``/files/``.
+            DeviceNotFoundError: The device has no such file.
+            DeviceUnreachableError: The device did not answer.
+            DeviceProtocolError: The device answered with another error.
+        """
+        if not path.startswith("/files/") or ".." in path:
+            raise ValueError(f"chemin hors de /files/ : {path!r}")
+        url = f"http://{self.host}{path}"
+        try:
+            with urllib.request.urlopen(url, timeout=self.timeout) as response:
+                data: bytes = response.read()
+                return data
+        except urllib.error.HTTPError as exc:
+            if exc.code == 404:
+                raise DeviceNotFoundError(f"{url} returned HTTP 404") from exc
+            raise DeviceProtocolError(f"{url} returned HTTP {exc.code}") from exc
+        except (urllib.error.URLError, OSError) as exc:
+            raise DeviceUnreachableError(f"no answer from {self.host}") from exc
 
     # -- derived reads ------------------------------------------------------
 

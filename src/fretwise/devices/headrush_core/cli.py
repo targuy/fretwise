@@ -29,6 +29,7 @@ from fretwise.devices.headrush_core.client import (
     DeviceError,
     DeviceSnapshot,
 )
+from fretwise.devices.headrush_core.images import ImageCache, all_image_relpaths
 from fretwise.devices.headrush_core.plan import PlanError, build_plan, load_binding
 from fretwise.devices.headrush_core.prompt import PromptError, build_rig_prompt, parse_rig_response
 from fretwise.devices.headrush_core.provision import (
@@ -652,4 +653,65 @@ def provision_main(argv: list[str] | None = None) -> int:
     print(f"  GUID     : {result.rig_id}")
     print(f"  MIDI PROG: {result.program_change if result.program_change is not None else '—'}")
     print(f"  table    : {store.path}")
+    return 0
+
+
+def images_main(argv: list[str] | None = None) -> int:
+    """Download every block picture the Core serves into the local cache. Read-only.
+
+    Optional: the web apps fetch pictures on first use anyway. Prefetching makes
+    them available while the device is switched off.
+
+    Args:
+        argv: Command-line arguments, excluding the program name.
+
+    Returns:
+        ``0`` on success, ``1`` when the device cannot be reached.
+    """
+    _configure_stdout()
+    parser = argparse.ArgumentParser(
+        prog="device_images",
+        description=(
+            "Recupere les images des blocs (pedales, amplis, baffles) servies par le "
+            "HeadRush Core, dans un cache local. Lecture seule."
+        ),
+    )
+    _add_host_argument(parser)
+    parser.add_argument("--catalog", type=Path, default=None)
+    parser.add_argument(
+        "--out",
+        type=Path,
+        default=_REPO_ROOT / "data" / "devices" / "headrush-core" / "images",
+        help="dossier du cache (defaut : celui de l'app en local)",
+    )
+    args = parser.parse_args(argv)
+
+    catalog_file = args.catalog
+    if catalog_file is None:
+        folder = _REPO_ROOT / "data" / "devices" / "headrush-core" / "catalog"
+        found = sorted(folder.glob("*.json"))
+        if not found:
+            print(f"erreur : aucun catalogue dans {folder}")
+            return 1
+        catalog_file = found[-1]
+    catalog = load_catalog(catalog_file)
+
+    client = CoreClient(args.host, timeout=15.0)
+    cache = ImageCache(args.out)
+    relpaths = all_image_relpaths(catalog)
+    cached = fetched = missing = 0
+    for relpath in relpaths:
+        if cache.get(relpath) is not None:
+            cached += 1
+            continue
+        if cache.fetch(relpath, client.file) is not None:
+            fetched += 1
+        elif cache.offline:
+            print(f"erreur : {client.host} injoignable — {fetched} images recuperees avant")
+            return 1
+        else:
+            missing += 1
+    print(f"{len(relpaths)} images attendues — {fetched} recuperees, {cached} deja en cache, "
+          f"{missing} absentes de l'appareil")
+    print(f"  cache : {args.out}")
     return 0
