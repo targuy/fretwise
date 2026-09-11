@@ -3673,12 +3673,67 @@ let _lastRigResolution = null;
 
 async function _loadRig(filename) {
   // The server returns the new-format gears sheet when one exists for this song,
-  // otherwise the legacy .md; a stub covers songs with neither.
+  // otherwise the legacy .md; a stub covers songs with neither. That lookup also
+  // resolves the song identity, which the HeadRush view needs too.
   const data = await fetchRig(filename) || _fallbackRigView(filename);
   _lastRig = data;
   _lastRigFile = filename;
+  // Re-read the selected unit each time: it is a server setting and may have
+  // been changed from another tab or device since this page loaded.
+  try { await headrush.refreshDevices(); } catch { /* keep the last known unit */ }
+  if (_headrushActive()) {
+    await _renderHeadrushRig(data);
+    return;
+  }
+  _showGp180Blocks(true);
   _renderRig(data);
   await _loadRigBankControl(filename, data);
+}
+
+// `headrush` is created further down; this runs from UI events long after, but
+// a try/catch keeps an early call from dying on the temporal dead zone.
+function _headrushActive() {
+  try { return !!headrush && headrush.isActive(); } catch { return false; }
+}
+
+// The GP-180 sheet and the HeadRush rig never share the panel: different
+// schema, different transport, different controls.
+function _showGp180Blocks(show) {
+  const view = document.getElementById('rig-headrush-view');
+  if (view) view.style.display = show ? 'none' : '';
+  for (const id of ['rig-meta', 'rig-chain']) {
+    const el = document.getElementById(id);
+    if (el) el.style.display = show ? '' : 'none';
+  }
+  if (!show) {
+    // _renderRig / _loadRigBankControl set these again in GP-180 mode.
+    for (const id of ['rig-bank-control', 'rig-notes-wrap', 'rig-improvements-wrap']) {
+      const el = document.getElementById(id);
+      if (el) el.style.display = 'none';
+    }
+  }
+}
+
+async function _renderHeadrushRig(data) {
+  const artist = data?.artist || '';
+  const song = data?.song || '';
+  window.__fretwiseSong = { artist, title: song };
+  _showGp180Blocks(false);
+  const title = document.getElementById('rig-panel-title');
+  if (title) title.textContent = `Rig HeadRush Core — ${artist || '?'} · ${song || '?'}`;
+  const view = document.getElementById('rig-headrush-view');
+  if (view) view.innerHTML = '<p class="settings-hint">Chargement du rig…</p>';
+  const payload = await headrush.fetchRigView(artist, song);
+  headrush.renderRigView(view, payload);
+  const btn = document.getElementById('rig-verify-ai-btn');
+  if (btn) {
+    const has = !!payload?.binding;
+    btn.dataset.mode = has ? 'verify' : 'create';
+    btn.textContent = has ? '✨ Corriger avec IA' : "✨ Créer avec l'IA";
+    btn.title = has
+      ? 'Faire corriger ce rig HeadRush par votre LLM…'
+      : 'Créer un rig HeadRush avec votre LLM…';
+  }
 }
 
 function _fallbackRigView(filename) {
@@ -4259,6 +4314,12 @@ const headrush = initHeadrush({
   getSong: () => {
     const meta = window.__fretwiseSong || {};
     return { artist: meta.artist || '', title: meta.title || '' };
+  },
+  // A rig just validated, or the other unit selected: redraw the open panel so
+  // it shows what is now true instead of the previous view.
+  onSaved: () => { if (_lastRigFile && rigPanel?.style.display !== 'none') _loadRig(_lastRigFile); },
+  onDeviceChange: () => {
+    if (_lastRigFile && rigPanel?.style.display !== 'none') _loadRig(_lastRigFile);
   },
 });
 

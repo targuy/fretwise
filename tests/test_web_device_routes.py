@@ -183,6 +183,117 @@ def test_ingest_never_touches_the_instrument(client: TestClient):
     assert r.status_code == 200
 
 
+# --- storing and showing a rig ------------------------------------------------
+
+
+@pytest.fixture
+def rig_store(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
+    """Point the rig store at a temporary gears directory.
+
+    Without this the save tests would write into the repository (or, on the NAS,
+    into the real persistent volume).
+    """
+    from fretwise.web import settings as _settings
+
+    original = _settings.get
+
+    def fake_get(key: str, default: object = None) -> object:
+        return str(tmp_path) if key == "gears_dir" else original(key, default)
+
+    monkeypatch.setattr(_settings, "get", fake_get)
+    return tmp_path / "_devices" / "headrush-core" / "rigs"
+
+
+def test_ingest_without_save_writes_nothing(client: TestClient, rig_store: Path):
+    r = client.post(
+        "/api/devices/headrush/ingest",
+        json={"artist": "Muse", "title": "Knights Of Cydonia", "response": _binding_json()},
+    )
+    assert r.status_code == 200
+    assert r.json()["saved"] is None
+    assert not rig_store.exists()
+
+
+def test_ingest_with_save_stores_under_the_open_songs_key(client: TestClient, rig_store: Path):
+    """Keyed by the song open in the UI, not by what the model wrote in `song`."""
+    r = client.post(
+        "/api/devices/headrush/ingest",
+        json={
+            "artist": "Muse",
+            "title": "Knights Of Cydonia",
+            "response": _binding_json(),
+            "save": True,
+        },
+    )
+    assert r.status_code == 200
+    assert r.json()["saved"] == "muse__knights-of-cydonia.json"
+    stored = json.loads((rig_store / "muse__knights-of-cydonia.json").read_text(encoding="utf-8"))
+    assert stored["rig"]["name"].startswith("#FW - ")
+
+
+def test_refused_rig_is_never_stored(client: TestClient, rig_store: Path):
+    r = client.post(
+        "/api/devices/headrush/ingest",
+        json={
+            "artist": "A",
+            "title": "B",
+            "response": _binding_json().replace('"Amp"', '"Klone"'),
+            "save": True,
+        },
+    )
+    assert r.status_code == 422
+    assert not rig_store.exists()
+
+
+def test_rig_route_is_empty_for_a_song_without_a_rig(client: TestClient, rig_store: Path):
+    payload = client.get(
+        "/api/devices/headrush/rig", params={"artist": "Nobody", "title": "Nothing"}
+    ).json()
+    assert payload["binding"] is None
+    assert payload["view"] is None
+    assert payload["provisioned"] is None
+
+
+def test_rig_route_returns_the_saved_rig_slot_by_slot(client: TestClient, rig_store: Path):
+    client.post(
+        "/api/devices/headrush/ingest",
+        json={"artist": "Muse", "title": "Knights Of Cydonia", "response": _binding_json(),
+              "save": True},
+    )
+    payload = client.get(
+        "/api/devices/headrush/rig", params={"artist": "Muse", "title": "Knights Of Cydonia"}
+    ).json()
+    assert payload["source"] == "store"
+    blocks = {b["module"]: b for b in payload["view"]["blocks"]}
+    # Frozen head: Amp in slot 6, Cab in slot 7; bypass CC = 74 + slot.
+    assert (blocks["Amp"]["slot"], blocks["Amp"]["cc"]) == (6, 80)
+    assert (blocks["Cab"]["slot"], blocks["Cab"]["cc"]) == (7, 81)
+    assert blocks["Amp"]["params"]["Type"] == "82 Lead 800 100W"
+    assert payload["view"]["applicable"] is True
+
+
+def test_rig_route_falls_back_to_the_rig_shipped_in_the_image(
+    client: TestClient, rig_store: Path
+):
+    """AC/DC was authored and pushed from the CLI: it lives in the repo, not the store."""
+    payload = client.get(
+        "/api/devices/headrush/rig", params={"artist": "AC/DC", "title": "Highway To Hell"}
+    ).json()
+    assert payload["source"] == "image"
+    assert payload["provisioned"]["programChange"] == 32
+
+
+def test_rig_route_requires_a_song(client: TestClient):
+    assert client.get("/api/devices/headrush/rig").status_code == 400
+
+
+def test_stored_rigs_stay_out_of_git_and_the_image():
+    """The UI store sits inside the gears volume; neither git nor the build may take it."""
+    for name in (".gitignore", ".dockerignore"):
+        lines = Path(name).read_text(encoding="utf-8").splitlines()
+        assert "data/gears/_devices/" in [line.strip() for line in lines], name
+
+
 # --- the artifact must actually reach the image -------------------------------
 
 
