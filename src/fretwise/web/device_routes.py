@@ -37,7 +37,7 @@ from fretwise.devices.headrush_core.client import (
     DeviceError,
     DeviceWriteTransport,
 )
-from fretwise.devices.headrush_core.plan import build_plan
+from fretwise.devices.headrush_core.plan import GENERATED_PREFIX, build_plan
 from fretwise.devices.headrush_core.prompt import (
     PromptError,
     build_rig_prompt,
@@ -46,6 +46,7 @@ from fretwise.devices.headrush_core.prompt import (
 from fretwise.devices.headrush_core.provision import (
     SANDBOX_NAME,
     find_known,
+    load_rig,
     provision_mode,
     provision_rig,
     suggest_program_change,
@@ -256,6 +257,34 @@ def _write_enabled() -> bool:
     return write_allowed(bool(_settings.get("headrush_allow_write")))
 
 
+def is_valid_host(host: str) -> bool:
+    """Return True for a bare host name or IP literal, optionally with a port."""
+    return bool(_HOST_RE.match(host))
+
+
+def device_settings() -> dict[str, Any]:
+    """Return the Core address and the write opt-in, as a settings UI shows them."""
+    from fretwise.web import settings as _settings
+
+    return {
+        "host": _configured_host(),
+        "writeEnabled": _write_enabled(),
+        "allowWriteSetting": bool(_settings.get("headrush_allow_write")),
+        "sandbox": SANDBOX_NAME,
+    }
+
+
+async def _json_body(request: Request) -> dict[str, Any]:
+    """Return a request's JSON object body, or raise 400."""
+    try:
+        body = await request.json()
+    except Exception:
+        raise HTTPException(400, "Invalid JSON body") from None
+    if not isinstance(body, dict):
+        raise HTTPException(400, "Invalid JSON body")
+    return body
+
+
 def _binding_stores() -> list[BindingStore]:
     """Return the song tables to consult: the persistent one first, then the image's."""
     stores: list[BindingStore] = []
@@ -321,6 +350,40 @@ def _program_change(raw: Any) -> int | None:
     if not 0 <= value <= 127:
         raise HTTPException(400, "programChange doit être un entier 0..127")
     return value
+
+
+def list_stored_rigs() -> list[dict[str, Any]]:
+    """Return every song with a stored rig — the persistent store first, then the image.
+
+    Files whose name starts with ``_`` (``_exemple.json``) are documentation, not
+    songs, and are skipped.
+    """
+    found: dict[str, dict[str, Any]] = {}
+    for source, base in (("store", _store_dir()), ("image", _BUNDLED_DIR)):
+        for path in sorted((base / "rigs").glob("*.json")):
+            if path.name.startswith("_") or path.stem in found:
+                continue
+            try:
+                document = json.loads(path.read_text(encoding="utf-8"))
+            except (OSError, ValueError):
+                continue
+            if not isinstance(document, dict):
+                continue
+            song = document.get("song") or {}
+            artist = str(song.get("artist") or "")
+            title = str(song.get("title") or "")
+            if not artist and not title:
+                continue
+            found[path.stem] = {
+                "key": path.stem,
+                "artist": artist,
+                "title": title,
+                "rig": str((document.get("rig") or {}).get("name") or ""),
+                "blocks": len(document.get("blocks") or []),
+                "source": source,
+                "provisioned": _provisioned(artist, title),
+            }
+    return sorted(found.values(), key=lambda r: (r["artist"].lower(), r["title"].lower()))
 
 
 def _provision_command(artist: str, title: str) -> str:
@@ -574,6 +637,121 @@ def register_device_routes(app: FastAPI, require_admin: Any) -> None:
             _push_lock.release()
         return JSONResponse(result.to_json())
 
+    @app.get("/api/devices/headrush/rigs")
+    async def headrush_rigs() -> JSONResponse:
+        """List every song with a stored HeadRush rig, and whether it is on the Core."""
+        return JSONResponse({"rigs": list_stored_rigs()})
+
+    @app.get("/api/devices/headrush/device")
+    async def headrush_device() -> JSONResponse:
+        """List the rigs stored on the Core, marking the ones FretWise made. Read-only."""
+        host = _core_host()
+        catalog = _load_headrush_catalog()
+
+        def read() -> dict[str, Any]:
+            status = _read_device(host, catalog)
+            if not status["reachable"]:
+                return status
+            try:
+                rigs = make_read_client(host).properties("/Evil/API/Rigs")
+            except DeviceError as exc:
+                return {"reachable": False, "detail": str(exc)}
+            by_rig_id: dict[str, Any] = {}
+            for store in reversed(_binding_stores()):  # the persistent table wins
+                for stored_entry in store.entries.values():
+                    by_rig_id[stored_entry.rig_id] = stored_entry
+            loaded = str(rigs.get("loadedID", ""))
+            listing: list[dict[str, Any]] = []
+            ids = [str(i) for i in rigs.get("AllRigIds") or []]
+            names = [str(n) for n in rigs.get("AllRigNames") or []]
+            for rig_id, name in zip(ids, names):
+                entry = by_rig_id.get(rig_id)
+                listing.append(
+                    {
+                        "id": rig_id,
+                        "name": name,
+                        "loaded": rig_id == loaded,
+                        "generated": name.startswith(GENERATED_PREFIX),
+                        "song": (
+                            {
+                                "artist": entry.artist,
+                                "title": entry.title,
+                                "programChange": entry.program_change,
+                            }
+                            if entry
+                            else None
+                        ),
+                    }
+                )
+            return {**status, "rigs": listing}
+
+        device = await run_in_threadpool(read)
+        return JSONResponse(
+            {"host": host, "writeEnabled": _write_enabled(), "sandbox": SANDBOX_NAME, **device}
+        )
+
+    @app.post("/api/devices/headrush/load")
+    async def headrush_load(request: Request) -> JSONResponse:
+        """Load a rig on the Core, to audition it. Body: ``{rigId}``.
+
+        Changes what the instrument is playing, so it is admin-only and subject
+        to the write opt-in. Refused while a save dialog is open or the loaded rig
+        has unsaved changes: the load would either discard them or be silently
+        blocked behind the dialog. Nothing is saved.
+        """
+        require_admin(app)
+        body = await _json_body(request)
+        rig_id = str(body.get("rigId") or "")
+        if not rig_id:
+            raise HTTPException(400, "rigId requis")
+        if not _write_enabled():
+            raise HTTPException(
+                409,
+                {
+                    "code": "write_disabled",
+                    "detail": "écriture désactivée : l'autoriser dans les réglages",
+                },
+            )
+        host = _core_host()
+
+        def run() -> dict[str, Any]:
+            client = make_write_client(host)
+            rigs = client.properties("/Evil/API/Rigs")
+            if rig_id not in [str(i) for i in rigs.get("AllRigIds") or []]:
+                raise WriteRefused(f"rig {rig_id} inconnu de l'appareil")
+            if client.properties("/Evil/API/RigSaveDialog").get("displayDialog"):
+                raise WriteRefused(
+                    "un dialogue de sauvegarde est ouvert sur l'appareil : Save ou Discard d'abord"
+                )
+            if rigs.get("dirty") and str(rigs.get("loadedID", "")) != rig_id:
+                raise WriteRefused(
+                    f"le rig chargé (« {rigs.get('loadedName')} ») a des modifications non "
+                    "sauvegardées : Save ou Discard sur l'appareil d'abord"
+                )
+            load_rig(client, rig_id, wait_s=2.0)
+            after = client.properties("/Evil/API/Rigs")
+            return {
+                "loadedId": str(after.get("loadedID", "")),
+                "loadedName": str(after.get("loadedName", "")),
+            }
+
+        if not _push_lock.acquire(blocking=False):
+            raise HTTPException(
+                409, {"code": "device_busy", "detail": "une écriture est déjà en cours"}
+            )
+        try:
+            result = await run_in_threadpool(run)
+        except (WriteRefused, DeviceBusy) as exc:
+            code = "write_refused" if isinstance(exc, WriteRefused) else "device_busy"
+            raise HTTPException(409, {"code": code, "detail": str(exc)}) from exc
+        except DeviceError as exc:
+            raise HTTPException(
+                502, {"code": "device_unreachable", "detail": f"{host} : {exc}"}
+            ) from exc
+        finally:
+            _push_lock.release()
+        return JSONResponse(result)
+
     @app.post("/api/devices/headrush/ingest")
     async def headrush_ingest(request: Request) -> JSONResponse:
         """Validate the JSON pasted back from the user's LLM, and store it.
@@ -609,12 +787,9 @@ def register_device_routes(app: FastAPI, require_admin: Any) -> None:
         if body.get("save"):
             if not artist.strip() and not title.strip():
                 raise HTTPException(400, "artist ou title requis pour enregistrer")
-            song = binding.setdefault("song", {})
-            if isinstance(song, dict):
-                song.setdefault("artist", artist)
-                song.setdefault("title", title)
             # Keyed by the song open in the UI, not by whatever the model wrote,
-            # so the Rig panel finds it again under the same score.
+            # so the Rig panel and the song lists find it again under the same key.
+            binding = _song_document(binding, artist, title)
             target = _rig_file(artist, title)
             try:
                 target.parent.mkdir(parents=True, exist_ok=True)

@@ -1001,6 +1001,17 @@ Clôtures côté FretWise, l'API du Core n'ayant aucune authentification :
 - la table des rigs de l'interface va dans le volume persistant
   (`<gears_dir>/_devices/headrush-core/bindings.json`), jamais dans l'image.
 
+**FAIT — Application autonome : HeadRush Studio** (`pixi run headrush-studio`, ou
+double-clic sur `tools/headrush_studio.cmd`). La partie rigs HeadRush seule, sans le
+reste de FretWise : morceaux → conception LLM → vue slot par slot → envoi, plus la
+liste des rigs du Core avec « Charger » pour écouter. Code :
+`devices/headrush_core/studio/` ; les routes sont celles de `web/device_routes.py` et
+les réglages les mêmes clés de `~/.fretwise/config.json`, donc un rig conçu d'un côté
+apparaît de l'autre. Serveur local `127.0.0.1:8765` sans authentification, protégé
+autrement : hôte `Host` limité au loopback (anti DNS rebinding), requêtes
+d'écriture refusées si leur `Origin` est étrangère (une autre page du navigateur ne
+peut pas poster), et `--host 0.0.0.0` affiche un avertissement.
+
 ### 5.6 Tests
 
 - **Parité `params.py`** — les 11 algos reproduits en float32 contre un golden JSON,

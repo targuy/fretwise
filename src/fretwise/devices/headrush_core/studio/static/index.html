@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HeadRush Studio</title>
+<link rel="stylesheet" href="/static/studio.css">
+<script type="module" src="/static/studio.js"></script>
+</head>
+<body>
+<header class="st-top">
+  <div class="st-brand"><span class="st-logo" aria-hidden="true">HR</span>HeadRush Studio</div>
+  <nav class="st-nav" aria-label="Vues">
+    <button type="button" class="st-nav-btn is-active" data-view="songs">Morceaux</button>
+    <button type="button" class="st-nav-btn" data-view="device">Appareil</button>
+  </nav>
+  <button type="button" id="st-device-pill" class="st-pill" title="État du HeadRush Core — cliquer pour les réglages">…</button>
+  <button type="button" id="st-settings-btn" class="st-btn">Réglages</button>
+</header>
+
+<main>
+  <section id="view-songs" class="st-view st-songs">
+    <aside class="st-side">
+      <form id="st-open" class="st-open" autocomplete="off">
+        <div class="st-side-title">Nouveau rig</div>
+        <input id="st-open-artist" placeholder="Artiste" required>
+        <input id="st-open-title" placeholder="Titre" required>
+        <button type="submit" class="st-btn st-primary">Ouvrir</button>
+      </form>
+      <div class="st-side-title">Rigs enregistrés <span id="st-song-count" class="st-muted"></span></div>
+      <input id="st-filter" type="search" placeholder="Filtrer…" autocomplete="off">
+      <ul id="st-song-list" class="st-song-list"></ul>
+    </aside>
+
+    <div class="st-detail">
+      <div id="st-empty" class="st-empty">
+        <h1>Un rig par morceau</h1>
+        <p>Choisissez un morceau à gauche, ou saisissez un artiste et un titre pour en concevoir un nouveau.</p>
+        <ol>
+          <li><b>Concevoir</b> — le prompt, généré depuis le catalogue de votre Core, part dans votre LLM ; vous collez sa réponse.</li>
+          <li><b>Vérifier</b> — chaque bloc est validé et placé : slot, CC de bypass, réglages.</li>
+          <li><b>Envoyer</b> — création sur l’appareil à partir du rig vide « #FW - SCRATCH », avec son Program Change.</li>
+        </ol>
+      </div>
+
+      <div id="st-song" hidden>
+        <div class="st-song-head">
+          <h1 id="st-song-title"></h1>
+          <p id="st-song-artist" class="st-muted"></p>
+        </div>
+        <div class="st-tabs" role="tablist">
+          <button type="button" class="st-tab is-active" data-tab="rig" role="tab">Rig</button>
+          <button type="button" class="st-tab" data-tab="design" role="tab">Concevoir avec l’IA</button>
+        </div>
+        <div id="tab-rig" class="st-panel rig-headrush-view"></div>
+        <div id="tab-design" class="st-panel st-design" hidden>
+          <label>Consigne pour le LLM <span class="st-muted">(optionnel)</span>
+            <textarea id="st-guidance" rows="2" placeholder="ex. : son du live de 1979, plus de gain pour le solo"></textarea>
+          </label>
+          <div class="st-row">
+            <button id="st-gen" class="st-btn st-primary" type="button">1. Générer le prompt</button>
+            <button id="st-copy" class="st-btn" type="button" disabled>Copier</button>
+            <span id="st-gen-status" class="st-status"></span>
+          </div>
+          <textarea id="st-prompt" rows="7" readonly placeholder="Le prompt apparaîtra ici."></textarea>
+          <label>2. Réponse de votre LLM
+            <textarea id="st-paste" rows="7" placeholder="Collez ici le JSON renvoyé par le LLM, avec ou sans ```json."></textarea>
+          </label>
+          <div class="st-row">
+            <button id="st-validate" class="st-btn st-primary" type="button">3. Valider et enregistrer</button>
+            <span id="st-validate-status" class="st-status"></span>
+          </div>
+          <div id="st-validate-result"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-device" class="st-view st-device" hidden>
+    <div class="st-device-head">
+      <h1>Rigs sur l’appareil</h1>
+      <input id="st-device-filter" type="search" placeholder="Filtrer…" autocomplete="off">
+      <button id="st-device-refresh" class="st-btn" type="button">Actualiser</button>
+    </div>
+    <p id="st-device-summary" class="st-muted"></p>
+    <div class="st-table-wrap">
+      <table class="st-table">
+        <thead><tr><th>Rig</th><th>Morceau</th><th>PC</th><th></th></tr></thead>
+        <tbody id="st-device-rigs"></tbody>
+      </table>
+    </div>
+  </section>
+</main>
+
+<dialog id="st-settings">
+  <form method="dialog" class="st-settings-form">
+    <h2>Réglages</h2>
+    <label>Adresse du HeadRush Core
+      <input id="st-host" autocomplete="off" spellcheck="false" placeholder="192.168.1.34">
+    </label>
+    <label class="st-check"><input id="st-write" type="checkbox"> Autoriser l’écriture sur l’appareil</label>
+    <p class="st-muted">
+      L’API du Core n’a pas d’authentification. HeadRush Studio n’écoute que ce poste,
+      n’écrit que dans les rigs nommés « #FW - … », et chaque envoi passe par un aperçu
+      puis une confirmation. Une création part d’un rig vide « #FW - SCRATCH » à créer
+      une fois à la main sur l’appareil.
+    </p>
+    <p id="st-locked" class="st-muted" hidden></p>
+    <div class="st-row">
+      <button id="st-test" class="st-btn" type="button">Tester la connexion</button>
+      <span id="st-settings-status" class="st-status"></span>
+    </div>
+    <div class="st-row st-end">
+      <button id="st-settings-save" class="st-btn st-primary" type="button">Enregistrer</button>
+      <button class="st-btn" value="close">Fermer</button>
+    </div>
+  </form>
+</dialog>
+</body>
+</html>

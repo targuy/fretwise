@@ -124,8 +124,10 @@ objets de l'API et questions ouvertes : **`docs/headrush_core.md`**.
 | `device_prompt.py` | Émet le **prompt LLM** d'un rig pour une chanson, contraint par le catalogue réel de l'appareil (noms de blocs et libellés d'énumération exacts). `--ingest` valide la réponse collée et écrit un binding. **Aucun appel API** : le prompt va dans le LLM que tu as déjà ouvert |
 | `device_plan.py` | Construit **hors ligne** le plan d'écriture d'un rig depuis un document `fretwise.device.binding.v1` : résout chaque module et chaque valeur contre le catalogue, place les slots, valide l'ordre, et émet la suite exacte d'appels. Ne touche pas l'appareil. Code de sortie 2 si le plan porte des erreurs |
 | `device_backup.py` | Sauvegarde **lecture seule** du rig chargé (chaîne, tous les paramètres de bloc, réglages rig, scènes) dans `data/devices/headrush-core/backups/<rigId>.json`. `--diff AVANT APRÈS` compare deux sauvegardes et sort en code 2 s'il y a des différences |
+| `headrush_studio.py` | **HeadRush Studio**, l'application autonome de conception et d'envoi des rigs : liste des rigs par morceau, prompt LLM + validation, vue slot par slot, création/mise à jour sur l'appareil (aperçu puis confirmation), liste des rigs du Core avec chargement pour écoute. Serveur local sur `127.0.0.1:8765`, ouvre le navigateur. Double-clic : `tools/headrush_studio.cmd` |
 
 ```powershell
+pixi run headrush-studio                      # HeadRush Studio, http://127.0.0.1:8765
 pixi run python scripts/device_probe.py
 pixi run python scripts/device_probe.py --rigs
 pixi run python scripts/device_catalog_dump.py

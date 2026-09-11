@@ -134,7 +134,7 @@ def _find_rig_id(transport: DeviceWriteTransport, name: str) -> str | None:
     return None
 
 
-def _load_rig(transport: DeviceWriteTransport, rig_id: str, *, wait_s: float) -> None:
+def load_rig(transport: DeviceWriteTransport, rig_id: str, *, wait_s: float) -> None:
     """Make ``rig_id`` the loaded rig, or raise."""
     if str(transport.properties("/Evil/API/Rigs").get("loadedID", "")) == rig_id:
         return
@@ -214,7 +214,7 @@ def provision_rig(
 
     if known is not None and mode in ("unchanged", "program_change"):
         if mode == "program_change" and program_change is not None:
-            _load_rig(transport, known.rig_id, wait_s=load_wait_s)
+            load_rig(transport, known.rig_id, wait_s=load_wait_s)
             set_program_change(transport, program_change)
             store.record(
                 artist, title,
@@ -242,7 +242,7 @@ def provision_rig(
                 "(il sert de modèle, jamais modifié), puis relancer"
             )
         target = found
-    _load_rig(transport, target, wait_s=load_wait_s)
+    load_rig(transport, target, wait_s=load_wait_s)
 
     report = apply_plan(
         plan,
@@ -295,6 +295,7 @@ __all__ = [
     "SANDBOX_NAME",
     "ProvisionResult",
     "find_known",
+    "load_rig",
     "provision_mode",
     "provision_rig",
     "suggest_program_change",

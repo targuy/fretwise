@@ -7,13 +7,22 @@
  * it is real — and the JSON pasted back is validated against that same catalog
  * before it is stored.
  *
- * Pushing a stored rig to the device stays a command-line operation on the
- * machine that owns the instrument: the Core's local API has no authentication,
- * and proxying writes through a web app would open a door onto someone's
- * amplifier. The Rig panel shows that command for rigs not yet on the device.
+ * Pushing a stored rig to the device goes through a preview and a confirmed
+ * apply on the server, which only writes when the installation opted in.
+ *
+ * `fetchRigView`, `renderRigView` and `setSettingsLabel` are also used by the
+ * standalone HeadRush Studio, which serves this file as a shared module.
  */
 
 const $ = (id) => document.getElementById(id);
+
+// Where the device settings live in the host UI, named in error messages.
+let settingsLabel = 'Préférences › Pédalier';
+
+/** Name the place the device settings live in the host UI. */
+export function setSettingsLabel(label) {
+  settingsLabel = label;
+}
 
 /** Escape text destined for innerHTML. */
 function esc(text) {
@@ -91,7 +100,7 @@ function renderPushBox(box, payload, p, onChanged) {
   const blockers = [];
   if (!dev.reachable) {
     blockers.push(`Appareil injoignable à ${p.host} — ${dev.detail || ''} ` +
-      'Vérifiez qu’il est allumé et son adresse dans Préférences › Pédalier.');
+      `Vérifiez qu’il est allumé et son adresse dans ${settingsLabel}.`);
   } else {
     if (!dev.firmwareMatches) {
       blockers.push(`Firmware ${dev.appVersion} différent du catalogue : régénérer le catalogue.`);
@@ -106,7 +115,7 @@ function renderPushBox(box, payload, p, onChanged) {
   }
   if (!p.applicable) blockers.push(...(p.errors || []));
   if (!p.writeEnabled) {
-    blockers.push('Écriture désactivée : cochez « Autoriser l’écriture » dans Préférences › Pédalier.');
+    blockers.push(`Écriture désactivée : cochez « Autoriser l’écriture » dans ${settingsLabel}.`);
   }
   const notes = [];
   if (dev.reachable && dev.loadedDirty) {
@@ -218,8 +227,9 @@ async function openPush(box, payload, onChanged) {
  *
  * @param {object} [options]
  * @param {() => void} [options.onChanged] the rig was written to the device.
+ * @param {string} [options.emptyHint] how to create a rig, shown when there is none.
  */
-export function renderRigView(container, payload, { onChanged } = {}) {
+export function renderRigView(container, payload, { onChanged, emptyHint } = {}) {
   if (!container) return;
   if (!payload || payload.error) {
     container.innerHTML = `<p class="hr-empty">${esc(payload?.error || 'Indisponible.')}</p>`;
@@ -229,8 +239,9 @@ export function renderRigView(container, payload, { onChanged } = {}) {
   if (!payload.binding || !view) {
     container.innerHTML =
       '<p class="hr-empty">Aucun rig HeadRush pour ce morceau.</p>' +
-      '<p class="settings-hint">Cliquez « ✨ Créer avec l’IA » : FretWise génère le prompt, ' +
-      'vous collez la réponse de votre LLM, et le rig validé s’affiche ici.</p>';
+      `<p class="settings-hint">${esc(emptyHint || (
+        'Cliquez « ✨ Créer avec l’IA » : FretWise génère le prompt, ' +
+        'vous collez la réponse de votre LLM, et le rig validé s’affiche ici.'))}</p>`;
     return;
   }
   const prov = payload.provisioned;
@@ -255,7 +266,7 @@ export function renderRigView(container, payload, { onChanged } = {}) {
   const pushLabel = prov ? '⇪ Mettre à jour sur le HeadRush' : '⇪ Créer sur le HeadRush';
   const pushHint = canWrite ? '' : (
     '<p class="settings-hint">Écriture désactivée : cochez « Autoriser l’écriture » dans ' +
-    'Préférences › Pédalier. Ou, sur le PC relié à l’appareil :</p>' +
+    `${esc(settingsLabel)}. Ou, sur le PC relié à l’appareil :</p>` +
     `<pre class="hr-cmd">${esc(payload.provisionCommand || '')}</pre>`
   );
   container.innerHTML =
