@@ -42,6 +42,7 @@ from fretwise.models import (
     BendType,
     ChordDiagram,
     Dynamic,
+    Finger,
     HarmonicType,
     NoteEvent,
     SlideType,
@@ -212,6 +213,10 @@ class GpifAdapter(BaseParser):
     #: Per-measure time signatures: {1-based measure number → (numerator, denominator)}.
     #: Set after each call to parse() or parse_track().
     measure_time_signatures: dict[int, tuple[int, int]] = {}
+    #: Absolute capo position on the selected track; source frets remain relative.
+    capo_fret: int = 0
+    #: Capo positions by GPIF track ID, also populated by the track-list methods.
+    capo_frets: dict[int, int] = {}
 
     def supports(self, path: Path) -> bool:
         """Return True for .gp files (Guitar Pro 7/8)."""
@@ -243,6 +248,8 @@ class GpifAdapter(BaseParser):
         except Exception as exc:
             raise ParseError(f"Failed to read GPIF from '{path}': {exc}") from exc
 
+        self.capo_frets = _track_capo_frets(root)
+        self.capo_fret = 0
         track_id, open_pitches = _find_guitar_track(root)
         if track_id is None:
             logger.warning("No guitar track found in '%s'. Returning empty sequence.", path)
@@ -251,6 +258,7 @@ class GpifAdapter(BaseParser):
         track_index = _track_bar_index(root, track_id)
         if track_index is None:
             raise ParseError(f"Selected track id={track_id} not found in '{path}'.")
+        self.capo_fret = self.capo_frets.get(track_id, 0)
 
         # Capture track name and chord diagrams for callers
         self.track_name = ""
@@ -301,6 +309,7 @@ class GpifAdapter(BaseParser):
             root = _load_gpif(path)
         except Exception as exc:
             raise ParseError(f"Failed to read GPIF from '{path}': {exc}") from exc
+        self.capo_frets = _track_capo_frets(root)
         return _list_guitar_tracks(root)
 
     def list_all_tracks(self, path: Path) -> list[tuple[int, str, list[int], str]]:
@@ -331,6 +340,7 @@ class GpifAdapter(BaseParser):
             root = _load_gpif(path)
         except Exception as exc:
             raise ParseError(f"Failed to read GPIF from '{path}': {exc}") from exc
+        self.capo_frets = _track_capo_frets(root)
         return _list_all_tracks(root)
 
     def parse_track(self, path: Path, track_id: int) -> list[NoteEvent]:
@@ -353,6 +363,8 @@ class GpifAdapter(BaseParser):
             raise ParseError(f"Failed to read GPIF from '{path}': {exc}") from exc
 
         # Find the tuning (open_pitches) for this specific track.
+        self.capo_frets = _track_capo_frets(root)
+        self.capo_fret = self.capo_frets.get(track_id, 0)
         open_pitches: list[int] = []
         self.track_name = ""
         self.midi_program = -1
@@ -650,6 +662,29 @@ def _build_tempo_map(root: ET.Element) -> list[tuple[int, float]]:
     return sorted(entries, key=lambda t: t[0])
 
 
+def _build_performance_tempo_map(root: ET.Element) -> tuple[tuple[float, float], ...]:
+    """Preserve automation positions, including changes inside silent measures."""
+    bars = root.findall("MasterBars/MasterBar")
+    starts: list[float] = []
+    cursor = 0.0
+    for bar in bars:
+        starts.append(cursor)
+        cursor += _measure_beats(bar)
+    entries: dict[float, float] = {0.0: 120.0}
+    for auto in root.findall("MasterTrack/Automations/Automation"):
+        if auto.findtext("Type") != "Tempo":
+            continue
+        bar = int(auto.findtext("Bar") or "0")
+        if not 0 <= bar < len(bars):
+            continue
+        position = float(auto.findtext("Position") or "0")
+        if not 0 <= position <= 1:
+            raise ParseError("GPIF tempo automation position outside measure")
+        beat = starts[bar] + position * _measure_beats(bars[bar])
+        entries[beat] = float((auto.findtext("Value") or "120").split()[0])
+    return tuple(sorted(entries.items()))
+
+
 def _build_rhythm_map(root: ET.Element) -> dict[str, float]:
     """Return {rhythm_id: beats} mapping from the <Rhythms> section."""
     result: dict[str, float] = {}
@@ -705,6 +740,7 @@ class _NoteData:
         "vibrato_wide",
         "pitch_step", "pitch_accidental", "pitch_octave",
         "ghost", "staccato", "strum_direction", "slap", "pop", "rasgueado", "golpe",
+        "bend_points", "source_finger",
     )
 
     def __init__(
@@ -738,6 +774,8 @@ class _NoteData:
         pop: bool = False,
         rasgueado: bool = False,
         golpe: bool = False,
+        bend_points: tuple[tuple[float, float], ...] = (),
+        source_finger: Finger | None = None,
     ) -> None:
         self.gpif_string = gpif_string
         self.fret = fret
@@ -768,6 +806,8 @@ class _NoteData:
         self.pop = pop
         self.rasgueado = rasgueado
         self.golpe = golpe
+        self.bend_points = bend_points
+        self.source_finger = source_finger
 
 
 def _build_note_map(root: ET.Element) -> dict[str, _NoteData]:
@@ -804,6 +844,24 @@ def _build_note_map(root: ET.Element) -> dict[str, _NoteData]:
         midi_pitch = int(midi_el.findtext("Number") or "0") if midi_el is not None else 0
 
         note_props = _parse_note_properties(props)
+        bend_points = _parse_bend_points(props)
+        if bend_points:
+            note_props["bend_value"] = max(value for _, value in bend_points) / 100.0
+            if bend_points[0][1] > 0:
+                note_props["bend_type"] = (BendType.PRE_BEND_RELEASE
+                    if bend_points[-1][1] == 0 else BendType.PRE_BEND)
+            else:
+                note_props["bend_type"] = (BendType.RELEASE
+                    if bend_points[-1][1] == 0 else BendType.NORMAL)
+            if note_props["articulation"] == Articulation.NORMAL:
+                note_props["articulation"] = Articulation.BEND
+        source_finger = {
+            "0": Finger.OPEN, "open": Finger.OPEN,
+            "1": Finger.INDEX, "i": Finger.INDEX, "index": Finger.INDEX,
+            "2": Finger.MIDDLE, "m": Finger.MIDDLE, "middle": Finger.MIDDLE,
+            "3": Finger.RING, "a": Finger.RING, "ring": Finger.RING,
+            "4": Finger.PINKY, "c": Finger.PINKY, "pinky": Finger.PINKY,
+        }.get((note.findtext("LeftFingering") or "").strip().lower())
         pitch_step, pitch_accidental, pitch_octave = _parse_notated_pitch(props)
 
         # GP7/8 carries several interpretation marks as *direct children* of the
@@ -884,6 +942,8 @@ def _build_note_map(root: ET.Element) -> dict[str, _NoteData]:
             let_ring=let_ring,
             bend_value=note_props["bend_value"],
             bend_type=note_props["bend_type"],
+            bend_points=bend_points,
+            source_finger=source_finger,
             slide_type=note_props["slide_type"],
             harmonic_type=harmonic_type,
             harmonic_fret=harmonic_fret,
@@ -1101,6 +1161,36 @@ def _parse_notated_pitch(
     return step, accidental, octave
 
 
+def _parse_bend_points(props: dict[str, ET.Element]) -> tuple[tuple[float, float], ...]:
+    """Read GPIF bend points: offset / 100, source value * 2 cents.
+
+    GPIF uses 25 units per quarter-tone, unlike the GP3-5 binary format.
+    Sibling GP7/8 properties preserve origin, plateau boundaries and release.
+    """
+    points: list[tuple[float, float]] = []
+    if "Bended" in props:
+        def value(name: str, default: float) -> float:
+            prop = props.get(name)
+            return float(prop.findtext("Float") or default) if prop is not None else default
+
+        points.append((value("BendOriginOffset", 0) / 100,
+                       value("BendOriginValue", 0) * 2))
+        if "BendMiddleValue" in props:
+            offsets = [name for name in ("BendMiddleOffset1", "BendMiddleOffset2")
+                       if name in props]
+            for offset in offsets or ["BendMiddleOffset1"]:
+                points.append((value(offset, 50) / 100, value("BendMiddleValue", 0) * 2))
+        points.append((value("BendDestinationOffset", 100) / 100,
+                       value("BendDestinationValue", 0) * 2))
+    elif "Bend" in props:
+        for point in props["Bend"].findall("Bend/Points/Point"):
+            points.append((float(point.findtext("Position") or "0") / 100,
+                           float(point.findtext("Value") or "0") * 2))
+    # Exact duplicate control points are redundant; conflicting duplicates are
+    # rejected later by the contract rather than silently overwriting a curve.
+    return tuple(dict.fromkeys(points))
+
+
 def _parse_bend(bend_prop: ET.Element) -> tuple[float | None, str | None]:
     """Parse a Bend Property element into (max_value_semitones, bend_type)."""
     bend_el = bend_prop.find("Bend")
@@ -1118,7 +1208,7 @@ def _parse_bend(bend_prop: ET.Element) -> tuple[float | None, str | None]:
         return None, None
 
     max_val = max(v for _, v in points)
-    semitones = max_val / 100.0  # 100 = 1 semitone in GPIF
+    semitones = max_val / 50.0  # GPIF uses 25 units per quarter-tone.
 
     if not semitones:
         return None, None
@@ -1272,6 +1362,37 @@ def _track_tuning_pitches(track: ET.Element) -> list[int]:
         return []
     pitches_text = tuning.findtext("Pitches") or ""
     return [int(x) for x in pitches_text.split() if x.strip()]
+
+
+def _track_capo_fret(track: ET.Element) -> int:
+    """Read the first staff's capo, falling back to legacy track properties.
+
+    GPIF stores ``Property name='CapoFret'/Fret`` beside Tuning. Tuning pitches
+    describe open strings at the nut and source frets remain capo-relative;
+    neither is transposed here. A staff property overrides the legacy track one.
+    """
+    prop = track.find("Staves/Staff/Properties/Property[@name='CapoFret']")
+    if prop is None:
+        prop = track.find("Properties/Property[@name='CapoFret']")
+    if prop is None:
+        return 0
+    text = (prop.findtext("Fret") or "").strip()
+    try:
+        capo = int(text)
+    except ValueError as exc:
+        raise ParseError(f"Invalid GPIF CapoFret for track {track.get('id')!r}") from exc
+    if capo < 0:
+        raise ParseError(f"Negative GPIF CapoFret for track {track.get('id')!r}")
+    return capo
+
+
+def _track_capo_frets(root: ET.Element) -> dict[int, int]:
+    """Return source capo positions without changing legacy track-list tuples."""
+    return {
+        int(track.get("id", "")): _track_capo_fret(track)
+        for track in root.findall("Tracks/Track")
+        if track.get("id", "").isdigit()
+    }
 
 
 def _list_all_tracks(root: ET.Element) -> list[tuple[int, str, list[int], str]]:
@@ -1644,18 +1765,23 @@ def _extract_events(
     voices_index = {v.get("id"): v for v in root.findall("Voices/Voice")}
     beats_index = {b.get("id"): b for b in root.findall("Beats/Beat")}
 
-    tempo_idx = 0
-    current_tempo = tempo_map[0][1] if tempo_map else 120.0
     onset = 0.0
     events: list[NoteEvent] = []
+    from fretwise.performance.tempo import TempoMap
+
+    performance_tempo = TempoMap(_build_performance_tempo_map(root))
+    timing_diagnostics = tuple(dict.fromkeys(
+        "TEMPO_RAMP_UNSUPPORTED"
+        for auto in root.findall("MasterTrack/Automations/Automation")
+        if auto.findtext("Type") == "Tempo"
+        and (auto.findtext("Linear") or "").lower() == "true"
+    ))
+    if any(bar.find("Repeat") is not None or bar.find("AlternateEndings") is not None
+           for bar in root.findall("MasterBars/MasterBar")):
+        timing_diagnostics += ("REPEAT_UNFOLDING_REQUIRED",)
 
     for bar_num, masterbar in enumerate(root.findall("MasterBars/MasterBar")):
         measure_duration = _measure_beats(masterbar)
-        # Advance tempo if a new automation starts at this bar.
-        while tempo_idx + 1 < len(tempo_map) and tempo_map[tempo_idx + 1][0] <= bar_num:
-            tempo_idx += 1
-            current_tempo = tempo_map[tempo_idx][1]
-
         bar_ids_text = masterbar.findtext("Bars") or ""
         bar_ids = bar_ids_text.split()
         if track_idx >= len(bar_ids):
@@ -1745,7 +1871,8 @@ def _extract_events(
                     # draws tie arcs automatically.  Notes whose data was not fully
                     # parsed (e.g. drum slots) keep pitch=0 and are already marked;
                     # skip those zero-pitch placeholders only.
-                    if nd.is_tie_dest and nd.midi_pitch == 0 and nd.fret == 0 and nd.gpif_string == 0:
+                    if (nd.is_tie_dest and nd.midi_pitch == 0 and nd.fret == 0
+                            and nd.gpif_string == 0):
                         continue
 
                     # Convert GPIF string index (0=low) to our convention (1=high).
@@ -1756,7 +1883,7 @@ def _extract_events(
                             pitch=nd.midi_pitch,
                             onset=beat_onset,
                             duration=beat_duration,
-                            tempo=current_tempo,
+                            tempo=performance_tempo.bpm_at(beat_onset),
                             articulation=nd.articulation,
                             is_tie_dest=nd.is_tie_dest,
                             dynamic=_beat_dynamic(beat_el),
@@ -1767,6 +1894,10 @@ def _extract_events(
                             # New notation fields
                             bend_value=nd.bend_value,
                             bend_type=nd.bend_type,
+                            bend_points=nd.bend_points,
+                            source_finger=nd.source_finger,
+                            tempo_points=performance_tempo.points,
+                            timing_diagnostics=timing_diagnostics,
                             slide_type=nd.slide_type,
                             harmonic_type=nd.harmonic_type,
                             harmonic_fret=nd.harmonic_fret,
@@ -1799,7 +1930,20 @@ def _extract_events(
 
         onset = measure_onset + measure_duration
 
-    return sorted(events, key=lambda e: (e.onset, e.voice_hint or 0))
+    events.sort(key=lambda e: (e.onset, e.voice_hint or 0))
+    next_by_string: dict[tuple[int | None, int | None], NoteEvent] = {}
+    for event in reversed(events):
+        key = (event.voice_hint, event.string_hint)
+        destination = next_by_string.get(key)
+        if (destination is not None and destination.onset > event.onset
+                and destination.onset <= event.onset + event.duration + 1e-7
+                and event.articulation in (Articulation.HAMMER_ON, Articulation.PULL_OFF,
+                                           Articulation.SLIDE)):
+            event.technique_to_source_note_id = destination.source_note_id
+            if event.articulation == Articulation.HAMMER_ON and destination.pitch < event.pitch:
+                event.articulation = Articulation.PULL_OFF
+        next_by_string[key] = event
+    return events
 
 
 def _measure_beats(masterbar: ET.Element) -> float:

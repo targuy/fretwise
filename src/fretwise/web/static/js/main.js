@@ -11,6 +11,7 @@ import { TabRenderer, buildLegendHTML } from './renderer.js';
 import { SlopeRenderer } from './slope-renderer.js';
 import { RainRenderer } from './rain-renderer.js';
 import { PlaybackEngine } from './playback.js';
+import { HAND_PROTOCOL_VERSION } from './hand_transport.js';
 import { SvgCursorDriver } from './svg-playback.js';
 import { task as notifyTask, toast as notifyToast } from './notify.js';
 import { MODES, MODE_LABELS, DEFAULT_MODE, isGuitarKind, trackKindLabel } from './modeConfig.js';
@@ -1916,7 +1917,9 @@ function _ensureHand3dViewFrame() {
   if (_hand3dFrameLoaded && hand3dViewFrame.contentWindow) return true;
   const src = hand3dViewFrame.getAttribute('src');
   if (!src) {
-    const next = hand3dViewFrame.dataset.src || '/static/hand_viz.html?view=3d';
+    let next = hand3dViewFrame.dataset.src || '/static/hand_viz.html?view=3d';
+    const engine = new URLSearchParams(location.search).get('handRenderer');
+    if (engine === 'v1' || engine === 'v2') next += '&handRenderer=' + engine;
     hand3dViewFrame.setAttribute('src', next);
     _hand3dFrameLoaded = true;
     return false;
@@ -4617,11 +4620,15 @@ function _buildHandVizPayload() {
   }
   const tempo = renderer.data.tempo || 120;
   const frames = [];
-  // Time base = parent's playback clock (t=0 at measure 0 beat 0), so
-  // onset_sec is onset_beats * 60 / tempo — no "first-note" offset.
+  // Nominal score time uses the same integrated tempo timeline as audio.
+  const scoreSec = (beat) => playback?.songSecForOnsetBeats
+    ? (playback._nominalSecondsAtBeat(beat)
+      ?? playback.songSecForOnsetBeats(beat) * playback.speed) : beat * 60 / tempo;
   for (const r of results) {
-    const onsetSec = (r.onset || 0) * 60 / tempo;
-    const durSec = Math.max(0.08, (r.duration || 0.25) * 60 / tempo);
+    const onsetBeat = Number(r.onset) || 0;
+    const durationBeat = Number(r.perf?.dur_beats ?? r.duration) || 0;
+    const onsetSec = scoreSec(onsetBeat);
+    const durSec = Math.max(0, scoreSec(onsetBeat + durationBeat) - onsetSec);
     // `r.finger` comes from Python as "Finger.INDEX" — normalise to bare word.
     let finger = String(r.finger || 'open');
     if (finger.startsWith('Finger.')) finger = finger.slice(7).toLowerCase();
@@ -4670,8 +4677,8 @@ function _buildHandVizPayload() {
       tempo,
       synced: true,                     // iframe MUST use external clock
       max_seconds: frames.length
-        ? frames[frames.length - 1].onset_sec + 4
-        : 10,
+        ? Math.max(...frames.map(f => f.onset_sec + f.duration_sec))
+        : 0,
     },
     fretboard: {
       num_frets: numFrets,
@@ -4681,6 +4688,7 @@ function _buildHandVizPayload() {
       num_strings: tuning.length,
     },
     frames,
+    handPerformance: renderer.data.hand_performance || null,
   };
 }
 
@@ -4691,12 +4699,21 @@ function _midiToNoteName(midi) {
   return NAMES[((midi % 12) + 12) % 12] + octave;
 }
 
+const _handSessionId = globalThis.crypto?.randomUUID?.()
+  || `hand-${performance.timeOrigin}-${Math.random().toString(36).slice(2)}`;
+let _handSequence = 0;
+let _handPlanId = 'empty';
+
 function _postHandVizData() {
   const payload = _buildHandVizPayload();
   if (!payload) return;
-  const message = { type: 'fretwise-hand-data', payload };
+  const hp = payload.handPerformance;
+  _handPlanId = hp ? `${hp.scoreId}:${hp.trackId}:${hp.scoreRevision}:${hp.fingeringRevision}`
+    : `${currentFile || 'empty'}:${currentTrackId}:${++_handSequence}`;
+  const message = { type: 'fretwise:load', protocolVersion: HAND_PROTOCOL_VERSION,
+    sessionId: _handSessionId, planId: _handPlanId, sequence: ++_handSequence, payload };
   if (_isHand3dViewVisible() && _ensureHand3dViewFrame() && hand3dViewFrame.contentWindow) {
-    hand3dViewFrame.contentWindow.postMessage(message, '*');
+    hand3dViewFrame.contentWindow.postMessage(message, window.location.origin);
   }
   // After reinstalling data, also push current time so the iframe starts
   // at the right place instead of t=0.
@@ -4713,18 +4730,25 @@ function _postHandVizTime(force = false) {
   }
   _lastHandVizSeekPostMs = now;
   const message = {
-    type: 'fretwise-hand-seek',
-    t: playback.getCurrentTimeSec(),
-    playing: !!playback.isPlaying,
+    type: 'fretwise:transport', protocolVersion: HAND_PROTOCOL_VERSION,
+    sessionId: _handSessionId, planId: _handPlanId, sequence: ++_handSequence,
+    nominalScoreSec: playback.getNominalTimeSec(),
+    status: playback.isPlaying ? 'playing' : 'paused',
+    rate: playback.speed,
+    anchorEpochMs: performance.timeOrigin + performance.now(),
+    discontinuityId: playback.discontinuityId || 0,
   };
   if (hand3dViewFrame.contentWindow) {
-    hand3dViewFrame.contentWindow.postMessage(message, '*');
+    hand3dViewFrame.contentWindow.postMessage(message, window.location.origin);
   }
 }
 
 // Repush whenever the iframe signals it is ready.
 window.addEventListener('message', (ev) => {
-  if (ev && ev.data && ev.data.type === 'fretwise-hand-ready') _postHandVizData();
+  if (ev.origin !== window.location.origin || ev.source !== hand3dViewFrame?.contentWindow) return;
+  if (ev.data?.type === 'fretwise:ready' && ev.data.protocolVersion === HAND_PROTOCOL_VERSION) {
+    _postHandVizData();
+  }
 });
 
 // Repush whenever the track changes or the pipeline re-runs. We hook into

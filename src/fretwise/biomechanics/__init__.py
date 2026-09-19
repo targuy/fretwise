@@ -8,7 +8,7 @@ deterministic violations without mutating the input sequence.
 from __future__ import annotations
 
 from collections import defaultdict
-from collections.abc import Iterable, Sequence
+from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import StrEnum
 
@@ -188,6 +188,8 @@ def validate_fingering_results(
     violations.extend(_validate_states(results, rule_config))
     violations.extend(_validate_chords(results, rule_config))
     violations.extend(_validate_transitions(results, rule_config))
+    violations.extend(_validate_occupations(results, rule_config))
+    violations.extend(_validate_tie_contacts(results))
     return BiomechanicalReport(
         checked_notes=len(results),
         violations=tuple(violations),
@@ -298,7 +300,11 @@ def _validate_chords(
         if len(chord) < 2:
             continue
         violations.extend(_validate_same_string_chord(chord))
-        fretted = [r for r in chord if _is_active_fretted(r)]
+        contacts = {
+            (r.state.string_num, r.state.fret, r.state.finger): r
+            for r in chord if _is_active_fretted(r)
+        }
+        fretted = list(contacts.values())
         if len(fretted) < 2:
             continue
         violations.extend(_validate_duplicate_fingers(fretted))
@@ -314,10 +320,155 @@ def _validate_transitions(
 ) -> list[BiomechanicalViolation]:
     violations: list[BiomechanicalViolation] = []
     ordered = sorted(results, key=lambda r: _timeline_key(r))
-    for previous, current in zip(ordered, ordered[1:]):
-        if _same_voice(previous, current):
+    previous_by_voice: dict[int, FingeringResult] = {}
+    for current in ordered:
+        voice = current.note_event.voice_hint or 0
+        previous = previous_by_voice.get(voice)
+        if previous is not None:
             violations.extend(_validate_extreme_shift(previous, current, config))
-        violations.extend(_validate_finger_overlap(previous, current))
+        previous_by_voice[voice] = current
+    return violations
+
+
+def _validate_tie_contacts(
+    results: Sequence[FingeringResult],
+) -> list[BiomechanicalViolation]:
+    previous: dict[tuple[int, int], FingeringResult] = {}
+    violations: list[BiomechanicalViolation] = []
+    for current in sorted(results, key=lambda result: (result.note_event.onset, result.note_id)):
+        note = current.note_event
+        key = (note.voice_hint or 0, note.string_hint or current.state.string_num)
+        prior = previous.get(key)
+        if note.is_tie_dest and prior is not None and (
+            prior.state.string_num != current.state.string_num
+            or prior.state.fret != current.state.fret
+            or prior.state.finger != current.state.finger
+        ):
+            violations.append(_multi_violation(
+                "BIO-TIE-001", BiomechanicalSeverity.FATAL,
+                "A tie changes its contact without an explicit finger substitution.",
+                (prior, current), context={},
+            ))
+        previous[key] = current
+    return violations
+
+
+def sounding_occupations(
+    results: Sequence[FingeringResult],
+) -> list[tuple[float, tuple[FingeringResult, ...]]]:
+    """Sweep all voices, retaining every sounding contact at each attack.
+
+    Source duration occupies a contact until its end. Let-ring extends to the
+    next attack on its string. A later same-voice attack on that string replaces
+    its previous pitch; other voices cannot silently truncate a notated sustain.
+    Cross-voice unisons retain both score identities and share a physical contact.
+    """
+    groups: dict[tuple[float, int | None], list[FingeringResult]] = defaultdict(list)
+    for result in results:
+        groups[(result.note_event.onset, result.note_event.measure_index)].append(result)
+    active: list[FingeringResult] = []
+    frames: list[tuple[float, tuple[FingeringResult, ...]]] = []
+    for (onset, measure), attacks in sorted(
+        groups.items(), key=lambda item: (item[0][0], item[0][1] or 0),
+    ):
+        kept: list[FingeringResult] = []
+        for previous in active:
+            note = previous.note_event
+            if note.onset == onset and note.measure_index != measure:
+                continue
+            if not note.let_ring and note.onset + note.duration <= onset:
+                continue
+            replaced = any(
+                previous.state.string_num == attack.state.string_num
+                and note.onset < onset
+                and (note.let_ring or _same_voice(previous, attack))
+                for attack in attacks
+            )
+            if not replaced:
+                kept.append(previous)
+        active = kept + attacks
+        frames.append((onset, tuple(active)))
+    return frames
+
+
+def validate_contact_configuration(
+    contacts: Sequence[FingeringResult],
+    config: BiomechanicalRuleConfig | None = None,
+) -> tuple[BiomechanicalViolation, ...]:
+    """Check one whole-hand occupation, including open strings under a barre.
+
+    This discrete check establishes contact compatibility only. It does not
+    certify joint angles, motion speeds, skin collisions or acoustic pressure.
+    """
+    rule_config = config or BiomechanicalRuleConfig()
+    sounding = [result for result in contacts if not result.note_event.muted]
+    violations = _validate_same_string_chord(sounding)
+    # Identical notation in two voices is one contact, not two fingers.
+    unique: dict[tuple[int, int, Finger], FingeringResult] = {}
+    for result in sounding:
+        unique.setdefault(
+            (result.state.string_num, result.state.fret, result.state.finger), result,
+        )
+    fretted = [result for result in unique.values() if _is_active_fretted(result)]
+    violations.extend(_validate_duplicate_fingers(fretted))
+    violations.extend(_validate_chord_ordering(fretted))
+    if len(fretted) > 1:
+        violations.extend(_validate_chord_spans(fretted, rule_config))
+    by_position: dict[tuple[int, int], list[FingeringResult]] = defaultdict(list)
+    for result in fretted:
+        by_position[(result.state.string_num, result.state.fret)].append(result)
+    for notes in by_position.values():
+        if len(notes) > 1:
+            violations.append(_multi_violation(
+                "BIO-CONTACT-001", BiomechanicalSeverity.FATAL,
+                "A shared sounding contact is assigned to different fingers.", notes,
+                context={},
+            ))
+    indices = [result for result in fretted if result.state.finger == Finger.INDEX]
+    if len(indices) > 1 and len({result.state.fret for result in indices}) == 1:
+        fret = indices[0].state.fret
+        low = min(result.state.string_num for result in indices)
+        high = max(result.state.string_num for result in indices)
+        blocked = [
+            result for result in sounding
+            if low <= result.state.string_num <= high and result.state.fret < fret
+        ]
+        if blocked:
+            violations.append(_multi_violation(
+                "BIO-CONTACT-002", BiomechanicalSeverity.FATAL,
+                "An index barre interrupts a required lower or open-string note.",
+                [*indices, *blocked],
+                context={"barre_fret": fret, "string_from": low, "string_to": high},
+            ))
+    return tuple(violations)
+
+
+def _validate_occupations(
+    results: Sequence[FingeringResult], config: BiomechanicalRuleConfig,
+) -> list[BiomechanicalViolation]:
+    violations: list[BiomechanicalViolation] = []
+    seen: set[tuple[str, tuple[int, ...]]] = set()
+    for onset, active in sounding_occupations(results):
+        for violation in validate_contact_configuration(active, config):
+            # Existing chord diagnostics already describe simultaneous attacks.
+            involved = [r for r in active if r.note_id in violation.note_ids]
+            if (
+                violation.code.startswith("BIO-CHORD-")
+                and len({r.note_event.onset for r in involved}) <= 1
+            ):
+                continue
+            code = "BIO-SUSTAIN-001" if violation.code == "BIO-CHORD-001" else violation.code
+            if violation.code == "BIO-CHORD-002":
+                code = "BIO-TRANS-002"
+            key = (code, tuple(sorted(violation.note_ids)))
+            if key in seen:
+                continue
+            seen.add(key)
+            violations.append(BiomechanicalViolation(
+                code=code, severity=violation.severity, message=violation.message,
+                note_ids=violation.note_ids, measure_index=violation.measure_index,
+                onset=onset, context=violation.context,
+            ))
     return violations
 
 
@@ -354,7 +505,7 @@ def _validate_duplicate_fingers(
             continue
         frets = {r.state.fret for r in notes}
         strings = sorted(r.state.string_num for r in notes)
-        if finger == Finger.INDEX and len(frets) == 1 and _is_index_barre_shape(strings):
+        if finger == Finger.INDEX and len(frets) == 1:
             continue
         violations.append(_multi_violation(
             "BIO-CHORD-002",
@@ -475,48 +626,6 @@ def _validate_extreme_shift(
     )]
 
 
-def _validate_finger_overlap(
-    previous: FingeringResult,
-    current: FingeringResult,
-) -> list[BiomechanicalViolation]:
-    if previous.state.finger == Finger.OPEN or current.state.finger == Finger.OPEN:
-        return []
-    if previous.note_event.muted or current.note_event.muted:
-        return []
-    if previous.state.finger != current.state.finger:
-        return []
-    if (
-        previous.state.string_num == current.state.string_num
-        and previous.state.fret == current.state.fret
-    ):
-        return []
-    previous_end = previous.note_event.onset + previous.note_event.duration
-    if previous_end <= current.note_event.onset:
-        return []
-    if previous.note_event.slide_type is not None or current.note_event.slide_type is not None:
-        return []
-    if previous.state.string_num == current.state.string_num:
-        return []
-    if previous.state.finger == Finger.INDEX and previous.state.fret == current.state.fret:
-        return []
-    if (
-        previous.note_event.measure_index != current.note_event.measure_index
-        and current.note_event.onset <= previous.note_event.onset
-    ):
-        return []
-    return [_multi_violation(
-        "BIO-TRANS-002",
-        BiomechanicalSeverity.FATAL,
-        "The same fretting finger overlaps on incompatible positions.",
-        (previous, current),
-        context={
-            "finger": previous.state.finger.value,
-            "previous_position": (previous.state.string_num, previous.state.fret),
-            "current_position": (current.state.string_num, current.state.fret),
-        },
-    )]
-
-
 def _group_by_onset(
     results: Sequence[FingeringResult],
     precision: int,
@@ -545,20 +654,6 @@ def _is_active_fretted(result: FingeringResult) -> bool:
         result.state.fret > 0
         and result.state.finger != Finger.OPEN
         and not result.note_event.muted
-    )
-
-
-def _are_contiguous(values: Iterable[int]) -> bool:
-    sorted_values = sorted(set(values))
-    return all(b - a == 1 for a, b in zip(sorted_values, sorted_values[1:]))
-
-
-def _is_index_barre_shape(strings: Iterable[int]) -> bool:
-    string_numbers = sorted(set(strings))
-    return (
-        _are_contiguous(string_numbers)
-        or len(string_numbers) >= 3
-        or (len(string_numbers) == 2 and string_numbers[-1] - string_numbers[0] >= 4)
     )
 
 
@@ -613,4 +708,6 @@ __all__ = [
     "BiomechanicalSeverity",
     "BiomechanicalViolation",
     "validate_fingering_results",
+    "sounding_occupations",
+    "validate_contact_configuration",
 ]

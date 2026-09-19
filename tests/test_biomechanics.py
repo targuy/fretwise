@@ -132,11 +132,11 @@ def test_index_full_barre_same_fret_non_contiguous_strings_is_allowed() -> None:
     assert "BIO-CHORD-002" not in _codes([first, second, third])
 
 
-def test_two_note_non_contiguous_index_barre_is_fatal() -> None:
+def test_partial_barre_may_cover_an_unplayed_interior_string() -> None:
     first = _result(0, onset=0.0, string_num=2, fret=6, pitch=65, finger=Finger.INDEX)
     second = _result(1, onset=0.0, string_num=4, fret=6, pitch=56, finger=Finger.INDEX)
 
-    assert "BIO-CHORD-002" in _codes([first, second])
+    assert "BIO-CHORD-002" not in _codes([first, second])
 
 
 def test_wide_two_note_index_barre_is_allowed() -> None:

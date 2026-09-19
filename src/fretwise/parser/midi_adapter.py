@@ -175,7 +175,6 @@ def _extract_note_events(midi: object, instrument: object) -> list[NoteEvent]:
     Uses ``midi.time_to_tick`` and tempo information to convert absolute
     seconds to beat positions.
     """
-    import pretty_midi  # type: ignore[import-untyped]
 
     events: list[NoteEvent] = []
     tempo_changes = midi.get_tempo_changes()  # type: ignore[union-attr]
@@ -187,11 +186,16 @@ def _extract_note_events(midi: object, instrument: object) -> list[NoteEvent]:
         tempo_values = [120.0]
         tempo_times = [0.0]
 
+    tempo_points = tuple(
+        (_seconds_to_beats(time, tempo_times, tempo_values), float(bpm))
+        for time, bpm in zip(tempo_times, tempo_values)
+    )
+
     for note in instrument.notes:  # type: ignore[union-attr]
         # Convert seconds → beats
         onset_beats = _seconds_to_beats(note.start, tempo_times, tempo_values)
         end_beats = _seconds_to_beats(note.end, tempo_times, tempo_values)
-        duration_beats = max(end_beats - onset_beats, 0.0625)  # min 1/64 note
+        duration_beats = end_beats - onset_beats
 
         # Current tempo at note onset
         tempo = _tempo_at_time(note.start, tempo_times, tempo_values)
@@ -202,6 +206,7 @@ def _extract_note_events(midi: object, instrument: object) -> list[NoteEvent]:
                 onset=round(onset_beats, 6),
                 duration=round(duration_beats, 6),
                 tempo=tempo,
+                tempo_points=tempo_points,
                 articulation=Articulation.NORMAL,
                 dynamic=_velocity_to_dynamic(note.velocity),
             )

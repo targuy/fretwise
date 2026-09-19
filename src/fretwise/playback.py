@@ -112,7 +112,7 @@ def _articulation_duration_beats(note: dict[str, Any]) -> float:
         dur *= 1.12
     if note.get("muted") or note.get("golpe"):
         dur *= 0.28
-    return max(0.01, dur)
+    return max(0.0, dur)
 
 
 def _let_ring_duration_beats(
@@ -169,6 +169,19 @@ def _bend_control_points(
     Returns just ``[(0, 0)]`` when the note is neither bent nor slid.
     """
     points: list[tuple[float, float]] = []
+
+    # Source curves take precedence over maximum-amplitude approximations.
+    # NoteEvent positions are normalized; values are cents, player uses semitones.
+    source_points = note.get("bend_points")
+    if source_points:
+        points = [(float(position), float(cents) / 100.0)
+                  for position, cents in source_points]
+        if any(not math.isfinite(p) or not math.isfinite(v) for p, v in points):
+            raise ValueError("Bend curve contains a non-finite value")
+        if (len(points) < 2 or points[0][0] != 0 or points[-1][0] != 1
+                or any(a[0] >= b[0] for a, b in zip(points, points[1:]))):
+            raise ValueError("Bend curve must cover 0..1 with increasing positions")
+        return points
 
     bend_value = note.get("bend_value")
     if isinstance(bend_value, (int, float)) and abs(float(bend_value)) > 0.001:
@@ -233,15 +246,18 @@ def _bend_curve_beats(
     to 0 appended just past the span so the wheel recenters for the next note on
     the channel. Returns None when the note carries no pitch expression.
     """
-    has_bend = isinstance(note.get("bend_value"), (int, float))
+    has_bend = bool(note.get("bend_points")) or isinstance(note.get("bend_value"), (int, float))
     has_slide = bool(note.get("slide_type")) or str(note.get("articulation")) == "slide"
-    has_vib = _has_vibrato(note)
+    has_vib = _has_vibrato(note) and (not note.get("bend_points")
+                                    or note.get("pitch_composition") == "additiveResidual")
     if not (has_bend or has_slide or has_vib):
         return None
 
     # Bend timing follows the *notated* duration, not any let-ring extension —
     # the gesture belongs to the written note, not the sustain tail.
-    span_beats = max(0.05, float(note.get("duration", 0.0) or 0.0))
+    span_beats = float(note.get("duration", 0.0) or 0.0)
+    if span_beats <= 0:
+        return None
     tempo = float(note.get("tempo") or 0.0) or default_tempo
     span_seconds = span_beats * 60.0 / max(1.0, tempo)
     n = int(round(span_seconds / _BEND_TARGET_DT))
@@ -256,8 +272,8 @@ def _bend_curve_beats(
     vib_start = min(0.35, 0.12 / span_seconds) if span_seconds > 0 else 0.0
 
     curve: list[list[float]] = []
-    for i in range(n + 1):
-        frac = i / n
+    fractions = sorted({i / n for i in range(n + 1)} | {point[0] for point in envelope})
+    for frac in fractions:
         semis = _interpolate(envelope, frac)
         if has_vib and frac >= vib_start:
             semis += math.sin((frac - vib_start) * span_seconds * vib_rate * math.tau) * vib_amp
@@ -336,4 +352,25 @@ def build_performance(
             "attack": not _is_legato(note),
             "bend": _bend_curve_beats(note, next_pitch, default_tempo),
         }
+    linked_destinations: list[dict[str, Any]] = []
+    for note in notes:
+        destination_id = note.get("technique_to_source_note_id")
+        if destination_id is None:
+            continue
+        candidates = [candidate for candidate in notes
+                      if str(candidate.get("source_note_id")) == str(destination_id)
+                      and candidate.get("string") == note.get("string")
+                      and (candidate.get("voice_hint") or 0) == (note.get("voice_hint") or 0)
+                      and float(candidate.get("onset", 0)) > float(note.get("onset", 0))]
+        destination = min(candidates, key=lambda row: float(row.get("onset", 0)), default=None)
+        if destination is None:
+            continue
+        # GPIF marks the outgoing gesture on its origin. The origin is picked;
+        # the destination is excited by the fretting hand (or a legato slide).
+        note["perf"]["attack"] = not bool(note.get("is_tie_dest"))
+        kind = str(note.get("articulation"))
+        if kind in ("hammer_on", "pull_off") or note.get("slide_type") == "legato":
+            linked_destinations.append(destination)
+    for destination in linked_destinations:
+        destination["perf"]["attack"] = False
     return notes

@@ -219,9 +219,15 @@
     <button class="ctrl" id="btn-rewind">Rewind</button>
     <button class="ctrl" id="btn-cam-view" title="Basculer entre la vue POV (joueur) et la vue de face — la caméra seule change, pas la main">Vue : POV</button>
     <button class="ctrl" id="btn-3d" title="Basculer entre la vue 3D et la vue 2D">3D : off</button>
+    <label for="hand-engine">Main</label>
+    <select id="hand-engine" aria-label="Moteur de la main">
+      <option value="v1">Historique</option>
+      <option value="v2">Nouvelle main · aperçu</option>
+    </select>
     <button class="ctrl primary" id="btn-play">Lecture</button>
   </div>
 
+  <div id="hand-status" role="status" style="padding:4px 10px;font-size:12px;color:#d6d8db"></div>
   <section id="hand-lookahead" aria-label="Prochaines notes et accords">
     <div class="lookahead-label">À venir</div>
     <div id="lookahead-items"></div>
@@ -722,7 +728,7 @@ function buildLookaheadGroups(frames) {
     const name = group.frames.length > 1
       ? (detectChordName(pcs) || "Accord")
       : NOTE_NAMES[((firstPitch % 12) + 12) % 12] + (Math.floor(firstPitch / 12) - 1);
-    return { ...group, id: index, name };
+    return { ...group, id: index, name, chordName: group.frames.length > 1 ? name : '' };
   });
 }
 
@@ -2374,6 +2380,9 @@ const EMBEDDED_DATA = {
 
 /* ---------- Boot ---------------------------------------------------------- */
 async function loadData() {
+  if (window.parent !== window) {
+    return {meta:{title:'En attente de la partition',synced:true,fingered:false},frames:[]};
+  }
   try {
     const r = await fetch("hand_viz_data.json", { cache: "no-store" });
     if (r.ok) {
@@ -2391,11 +2400,12 @@ function formatHUD(data) {
   document.getElementById("hud-track").textContent  = m.track ? ("> " + m.track) : "";
   document.getElementById("hud-meta").textContent   =
     Math.round(m.tempo || 120) + " BPM - " + data.frames.length + " notes - " +
-    (m.max_seconds || 10) + "s - " + HAND_MODEL_LABEL;
+    (m.max_seconds || 10) + "s - " + (HAND_ENGINE === 'v2' ? 'main de référence · aperçu' : HAND_MODEL_LABEL);
 }
 
 /* ---------- Runtime state (mutable, reassignable via postMessage) -------- */
 let CURRENT_DATA         = null;  // current dataset
+let CURRENT_DATA_REVISION = 0;
 let CURRENT_SIM          = null;  // hand simulator bound to that data
 let CURRENT_CHORD_GROUPS = [];    // pre-computed chord groups for current data
 let CURRENT_LOOKAHEAD_GROUPS = []; // attacks shown outside the animation
@@ -2451,6 +2461,52 @@ let HAND3D_ACTIVE   = false;  // true once the 3D renderer is live (SVG hidden)
 let HAND3D_RENDERER = null;   // Hand3DRenderer instance, or null (→ SVG)
 let HAND3D_MODULE   = null;   // cached imported module
 let HAND3D_LOADING  = false;  // guard against concurrent enable() calls
+let HAND_ENGINE = (() => {
+  const requested = new URLSearchParams(location.search).get('handRenderer');
+  if (requested === 'v1' || requested === 'v2') return requested;
+  try { return localStorage.getItem('fretwise.handRenderer') === 'v2' ? 'v2' : 'v1'; }
+  catch (_) { return 'v1'; }
+})();
+let HAND_CAMERA = 'fingers';
+let HAND_LOAD_REVISION = 0;
+let HAND_INIT_REVISION = 0;
+let HAND_RATE = 1;
+let HAND_TRANSPORT = null;
+let HAND_BASE_STATUS = '';
+let HAND_DESYNCED = false;
+
+function handStatus(message) {
+  HAND_BASE_STATUS = message;
+  document.getElementById('hand-status').textContent = HAND_DESYNCED
+    ? 'TRANSPORT_DESYNC · synchronisation interrompue, pose figée. ' + message : message;
+}
+
+async function loadHandPerformance() {
+  if (HAND_ENGINE !== 'v2' || !HAND3D_RENDERER) return;
+  const view = HAND3D_RENDERER;
+  const revision = ++HAND_LOAD_REVISION;
+  if (!CURRENT_DATA?.handPerformance) {
+    view.clearPerformance();
+    handStatus('Nouvelle main : données de performance indisponibles pour cette piste.');
+    return;
+  }
+  handStatus('Nouvelle main : préparation des mouvements…');
+  try {
+    await view.setPerformance(CURRENT_DATA.handPerformance);
+    if (revision !== HAND_LOAD_REVISION || view !== HAND3D_RENDERER) return;
+    await view.setPlaybackRate(HAND_RATE);
+    if (revision !== HAND_LOAD_REVISION || view !== HAND3D_RENDERER) return;
+    const diagnostics = view.getDiagnostics();
+    handStatus('Main v2 · maquette intégrée' + (diagnostics.length
+      ? ' · ' + diagnostics.length + ' diagnostic(s) : ' + diagnostics[0].message : ''));
+    view.renderAt(extT || 0);
+  } catch (error) {
+    if (revision === HAND_LOAD_REVISION) {
+      view.clearPerformance();
+      handStatus('Main v2 indisponible : ' + error.message);
+    }
+  }
+}
 
 /* Build the per-frame kinematic snapshot the 3D rig consumes.  This is derived
    ENTIRELY from the SHARED model: the same HandSimulator `sim`, the same
@@ -2744,23 +2800,32 @@ function hand3dGeometry() {
 async function enableHand3d() {
   if (HAND3D_ACTIVE || HAND3D_LOADING) return HAND3D_ACTIVE;
   HAND3D_LOADING = true;
+  const generation = ++HAND_INIT_REVISION;
+  const engine = HAND_ENGINE;
+  const selector = document.getElementById('hand-engine');
+  if (selector) selector.disabled = true;
   const mount = document.getElementById("scene3d");
   const svg   = document.getElementById("scene");
   try {
-    if (!HAND3D_MODULE) {
-      HAND3D_MODULE = await import("./js/hand3d.js");
-    }
-    const renderer = HAND3D_MODULE.create(mount);
+    const module = HAND3D_MODULE || (engine === 'v2'
+      ? await import('./js/hand_v2.js') : await import("./js/hand3d.js"));
+    if (generation !== HAND_INIT_REVISION) return false;
+    HAND3D_MODULE = module;
+    const renderer = await module.create(mount);
+    if (generation !== HAND_INIT_REVISION) { renderer?.dispose(); return false; }
     if (!renderer) throw new Error("WebGL unavailable or renderer creation failed");
     HAND3D_RENDERER = renderer;
     HAND3D_ACTIVE   = true;
-    renderer.setGeometry(hand3dGeometry());
+    if (engine === 'v2') await loadHandPerformance();
+    else renderer.setGeometry(hand3dGeometry());
+    if (generation !== HAND_INIT_REVISION) return false;
     if (mount) mount.style.display = "block";
     if (svg)   svg.style.display   = "none";
     _syncHand3dButton();
     _syncCamViewButton();
     return true;
   } catch (e) {
+    if (generation !== HAND_INIT_REVISION) return false;
     // Silent fall back to SVG: log a single warning so the regression is
     // traceable in DevTools, then revert HAND3D_ACTIVE so the toggle button
     // ('3D : off') reflects the state and the SVG path resumes rendering.
@@ -2768,6 +2833,8 @@ async function enableHand3d() {
     // hand3d.js); we treat any throw (renderer null, setGeometry, WebGL) the
     // same so the panel is never left blank.
     console.warn("[hand3d] enable failed; reverting to SVG hand", e);
+    handStatus('Repli schématique 2D : ' + e.message);
+    HAND3D_RENDERER?.dispose();
     HAND3D_RENDERER = null;
     HAND3D_ACTIVE   = false;
     if (mount) mount.style.display = "none";
@@ -2776,12 +2843,20 @@ async function enableHand3d() {
     _syncCamViewButton();
     return false;
   } finally {
-    HAND3D_LOADING = false;
+    if (generation === HAND_INIT_REVISION) {
+      HAND3D_LOADING = false;
+      if (selector) selector.disabled = false;
+    }
   }
 }
 
 /* Disable the 3D renderer and restore the unchanged SVG view. */
 function disableHand3d() {
+  HAND_INIT_REVISION++;
+  HAND3D_LOADING = false;
+  const selector = document.getElementById('hand-engine');
+  if (selector) selector.disabled = false;
+  HAND_LOAD_REVISION++;
   if (HAND3D_RENDERER) {
     try { HAND3D_RENDERER.dispose(); } catch (e) { /* ignore */ }
   }
@@ -2810,6 +2885,11 @@ function _syncCamViewButton() {
   const btn = document.getElementById("btn-cam-view");
   if (!btn) return;
   btn.style.display = HAND3D_ACTIVE ? "" : "none";
+  if (HAND_ENGINE === 'v2') {
+    btn.textContent = 'Vue : ' + ({fingers:'doigts',thumb:'pouce',palm:'paume',profile:'profil'}[HAND_CAMERA]);
+    btn.title = 'Changer la caméra : doigts, pouce, paume, profil';
+    return;
+  }
   if (!HAND3D_ACTIVE || !HAND3D_RENDERER || typeof HAND3D_RENDERER.getCameraView !== "function") return;
   // Label reads as the mode a click switches TO (standard toggle convention).
   btn.textContent = HAND3D_RENDERER.getCameraView() === "pov" ? "Vue : Face" : "Vue : POV";
@@ -2828,6 +2908,7 @@ function _hasNoFingering(data) {
 }
 
 function installData(data) {
+  CURRENT_DATA_REVISION++;
   CURRENT_DATA         = data;
   NO_FINGERING         = _hasNoFingering(data);
   // Derive fret/string/tuning/scale/capo geometry from the payload BEFORE the
@@ -2849,7 +2930,8 @@ function installData(data) {
   // geometry (string count / fret span can change between tracks).  The SVG
   // path is geometry-rebuilt by buildFretboard() above; mirror that for 3D.
   if (HAND3D_ACTIVE && HAND3D_RENDERER) {
-    try { HAND3D_RENDERER.setGeometry(hand3dGeometry()); } catch (e) { /* keep SVG-safe */ }
+    if (HAND_ENGINE === 'v2') loadHandPerformance();
+    else try { HAND3D_RENDERER.setGeometry(hand3dGeometry()); } catch (e) { /* keep SVG-safe */ }
   }
 }
 
@@ -2893,12 +2975,29 @@ function renderNoFingeringState() {
 /* postMessage support — the parent FretWise UI pushes fingering data
    ("fretwise-hand-data") and time updates ("fretwise-hand-seek") here. */
 window.addEventListener("message", (ev) => {
+  if (ev.origin !== location.origin || ev.source !== window.parent) return;
   const msg = ev.data;
   if (!msg) return;
-  if (msg.type === "fretwise-hand-data"
+  const accepted = HAND_TRANSPORT?.accept(ev);
+  if (accepted?.type === 'fretwise:load') {
+    installData(accepted.payload);
+    window.parent.postMessage({type:'fretwise:loaded', protocolVersion:1,
+      sessionId:accepted.sessionId, planId:accepted.planId}, location.origin);
+  } else if (accepted?.type === 'fretwise:transport') {
+    extT = accepted.nominalScoreSec;
+    extWallMs = performance.now();
+    playing = accepted.status === 'playing';
+    EXT_SYNCED = true;
+    if (HAND_RATE !== accepted.rate) {
+      HAND_RATE = accepted.rate;
+      if (HAND_ENGINE === 'v2' && HAND3D_RENDERER) {
+        HAND3D_RENDERER.setPlaybackRate(HAND_RATE).catch(e => handStatus(e.message));
+      }
+    }
+  } else if (!HAND_TRANSPORT?.sessionId && msg.type === "fretwise-hand-data"
       && msg.payload && Array.isArray(msg.payload.frames)) {
     installData(msg.payload);
-  } else if (msg.type === "fretwise-hand-seek") {
+  } else if (!HAND_TRANSPORT?.sessionId && msg.type === "fretwise-hand-seek") {
     extT    = typeof msg.t === "number" ? msg.t : 0;
     extWallMs = performance.now();
     playing = !!msg.playing;
@@ -2919,6 +3018,16 @@ window.addEventListener("message", (ev) => {
    honouring is likewise hoisted so a saved/URL opt-in still applies on first
    paint. */
 (function wireHand3dToggle() {
+  const engineSelect = document.getElementById('hand-engine');
+  engineSelect.value = HAND_ENGINE;
+  engineSelect.addEventListener('change', async () => {
+    disableHand3d();
+    HAND_ENGINE = engineSelect.value;
+    try { localStorage.setItem('fretwise.handRenderer', HAND_ENGINE); } catch (_) { /* optional */ }
+    formatHUD(CURRENT_DATA);
+    HAND3D_MODULE = null;
+    await enableHand3d();
+  });
   const btn3d = document.getElementById("btn-3d");
   if (btn3d) {
     _syncHand3dButton();
@@ -2938,6 +3047,13 @@ window.addEventListener("message", (ev) => {
   if (btnCamView) {
     _syncCamViewButton();
     btnCamView.addEventListener("click", () => {
+      if (HAND_ENGINE === 'v2' && HAND3D_RENDERER) {
+        const views = ['fingers', 'thumb', 'palm', 'profile'];
+        HAND_CAMERA = views[(views.indexOf(HAND_CAMERA) + 1) % views.length];
+        HAND3D_RENDERER.setCamera(HAND_CAMERA);
+        _syncCamViewButton();
+        return;
+      }
       if (!HAND3D_RENDERER || typeof HAND3D_RENDERER.setCameraView !== "function") return;
       const next = HAND3D_RENDERER.getCameraView() === "pov" ? "face" : "pov";
       HAND3D_RENDERER.setCameraView(next);
@@ -2953,12 +3069,15 @@ window.addEventListener("message", (ev) => {
 })();
 
 (async () => {
-  installData(await loadData());
+  const {HandTransportReceiver} = await import('./js/hand_transport.js');
+  HAND_TRANSPORT = new HandTransportReceiver(location.origin, window.parent);
+  const initialData = await loadData();
+  if (!HAND_TRANSPORT.sessionId) installData(initialData);
 
   /* Tell the parent window we are ready to receive data via postMessage. */
   try {
     if (window.parent && window.parent !== window) {
-      window.parent.postMessage({ type: "fretwise-hand-ready" }, "*");
+      window.parent.postMessage({ type: 'fretwise:ready', protocolVersion: 1 }, location.origin);
     }
   } catch (e) { /* isolated window */ }
 
@@ -3043,7 +3162,7 @@ window.addEventListener("message", (ev) => {
       _lookaheadKey = null;
       return;
     }
-    const key = next.map((group) => group.id).join(",");
+    const key = CURRENT_DATA_REVISION + ':' + next.map((group) => group.id).join(",");
     if (key === _lookaheadKey) {
       lookaheadItems.querySelectorAll(".lookahead-time").forEach((node, index) => {
         node.textContent = `+${Math.max(0, next[index].startSec - tNow).toFixed(1)}s`;
@@ -3131,11 +3250,18 @@ window.addEventListener("message", (ev) => {
          keeps the sound engine authoritative while avoiding visible step-jumps.
        - Standalone mode: internal loop (pre-existing behaviour).  */
     let tNow;
+    const desynced = !!HAND_TRANSPORT?.isDesynced(performance.timeOrigin + now);
+    if (desynced !== HAND_DESYNCED) {
+      HAND_DESYNCED = desynced;
+      handStatus(HAND_BASE_STATUS);
+    }
     if (EXT_SYNCED) {
       const smooth = DEDICATED_3D_VIEW && playing && extWallMs > 0
         ? (now - extWallMs) / 1000
         : 0;
-      tNow = extT + smooth;
+      tNow = HAND_TRANSPORT?.snapshot
+        ? HAND_TRANSPORT.timeAt(performance.timeOrigin + now)
+        : extT + Math.min(0.25, smooth) * HAND_RATE;
     } else {
       if (playing && CURRENT_DATA) {
         playT += dt;
@@ -3184,7 +3310,7 @@ window.addEventListener("message", (ev) => {
       };
       /* Only animate the hand when playing; freeze in place on pause so
          the user can inspect/screenshot the current finger positions. */
-      if (playing) {
+      if ((playing || EXT_SYNCED) && !(threeDLive && HAND_ENGINE === 'v2')) {
         CURRENT_SIM.update(tNow, dt, CURRENT_DATA.frames, CURRENT_CHORD_GROUPS);
       }
       // Renderer selection: when the 3D flag is on AND the renderer is live, the
@@ -3194,10 +3320,11 @@ window.addEventListener("message", (ev) => {
       // kinematics are shared with zero divergence.
       if (threeDLive) {
         try {
-          HAND3D_RENDERER.update(buildKinSnapshot(CURRENT_SIM, getSampledState()));
+          if (HAND_ENGINE === 'v2') HAND3D_RENDERER.renderAt(tNow);
+          else HAND3D_RENDERER.update(buildKinSnapshot(CURRENT_SIM, getSampledState()));
           // Warm the pose cache for upcoming shapes during idle time so the
           // frame that reaches each new shape is a cheap cache hit, not a solve.
-          if (playing) _scheduleHandPosePrefill(tNow);
+          if (playing && HAND_ENGINE !== 'v2') _scheduleHandPosePrefill(tNow);
         } catch (e) {
           // A render fault must never blank the panel: fall back to SVG.
           disableHand3d();
@@ -3210,7 +3337,7 @@ window.addEventListener("message", (ev) => {
       if (updateHud) {
         lastHudFrameMs = now;
         // Chord-name flash: HTML overlay, visible in both SVG (2D) and 3D modes.
-        updateChordFlash(tNow, CURRENT_CHORD_GROUPS);
+        updateChordFlash(tNow, CURRENT_LOOKAHEAD_GROUPS);
         updateLookahead(tNow, CURRENT_LOOKAHEAD_GROUPS);
         tlFill.style.width = (100 * Math.min(1, tNow / Math.max(1, CURRENT_TOTAL))) + "%";
       }

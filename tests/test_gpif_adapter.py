@@ -9,7 +9,14 @@ from pathlib import Path
 
 import pytest
 
-from fretwise.models import Articulation, Dynamic, HarmonicType
+from fretwise.models import (
+    Articulation,
+    Dynamic,
+    Finger,
+    FingeringResult,
+    FingeringState,
+    HarmonicType,
+)
 from fretwise.parser.base import ParseError, UnsupportedFormatError
 from fretwise.parser.gpif_adapter import (
     KIND_BASS,
@@ -33,8 +40,10 @@ from fretwise.parser.gpif_adapter import (
     _parse_int_fret,
     _parse_note_articulation,
     _tokenize_lyrics,
+    _track_capo_fret,
     classify_kind_for_program,
 )
+from fretwise.performance import build_hand_performance
 
 # ---------------------------------------------------------------------------
 # Helpers — minimal GPIF XML builders
@@ -51,6 +60,64 @@ def _make_gpif_zip(gpif_xml: str) -> bytes:
     with zipfile.ZipFile(buf, "w") as zf:
         zf.writestr("Content/score.gpif", gpif_xml)
     return buf.getvalue()
+
+
+@pytest.mark.parametrize("capo", [0, 2, 5])
+def test_source_capo_keeps_tuning_relative_frets_and_sounding_pitch(
+    tmp_path: Path, capo: int,
+) -> None:
+    """A capo-open note and a fretted note map to absolute frets exactly once."""
+    root = _xml(_MINIMAL_GPIF)
+    props = root.find("Tracks/Track/Staves/Staff/Properties")
+    assert props is not None
+    prop = ET.SubElement(props, "Property", name="CapoFret")
+    ET.SubElement(prop, "Fret").text = str(capo)
+    first_fret = root.find("Notes/Note[@id='0']/Properties/Property[@name='Fret']/Fret")
+    first_pitch = root.find("Notes/Note[@id='0']/Properties/Property[@name='Midi']/Number")
+    second_pitch = root.find("Notes/Note[@id='1']/Properties/Property[@name='Midi']/Number")
+    assert first_fret is not None and first_pitch is not None and second_pitch is not None
+    first_fret.text = "0"
+    first_pitch.text = str(59 + capo)
+    second_pitch.text = str(66 + capo)
+    path = tmp_path / "capo.gp"
+    path.write_bytes(_make_gpif_zip(ET.tostring(root, encoding="unicode")))
+
+    adapter = GpifAdapter()
+    tracks = adapter.list_all_tracks(path)
+    assert len(tracks[0]) == 4  # Keep the public track-list tuple compatible.
+    assert tracks[0][2] == [40, 45, 50, 55, 59, 64]
+    assert adapter.capo_frets == {0: capo}
+    events = adapter.parse_track(path, 0)
+    assert adapter.capo_fret == capo
+    assert [event.fret_hint for event in events] == [0, 2]
+    assert [event.pitch for event in events] == [59 + capo, 66 + capo]
+    results = [
+        FingeringResult(0, events[0], FingeringState(2, 0, Finger.OPEN, 1), 0.0),
+        FingeringResult(1, events[1], FingeringState(1, 2, Finger.MIDDLE, 1), 0.0),
+    ]
+    performance = build_hand_performance(events, results, instrument={"capoFret": capo})
+    assert [note["fingering"]["fretAbs"] for note in performance["notes"]] == [capo, capo + 2]
+    assert performance["notes"][0]["basePitchMidi"] == 59 + capo
+    adapter.parse(path)
+    assert adapter.capo_fret == capo
+
+
+def test_capo_first_staff_overrides_legacy_track_property() -> None:
+    track = _xml('''<Track id="9"><Properties><Property name="CapoFret">
+    <Fret>3</Fret></Property></Properties><Staves><Staff><Properties>
+    <Property name="CapoFret"><Fret>1</Fret></Property></Properties></Staff></Staves>
+    </Track>''')
+    assert _track_capo_fret(track) == 1
+    track.remove(track.find("Staves"))
+    assert _track_capo_fret(track) == 3
+
+
+@pytest.mark.parametrize("value", ["", "two", "-1", "2.5"])
+def test_invalid_source_capo_is_rejected_instead_of_becoming_zero(value: str) -> None:
+    track = _xml(f'''<Track id="9"><Properties><Property name="CapoFret">
+    <Fret>{value}</Fret></Property></Properties></Track>''')
+    with pytest.raises(ParseError, match="CapoFret"):
+        _track_capo_fret(track)
 
 
 _MINIMAL_GPIF = """<?xml version="1.0" encoding="utf-8"?>

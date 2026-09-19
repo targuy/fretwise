@@ -7,13 +7,12 @@ from unittest.mock import MagicMock, PropertyMock, patch
 
 import pytest
 
-from fretwise.models import Articulation, Dynamic, NoteEvent
+from fretwise.models import Dynamic
 from fretwise.parser.base import ParseError, UnsupportedFormatError
 from fretwise.parser.musicxml_adapter import (
     MusicXmlAdapter,
     _m21_dynamic_to_dynamic,
 )
-
 
 # ---------------------------------------------------------------------------
 # MusicXmlAdapter.supports()
@@ -138,6 +137,7 @@ class TestMusicXmlParseMocked:
         # Tempo context
         tempo_mark = MagicMock()
         tempo_mark.number = 120.0
+        tempo_mark.getQuarterBPM.return_value = 120.0
         note.getContextByClass = MagicMock(return_value=tempo_mark)
 
         # Build mock score

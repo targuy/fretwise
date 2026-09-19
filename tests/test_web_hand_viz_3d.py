@@ -285,7 +285,7 @@ def test_toggle_button_is_wired_to_enable_path() -> None:
     # an exception during installData(): the binding's getElementById call must
     # appear before `installData(await loadData());`.
     bind_at = html.index('document.getElementById("btn-3d")')
-    boot_at = html.index("installData(await loadData());")
+    boot_at = html.index("if (!HAND_TRANSPORT.sessionId) installData(initialData);")
     assert bind_at < boot_at, (
         "the #btn-3d toggle must be wired before the async data-load boot so a "
         "data-install failure can't leave the visible button dead"

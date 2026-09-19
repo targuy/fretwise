@@ -1,0 +1,1000 @@
+{
+  "$defs": {
+    "BarreHint": {
+      "additionalProperties": false,
+      "description": "Explicit interval occupied by a multi-string finger contact.",
+      "properties": {
+        "startTick": {
+          "minimum": 0,
+          "title": "Starttick",
+          "type": "integer"
+        },
+        "endTick": {
+          "minimum": 0,
+          "title": "Endtick",
+          "type": "integer"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "finger": {
+          "enum": [
+            "open",
+            "index",
+            "middle",
+            "ring",
+            "pinky",
+            "thumb"
+          ],
+          "title": "Finger",
+          "type": "string"
+        },
+        "fretAbs": {
+          "minimum": 0,
+          "title": "Fretabs",
+          "type": "integer"
+        },
+        "stringNos": {
+          "items": {
+            "type": "integer"
+          },
+          "title": "Stringnos",
+          "type": "array"
+        },
+        "locked": {
+          "title": "Locked",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "startTick",
+        "endTick",
+        "id",
+        "finger",
+        "fretAbs",
+        "stringNos",
+        "locked"
+      ],
+      "title": "BarreHint",
+      "type": "object"
+    },
+    "Curve": {
+      "additionalProperties": false,
+      "description": "Linear interpolation preserves plateaus without spline overshoot.",
+      "properties": {
+        "interpolation": {
+          "const": "linear",
+          "default": "linear",
+          "title": "Interpolation",
+          "type": "string"
+        },
+        "points": {
+          "items": {
+            "$ref": "#/$defs/CurvePoint"
+          },
+          "title": "Points",
+          "type": "array"
+        }
+      },
+      "required": [
+        "points"
+      ],
+      "title": "Curve",
+      "type": "object"
+    },
+    "CurvePoint": {
+      "additionalProperties": false,
+      "description": "Absolute tick and scalar value, with units supplied by the expression.",
+      "properties": {
+        "tick": {
+          "minimum": 0,
+          "title": "Tick",
+          "type": "integer"
+        },
+        "value": {
+          "title": "Value",
+          "type": "number"
+        }
+      },
+      "required": [
+        "tick",
+        "value"
+      ],
+      "title": "CurvePoint",
+      "type": "object"
+    },
+    "Diagnostic": {
+      "additionalProperties": false,
+      "description": "Machine-readable missing-data or coverage diagnosis.",
+      "properties": {
+        "code": {
+          "title": "Code",
+          "type": "string"
+        },
+        "message": {
+          "title": "Message",
+          "type": "string"
+        },
+        "noteIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Noteids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "code",
+        "message"
+      ],
+      "title": "Diagnostic",
+      "type": "object"
+    },
+    "ExecutionAttack": {
+      "additionalProperties": false,
+      "description": "Effective attack within a chord or arpeggio.",
+      "properties": {
+        "occurrenceId": {
+          "title": "Occurrenceid",
+          "type": "string"
+        },
+        "onTick": {
+          "minimum": 0,
+          "title": "Ontick",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "occurrenceId",
+        "onTick"
+      ],
+      "title": "ExecutionAttack",
+      "type": "object"
+    },
+    "ExecutionGroup": {
+      "additionalProperties": false,
+      "description": "Group preserves each attack's effective date.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "single",
+            "chord",
+            "arpeggio",
+            "strum"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "noteIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Noteids",
+          "type": "array"
+        },
+        "attacks": {
+          "items": {
+            "$ref": "#/$defs/ExecutionAttack"
+          },
+          "title": "Attacks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id",
+        "kind",
+        "noteIds",
+        "attacks"
+      ],
+      "title": "ExecutionGroup",
+      "type": "object"
+    },
+    "Expression": {
+      "additionalProperties": false,
+      "description": "Musical expression with retained source data for unknown techniques.",
+      "properties": {
+        "startTick": {
+          "minimum": 0,
+          "title": "Starttick",
+          "type": "integer"
+        },
+        "endTick": {
+          "minimum": 0,
+          "title": "Endtick",
+          "type": "integer"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "noteIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Noteids",
+          "type": "array"
+        },
+        "provenance": {
+          "enum": [
+            "source",
+            "user",
+            "computed",
+            "inferred"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        },
+        "kind": {
+          "enum": [
+            "bend",
+            "vibrato",
+            "slide",
+            "hammer_on",
+            "pull_off",
+            "tie",
+            "let_ring",
+            "staccato",
+            "dead_note",
+            "harmonic",
+            "palm_mute",
+            "tremolo_picking",
+            "pick_attack",
+            "trill",
+            "unknown"
+          ],
+          "title": "Kind",
+          "type": "string"
+        },
+        "cents": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Curve"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "direction": {
+          "anyOf": [
+            {
+              "enum": [
+                "toward_bass",
+                "toward_treble",
+                "auto"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Direction"
+        },
+        "preBend": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Prebend"
+        },
+        "mechanism": {
+          "anyOf": [
+            {
+              "enum": [
+                "lateral",
+                "longitudinal",
+                "unspecified"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mechanism"
+        },
+        "fromId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Fromid"
+        },
+        "toId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Toid"
+        },
+        "mode": {
+          "anyOf": [
+            {
+              "enum": [
+                "legato",
+                "shift",
+                "natural",
+                "artificial"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Mode"
+        },
+        "soundingPitchMidi": {
+          "anyOf": [
+            {
+              "maximum": 127,
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Soundingpitchmidi"
+        },
+        "nodeXM": {
+          "anyOf": [
+            {
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Nodexm"
+        },
+        "rateHz": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Ratehz"
+        },
+        "sourceKind": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sourcekind"
+        },
+        "raw": {
+          "$ref": "#/$defs/JsonValue",
+          "default": null
+        }
+      },
+      "required": [
+        "startTick",
+        "endTick",
+        "id",
+        "noteIds",
+        "provenance",
+        "kind"
+      ],
+      "title": "Expression",
+      "type": "object"
+    },
+    "ExpressionDetail": {
+      "additionalProperties": false,
+      "description": "Explicit pitch composition prevents applying vibrato twice.",
+      "properties": {
+        "expressionId": {
+          "title": "Expressionid",
+          "type": "string"
+        },
+        "pitchComposition": {
+          "anyOf": [
+            {
+              "enum": [
+                "absoluteFromBase",
+                "additiveResidual"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Pitchcomposition"
+        },
+        "supportFingerIds": {
+          "items": {
+            "enum": [
+              "open",
+              "index",
+              "middle",
+              "ring",
+              "pinky",
+              "thumb"
+            ],
+            "type": "string"
+          },
+          "title": "Supportfingerids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "expressionId"
+      ],
+      "title": "ExpressionDetail",
+      "type": "object"
+    },
+    "Fingering": {
+      "additionalProperties": false,
+      "description": "Final fingering; provenance is never treated as calibrated confidence.",
+      "properties": {
+        "finger": {
+          "enum": [
+            "open",
+            "index",
+            "middle",
+            "ring",
+            "pinky",
+            "thumb"
+          ],
+          "title": "Finger",
+          "type": "string"
+        },
+        "stringNo": {
+          "minimum": 1,
+          "title": "Stringno",
+          "type": "integer"
+        },
+        "fretAbs": {
+          "minimum": 0,
+          "title": "Fretabs",
+          "type": "integer"
+        },
+        "handPositionHint": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Handpositionhint"
+        },
+        "provenance": {
+          "enum": [
+            "source",
+            "user",
+            "computed",
+            "inferred"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        },
+        "locked": {
+          "title": "Locked",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "finger",
+        "stringNo",
+        "fretAbs",
+        "provenance",
+        "locked"
+      ],
+      "title": "Fingering",
+      "type": "object"
+    },
+    "HandProfile": {
+      "additionalProperties": false,
+      "description": "Immutable reference to a hand profile.",
+      "properties": {
+        "side": {
+          "default": "left",
+          "enum": [
+            "left",
+            "right"
+          ],
+          "title": "Side",
+          "type": "string"
+        },
+        "profileId": {
+          "default": "adult-reference-left",
+          "title": "Profileid",
+          "type": "string"
+        },
+        "profileRevision": {
+          "default": "1",
+          "title": "Profilerevision",
+          "type": "string"
+        }
+      },
+      "title": "HandProfile",
+      "type": "object"
+    },
+    "HoldHint": {
+      "additionalProperties": false,
+      "description": "Optional planted-finger contact with a finite lifetime.",
+      "properties": {
+        "startTick": {
+          "minimum": 0,
+          "title": "Starttick",
+          "type": "integer"
+        },
+        "endTick": {
+          "minimum": 0,
+          "title": "Endtick",
+          "type": "integer"
+        },
+        "finger": {
+          "enum": [
+            "open",
+            "index",
+            "middle",
+            "ring",
+            "pinky",
+            "thumb"
+          ],
+          "title": "Finger",
+          "type": "string"
+        },
+        "stringNo": {
+          "title": "Stringno",
+          "type": "integer"
+        },
+        "fretAbs": {
+          "minimum": 0,
+          "title": "Fretabs",
+          "type": "integer"
+        },
+        "provenance": {
+          "enum": [
+            "source",
+            "user",
+            "computed",
+            "inferred"
+          ],
+          "title": "Provenance",
+          "type": "string"
+        }
+      },
+      "required": [
+        "startTick",
+        "endTick",
+        "finger",
+        "stringNo",
+        "fretAbs",
+        "provenance"
+      ],
+      "title": "HoldHint",
+      "type": "object"
+    },
+    "InstrumentProfile": {
+      "additionalProperties": false,
+      "description": "Instrument geometry in meters, absolute frets counted from the nut.",
+      "properties": {
+        "profileId": {
+          "default": "six-string-648",
+          "title": "Profileid",
+          "type": "string"
+        },
+        "profileRevision": {
+          "default": "1",
+          "title": "Profilerevision",
+          "type": "string"
+        },
+        "scaleLengthM": {
+          "default": 0.648,
+          "exclusiveMinimum": 0,
+          "title": "Scalelengthm",
+          "type": "number"
+        },
+        "fretCount": {
+          "default": 24,
+          "minimum": 1,
+          "title": "Fretcount",
+          "type": "integer"
+        },
+        "capoFret": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Capofret",
+          "type": "integer"
+        },
+        "strings": {
+          "items": {
+            "$ref": "#/$defs/InstrumentString"
+          },
+          "title": "Strings",
+          "type": "array"
+        }
+      },
+      "title": "InstrumentProfile",
+      "type": "object"
+    },
+    "InstrumentString": {
+      "additionalProperties": false,
+      "description": "String numbering starts at the highest-pitched string.",
+      "properties": {
+        "number": {
+          "minimum": 1,
+          "title": "Number",
+          "type": "integer"
+        },
+        "openPitchMidi": {
+          "maximum": 127,
+          "minimum": 0,
+          "title": "Openpitchmidi",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "number",
+        "openPitchMidi"
+      ],
+      "title": "InstrumentString",
+      "type": "object"
+    },
+    "Interval": {
+      "additionalProperties": false,
+      "description": "Absolute interval on the unfolded score timeline.",
+      "properties": {
+        "startTick": {
+          "minimum": 0,
+          "title": "Starttick",
+          "type": "integer"
+        },
+        "endTick": {
+          "minimum": 0,
+          "title": "Endtick",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "startTick",
+        "endTick"
+      ],
+      "title": "Interval",
+      "type": "object"
+    },
+    "JsonValue": {},
+    "NoteExecution": {
+      "additionalProperties": false,
+      "description": "Shared attack/sustain policy, distinct from the nominal note length.",
+      "properties": {
+        "occurrenceId": {
+          "title": "Occurrenceid",
+          "type": "string"
+        },
+        "attackKind": {
+          "enum": [
+            "pick",
+            "hammer_on",
+            "pull_off",
+            "tapping",
+            "continuation",
+            "none"
+          ],
+          "title": "Attackkind",
+          "type": "string"
+        },
+        "excitationGroupId": {
+          "title": "Excitationgroupid",
+          "type": "string"
+        },
+        "sustainRequiredUntilTick": {
+          "minimum": 0,
+          "title": "Sustainrequireduntiltick",
+          "type": "integer"
+        },
+        "dampingAtTick": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dampingattick"
+        },
+        "timingProvenance": {
+          "enum": [
+            "source",
+            "user",
+            "computed",
+            "inferred"
+          ],
+          "title": "Timingprovenance",
+          "type": "string"
+        }
+      },
+      "required": [
+        "occurrenceId",
+        "attackKind",
+        "excitationGroupId",
+        "sustainRequiredUntilTick",
+        "timingProvenance"
+      ],
+      "title": "NoteExecution",
+      "type": "object"
+    },
+    "PlayedNote": {
+      "additionalProperties": false,
+      "description": "One unambiguous source-note occurrence.",
+      "properties": {
+        "occurrenceId": {
+          "title": "Occurrenceid",
+          "type": "string"
+        },
+        "sourceNoteId": {
+          "title": "Sourcenoteid",
+          "type": "string"
+        },
+        "voiceId": {
+          "title": "Voiceid",
+          "type": "string"
+        },
+        "onTick": {
+          "minimum": 0,
+          "title": "Ontick",
+          "type": "integer"
+        },
+        "notatedEndTick": {
+          "minimum": 0,
+          "title": "Notatedendtick",
+          "type": "integer"
+        },
+        "soundEndTick": {
+          "minimum": 0,
+          "title": "Soundendtick",
+          "type": "integer"
+        },
+        "basePitchMidi": {
+          "maximum": 127,
+          "minimum": 0,
+          "title": "Basepitchmidi",
+          "type": "integer"
+        },
+        "velocity": {
+          "maximum": 127,
+          "minimum": 0,
+          "title": "Velocity",
+          "type": "integer"
+        },
+        "fingering": {
+          "$ref": "#/$defs/Fingering"
+        },
+        "expressionIds": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Expressionids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "occurrenceId",
+        "sourceNoteId",
+        "voiceId",
+        "onTick",
+        "notatedEndTick",
+        "soundEndTick",
+        "basePitchMidi",
+        "velocity",
+        "fingering",
+        "expressionIds"
+      ],
+      "title": "PlayedNote",
+      "type": "object"
+    },
+    "TempoPoint": {
+      "additionalProperties": false,
+      "description": "Microseconds per quarter note, independent of meter denominator.",
+      "properties": {
+        "tick": {
+          "minimum": 0,
+          "title": "Tick",
+          "type": "integer"
+        },
+        "usPerQuarter": {
+          "exclusiveMinimum": 0,
+          "title": "Usperquarter",
+          "type": "number"
+        }
+      },
+      "required": [
+        "tick",
+        "usPerQuarter"
+      ],
+      "title": "TempoPoint",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Validated HandPerformance 1.1; JSON Schema is generated from this model.",
+  "properties": {
+    "schemaVersion": {
+      "const": "1.1",
+      "default": "1.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "scoreId": {
+      "title": "Scoreid",
+      "type": "string"
+    },
+    "trackId": {
+      "title": "Trackid",
+      "type": "string"
+    },
+    "scoreRevision": {
+      "title": "Scorerevision",
+      "type": "string"
+    },
+    "fingeringRevision": {
+      "title": "Fingeringrevision",
+      "type": "string"
+    },
+    "performanceTimingRevision": {
+      "default": "notated-v1",
+      "title": "Performancetimingrevision",
+      "type": "string"
+    },
+    "requiredCapabilities": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Requiredcapabilities",
+      "type": "array"
+    },
+    "ppq": {
+      "exclusiveMinimum": 0,
+      "title": "Ppq",
+      "type": "integer"
+    },
+    "range": {
+      "$ref": "#/$defs/Interval"
+    },
+    "tempoMap": {
+      "items": {
+        "$ref": "#/$defs/TempoPoint"
+      },
+      "title": "Tempomap",
+      "type": "array"
+    },
+    "hand": {
+      "$ref": "#/$defs/HandProfile"
+    },
+    "instrument": {
+      "$ref": "#/$defs/InstrumentProfile"
+    },
+    "notes": {
+      "items": {
+        "$ref": "#/$defs/PlayedNote"
+      },
+      "title": "Notes",
+      "type": "array"
+    },
+    "expressions": {
+      "items": {
+        "$ref": "#/$defs/Expression"
+      },
+      "title": "Expressions",
+      "type": "array"
+    },
+    "barres": {
+      "items": {
+        "$ref": "#/$defs/BarreHint"
+      },
+      "title": "Barres",
+      "type": "array"
+    },
+    "holds": {
+      "items": {
+        "$ref": "#/$defs/HoldHint"
+      },
+      "title": "Holds",
+      "type": "array"
+    },
+    "diagnostics": {
+      "items": {
+        "$ref": "#/$defs/Diagnostic"
+      },
+      "title": "Diagnostics",
+      "type": "array"
+    },
+    "noteExecution": {
+      "items": {
+        "$ref": "#/$defs/NoteExecution"
+      },
+      "title": "Noteexecution",
+      "type": "array"
+    },
+    "executionGroups": {
+      "items": {
+        "$ref": "#/$defs/ExecutionGroup"
+      },
+      "title": "Executiongroups",
+      "type": "array"
+    },
+    "expressionDetails": {
+      "items": {
+        "$ref": "#/$defs/ExpressionDetail"
+      },
+      "title": "Expressiondetails",
+      "type": "array"
+    },
+    "transitionHints": {
+      "items": {
+        "$ref": "#/$defs/JsonValue"
+      },
+      "title": "Transitionhints",
+      "type": "array"
+    }
+  },
+  "required": [
+    "scoreId",
+    "trackId",
+    "scoreRevision",
+    "fingeringRevision",
+    "requiredCapabilities",
+    "ppq",
+    "range",
+    "tempoMap",
+    "hand",
+    "instrument",
+    "notes",
+    "expressions",
+    "barres",
+    "holds",
+    "diagnostics",
+    "noteExecution",
+    "executionGroups",
+    "expressionDetails"
+  ],
+  "title": "HandPerformance",
+  "type": "object"
+}

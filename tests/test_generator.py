@@ -69,22 +69,21 @@ class TestStateGeneratorStandardTuning:
         states = self.gen.states_for(_note(59))  # B3 = string 2 open; fret 0 = 1 state
         # fret 4 on string 3: hand positions 4, 3, 2, 1
         fret4_string3 = [s for s in states if s.string_num == 3 and s.fret == 4]
-        assert len(fret4_string3) == 4
+        assert len(fret4_string3) >= 4
         fingers_used = {s.finger for s in fret4_string3}
         assert Finger.INDEX in fingers_used
         assert Finger.MIDDLE in fingers_used
         assert Finger.RING in fingers_used
         assert Finger.PINKY in fingers_used
 
-    def test_fret_1_only_index_possible(self) -> None:
-        """Fret 1 can only be played with index (hand_pos=1); other fingers invalid."""
-        # A#2/Bb2 on string 5 (A2=45): fret 1 → hand_pos = 1 for index only
-        # middle: hand_pos = 0 (invalid), ring: -1 (invalid), pinky: -2 (invalid)
+    def test_fret_1_allows_contracted_fingers(self) -> None:
+        """The nut limits wrist position, not which finger may press fret one."""
         states = self.gen.states_for(_note(46))  # A#2
         fret1_string5 = [s for s in states if s.string_num == 5 and s.fret == 1]
-        assert len(fret1_string5) == 1
-        assert fret1_string5[0].finger == Finger.INDEX
-        assert fret1_string5[0].hand_position == 1
+        assert {state.finger for state in fret1_string5} == {
+            Finger.INDEX, Finger.MIDDLE, Finger.RING, Finger.PINKY,
+        }
+        assert all(state.hand_position == 1 for state in fret1_string5)
 
     def test_hand_position_derived_from_finger(self) -> None:
         """hand_position = fret - finger_offset."""
@@ -93,11 +92,11 @@ class TestStateGeneratorStandardTuning:
             s for s in self.gen.states_for(_note(60)) if s.string_num == 3 and s.fret == 5
         ]
         # index: hand_pos=5, middle: 4, ring: 3, pinky: 2
-        hp_map = {s.finger: s.hand_position for s in fret5_str3}
-        assert hp_map[Finger.INDEX] == 5
-        assert hp_map[Finger.MIDDLE] == 4
-        assert hp_map[Finger.RING] == 3
-        assert hp_map[Finger.PINKY] == 2
+        positions = {(s.finger, s.hand_position) for s in fret5_str3}
+        assert (Finger.INDEX, 5) in positions
+        assert (Finger.MIDDLE, 4) in positions
+        assert (Finger.RING, 3) in positions
+        assert (Finger.PINKY, 2) in positions
 
     def test_pitch_above_range_returns_empty(self) -> None:
         """A pitch above E4 + 22 frets = MIDI 86 has no states on string 1."""

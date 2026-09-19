@@ -102,6 +102,10 @@ def _run_rig_in_node(probe: str) -> dict:
     m = re.search(r"<script>(.*)</script>", html, re.DOTALL)
     assert m, "renderer must contain an inline <script> block"
     script = m.group(1)
+    script = script.replace(
+        "'./js/hand_transport.js'",
+        json.dumps((_HAND_VIZ.parent / "js/hand_transport.js").as_uri()),
+    )
 
     harness = (
         textwrap.dedent(
@@ -112,6 +116,7 @@ def _run_rig_in_node(probe: str) -> dict:
             FakeEl.prototype.removeChild = function () {};
             Object.defineProperty(FakeEl.prototype, 'firstChild', { get() { return null; } });
             FakeEl.prototype.style = {};
+            FakeEl.prototype.dataset = {};
             FakeEl.prototype.textContent = '';
             FakeEl.prototype.addEventListener = function () {};
             const _doc = {
@@ -122,6 +127,8 @@ def _run_rig_in_node(probe: str) -> dict:
             globalThis.window = {
               addEventListener: () => {}, parent: null, postMessage: () => {},
             };
+            globalThis.location = {origin: 'https://fretwise.test', search: ''};
+            globalThis.window.location = globalThis.location;
             globalThis.performance = { now: () => 0 };
             globalThis.requestAnimationFrame = () => 0;
             globalThis.fetch = () => Promise.reject(new Error('no fetch in test'));
@@ -140,9 +147,11 @@ def _run_rig_in_node(probe: str) -> dict:
     )
 
     proc = subprocess.run(
-        [_NODE, "--input-type=module", "-e", harness],
+        [_NODE, "--input-type=module", "-"],
+        input=harness,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         timeout=30,
     )
     assert proc.returncode == 0, f"node failed:\n{proc.stderr}"

@@ -10,8 +10,14 @@ from __future__ import annotations
 import logging
 from dataclasses import dataclass
 
-from fretwise.biomechanics import BiomechanicalReport, validate_fingering_results
+from fretwise.biomechanics import (
+    BiomechanicalReport,
+    BiomechanicalSeverity,
+    BiomechanicalViolation,
+    validate_fingering_results,
+)
 from fretwise.generator import StateGenerator
+from fretwise.hand_planning import plan_hand_configurations, refresh_fingering_costs
 from fretwise.models import Finger, FingeringResult, FingeringState, NoteEvent
 from fretwise.optimizer import ViterbiOptimizer
 from fretwise.patterns import PatternMatcher
@@ -167,6 +173,8 @@ def run_pipeline(
     total_valid = 0
     total_dropped = 0
     total_source_unfingerable = 0
+    candidates_by_event: dict[int, list[FingeringState]] = {}
+    unfingerable_events: set[int] = set()
 
     for voice_idx in sorted(voices.keys()):
         voice_events = voices[voice_idx]
@@ -174,15 +182,20 @@ def run_pipeline(
         valid_pairs: list[tuple[NoteEvent, list[FingeringState]]] = []
         fallback_event_ids: set[int] = set()
         for event, states in zip(voice_events, state_lists):
+            candidates_by_event[id(event)] = states
             if states:
                 valid_pairs.append((event, states))
                 continue
             fallback = _fallback_state_for_unfingerable_source_note(event)
             if fallback is None:
-                continue
+                raise ValueError(
+                    f"No admissible fingering for MIDI pitch {event.pitch} "
+                    f"at beat {event.onset}; source note was not discarded."
+                )
             valid_pairs.append((event, [fallback]))
             fallback_event_ids.add(id(event))
             total_source_unfingerable += 1
+            unfingerable_events.add(id(event))
         total_valid += len(valid_pairs)
         total_dropped += len(voice_events) - len(valid_pairs)
 
@@ -242,19 +255,9 @@ def run_pipeline(
     # Sort by onset then voice for stable, predictable ordering.
     all_results.sort(key=lambda r: (r.note_event.onset, r.note_event.voice_hint or 0))
 
-    # Deduplicate cross-voice unison notes: when two voices play the exact same
-    # (string, fret) at the same onset, keep only the first occurrence.  GP
-    # files frequently double-notate the same pitch across voices; rendering
-    # both produces two fingers on one spot, which is physically impossible.
-    seen: set[tuple[float, int, int]] = set()
-    deduped: list[FingeringResult] = []
-    for r in all_results:
-        key = (round(r.note_event.onset, 6), r.state.string_num, r.state.fret)
-        if key in seen:
-            continue
-        seen.add(key)
-        deduped.append(r)
-    all_results = deduped
+    # Preserve notation identities and source durations across voices. A unison
+    # may share one physical contact; deleting a score occurrence loses its
+    # source identity and can shorten the other voice's sustained note.
 
     # Second pass on the merged result: catch inter-voice chord conflicts and
     # crossings that are only visible when all voices are combined.
@@ -295,6 +298,34 @@ def run_pipeline(
                 _LOGGER.warning("Phrase-window CPU inference failed; using rules: %s", exc)
                 pw_stats["phrase_window_fallback"] = 1
 
+    hand_stats: dict[str, int] = {}
+    if isinstance(generator, StateGenerator):
+        # Heuristics/ML can change a locked finger. Restore admissible states
+        # before joint search, including its explicit search-failure fallback.
+        for result in all_results:
+            allowed = candidates_by_event.get(id(result.note_event), [])
+            if allowed and result.state not in allowed:
+                result.state = min(allowed, key=lambda state: (
+                    state.string_num != result.state.string_num,
+                    state.fret != result.state.fret,
+                    state.finger != result.state.finger,
+                    abs(state.hand_position - result.state.hand_position),
+                ))
+        planned = plan_hand_configurations(
+            all_results, candidates_by_event, optimizer.cost_fn,
+        )
+        all_results = planned.results
+        hand_stats = {
+            "hand_plan_changed": planned.changed_notes,
+            "hand_plan_expanded": planned.expanded_states,
+            "hand_plan_search_failed": int(planned.status != "valid"),
+        }
+    if optimizer.cost_fn is not None:
+        refresh_fingering_costs(all_results, optimizer.cost_fn)
+    for result in all_results:
+        if id(result.note_event) in unfingerable_events:
+            result.cost = max(result.cost, _UNFINGERABLE_SOURCE_COST)
+
     # Sedentary/planted fingers — read-only w.r.t. FingeringState.  Runs on the
     # merged, fully-resolved list so every active finger decision is final and
     # all voices share one consistent hand model.  See
@@ -307,6 +338,8 @@ def run_pipeline(
         "viterbi": len(all_results),
         "dropped": total_dropped,
         "source_unfingerable": total_source_unfingerable,
+        "hard_constraint_violations": validate_fingering_results(all_results).fatal_count,
+        **hand_stats,
         **pw_stats,
     }
     return all_results, stats
@@ -333,8 +366,19 @@ def run_pipeline_with_guard_report(
         chord_finger_classifier=chord_finger_classifier,
         phrase_window_fingerer=phrase_window_fingerer,
     )
+    report = validate_fingering_results(results)
+    if stats["source_unfingerable"]:
+        unvalidated = [result for result in results if result.cost >= _UNFINGERABLE_SOURCE_COST]
+        report = BiomechanicalReport(report.checked_notes, (*report.violations, *(
+            BiomechanicalViolation(
+                "BIO-SOURCE-001", BiomechanicalSeverity.FATAL,
+                "No admissible source fingering; displayed position is unvalidated.",
+                note_ids=(result.note_id,), measure_index=result.note_event.measure_index,
+                onset=result.note_event.onset,
+            ) for result in unvalidated
+        )))
     return PipelineResult(
         results=results,
         stats=stats,
-        biomechanical_report=validate_fingering_results(results),
+        biomechanical_report=report,
     )

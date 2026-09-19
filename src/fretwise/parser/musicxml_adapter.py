@@ -121,7 +121,6 @@ def _find_guitar_part(score: object) -> object | None:
     2. Part whose name contains 'guitar' or 'guit' (case-insensitive).
     3. First Part (fallback).
     """
-    import music21  # type: ignore[import-untyped]
 
     parts = list(score.parts)  # type: ignore[union-attr]
     if not parts:
@@ -211,12 +210,21 @@ def _extract_note_events(part: object) -> list[NoteEvent]:
 
     events: list[NoteEvent] = []
     current_tempo: float = 120.0  # default
+    flat_part = part.flatten()  # type: ignore[union-attr]
+    tempo_changes: dict[float, float] = {0.0: current_tempo}
+    for mark in flat_part.getElementsByClass(music21.tempo.MetronomeMark):
+        bpm = mark.getQuarterBPM()
+        if bpm is not None:
+            tempo_changes[float(mark.offset)] = float(bpm)
+    tempo_points = tuple(sorted(tempo_changes.items()))
 
-    for el in part.flatten().notesAndRests:  # type: ignore[union-attr]
+    for el in flat_part.notesAndRests:
         # Track tempo changes
         tempos = el.getContextByClass(music21.tempo.MetronomeMark)
         if tempos is not None:
-            current_tempo = float(tempos.number)
+            quarter_bpm = tempos.getQuarterBPM()
+            if quarter_bpm is not None:
+                current_tempo = float(quarter_bpm)
 
         if isinstance(el, music21.note.Rest):
             continue
@@ -227,6 +235,8 @@ def _extract_note_events(part: object) -> list[NoteEvent]:
         elif isinstance(el, music21.note.Note):
             _append_note(events, el, el.offset, el.quarterLength, current_tempo)
 
+    for event in events:
+        event.tempo_points = tempo_points
     return sorted(events, key=lambda e: e.onset)
 
 

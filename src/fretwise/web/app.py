@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import json as _json
 import os
 import re
@@ -104,6 +105,7 @@ from fretwise.patterns.scale_library import scale_boxes_for_root as _scale_boxes
 from fretwise.pdf_conformance import (
     legacy_shadow_pdf_conformance_report,
 )
+from fretwise.performance.hand_performance import HandProfile, InstrumentProfile
 from fretwise.pipeline import PipelineResult, run_pipeline, run_pipeline_with_guard_report
 from fretwise.playback import build_performance
 from fretwise.rig import (
@@ -143,6 +145,12 @@ from fretwise.storage import (
 )
 from fretwise.storage.local import LocalStorageBackend
 from fretwise.web.device_routes import register_device_routes
+from fretwise.web.hand_performance import (
+    HandPerformanceRequest,
+    build_saved_hand_performance,
+    fingering_revision,
+    source_revision,
+)
 
 from . import settings as _settings
 from . import songs_metadata as _songs_metadata
@@ -1175,6 +1183,35 @@ def _register_routes(app: FastAPI) -> None:
         )
         build_performance(serialized_results, default_tempo=base["tempo"])
 
+        score_rev = source_revision(filepath)
+        fingering_rev = fingering_revision(serialized_results)
+        hand_performance = None
+        hand_error = None
+        if base["fingered"] and serialized_results:
+            try:
+                instrument = None
+                if hasattr(base["adapter"], "list_all_tracks"):
+                    tracks = base["adapter"].list_all_tracks(filepath)
+                    selected = next((t for t in tracks if t[0] == track_id), None)
+                    if selected is None and track_id is None:
+                        selected = next((t for t in tracks if t[3] == KIND_GUITAR), None)
+                    if selected and selected[2]:
+                        instrument = {"capoFret": getattr(base["adapter"], "capo_frets", {}).get(
+                            selected[0], getattr(base["adapter"], "capo_fret", 0)), "strings": [
+                            {"number": i + 1, "openPitchMidi": pitch}
+                            for i, pitch in enumerate(reversed(selected[2]))
+                        ]}
+                hand_performance = build_saved_hand_performance(
+                    base["events"], serialized_results,
+                    {"scoreId": filename, "trackId": str(track_id or 0),
+                     "scoreRevision": score_rev, "fingeringRevision": fingering_rev},
+                    instrument,
+                )
+            except (ValueError, TypeError, KeyError, IndexError) as exc:
+                import logging
+                logging.getLogger(__name__).warning("Hand performance unavailable: %s", exc)
+                hand_error = str(exc)
+
         payload: dict[str, Any] = {
             "title": auto_title,
             "artist": auto_artist,
@@ -1206,9 +1243,57 @@ def _register_routes(app: FastAPI) -> None:
             "results": serialized_results,
             "audit": audit,
             "render_error": render_error,
+            "score_revision": score_rev,
+            "fingering_revision": fingering_rev,
+            "hand_performance": hand_performance,
+            "hand_performance_error": hand_error,
         }
         _solve_cache_put(cache_key, payload)
         return payload
+
+    @app.get("/api/v2/hand-profiles/{profile_id}/revisions/{revision}")
+    def hand_profile_v2(profile_id: str, revision: str) -> dict[str, Any]:
+        """Describe only the immutable hand profile delivered with this release."""
+        if (profile_id, revision) != ("adult-reference-left", "1"):
+            raise HTTPException(404, "Unknown hand profile revision")
+        asset_dir = _STATIC_DIR / "models" / "hand-reference"
+        manifest = json.loads((asset_dir / "manifest.json").read_text(encoding="utf-8"))
+        return {**HandProfile().model_dump(mode="json"), "asset": manifest,
+                "assetUrl": "/static/models/hand-reference/source.glb",
+                "licenseUrl": "/static/models/hand-reference/LICENSE.txt"}
+
+    @app.get("/api/v2/instrument-profiles/{profile_id}/revisions/{revision}")
+    def instrument_profile_v2(profile_id: str, revision: str) -> dict[str, Any]:
+        """Return the shipped reference guitar geometry; score tuning may override it."""
+        if (profile_id, revision) != ("six-string-648", "1"):
+            raise HTTPException(404, "Unknown instrument profile revision")
+        return InstrumentProfile().model_dump(mode="json")
+
+    @app.post("/api/v2/hand-performance")
+    def hand_performance_v2(body: HandPerformanceRequest) -> dict[str, Any]:
+        """Return saved decisions under the same access controls as /api/solve."""
+        if (body.handProfileId, body.handProfileRevision) != ("adult-reference-left", "1"):
+            raise HTTPException(404, "Unknown hand profile revision")
+        if (body.instrumentProfileId, body.instrumentProfileRevision) != ("six-string-648", "1"):
+            raise HTTPException(404, "Unknown instrument profile revision")
+        try:
+            track = int(body.trackId)
+        except ValueError as exc:
+            raise HTTPException(422, "trackId must identify an existing numeric track") from exc
+        payload = solve_file(body.scoreId, track_id=track,
+                             representation_mode="tablature", same_finger_motion_penalty=True,
+                             infer_implicit_legato=True, svg_width=None)
+        if (source_revision(_resolve_file(app, body.scoreId)) != body.scoreRevision
+                or payload["score_revision"] != body.scoreRevision
+                or payload["fingering_revision"] != body.fingeringRevision):
+            raise HTTPException(409, "Score or fingering revision changed; reload the track")
+        performance = payload.get("hand_performance")
+        if performance is None:
+            raise HTTPException(422, payload.get("hand_performance_error")
+                                or "This track has no complete saved fingering")
+        if body.range is not None and body.range != performance["range"]:
+            raise HTTPException(422, "Only the complete score range is supported")
+        return performance
 
     @app.get("/api/export/pdf/{filename}")
     async def export_pdf(
@@ -3451,10 +3536,16 @@ def _solve_cache_key(
         sidecar_mtime = _fingering_meta_path(filepath).stat().st_mtime_ns
     except OSError:
         sidecar_mtime = 0
+    try:
+        decisions_stat = _fingering_data_path(filepath).stat()
+        decisions_revision = (decisions_stat.st_mtime_ns, decisions_stat.st_size)
+    except OSError:
+        decisions_revision = (0, 0)
     return (
         str(filepath),
         mtime,
         sidecar_mtime,
+        decisions_revision,
         track_id,
         representation_mode,
         bool(same_finger_motion_penalty),
@@ -4146,6 +4237,9 @@ def _serialize_result(r: FingeringResult) -> dict[str, Any]:
         "let_ring": ne.let_ring,
         "bend_value": ne.bend_value,
         "bend_type": ne.bend_type,
+        "bend_points": [list(point) for point in ne.bend_points],
+        "technique_to_source_note_id": getattr(ne, "technique_to_source_note_id", None),
+        "source_finger": ne.source_finger.value if ne.source_finger is not None else None,
         "slide_type": ne.slide_type,
         "vibrato_wide": ne.vibrato_wide,
         "harmonic_type": ne.harmonic_type,

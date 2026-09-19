@@ -12,6 +12,7 @@ from pathlib import Path
 from typing import Any
 
 from fretwise.models import FingeringResult
+from fretwise.performance import TempoMap, build_hand_performance
 
 
 def export_hand_viz_json(
@@ -34,7 +35,7 @@ def export_hand_viz_json(
         title: Song title for the viewer HUD.
         artist: Artist name for the viewer HUD.
         track_name: Track label for the viewer HUD.
-        max_seconds: Cut-off duration from the first note onset.
+        max_seconds: Cut-off from the score origin, including initial rests.
         tuning: 6-string tuning, low-to-high. Defaults to standard EADGBE.
         num_frets: Number of frets to render.
         scale_length_mm: Physical scale length, used for fret geometry.
@@ -46,29 +47,26 @@ def export_hand_viz_json(
         tuning = ["E2", "A2", "D3", "G3", "B3", "E4"]
 
     tempo = results[0].note_event.tempo if results else 120.0
+    tempo_map = TempoMap.from_events([result.note_event for result in results])
     frames: list[dict[str, Any]] = []
+    included_results: list[FingeringResult] = []
 
-    first_onset_beat = results[0].note_event.onset if results else 0.0
-    for r in results:
+    for r in sorted(results, key=lambda result: result.note_event.onset):
         ne = r.note_event
-        local_tempo = ne.tempo or tempo
-        # Normalise onset so t=0 corresponds to the first note.
-        onset_sec = (ne.onset - first_onset_beat) * 60.0 / local_tempo
+        onset_sec = tempo_map.beat_to_seconds(ne.onset)
         if onset_sec >= max_seconds:
             break
-        duration_sec = max(0.08, ne.duration * 60.0 / local_tempo)
+        duration_sec = tempo_map.duration_seconds(ne.onset, ne.duration)
+        included_results.append(r)
         # Serialise planted (sedentary) fingers as a dict {finger: [s, f]}
         # so the browser side can read them as plain JS objects.
-        planted = {
-            fname: [int(pos[0]), int(pos[1])]
-            for fname, pos in r.planted_fingers.items()
-        }
+        planted = {fname: [int(pos[0]), int(pos[1])] for fname, pos in r.planted_fingers.items()}
         frames.append(
             {
                 "note_id": r.note_id,
                 "onset_sec": round(onset_sec, 4),
-                "duration_sec": round(duration_sec, 4),
-                "onset_beat": round(ne.onset - first_onset_beat, 4),
+                "duration_sec": duration_sec,
+                "onset_beat": ne.onset,
                 "duration_beat": round(ne.duration, 4),
                 "string": r.state.string_num,
                 "fret": r.state.fret,
@@ -77,6 +75,10 @@ def export_hand_viz_json(
                 "pitch": ne.pitch,
                 "voice": ne.voice_hint or 0,
                 "planted": planted,
+                "source_note_id": ne.source_note_id,
+                "articulation": ne.articulation.value,
+                "bend_points": [list(point) for point in ne.bend_points],
+                "is_tie_dest": ne.is_tie_dest,
             },
         )
 
@@ -95,6 +97,21 @@ def export_hand_viz_json(
         },
         "frames": frames,
     }
+    # Tuning labels are the same scientific-pitch notation accepted elsewhere.
+    from music21.pitch import Pitch
+
+    data["handPerformance"] = build_hand_performance(
+        [result.note_event for result in included_results],
+        included_results,
+        instrument={
+            "scaleLengthM": scale_length_mm / 1000,
+            "fretCount": max(num_frets, max((r.state.fret for r in included_results), default=0)),
+            "strings": [
+                {"number": i + 1, "openPitchMidi": int(Pitch(label).midi)}
+                for i, label in enumerate(reversed(tuning))
+            ],
+        },
+    )
 
     p = Path(output_path)
     p.parent.mkdir(parents=True, exist_ok=True)

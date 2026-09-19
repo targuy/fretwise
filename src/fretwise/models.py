@@ -83,7 +83,7 @@ class NoteEvent:
     let_ring: bool = False
 
     # ── Bend ──────────────────────────────────────────────────────────────────
-    # bend_value: max bend in semitones (0.5=half step, 1.0=whole, 1.5, 2.0)
+    # bend_value: max bend in semitones (1.0=half step, 2.0=whole step)
     # bend_type: "normal" | "release" | "pre_bend" | "pre_bend_release" |
     #            "unison" | "grace" | None
     bend_value: float | None = None
@@ -149,6 +149,16 @@ class NoteEvent:
     # ── Tuplet ─────────────────────────────────────────────────────────────────
     tuplet_actual: int | None = None    # actual note count (e.g. 3 for a triplet)
     tuplet_normal: int | None = None    # normal note count (e.g. 2 for a triplet)
+
+    # Additive performance metadata; M5 continues to consume the same NoteEvent.
+    # Bend positions are fractions of the notated duration; values are cents.
+    bend_points: tuple[tuple[float, float], ...] = ()
+    source_finger: Finger | None = None
+    # Full score tempo map (quarter-note beats, BPM), including changes in rests.
+    tempo_points: tuple[tuple[float, float], ...] = ()
+    timing_diagnostics: tuple[str, ...] = ()
+    # The GPIF articulation belongs to the origin, not the destination attack.
+    technique_to_source_note_id: str | None = None
 
 
 # Bend type string constants (used in NoteEvent.bend_type)

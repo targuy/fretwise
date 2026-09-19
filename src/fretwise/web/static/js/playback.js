@@ -133,11 +133,71 @@ export class PlaybackEngine {
    */
   getCurrentTimeSec() {
     if (this.isPlaying && this._startTime != null) {
+      if (this._audioCtx && (this.audioEnabled || this.metronome)) {
+        return Math.max(this._audioAnchorSongSec,
+          this._audioAnchorSongSec + this._audioCtx.currentTime - this._audioAnchorTime);
+      }
       const elapsed = (performance.now() - this._startTime) / 1000;
-      return this._measureStartSec(this._startMeasure) + elapsed;
+      return Math.max(this._audioAnchorSongSec,
+        this._measureStartSec(this._startMeasure) + elapsed);
     }
     const cursor = this.renderer ? (this.renderer.cursorMeasure || 0) : 0;
-    return this._measureStartSec(cursor);
+    return this._measureStartSec(cursor) + (this._resumeSubMeasureSec || 0);
+  }
+
+  /** Score seconds at nominal speed; shared by notation and hand animation. */
+  getNominalTimeSec() {
+    this._ensureTimeline();
+    const origin = this._nominalSecondsAtBeat(this._measureBaseBeat || 0) || 0;
+    return this.getCurrentTimeSec() * this.speed + origin;
+  }
+
+  /** Preserve the playhead when enabling/disabling its authoritative clock. */
+  _reanchorPlaybackClock(songSec, resetScheduler = false) {
+    if (!this.isPlaying) return;
+    this._audioAnchorSongSec = songSec;
+    this._audioAnchorTime = this._audioCtx?.currentTime || 0;
+    this._startTime = performance.now()
+      - (songSec - this._measureStartSec(this._startMeasure)) * 1000;
+    if (resetScheduler) {
+      const measure = Math.min(this._secToMeasure(songSec), Math.max(0, this.totalMeasures - 1));
+      this._schedulerMeasure = measure;
+      this._skipMeasure = measure;
+      this._firstScheduleSkipSec = Math.max(0, songSec - this._measureStartSec(measure));
+      this._lastScheduledMeasure = measure - 1;
+    }
+  }
+
+  /** Integrate the source tempo map, including changes inside a measure. */
+  _nominalSecondsAtBeat(beat) {
+    const hp = this.renderer?.data?.hand_performance;
+    if (!hp?.tempoMap?.length || !(hp.ppq > 0)) return null;
+    if (this._tempoDocument !== hp) {
+      let seconds = 0;
+      this._tempoSegments = hp.tempoMap.map((point, i, points) => {
+        if (i) seconds += (point.tick - points[i-1].tick) / hp.ppq
+          * points[i-1].usPerQuarter / 1e6;
+        return {...point, seconds};
+      });
+      this._tempoDocument = hp;
+    }
+    const tick = beat * hp.ppq;
+    let lo = 0, hi = this._tempoSegments.length - 1;
+    while (lo < hi) {
+      const mid = (lo + hi + 1) >> 1;
+      if (this._tempoSegments[mid].tick <= tick) lo = mid; else hi = mid - 1;
+    }
+    const point = this._tempoSegments[lo];
+    return point.seconds + (tick - point.tick) / hp.ppq * point.usPerQuarter / 1e6;
+  }
+
+  _noteSpanSec(note, beats) {
+    return this.songSecForOnsetBeats(Number(note.onset) + beats)
+      - this.songSecForOnsetBeats(Number(note.onset));
+  }
+
+  _noteOffsetSec(onset, measureOnset) {
+    return this.songSecForOnsetBeats(Number(onset)) - this.songSecForOnsetBeats(measureOnset);
   }
 
   /**
@@ -227,6 +287,7 @@ export class PlaybackEngine {
         && this._timelineBeatsRef === beats
         && this._timelineTemposRef === tempos
         && this._timelineRendererRef === this.renderer
+        && this._timelineHandPerformance === this.renderer?.data?.hand_performance
         && this._timelineBpm === this.bpm
         && this._timelineTempo === this.tempo) {
       return;
@@ -251,6 +312,10 @@ export class PlaybackEngine {
       const spb = 60 / tempoFor(globalIdx0);   // seconds per quarter-beat, speed 1
       start[s + 1] = start[s] + slotBeats;
       startSec[s + 1] = startSec[s] + slotBeats * spb;
+      const exactEnd = this._nominalSecondsAtBeat(base + start[s + 1]);
+      if (exactEnd !== null) {
+        startSec[s + 1] = exactEnd - this._nominalSecondsAtBeat(base);
+      }
       secPerBeat[s] = spb;
     }
     this._slotStartBeat = start;
@@ -260,6 +325,7 @@ export class PlaybackEngine {
     this._timelineBeatsRef = beats;
     this._timelineTemposRef = tempos;
     this._timelineRendererRef = this.renderer;
+    this._timelineHandPerformance = this.renderer?.data?.hand_performance;
     this._timelineBpm = this.bpm;
     this._timelineTempo = this.tempo;
   }
@@ -305,6 +371,10 @@ export class PlaybackEngine {
    */
   songSecForOnsetBeats(onsetBeats) {
     this._ensureTimeline();
+    const exact = this._nominalSecondsAtBeat(onsetBeats);
+    if (exact !== null) {
+      return (exact - this._nominalSecondsAtBeat(this._measureBaseBeat)) / this.speed;
+    }
     const target = onsetBeats - this._measureBaseBeat;
     const starts = this._slotStartBeat;
     let lo = 0;
@@ -359,6 +429,8 @@ export class PlaybackEngine {
 
   /** Enable audio — must be called on user gesture */
   enableAudio() {
+    const hadAudioClock = !!this._audioCtx && (this.audioEnabled || this.metronome);
+    const songSec = this.getCurrentTimeSec();
     if (!this._audioCtx) {
       this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
@@ -371,6 +443,7 @@ export class PlaybackEngine {
       this._audioCtx.resume();
     }
     this.audioEnabled = true;
+    if (!hadAudioClock) this._reanchorPlaybackClock(songSec, true);
     this._initSynth().catch(() => { /* oscillator fallback ok */ });
     // Reload any secondary channels whose synth was stopped
     for (const ch of this._secondaryChannels) {
@@ -397,7 +470,9 @@ export class PlaybackEngine {
   }
 
   disableAudio() {
+    const songSec = this.getCurrentTimeSec();
     this.audioEnabled = false;
+    if (!this.metronome) this._reanchorPlaybackClock(songSec);
     if (this._spessa) {
       try { this._spessa.stopAll?.(); } catch (_) {}
     } else if (this._synth && this._synth !== 'spessa') {
@@ -994,6 +1069,7 @@ export class PlaybackEngine {
    * restart, and resets the cursor clock so the two stay aligned.
    */
   _restartSegment(measure) {
+    this.discontinuityId = (this.discontinuityId || 0) + 1;
     const lead = (this._audioCtx && this.audioEnabled) ? this._schedLeadSec : 0;
     this._startMeasure = measure;
     this._startTime = performance.now() + lead * 1000;
@@ -1020,8 +1096,7 @@ export class PlaybackEngine {
   _catchUpChannel(ch) {
     if (!this.isPlaying || !this._audioCtx || !ch || !ch.synth) return;
     const cur = this.renderer ? this.renderer.cursorMeasure : this._startMeasure;
-    const elapsed = (performance.now() - this._startTime) / 1000;
-    const curSongSec = this._measureStartSec(this._startMeasure) + elapsed;
+    const curSongSec = this.getCurrentTimeSec();
     const skipInCur = Math.max(0, curSongSec - this._measureStartSec(cur));
     const upTo = Math.max(cur, this._schedulerMeasure - 1);
     for (let m = cur; m <= upTo && m < this.totalMeasures; m += 1) {
@@ -1039,8 +1114,7 @@ export class PlaybackEngine {
   _resyncSchedulerToNow() {
     if (!this.isPlaying || !this._audioCtx) return;
     const cur = this.renderer ? this.renderer.cursorMeasure : this._startMeasure;
-    const elapsed = (performance.now() - this._startTime) / 1000;
-    const curSongSec = this._measureStartSec(this._startMeasure) + elapsed;
+    const curSongSec = this.getCurrentTimeSec();
     this._audioAnchorTime = this._audioCtx.currentTime;
     this._audioAnchorSongSec = curSongSec;
     this._schedulerMeasure = cur;
@@ -1091,13 +1165,17 @@ export class PlaybackEngine {
   /** Stop and reset to beginning */
   stop() {
     this.pause();
+    this._resumeSubMeasureSec = 0;
+    this.discontinuityId = (this.discontinuityId || 0) + 1;
     this.renderer.cursorMeasure = 0;
     this.renderer.render();
+    if (this.onTimeChange) this.onTimeChange(this.getCurrentTimeSec());
     if (this.onStop) this.onStop();
   }
 
   /** Jump to specific measure */
   goToMeasure(m) {
+    this.discontinuityId = (this.discontinuityId || 0) + 1;
     const wasPlaying = this.isPlaying;
     this.pause();
     // An explicit seek to a measure boundary discards any sub-measure
@@ -1121,15 +1199,21 @@ export class PlaybackEngine {
 
   /** Set speed multiplier (0.1 – 2.0) */
   setSpeed(s) {
+    if (!Number.isFinite(s) || s <= 0) return;
     const wasMeasure = this.renderer.cursorMeasure;
     const wasPlaying = this.isPlaying;
+    const oldSpeed = this.speed;
     this.pause();
+    const nominalOffset = (this._resumeSubMeasureSec || 0) * oldSpeed;
     this.speed = Math.max(0.1, Math.min(2.0, s));
+    this._resumeSubMeasureSec = nominalOffset / this.speed;
+    this.discontinuityId = (this.discontinuityId || 0) + 1;
     if (wasPlaying) {
       this._startMeasure = wasMeasure;
       this._startTime = performance.now();
       this.play();
     }
+    if (this.onTimeChange) this.onTimeChange(this.getCurrentTimeSec());
   }
 
   /** Set loop A marker (start) */
@@ -1178,10 +1262,17 @@ export class PlaybackEngine {
 
   /** Toggle metronome */
   toggleMetronome() {
+    const hadAudioClock = !!this._audioCtx && (this.audioEnabled || this.metronome);
+    const songSec = this.getCurrentTimeSec();
     this.metronome = !this.metronome;
     if (this.metronome && !this._audioCtx) {
       this._audioCtx = new (window.AudioContext || window.webkitAudioContext)();
     }
+    const hasAudioClock = !!this._audioCtx && (this.audioEnabled || this.metronome);
+    if (hadAudioClock !== hasAudioClock) {
+      this._reanchorPlaybackClock(songSec, hasAudioClock);
+    }
+    if (this.metronome && this._audioCtx?.state === 'suspended') this._audioCtx.resume();
     return this.metronome;
   }
 
@@ -1203,11 +1294,10 @@ export class PlaybackEngine {
   }
 
   _tickBody() {
-    const elapsed = (performance.now() - this._startTime) / 1000;
     // Map elapsed wall-clock time to a measure via the meter-aware timeline:
     // each measure consumes its own real duration, so the cursor no longer
     // drifts from the audio after a meter change or pickup bar.
-    let targetMeasure = this._secToMeasure(this._measureStartSec(this._startMeasure) + elapsed);
+    let targetMeasure = this._secToMeasure(this.getCurrentTimeSec());
     // During the startup lead (elapsed < 0) `targetMeasure` can fall below the
     // start; hold the cursor at the start measure until real playback begins.
     if (targetMeasure < this._startMeasure) targetMeasure = this._startMeasure;
@@ -1308,7 +1398,8 @@ export class PlaybackEngine {
     const clicks = Math.max(1, Math.round(slotBeats > 0 ? slotBeats : this.bpm));
     const secPerBeat = this._measureSecPerBeat(measureIdx);
     for (let b = 0; b < clicks; b++) {
-      const off = b * secPerBeat;
+      const off = this._noteOffsetSec(this._measureOnsetBeats(measureIdx) + b,
+        this._measureOnsetBeats(measureIdx));
       if (off < skipSec) continue;
       this._click(base + off, b === 0);
     }
@@ -1751,7 +1842,7 @@ export class PlaybackEngine {
    *  the same string (computed track-wide in Python, not measure-locally). */
   _perfDurationSec(note, secPerBeat) {
     const beats = note?.perf?.dur_beats;
-    return Number.isFinite(beats) ? Math.max(0.03, beats * secPerBeat) : null;
+    return Number.isFinite(beats) ? Math.max(0, this._noteSpanSec(note, beats)) : null;
   }
 
   /** Final MIDI velocity from the backend's phrasing engine, or null. */
@@ -1770,7 +1861,7 @@ export class PlaybackEngine {
     this._ensurePitchBendRange(channel);
     this._sendPitchWheel(channel, 0, Math.max(0, when - 0.004));
     for (const [beatOffset, semitones] of curve) {
-      this._sendPitchWheel(channel, semitones, when + beatOffset * secPerBeat);
+      this._sendPitchWheel(channel, semitones, when + this._noteSpanSec(note, beatOffset));
     }
     return true;
   }
@@ -1873,7 +1964,7 @@ export class PlaybackEngine {
     for (const other of measureNotes) {
       if (other === note) continue;
       if (this._playbackPitch(other) !== playbackPitch) continue;
-      const off = (Number(other.onset) - measureOnset) * secPerBeat;
+      const off = this._noteOffsetSec(other.onset, measureOnset);
       if (off > myOffsetSec + 1e-6 && off < best) best = off;
     }
     return best;
@@ -1918,7 +2009,7 @@ export class PlaybackEngine {
           0, this._midiProgram, this._primaryVolume,
         );
         for (const note of notes) {
-          const noteOffsetInMeasure = (note.onset - measureOnset) * secPerBeat;
+          const noteOffsetInMeasure = this._noteOffsetSec(note.onset, measureOnset);
           if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
           const playbackPitch = this._playbackPitch(note);
           const strumOffset = this._strumOffsetSec(note, notes, secPerBeat);
@@ -1952,7 +2043,7 @@ export class PlaybackEngine {
       } else if (this._synth) {
         // soundfont-player fallback
         for (const note of notes) {
-          const noteOffsetInMeasure = (note.onset - measureOnset) * secPerBeat;
+          const noteOffsetInMeasure = this._noteOffsetSec(note.onset, measureOnset);
           if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
           const playbackPitch = this._playbackPitch(note);
           const strumOffset = this._strumOffsetSec(note, notes, secPerBeat);
@@ -2027,7 +2118,7 @@ export class PlaybackEngine {
         ? (() => null)
         : this._createPitchChannelAllocator(ch.midiChannel, ch.midiProgram, ch.gain);
       for (const note of chNotes) {
-        const noteOffsetInMeasure = (note.onset - chMeasureOnset) * chSpb;
+        const noteOffsetInMeasure = this._noteOffsetSec(note.onset, chMeasureOnset);
         if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
         const playbackPitch = this._playbackPitch(note);
         const strumOffset = this._strumOffsetSec(note, chNotes, chSpb);
@@ -2065,7 +2156,7 @@ export class PlaybackEngine {
     }
 
     for (const note of chNotes) {
-      const noteOffsetInMeasure = (note.onset - chMeasureOnset) * chSpb;
+      const noteOffsetInMeasure = this._noteOffsetSec(note.onset, chMeasureOnset);
       if (noteOffsetInMeasure < skipBeforeMeasureSec) continue;
       const playbackPitch = this._playbackPitch(note);
       const strumOffset = this._strumOffsetSec(note, chNotes, chSpb);
@@ -2100,7 +2191,7 @@ export class PlaybackEngine {
       const beatInMeasure = note.onset - measureOnset;
       const playbackPitch = this._playbackPitch(note);
       const strumOffset = this._strumOffsetSec(note, notes, secPerBeat);
-      const when = base + beatInMeasure * secPerBeat + strumOffset;
+      const when = base + this._noteOffsetSec(note.onset, measureOnset) + strumOffset;
       const expr = this._expressionForNote(note, note.duration * secPerBeat);
       const pitchSamples = this._pitchSamplesForNote(note, notes, when, expr.duration);
       for (const attack of this._noteAttacks(note, when, expr.duration, secPerBeat)) {

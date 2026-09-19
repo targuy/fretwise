@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import logging
 from dataclasses import dataclass
+from typing import Literal
 
 from fretwise.config import config
 from fretwise.models import Finger, FingeringState, NoteEvent
@@ -59,15 +60,29 @@ class GeneratorConfig:
         open_string_pitches: MIDI pitches for open strings 1–6 (index 0 = string 1).
         max_fret: Highest fret considered during state generation.
         max_open_hand_position: Highest hand position tracked for open-string states.
+        max_contraction: Allowed frets closer to the wrist than neutral finger offset.
+        max_extension: Allowed frets beyond the neutral offset.
+        position_mode: Preserve source tablature, or explicitly explore other positions.
+        source_finger_policy: Prefer source on cost ties, lock it, or ignore it.
     """
 
     open_string_pitches: list[int] = None  # type: ignore[assignment]
     max_fret: int = MAX_FRET
     max_open_hand_position: int = _MAX_OPEN_HAND_POSITION
+    max_contraction: int = 3
+    max_extension: int = 1
+    position_mode: Literal["tablature", "rearrange"] = "tablature"
+    source_finger_policy: Literal["prefer", "lock", "ignore"] = "prefer"
 
     def __post_init__(self) -> None:
         if self.open_string_pitches is None:
             self.open_string_pitches = list(STANDARD_TUNING)
+        if self.position_mode not in {"tablature", "rearrange"}:
+            raise ValueError("position_mode must be tablature or rearrange")
+        if self.source_finger_policy not in {"prefer", "lock", "ignore"}:
+            raise ValueError("source_finger_policy must be prefer, lock or ignore")
+        if self.max_contraction < 0 or self.max_extension < 0:
+            raise ValueError("Finger reach margins must be non-negative")
 
 
 class StateGenerator:
@@ -112,13 +127,20 @@ class StateGenerator:
         # --- Hint-constrained mode (GP source tab) ---------------------------
         # When both string and fret are known from the source, generate states
         # for that single position only.  The hint overrides free exploration.
-        if (
-            note.string_hint is not None
-            and note.fret_hint is not None
-            and 1 <= note.string_hint <= len(pitches)
-            and 0 <= note.fret_hint <= max_fret
+        if self._config.position_mode == "tablature" and (
+            note.string_hint is not None or note.fret_hint is not None
         ):
-            return self._states_for_position(note.string_hint, note.fret_hint)
+            # A malformed source lock must not silently become a rearrangement.
+            if not (
+                note.string_hint is not None
+                and note.fret_hint is not None
+                and 1 <= note.string_hint <= len(pitches)
+                and 0 <= note.fret_hint <= max_fret
+            ):
+                return []
+            return self._apply_source_finger(
+                note, self._states_for_position(note.string_hint, note.fret_hint),
+            )
 
         # --- Free-exploration mode (no source tab data) ----------------------
         states: list[FingeringState] = []
@@ -140,14 +162,26 @@ class StateGenerator:
                 max_fret,
             )
 
-        return states
+        return self._apply_source_finger(note, states)
+
+    def _apply_source_finger(
+        self, note: NoteEvent, states: list[FingeringState],
+    ) -> list[FingeringState]:
+        """Apply explicit locks or stable tie-breaking for source annotations."""
+        source_finger = note.source_finger
+        if source_finger is None or self._config.source_finger_policy == "ignore":
+            return states
+        if self._config.source_finger_policy == "lock":
+            return [state for state in states if state.finger == source_finger]
+        return sorted(states, key=lambda state: state.finger != source_finger)
 
     def _states_for_position(self, string_num: int, fret: int) -> list[FingeringState]:
         """Return FingeringStates for a fixed (string, fret) position.
 
         Generates OPEN states for fret 0 across a bounded hand-position range
-        (to preserve continuity through open notes), or one state per finger
-        for fretted positions (hand_position derives from finger offset).
+        (to preserve continuity through open notes). Fretted notes include
+        bounded contraction/extension around the conventional finger offset.
+        An offset is a neutral pose preference, never an anatomical exclusion.
         """
         if fret == 0:
             max_open_hp = max(1, min(self._config.max_open_hand_position, self._config.max_fret))
@@ -163,17 +197,18 @@ class StateGenerator:
 
         states: list[FingeringState] = []
         for finger in _FRETTING_FINGERS:
-            hand_position = fret - _FINGER_OFFSET[finger]
-            if hand_position < 1:
-                continue
-            states.append(
-                FingeringState(
+            natural = fret - _FINGER_OFFSET[finger]
+            low = max(1, natural - self._config.max_extension)
+            high = min(fret, natural + self._config.max_contraction)
+            # Keep neutral candidates first so old tie-breaking remains stable.
+            positions = sorted(range(low, high + 1), key=lambda hp: (abs(hp - natural), hp))
+            for hand_position in positions:
+                states.append(FingeringState(
                     string_num=string_num,
                     fret=fret,
                     finger=finger,
                     hand_position=hand_position,
-                )
-            )
+                ))
         return states
 
     def states_for_sequence(

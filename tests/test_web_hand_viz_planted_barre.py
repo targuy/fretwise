@@ -105,16 +105,18 @@ def test_sync_path_uses_absolute_timestamps() -> None:
     # `extT += dt` form) doesn't trip the code-shape assertions below.
     code = re.sub(r"/\*.*?\*/", "", html, flags=re.DOTALL)
     code = re.sub(r"//[^\n]*", "", code)
-    # EXT_SYNCED reads extT directly — never accumulates dt.
-    assert "tNow = extT;" in code
+    # Versioned transport projects the absolute anchor; it owns the bounded
+    # interpolation/freeze policy (behavior tested in test_hand_transport.py).
+    assert "HAND_TRANSPORT.timeAt(performance.timeOrigin + now)" in code
     # No incremental integration of the external clock anywhere in the code.
     assert "extT +=" not in code
     assert re.search(r"extT\s*=\s*extT\s*\+", code) is None
-    # The guard comment documents the invariant (checked on the raw source).
-    assert "sync-drift guard" in html
+    # Compatibility input is also bounded rather than integrated frame by frame.
+    assert "extT + Math.min(0.25, smooth) * HAND_RATE" in code
     # The parent sends the absolute playback clock.
     js = _MAIN_JS.read_text(encoding="utf-8")
-    assert "t: playback.getCurrentTimeSec()" in js
+    assert "nominalScoreSec: playback.getNominalTimeSec()" in js
+    assert "type: 'fretwise:transport'" in js
 
 
 # --------------------------------------------------------------------------- #
@@ -135,6 +137,10 @@ def _run_in_node(probe: str) -> dict:
     m = re.search(r"<script>(.*)</script>", html, re.DOTALL)
     assert m, "renderer must contain an inline <script> block"
     script = m.group(1)
+    script = script.replace(
+        "'./js/hand_transport.js'",
+        json.dumps((_HAND_VIZ.parent / "js/hand_transport.js").as_uri()),
+    )
 
     harness = (
         textwrap.dedent(
@@ -154,6 +160,7 @@ def _run_in_node(probe: str) -> dict:
               get() { return this._text; }, set(v) { this._text = v; this.children = []; },
             });
             FakeEl.prototype.style = {};
+            FakeEl.prototype.dataset = {};
             FakeEl.prototype.addEventListener = function () {};
             const _byId = {};
             const _doc = {
@@ -165,6 +172,8 @@ def _run_in_node(probe: str) -> dict:
             globalThis.window = {
               addEventListener: () => {}, parent: null, postMessage: () => {},
             };
+            globalThis.location = {origin: 'https://fretwise.test', search: ''};
+            globalThis.window.location = globalThis.location;
             globalThis.performance = { now: () => 0 };
             globalThis.requestAnimationFrame = () => 0;
             globalThis.fetch = () => Promise.reject(new Error('no fetch in test'));
@@ -192,9 +201,11 @@ def _run_in_node(probe: str) -> dict:
     )
 
     proc = subprocess.run(
-        [_NODE, "--input-type=module", "-e", harness],
+        [_NODE, "--input-type=module", "-"],
+        input=harness,
         capture_output=True,
         text=True,
+        encoding="utf-8",
         timeout=30,
     )
     assert proc.returncode == 0, f"node failed:\n{proc.stderr}"
@@ -329,18 +340,20 @@ def test_empty_fingering_renders_message_no_throw() -> None:
 def test_sync_no_drift_over_long_timeline() -> None:
     """The synced iframe clock tracks the parent exactly over many minutes.
 
-    Drives the renderer's real EXT_SYNCED clock-selection logic across a
+    Drives the renderer's real HandTransportReceiver across a
     simulated 5-minute timeline.  The parent sends absolute timestamps each
     frame (as main.js does); the iframe must read them with zero accumulated
     drift no matter how many frames elapse or how jittery the frame interval.
     """
     probe = textwrap.dedent(
         """
-        // Replicate the renderer's synced clock read: in EXT_SYNCED mode tNow is
-        // simply the last absolute timestamp received (extT), never extT += dt.
-        // We feed the parent's absolute clock and a jittery per-frame dt, and
-        // confirm the iframe-side read equals the parent clock every frame.
-        EXT_SYNCED = true;
+        const {HandTransportReceiver} = await import(__TRANSPORT_URL__);
+        const source = {};
+        const receiver = new HandTransportReceiver(location.origin, source);
+        receiver.accept({origin: location.origin, source, data: {
+          type: 'fretwise:load', protocolVersion: 1, sessionId: 'test-session',
+          planId: 'test-plan', sequence: 0, payload: {frames: []},
+        }});
         const FPS_DT = [1/60, 1/30, 1/120, 0.05, 1/90];  // jittery frame spacing
         let parentClock = 0;
         let maxDrift = 0;
@@ -349,10 +362,14 @@ def test_sync_no_drift_over_long_timeline() -> None:
         while (parentClock < TOTAL) {
           const dt = FPS_DT[i % FPS_DT.length];
           parentClock += dt;
-          // Parent posts the ABSOLUTE clock (main.js: t: getCurrentTimeSec()).
-          extT = parentClock;
-          // Iframe-side read (hand_viz.html frame loop, EXT_SYNCED branch):
-          const tNow = EXT_SYNCED ? extT : NaN;
+          const message = receiver.accept({origin: location.origin, source, data: {
+            type: 'fretwise:transport', protocolVersion: 1, sessionId: 'test-session',
+            planId: 'test-plan', sequence: i + 1, status: 'playing',
+            nominalScoreSec: parentClock, rate: 1,
+            anchorEpochMs: parentClock * 1000, discontinuityId: 0,
+          }});
+          if (!message) throw new Error('Valid transport anchor rejected');
+          const tNow = receiver.timeAt(parentClock * 1000);
           const drift = Math.abs(tNow - parentClock);
           if (drift > maxDrift) maxDrift = drift;
           i++;
@@ -363,7 +380,7 @@ def test_sync_no_drift_over_long_timeline() -> None:
         // Sanity: we really simulated a multi-minute, many-frame timeline.
         out.long_enough = parentClock >= TOTAL && i > 3000;
         """
-    )
+    ).replace("__TRANSPORT_URL__", json.dumps((_STATIC_DIR / "js/hand_transport.js").as_uri()))
     g = _run_in_node(probe)
     assert g["long_enough"] is True
     # Zero accumulated drift: the iframe read equals the parent clock exactly.
