@@ -38,19 +38,16 @@ def test_reference_hand_is_default_when_performance_is_available_and_legacy_mode
         assert removed not in main
 
 
-def test_missing_hand_performance_keeps_schematic_fallback_visible() -> None:
-    """A legacy/standalone frames payload must never leave a blank 3D panel."""
+def test_legacy_frames_are_adapted_into_the_reference_3d_contract() -> None:
+    """Standalone frames render through v2 instead of exposing the old SVG view."""
     html = _HAND_VIZ.read_text(encoding="utf-8")
 
-    assert "function hasHandPerformance(data = CURRENT_DATA)" in html
-    assert "Aperçu schématique affiché." in html
-    enable = html[html.index("async function enableHand3d()") :]
-    enable = enable[: enable.index("\nfunction disableHand3d")]
-    assert "if (!hasHandPerformance())" in enable
-    assert "await import('./js/hand_v2.js')" in enable
-    assert enable.index("if (!hasHandPerformance())") < enable.index(
-        "await import('./js/hand_v2.js')"
-    )
+    assert "function adaptLegacyFrames(data)" in html
+    assert "schemaVersion: '1.0'" in html
+    assert "LEGACY_FRAMES_ADAPTED" in html
+    assert "function handPerformanceFor(data = CURRENT_DATA)" in html
+    assert "await view.setPerformance(performance);" in html
+    assert "void enableHand3d();" in html
 
 
 def test_reference_assets_and_schematic_failure_fallback_remain() -> None:

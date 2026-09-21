@@ -2435,23 +2435,95 @@ function handStatus(message) {
     ? 'TRANSPORT_DESYNC · synchronisation interrompue, pose figée. ' + message : message;
 }
 
-function hasHandPerformance(data = CURRENT_DATA) {
+const LEGACY_TUNING = ['E2', 'A2', 'D3', 'G3', 'B3', 'E4'];
+const LEGACY_NOTE_BASE = {C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11};
+
+function legacyMidi(value, fallback) {
+  if (Number.isFinite(value)) return Number(value);
+  const match = /^([A-G])([#b]?)(-?\d+)$/.exec(String(value || ''));
+  if (!match) return fallback;
+  const accidental = match[2] === '#' ? 1 : match[2] === 'b' ? -1 : 0;
+  return LEGACY_NOTE_BASE[match[1]] + accidental + (Number(match[3]) + 1) * 12;
+}
+
+function legacyFinger(value) {
+  const finger = String(value || 'open').replace(/^Finger\./, '').toLowerCase();
+  return ['index', 'middle', 'ring', 'pinky', 'open'].includes(finger) ? finger : 'open';
+}
+
+function adaptLegacyFrames(data) {
+  if (!data || !Array.isArray(data.frames)) return null;
+  const fretboard = data.fretboard || {};
+  const tempo = Math.max(1, Number(data.meta?.tempo) || 120);
+  const ppq = 960;
+  const tickAt = (seconds) => Math.max(0, Math.round((Number(seconds) || 0) * tempo * ppq / 60));
+  const tuning = Array.isArray(fretboard.tuning) && fretboard.tuning.length === 6
+    ? fretboard.tuning : LEGACY_TUNING;
+  const capoFret = Math.max(0, Number.parseInt(fretboard.capo, 10) || 0);
+  const fretCount = Math.min(24, Math.max(capoFret, Number.parseInt(fretboard.num_frets, 10) || 22));
+  const notes = data.frames.map((frame, index) => {
+    const finger = legacyFinger(frame?.finger);
+    const stringNo = Math.min(6, Math.max(1, Number.parseInt(frame?.string, 10) || 1));
+    const fretAbs = Math.min(fretCount, Math.max(capoFret, Number.parseInt(frame?.fret, 10) || capoFret));
+    const onTick = tickAt(frame?.onset_sec);
+    const soundEndTick = Math.max(onTick, tickAt((Number(frame?.onset_sec) || 0)
+      + Math.max(0, Number(frame?.duration_sec) || 0)));
+    const occurrenceId = `legacy-${frame?.note_id ?? index}`;
+    const openPitch = legacyMidi(tuning[6 - stringNo], 40);
+    return {
+      occurrenceId, sourceNoteId: occurrenceId, voiceId: 'legacy', onTick,
+      notatedEndTick: soundEndTick, soundEndTick,
+      basePitchMidi: openPitch + fretAbs, velocity: 80, expressionIds: [],
+      fingering: {
+        finger: fretAbs === capoFret ? 'open' : finger,
+        stringNo, fretAbs, handPositionHint: Number(frame?.hand_position) || undefined,
+        provenance: 'legacy', locked: false,
+      },
+    };
+  });
+  const endTick = Math.max(ppq, ...notes.map((note) => note.soundEndTick));
+  return {
+    schemaVersion: '1.0', scoreId: 'legacy-frames', trackId: 'legacy',
+    scoreRevision: 'legacy', fingeringRevision: 'legacy', ppq,
+    range: {startTick: 0, endTick}, tempoMap: [{tick: 0, usPerQuarter: Math.round(60000000 / tempo)}],
+    hand: {side: 'left', profileId: 'adult-reference-left', profileRevision: '1'},
+    instrument: {
+      profileId: 'six-string-648', profileRevision: '1',
+      scaleLengthM: Math.max(.5, Number(fretboard.scale_length_mm) / 1000 || .648),
+      fretCount, capoFret,
+      strings: [...tuning].reverse().map((pitch, index) => ({
+        number: index + 1, openPitchMidi: legacyMidi(pitch, 64 - index * 5),
+      })),
+    },
+    notes, expressions: [], holds: [], barres: [],
+    diagnostics: [{code: 'LEGACY_FRAMES_ADAPTED', severity: 'info',
+      message: 'Données historiques adaptées au contrat de main v2.', noteIds: notes.map((note) => note.occurrenceId)}],
+  };
+}
+
+function handPerformanceFor(data = CURRENT_DATA) {
   const performance = data?.handPerformance;
-  return !!performance && Array.isArray(performance.notes) && performance.notes.length > 0;
+  if (performance && Array.isArray(performance.notes)) return performance;
+  return adaptLegacyFrames(data);
+}
+
+function hasHandPerformance(data = CURRENT_DATA) {
+  return handPerformanceFor(data) !== null;
 }
 
 async function loadHandPerformance() {
   if (!HAND3D_RENDERER) return false;
   const view = HAND3D_RENDERER;
   const revision = ++HAND_LOAD_REVISION;
-  if (!hasHandPerformance()) {
+  const performance = handPerformanceFor();
+  if (!performance) {
     view.clearPerformance();
     handStatus('Nouvelle main : données de performance indisponibles pour cette piste.');
     return false;
   }
   handStatus('Nouvelle main : préparation des mouvements…');
   try {
-    await view.setPerformance(CURRENT_DATA.handPerformance);
+    await view.setPerformance(performance);
     if (revision !== HAND_LOAD_REVISION || view !== HAND3D_RENDERER) return;
     await view.setPlaybackRate(HAND_RATE);
     if (revision !== HAND_LOAD_REVISION || view !== HAND3D_RENDERER) return;
@@ -2476,7 +2548,7 @@ async function loadHandPerformance() {
 async function enableHand3d() {
   if (HAND3D_ACTIVE || HAND3D_LOADING) return HAND3D_ACTIVE;
   if (!hasHandPerformance()) {
-    handStatus('Nouvelle main : données de performance indisponibles pour cette piste. Aperçu schématique affiché.');
+    handStatus('Nouvelle main : données de performance indisponibles pour cette piste.');
     _syncTopViewButton();
     _syncCamViewButton();
     return false;
@@ -2598,13 +2670,13 @@ function installData(data) {
         if (!loaded && HAND3D_ACTIVE) disableHand3d();
       });
     } else {
-      handStatus('Nouvelle main : données de performance indisponibles pour cette piste. Aperçu schématique affiché.');
+      handStatus('Nouvelle main : données de performance indisponibles pour cette piste.');
       disableHand3d();
     }
   } else if (hasHandPerformance(data)) {
     void enableHand3d();
   } else {
-    handStatus('Nouvelle main : données de performance indisponibles pour cette piste. Aperçu schématique affiché.');
+    handStatus('Nouvelle main : données de performance indisponibles pour cette piste.');
   }
 }
 

@@ -8,7 +8,9 @@ import {createReferenceRig} from "./hand_reference_rig.js";
 
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
 const toInternal = p => V(p[0] * 1000, p[2] * 1000, p[1] * 1000);
-const TOP_VIEW_HEIGHT = 184;
+// 2D replacement: enough horizontal orthographic span to keep the playable
+// fretboard readable (roughly frets 1–22 on a desktop panel), not a close-up.
+const TOP_VIEW_HEIGHT = 440;
 const TOP_CAMERA_DISTANCE = 900;
 
 function disposeTree(object) {

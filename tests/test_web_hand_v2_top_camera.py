@@ -66,6 +66,12 @@ def test_resize_recomputes_orthographic_frustum_from_live_aspect() -> None:
     assert "this._updateProjection()" in resize
 
 
+def test_top_projection_has_fretboard_replacement_scale() -> None:
+    """Plan view keeps a useful fretboard span instead of a finger close-up."""
+    source = _source()
+    assert "const TOP_VIEW_HEIGHT = 440" in source
+
+
 def test_top_view_cannot_be_tilted_by_pointer_drag() -> None:
     """Plan view remains exactly 90 degrees after user interaction."""
     source = _source()
