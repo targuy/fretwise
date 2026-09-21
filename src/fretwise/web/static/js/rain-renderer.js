@@ -716,6 +716,15 @@ export class RainRenderer {
     ctx.beginPath();
     ctx.roundRect(x - coreW / 2, topClamped + 1, coreW, Math.max(1, height - 2), coreW / 2);
     ctx.fill();
+    if (note.muted) {
+      // Match Tab, notation, Slope and the hand lookahead: this occurrence
+      // is a dead note, never an unlabelled ordinary fret contact.
+      ctx.fillStyle = '#fffdf2';
+      ctx.font = `900 ${Math.max(13, barW * 2.1)}px Inter, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('X', this._snapPx(x), this._snapPx((topClamped + yBottom) / 2));
+    }
     ctx.restore();
   }
 

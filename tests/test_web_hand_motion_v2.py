@@ -200,6 +200,24 @@ console.log(JSON.stringify({{contacts,wrist:wrist.toArray(),
     assert result["contacts"][0]["valid"] is True
 
 
+def test_dead_note_keeps_x_semantics_without_an_ordinary_press() -> None:
+    """The rig does not turn a source dead note into a fretted contact."""
+    result = run_js("""
+const muted=note('muted','index',3,5,0,960);
+muted.expressionIds=['dead'];
+const p=performance([muted],[{id:'dead',kind:'dead_note',noteIds:['muted'],startTick:0,endTick:960}]);
+const plan=compilePerformance(p);
+console.log(JSON.stringify({contacts:plan.byFinger.index.length,
+  active:sampleMotion(plan,.2).activeContactIds,
+  codes:plan.diagnostics.map(d=>d.code)}));
+""")
+    assert result == {
+        "contacts": 0,
+        "active": [],
+        "codes": ["DEAD_NOTE_DAMPING_NOT_RENDERED"],
+    }
+
+
 def test_unknown_major_version_and_required_capability_fail_explicitly() -> None:
     result = run_js("""
 const p=performance([]);p.schemaVersion='2.0';let major;

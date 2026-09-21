@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 _HAND_VIZ = Path(__file__).parents[1] / "src" / "fretwise" / "web" / "static" / "hand_viz.html"
+_MAIN_JS = Path(__file__).parents[1] / "src" / "fretwise" / "web" / "static" / "js" / "main.js"
 
 
 def test_lookahead_is_outside_the_animation_surface() -> None:
@@ -25,3 +26,16 @@ def test_lookahead_uses_shared_frame_payload_for_both_renderers() -> None:
     assert installation in html
     assert "updateLookahead(tNow, CURRENT_LOOKAHEAD_GROUPS);" in html
     assert "lookahead-dot" in html
+
+
+def test_lookahead_preserves_dead_note_x_from_the_shared_payload() -> None:
+    """Muted occurrences stay X rather than becoming open or absent slots."""
+    html = _HAND_VIZ.read_text(encoding="utf-8")
+    main_js = _MAIN_JS.read_text(encoding="utf-8")
+    builder = main_js[main_js.index("function _buildHandVizPayload"):]
+    builder = builder[: builder.index("\nfunction _postHandVizData")]
+
+    assert "muted: Boolean(r.muted)" in builder
+    assert 'muted ? " muted"' in html
+    assert 'muted ? "X"' in html
+    assert ".lookahead-dot.muted" in html

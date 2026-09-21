@@ -62,6 +62,7 @@
     }
     .lookahead-dot.fretted { background: #f4a03a; border-color: #f7bd68; }
     .lookahead-dot.open { background: #4b83d4; border-color: #74a6ea; }
+    .lookahead-dot.muted { background: #f2f0ea; border-color: #ffffff; color: #161719; }
     button.ctrl {
       background: #2c2f34; color: var(--text);
       border: 1px solid #3b3e44; border-radius: 6px;
@@ -2870,8 +2871,9 @@ window.addEventListener("message", (ev) => {
     for (let string = 1; string <= 6; string++) {
       const frame = byString.get(string);
       const fret = frame && Number(frame.fret);
-      const state = frame ? (fret === 0 ? " open" : " fretted") : "";
-      const label = frame ? String(Math.max(0, fret)) : "";
+      const muted = Boolean(frame?.muted);
+      const state = frame ? (muted ? " muted" : fret === 0 ? " open" : " fretted") : "";
+      const label = frame ? (muted ? "X" : String(Math.max(0, fret))) : "";
       html += `<span class="lookahead-dot${state}">${label}</span>`;
     }
     return html;

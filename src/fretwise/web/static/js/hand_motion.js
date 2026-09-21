@@ -154,6 +154,9 @@ export function compilePerformance(performance, {playbackRate = 1, rigRevision =
   const geometry = makeInstrumentGeometry(performance.instrument);
   const notes = performance.notes || [];
   const expressions = performance.expressions || [];
+  const deadNoteIds = new Set(expressions
+    .filter(expression => expression.kind === "dead_note")
+    .flatMap(expression => expression.noteIds || []));
   const ids = new Set();
   const diagnostics = [...(performance.diagnostics || [])];
   const startSec = clock.tickToSeconds(performance.range.startTick);
@@ -191,6 +194,10 @@ export function compilePerformance(performance, {playbackRate = 1, rigRevision =
         || f.fretAbs > performance.instrument.fretCount) throw new Error("INVALID_FINGERING");
     if (!Number.isInteger(note.onTick) || !Number.isInteger(note.soundEndTick)
         || note.soundEndTick < note.onTick) throw new Error("INVALID_NOTE_INTERVAL");
+    // A dead note is represented as X in score, Tab and lookahead.  Its
+    // damping contact is not qualified by this pressing rig, so never draw
+    // it as an ordinary fretted press.
+    if (deadNoteIds.has(note.occurrenceId)) continue;
     if (f.finger === "open") {
       if (f.fretAbs !== geometry.capo) throw new Error("INVALID_OPEN_FINGERING");
       continue;
@@ -255,6 +262,9 @@ export function compilePerformance(performance, {playbackRate = 1, rigRevision =
           ? from.fingering.fretAbs < to.fingering.fretAbs && from.fingering.finger !== to.fingering.finger
           : from.fingering.fretAbs > to.fingering.fretAbs && from.fingering.finger !== to.fingering.finger);
       if (!ordered) fail("TECHNIQUE_FINGERING_CONFLICT", "Expression incompatible avec corde/case/doigts transmis.", expression.noteIds, begin, end);
+    } else if (expression.kind === "dead_note") {
+      diagnostics.push(diagnostic("DEAD_NOTE_DAMPING_NOT_RENDERED",
+        "Note étouffée marquée X ; contact d'étouffement non rendu par ce rig.", expression.noteIds));
     } else if (!["tie", "let_ring", "staccato", "pick_attack", "palm_mute", "tremolo_picking"].includes(expression.kind)) {
       fail("TECHNIQUE_UNSUPPORTED", `Animation non qualifiée : ${expression.kind}`, expression.noteIds, begin, end);
     } else if (["palm_mute", "tremolo_picking"].includes(expression.kind)) {
@@ -272,7 +282,8 @@ export function compilePerformance(performance, {playbackRate = 1, rigRevision =
   }
   const rootFrames = [];
   for (const onTick of [...new Set(notes.map(n => n.onTick))].sort((a, b) => a - b)) {
-    const group = notes.filter(n => n.onTick === onTick && FINGERS.includes(n.fingering.finger));
+    const group = notes.filter(n => n.onTick === onTick && FINGERS.includes(n.fingering.finger)
+      && !deadNoteIds.has(n.occurrenceId));
     if (!group.length) continue;
     const implied = group.map(n => Math.max(geometry.capo + 1,
       n.fingering.fretAbs - FINGERS.indexOf(n.fingering.finger))).sort((a, b) => a - b);

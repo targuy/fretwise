@@ -4659,6 +4659,10 @@ function _buildHandVizPayload() {
       pitch: r.pitch,
       voice: r.voice_hint || 0,
       planted: r.planted_fingers || {},
+      // A dead note is still an occurrence on a string.  Keep its source
+      // state for the iframe lookahead instead of degrading it to an open
+      // note or an empty string slot.
+      muted: Boolean(r.muted),
     });
   }
   // ── Real fretboard geometry threaded from the source ──────────────────

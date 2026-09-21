@@ -331,7 +331,8 @@ export class SlopeRenderer {
      (not smooth pursuit), so it stays sharp at any tempo / refresh rate —
      the moving discs keep carrying position/colour/length, the band carries
      the reading. Every string gets its own row: played strings get a filled
-     disc + fret digit, unplayed/muted strings get a hollow ring — without
+     disc + fret digit, dead notes get an explicit X, and unplayed strings
+     get a hollow ring — without
      that, there's no way to tell "not played" from "chord I haven't read
      yet" at a glance. Six FIXED rows per card is what guarantees no
      collision between displayed notes: every string has exactly one slot,
@@ -442,9 +443,9 @@ export class SlopeRenderer {
           ctx.fillStyle = '#050505';
           ctx.textAlign = 'center';
           ctx.font = `900 ${Math.max(10, radius * 1.05)}px Inter, sans-serif`;
-          ctx.fillText(String(played.fret), cx, cy + 0.5);
+          ctx.fillText(played.muted ? 'X' : String(played.fret), cx, cy + 0.5);
         } else {
-          // Unplayed/muted string: hollow ring only, no fill, no digit — the
+          // Unplayed string: hollow ring only, no fill, no digit — the
           // only way to distinguish "not played" from "not read yet".
           ctx.strokeStyle = 'rgba(255,255,255,0.30)';
           ctx.lineWidth = Math.max(1.2, radius * 0.16);
@@ -1216,7 +1217,7 @@ export class SlopeRenderer {
     const fretSizeRaw = Math.max(14, radius * 0.95);
     const fretSize = this._snapFontSizeClamped(fretSizeRaw, Math.round(13 * dpr));
     ctx.font = `900 ${fretSize}px Inter, sans-serif`;
-    ctx.fillText(String(note.fret), px, this._snapPx(point.y - 0.5));
+    ctx.fillText(note.muted ? 'X' : String(note.fret), px, this._snapPx(point.y - 0.5));
   }
 
   _drawChordLabel(chord) {

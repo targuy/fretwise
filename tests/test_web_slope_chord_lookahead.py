@@ -3,8 +3,8 @@
 The band is a fixed strip (read in fixation, never glided) showing a genuine
 6-string chord shape per upcoming group: every string gets a row, played
 strings get a filled disc + fret digit (no note-name letter — string
-identity comes from fixed row position, row 0 = string 1), unplayed/muted
-strings get a hollow ring. 20 upcoming groups, one chord triangle per card
+identity comes from fixed row position, row 0 = string 1), dead notes get X,
+and unplayed strings get a hollow ring. 20 upcoming groups, one chord triangle per card
 (not per note). These tests execute the real shipped ``slope-renderer.js``
 in Node and assert on actual canvas draw-call output, not source text.
 """
@@ -162,6 +162,17 @@ const f = frame(1.0);
 console.log(JSON.stringify({ shapeCount: f.shapes.length }));
 """)
     assert out["shapeCount"] == 120, f"expected 20 cards x 6 strings = 120 shapes, got {out['shapeCount']}"
+
+
+def test_muted_occurrence_is_x_instead_of_an_open_or_fretted_digit() -> None:
+    """A source dead note remains visibly distinct from an unplayed string."""
+    out = _run("""
+r.notes.find((n) => n.string === 3 && n.onset === 6.5).muted = true;
+const f = frame(1.0);
+console.log(JSON.stringify(f.fills.map((entry) => entry.txt)));
+""")
+    # Heading then first group 0, 1, 2; next group is the mutated occurrence.
+    assert out[4] == "X", out
 
 
 def test_p5_unplayed_strings_are_hollow_played_strings_are_filled() -> None:
