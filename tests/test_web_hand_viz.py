@@ -3,9 +3,9 @@
 The hand-viz feature is purely client-side: the "3D" view-segment button
 (data-mode="hand_3d") shows an iframe (#hand3d-view-frame) pointing at the
 committed renderer ``/static/hand_viz.html?view=3d``. That renderer boots the
-single HandPerformance implementation. Schematic SVG remains automatic
-failure fallback, never a user-selectable mode. These guards assert static
-serving, iframe wiring, and absence of historical controls.
+single HandPerformance implementation. A 3D failure remains an explicit
+empty-state in that same host. These guards assert static serving, iframe
+wiring, and absence of historical controls.
 """
 from __future__ import annotations
 

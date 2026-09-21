@@ -382,5 +382,5 @@ export class HandV2View {
   }
 }
 
-/** A construction error is surfaced to the host, which retains its SVG fallback. */
+/** A construction error is surfaced to the 3D-only host for explicit reporting. */
 export function create(container, options = {}) { return new HandV2View(container, options); }

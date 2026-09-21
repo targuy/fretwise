@@ -73,8 +73,8 @@ y compris sur mobile, sans doigts masqués derrière les commandes.
 Le parent gère transport et sécurité du protocole. Le composant ignore les rendus
 hors écran ; il libère géométries, matériaux, textures, Workers et écouteurs à sa
 destruction. Une perte WebGL suspend le rendu ; sa restauration réaffiche le même
-instant musical. Un échec d'import ou de création remonte au parent pour son repli SVG
-automatique. Ce repli n'est pas sélectionnable dans l'interface.
+instant musical. Un échec d'import ou de création laisse l'hôte 3D vide et affiche un
+état explicite. Aucun renderer 2D/SVG ne reste disponible, y compris comme repli.
 
 ## Couverture et limites affichées
 
