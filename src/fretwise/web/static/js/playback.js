@@ -102,6 +102,7 @@ export class PlaybackEngine {
     this.onPositionChange = null; // (measureFrac) → 0..1 fraction of song
     this.onSynthStatusChange = null; // ('loading'|'ready'|'error') → void
     this.onSynthProgress = null;     // (frac|null, loadedMB, totalMB) → void, during SF download
+    this.onSynthPhase = null;        // ('parsing'|'fallback') → void, after download begins
     this.onSoundfontWarning = null;  // (message, {presetCount, url}) → void, when the active bank is not General MIDI
     this.onTimeChange = null;     // (seconds) → void, called on every tick
 
@@ -171,7 +172,7 @@ export class PlaybackEngine {
     this._slotStartBeat = null;
     this._instrumentOverrides = {};
     this.onMeasureChange = this.onPositionChange = this.onTimeChange = this.onStop = null;
-    this.onSynthStatusChange = this.onSynthProgress = this.onSoundfontWarning = null;
+    this.onSynthStatusChange = this.onSynthProgress = this.onSynthPhase = this.onSoundfontWarning = null;
   }
 
   /** Dispose one owned synth, including a candidate that finished after cancellation. */
@@ -230,7 +231,7 @@ export class PlaybackEngine {
     const context = this._audioCtx;
     this._audioCtx = this._masterGain = null;
     this._workletPromise = null;
-    this.onSynthStatusChange = this.onSynthProgress = this.onSoundfontWarning = null;
+    this.onSynthStatusChange = this.onSynthProgress = this.onSynthPhase = this.onSoundfontWarning = null;
     this._destroyPromise = Promise.resolve().then(() => context?.close()).catch(() => {});
     return this._destroyPromise;
   }
@@ -1654,6 +1655,7 @@ export class PlaybackEngine {
       this._lastSf2Url = url;
 
       const dest = this._masterGain || this._audioCtx.destination;
+      this.onSynthPhase?.('parsing');
       const tParse = performance.now();
       spessa = new Synthetizer(dest, sf2Buffer);
       this._pendingSpessa = spessa;
@@ -1726,6 +1728,7 @@ export class PlaybackEngine {
       if (this._destroyed || signal.aborted || generation !== this._synthGeneration) return;
       console.warn('[FretWise] SpessaSynth unavailable, falling back to MusyngKite:', err.message);
       this._spessaFailed = true;
+      this.onSynthPhase?.('fallback');
       await this._initSynthFallback(generation, signal);
     }
   }

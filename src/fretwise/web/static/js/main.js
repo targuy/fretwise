@@ -2693,6 +2693,14 @@ function initRenderer(data) {
       _synthTask.message(`Chargement de l'instrument… ${loadedMB} / ${totalMB} Mo`);
     }
   };
+  playback.onSynthPhase = (phase) => {
+    if (!_synthTask) return;
+    if (phase === 'parsing') {
+      _synthTask.message("Préparation de l'instrument…");
+    } else if (phase === 'fallback') {
+      _synthTask.message("Chargement de l'instrument de repli…");
+    }
+  };
   // Advisory when the active soundfont is not a full General MIDI bank: non-guitar
   // tracks can't map and everything collapses onto one timbre. Surface it once so
   // the user knows to switch banks (Réglages) rather than blaming the tab.
@@ -5151,7 +5159,6 @@ if (metaImportInput) {
 function _unlockAudioOnFirstGesture() {
   if (playback?.renderer) {
     playback.resumeAudioContext();
-    if (!playback.audioEnabled) playback.enableAudio();
   }
 }
 ['pointerdown', 'keydown', 'touchstart'].forEach((evt) => {
