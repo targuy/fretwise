@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import shutil
+import json
 import subprocess
 from pathlib import Path
 
@@ -59,23 +60,88 @@ def test_resize_recomputes_orthographic_frustum_from_live_aspect() -> None:
     source = _source()
     projection = source[source.index("_updateProjection() {"):source.index("\n  resize() {")]
     assert "const aspect = width / height;" in projection
-    assert "const halfHeight = TOP_VIEW_HEIGHT * this.zoom / 2;" in projection
+    assert "Math.max(TOP_VIEW_HEIGHT, 220 / aspect) * this.zoom / 2" in projection
     assert "this.camera.left = -halfHeight * aspect" in projection
     assert "this.camera.right = halfHeight * aspect" in projection
     resize = source[source.index("resize() {"):source.index("\n  dispose() {")]
     assert "this._updateProjection()" in resize
 
 
-def test_top_projection_has_fretboard_replacement_scale() -> None:
-    """Plan view keeps a useful fretboard span instead of a finger close-up."""
+def test_top_projection_has_readable_fingering_scale() -> None:
+    """Top view magnifies finger contacts while preserving a mobile hand span."""
     source = _source()
-    assert "const TOP_VIEW_HEIGHT = 440" in source
+    assert "const TOP_VIEW_HEIGHT = 150" in source
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not available")
+def test_top_camera_stability_shifts_seeks_and_resize() -> None:
+    """Exercise the shipped camera policy against changing chords and transport."""
+    script = f"import {{topCameraFocus as focus}} from {json.dumps(_HAND_V2.as_uri())};" + """
+const initial = focus(null, 30, 110, 150, 0);
+let held = initial;
+for(let i=1;i<=120;i++) held=focus(held, 35+i%8, 105-i%9, 150, i/60);
+const shifted = focus(held, 120, 200, 150, 2+1/60);
+let settled=shifted;
+for(let i=2;i<=180;i++) settled=focus(settled,120,200,150,2+i/60);
+const paused=focus(settled,120,200,150,settled.time);
+const backward=focus(settled,300,360,150,1);
+const forward=focus(held,300,360,150,10);
+const resized=focus(held,30,110,55,held.time);
+const fast=focus(held,120,200,150,held.time+2/60,2);
+console.log(JSON.stringify({initial,held,shifted,settled,paused,backward,forward,resized,fast}));
+"""
+    proc = subprocess.run(
+        [shutil.which("node"), "--input-type=module", "-e", script],
+        capture_output=True, text=True, timeout=30,
+    )
+    assert proc.returncode == 0, proc.stderr
+    result = json.loads(proc.stdout)
+    assert result["held"]["x"] == result["initial"]["x"] == 70
+    assert 70 < result["shifted"]["x"] < 80
+    assert result["settled"]["x"] == pytest.approx(117.5, abs=.001)
+    assert result["paused"] == result["settled"]
+    assert result["backward"]["x"] == result["forward"]["x"] == 330
+    assert abs(30 - result["resized"]["x"]) < 55
+    assert abs(110 - result["resized"]["x"]) < 55
+    assert result["fast"]["x"] == pytest.approx(result["shifted"]["x"])
 
 
 def test_top_view_cannot_be_tilted_by_pointer_drag() -> None:
     """Plan view remains exactly 90 degrees after user interaction."""
     source = _source()
     assert 'if (this.cameraView === "top") { point = [e.clientX, e.clientY]; return; }' in source
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not available")
+def test_embedded_viewport_excludes_fixed_transport_toolbar() -> None:
+    """Canvas height must describe the visible area on desktop and mobile."""
+    source = (_HAND_V2.parent / "main.js").read_text(encoding="utf-8")
+    start = source.index("function resizeHand3dViewport() {")
+    function = source[start:source.index("\nconst hand3dViewportObserver", start)]
+    script = """
+let top=227, parentBottom=1064, footerTop=987, footerHeight=93;
+const window={innerHeight:1080};
+const toolbar={getBoundingClientRect:()=>({top:footerTop,height:footerHeight})};
+const hand3dViewFrame={style:{display:'block'},getBoundingClientRect:()=>({top}),
+ parentElement:{clientTop:0,get clientHeight(){return parentBottom-top;},
+ getBoundingClientRect:()=>({top})}};
+""" + function + """
+resizeHand3dViewport();const desktop=hand3dViewFrame.style.height;
+top=223;parentBottom=828;footerTop=743;footerHeight=101;window.innerHeight=844;
+resizeHand3dViewport();const mobile=hand3dViewFrame.style.height;
+footerHeight=0;resizeHand3dViewport();const hiddenToolbar=hand3dViewFrame.style.height;
+hand3dViewFrame.style.display='none';top=0;resizeHand3dViewport();
+console.log(JSON.stringify({desktop,mobile,hiddenToolbar,hiddenFrame:hand3dViewFrame.style.height}));
+"""
+    proc = subprocess.run(
+        [shutil.which("node"), "--input-type=module", "-e", script],
+        capture_output=True, text=True, timeout=30,
+    )
+    assert proc.returncode == 0, proc.stderr
+    assert json.loads(proc.stdout) == {
+        "desktop": "760px", "mobile": "520px",
+        "hiddenToolbar": "605px", "hiddenFrame": "605px",
+    }
 
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="node not available")

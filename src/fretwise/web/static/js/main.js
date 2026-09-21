@@ -292,6 +292,23 @@ const coreSvgView   = $('#core-svg-view');
 const legendContent = $('#legend-content');
 const toolbar       = $('#toolbar');
 
+// The score reserves toolbar space with padding, but an absolute iframe spans
+// that padding too. Give the 3D renderer the actually visible viewport height.
+function resizeHand3dViewport() {
+  if (!hand3dViewFrame || hand3dViewFrame.style.display === 'none') return;
+  const parent = hand3dViewFrame.parentElement;
+  const top = hand3dViewFrame.getBoundingClientRect().top;
+  const parentBottom = parent.getBoundingClientRect().top + parent.clientTop + parent.clientHeight;
+  const toolbarRect = toolbar?.getBoundingClientRect();
+  const bottom = Math.min(window.innerHeight, parentBottom,
+    toolbarRect?.height ? toolbarRect.top : window.innerHeight);
+  hand3dViewFrame.style.height = `${Math.max(0, bottom - top)}px`;
+}
+const hand3dViewportObserver = new ResizeObserver(resizeHand3dViewport);
+if (hand3dViewFrame?.parentElement) hand3dViewportObserver.observe(hand3dViewFrame.parentElement);
+if (toolbar) hand3dViewportObserver.observe(toolbar);
+window.addEventListener('resize', resizeHand3dViewport);
+
 // Toolbar controls
 const btnPlay       = $('#btn-play');
 const btnPrev       = $('#btn-prev');
@@ -1877,6 +1894,7 @@ function applyRepresentationModeView(data) {
   if (slopeCanvas) slopeCanvas.style.display = showSlope ? 'block' : 'none';
   if (rainCanvas) rainCanvas.style.display = showRain ? 'block' : 'none';
   if (hand3dViewFrame) hand3dViewFrame.style.display = showHand3d ? 'block' : 'none';
+  if (showHand3d) resizeHand3dViewport();
   if (!showHand3d) _releaseHand3dViewFrame();
   // The density control only makes sense in the Slope and Rain views; its
   // bounds/value are retargeted to whichever of the two is active.

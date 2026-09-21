@@ -12,9 +12,12 @@ const mesh=(g,m,parent=world)=>{const o=new T.Mesh(g,m);o.castShadow=o.receiveSh
 const rad=T.MathUtils.degToRad,A=rad(75),U=V(1,0,0),L=V(0,Math.sin(A),-Math.cos(A)),P=V(0,-Math.cos(A),-Math.sin(A));
 function canonical(p,extend=false){let a=(p[2]-.00811395)*1000,b=(.05598624-p[1])*1000,c=(p[0]+.03732416)*1000;
  if(extend&&b<0){
-  // Continuous wrist skin, then a straight forearm descending toward the elbow.
-  // This rest-shape construction preserves the attached wrist cross section.
-  const s=-b*(245/22.35756865),near=L.clone().negate(),far=V(.38,-.52,.765).normalize(),w=32;
+  // Guitar reference: curl away from the palm around the wrist, then descend
+  // below and across the neck toward the elbow (negative y AND negative z).
+  // Positive z here puts the arm behind the hand in the fretboard plane, giving
+  // a keyboard posture from above. Keep the wrist seam and all finger rest
+  // positions unchanged; this is an illustrative pose, not an ergonomic limit.
+  const s=-b*(245/22.35756865),near=L.clone().negate(),far=V(.12,-.60,-.79).normalize(),w=22;
   const delta=far.clone().sub(near),k=1-Math.exp(-s/w),center=near.clone().multiplyScalar(s).addScaledVector(delta,s-w*k);
   const tangent=near.clone().addScaledVector(delta,k).normalize(),q=new T.Quaternion().setFromUnitVectors(near,tangent),thick=1+.34*T.MathUtils.smoothstep(s,0,245);
   return center.add(U.clone().multiplyScalar(a*thick).addScaledVector(P,c*thick).applyQuaternion(q));
@@ -108,7 +111,7 @@ if(!best){let residual=Infinity;
 }const points=fk(base,lengths,h,best);const result={points,q:best,h,error:points[3].distanceTo(target)};if(solveCache.size>700)solveCache.delete(solveCache.keys().next().value);solveCache.set(cacheKey,result);return result;}
 const jointGroup=new T.Group();hand.add(jointGroup);jointGroup.visible=false;const jmat=new T.MeshBasicMaterial({color:0x459379,depthTest:false}),jgeo=new T.SphereGeometry(1.1,10,8),dots=bonePos.map(()=>mesh(jgeo,jmat,jointGroup)),lines=[...chains,tc].map(c=>{const l=new T.Line(new T.BufferGeometry().setFromPoints(c.map(i=>rest[i])),new T.LineBasicMaterial({color:0x459379,depthTest:false}));jointGroup.add(l);return l;});
 const armAxisPoints=Array.from({length:24},(_,i)=>canonical([-.03732416,.05598624+(23-i)/23*.02235756865,.00811395],true));armAxisPoints.push(rest[chains[1][0]],rest[chains[1][1]]);
-const armAxis=new T.Line(new T.BufferGeometry().setFromPoints(armAxisPoints),new T.LineBasicMaterial({color:0x459379,depthTest:false}));jointGroup.add(armAxis);
+const armAxis=new T.Line(new T.BufferGeometry().setFromPoints(armAxisPoints),new T.LineBasicMaterial({color:0x459379,depthTest:false}));armAxis.name='reference-forearm-axis';jointGroup.add(armAxis);
 const contactGroup=new T.Group();world.add(contactGroup);contactGroup.visible=false;const contactMat=new T.MeshBasicMaterial({color:0x57bd94,transparent:true,opacity:.95,depthTest:false}),rings=Array.from({length:4},()=>{const o=mesh(new T.TorusGeometry(2.1,.32,8,20),contactMat,contactGroup);o.rotation.x=-Math.PI/2;o.renderOrder=6;return o;});
 const fretContactMat=new T.MeshBasicMaterial({color:0xc78936,depthTest:false});const fretRings=Array.from({length:4},()=>{const o=mesh(new T.TorusGeometry(1.2,.25,8,20),fretContactMat,contactGroup);o.rotation.x=-Math.PI/2;o.renderOrder=5;return o;});
 const nailMat=new T.MeshPhysicalMaterial({color:0xe8c5b2,roughness:.38,clearcoat:.25});const nails=Array.from({length:5},()=>mesh(new T.SphereGeometry(1,20,12),nailMat,hand));

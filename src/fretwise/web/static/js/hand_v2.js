@@ -8,10 +8,30 @@ import {createReferenceRig} from "./hand_reference_rig.js";
 
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
 const toInternal = p => V(p[0] * 1000, p[2] * 1000, p[1] * 1000);
-// 2D replacement: enough horizontal orthographic span to keep the playable
-// fretboard readable (roughly frets 1–22 on a desktop panel), not a close-up.
-const TOP_VIEW_HEIGHT = 440;
+// Frame the fingering area, not the entire neck and forearm.
+const TOP_VIEW_HEIGHT = 150;
 const TOP_CAMERA_DISTANCE = 900;
+
+/** Hold the top camera inside a dead zone; ease only actual position changes. */
+export function topCameraFocus(previous, minX, maxX, halfWidth, time, rate = 1) {
+  const midpoint = (minX + maxX) / 2;
+  const dt = previous ? time - previous.time : 0;
+  // A seek starts a fresh framing; pauses never advance the camera animation.
+  if (!previous || dt < 0 || dt > .5 * rate) return {x: midpoint, time};
+  const safeHalfWidth = halfWidth * .55;
+  let target = previous.x;
+  if (maxX - minX > safeHalfWidth * 2) target = midpoint;
+  else if (minX < previous.x - safeHalfWidth) target = minX + safeHalfWidth;
+  else if (maxX > previous.x + safeHalfWidth) target = maxX - safeHalfWidth;
+  const alpha = 1 - Math.exp(-Math.max(0, dt) / (rate * .18));
+  let x = previous.x + (target - previous.x) * alpha;
+  // Keep contacts visible even after resizing or a large forward seek.
+  const visibleHalfWidth = halfWidth * .85;
+  if (maxX - minX <= visibleHalfWidth * 2) {
+    x = Math.max(maxX - visibleHalfWidth, Math.min(minX + visibleHalfWidth, x));
+  }
+  return {x, time};
+}
 
 function disposeTree(object) {
   const geometries = new Set(), materials = new Set(), textures = new Set();
@@ -214,6 +234,7 @@ export class HandV2View {
     if (this.disposed) return;
     this.generation++; this.compiler.cancel(); this.rig.clearCaches();
     this.performance = null; this.plan = null; this.metrics = []; this.lastSample = null;
+    this.topFocus = null;
     this.diagnostics = []; this.poseDiagnostics = []; this.rig.hand.visible = false;
     this.rig.setDiagnostics(false);
     this.badge.textContent = message;
@@ -284,9 +305,18 @@ export class HandV2View {
     const center = active.length ? active.reduce((v, m) => v.add(toInternal(m.targetM)), V())
       .multiplyScalar(1 / active.length).add(V(8, -15, 16))
       : V(this.rig.hand.position.x + 20, -18, 35);
-    const focus = this.world.localToWorld(center);
     const dist = (this.container.clientWidth < 480 ? 312 : 264) * this.zoom;
     this._updateProjection();
+    if (this.cameraView === "top") {
+      // Include the palm and all finger targets, including preparation/rest.
+      // Across-string motion must never move the camera vertically.
+      const xs = [this.rig.hand.position.x, ...Object.values(sample.fingers)
+        .map(f => f.targetM[0] * 1000)];
+      this.topFocus = topCameraFocus(this.topFocus, Math.min(...xs) - 12,
+        Math.max(...xs) + 12, this.topCamera.right, nominalScoreSec, this.rate);
+      center.set(this.topFocus.x, 0, 30);
+    }
+    const focus = this.world.localToWorld(center);
     if (this.cameraView === "top") {
       // Pure plan projection: look along fretboard normal. Across-string axis
       // stays vertical on screen, leaving neck/frets horizontal like 2D view.
@@ -309,6 +339,7 @@ export class HandV2View {
     const cameras = {face: [.9, 1.1], fingers: [.9, 1.1], thumb: [3, 1.65],
       palm: [.25, 1.30], profile: [1.48, 1.25], top: null};
     if (!(view in cameras)) return false;
+    if (view !== this.cameraView) this.topFocus = null;
     this.cameraView = view;
     if (cameras[view]) [this.theta, this.phi] = cameras[view];
     this._updateProjection(); this.renderAt(this.time);
@@ -329,7 +360,7 @@ export class HandV2View {
     const aspect = width / height;
     if (this.cameraView === "top") {
       this.camera = this.topCamera;
-      const halfHeight = TOP_VIEW_HEIGHT * this.zoom / 2;
+      const halfHeight = Math.max(TOP_VIEW_HEIGHT, 220 / aspect) * this.zoom / 2;
       this.camera.left = -halfHeight * aspect; this.camera.right = halfHeight * aspect;
       this.camera.top = halfHeight; this.camera.bottom = -halfHeight;
     } else {

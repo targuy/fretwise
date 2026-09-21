@@ -25,6 +25,11 @@ X vers le chevalet, Y vers le dessus, Z vers l'aigu. Les longueurs d'os restent
 constantes. Une cible inaccessible produit un résidu et une pose translucide ;
 elle ne déclenche plus le repli à trois angles fixes de la maquette.
 
+La forme de référence du poignet se courbe progressivement sur 22 mm vers un
+avant-bras situé sous le manche, avec retour transversal vers celui-ci. Cette
+correction visuelle conserve la paume et les contacts résolus des doigts ; elle
+ne constitue pas une recommandation ergonomique ni un modèle de bras articulé.
+
 ## Transport et cycle de vie
 
 `hand_motion.js` compile HandPerformance 1.0/1.1 en contacts indépendants par doigt,
@@ -48,9 +53,18 @@ s'agit donc pas encore d'un plan articulaire complet calculé hors rendu.
 - `setCamera('fingers'|'thumb'|'palm'|'profile'|'top')`, `setDiagnostics(enabled)` ;
 - `top` emploie une caméra orthographique alignée sur la normale de la touche :
   projection du dessus exacte à 90°, sans rotation libre ;
+  cadrage rapproché de 150 mm en hauteur (largeur minimale de 220 mm avant zoom
+  sur écran étroit). Le centre transversal reste fixe. Une zone centrale de 55 %
+  de la largeur maintient la caméra immobile pendant les changements de doigts ;
+  les démanchés déclenchent un suivi amorti sur 180 ms de temps réel. Une recherche
+  temporelle réinitialise le cadrage, sans créer d'horloge de lecture secondaire ;
 - `getCapabilities()`, `getDiagnostics()`, `getMetrics()`, `dispose()`.
 
 Le moteur ne reçoit pas de messages iframe et ne crée pas de boucle RAF.
+Le parent dimensionne l'iframe jusqu'au bord supérieur de la barre de lecture
+fixe, et recalcule cette hauteur lors des changements de taille du panneau ou
+de la barre. La projection utilise ainsi toute la zone réellement visible,
+y compris sur mobile, sans doigts masqués derrière les commandes.
 Le parent gère transport et sécurité du protocole. Le composant ignore les rendus
 hors écran ; il libère géométries, matériaux, textures, Workers et écouteurs à sa
 destruction. Une perte WebGL suspend le rendu ; sa restauration réaffiche le même

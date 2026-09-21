@@ -151,6 +151,46 @@ console.log(JSON.stringify({{output,vertices:rig.geometry.attributes.position.co
             assert finger["valid"] is True
 
 
+def test_reference_forearm_bends_below_and_across_neck_without_moving_contacts() -> None:
+    result = run_js(f"""
+const T=await import({json.dumps((JS / 'vendor/three.module.min.js').as_uri())});
+const {{createReferenceRig}}=await import({json.dumps((JS / 'hand_reference_rig.js').as_uri())});
+const rig=createReferenceRig(new T.Group());
+const plan=compilePerformance(performance([note('i','index',2,1,0,1920)]));
+const contacts=rig.pose(sampleMotion(plan,.3),plan.geometry).filter(m=>m.active);
+// The diagnostic axis and rendered wrist skin share the same rest-shape bake.
+const axis=rig.hand.getObjectByName('reference-forearm-axis').geometry.attributes.position;
+const points=Array.from({{length:24}},(_,i)=>new T.Vector3().fromBufferAttribute(axis,i));
+const wrist=points[23],elbow=points[0];
+const palm=points[23].clone().sub(new T.Vector3().fromBufferAttribute(axis,25)).normalize();
+const arm=points[0].clone().sub(points[1]).normalize();
+const world=points.map(p=>p.clone().add(rig.hand.position));
+const position=rig.geometry.attributes.position;
+const distalSkin=[];
+for(let i=0;i<position.count;i++){{
+ const p=new T.Vector3().fromBufferAttribute(position,i).add(rig.hand.position);
+ if(p.y < -170)distalSkin.push(p.toArray());
+}}
+console.log(JSON.stringify({{contacts,wrist:wrist.toArray(),
+ bendDegrees:T.MathUtils.radToDeg(palm.angleTo(arm)),
+ axis:world.map(p=>p.toArray()),distalSkin}}));
+""")
+    assert result["wrist"] == pytest.approx([0, 0, 0], abs=1e-5)
+    # Clear flexion, with the elbow side going under the board rather than
+    # extending out behind the hand as a flat keyboard wrist would.
+    assert 55 < result["bendDegrees"] < 85
+    axis = result["axis"]
+    assert all(p[1] < -70 for p in axis)
+    assert any(abs(p[2]) < 25 and p[1] < -120 for p in axis)
+    assert axis[0][2] < axis[-1][2] - 100
+    # Check the actual mesh too: an axis-only correction must not pass.
+    assert len(result["distalSkin"]) > 100
+    assert max(p[2] for p in result["distalSkin"]) < 85
+    assert min(p[2] for p in result["distalSkin"]) < 0
+    assert result["contacts"][0]["errorMm"] < 0.5
+    assert result["contacts"][0]["valid"] is True
+
+
 def test_unknown_major_version_and_required_capability_fail_explicitly() -> None:
     result = run_js("""
 const p=performance([]);p.schemaVersion='2.0';let major;
