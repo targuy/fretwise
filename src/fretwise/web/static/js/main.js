@@ -2699,9 +2699,11 @@ function initRenderer(data) {
   playback.onSoundfontWarning = (message) => {
     try { notifyTask('Soundfont').error(message); } catch (_) { /* notices optional */ }
   };
-  // Enable audio immediately (muting is handled per-track in the multi-track bar)
+  // Audio starts on the first explicit user gesture (Play, keyboard, or the
+  // gesture-unlock handler). Do not download/parse a multi-MB soundfont while
+  // merely opening a song: that made initial rendering look stuck and could
+  // trigger the fallback before the user ever requested audio.
   if (playback._synthLoading) playback.onSynthStatusChange('loading');
-  playback.enableAudio();
 
   // The engine owns one gesture-unlock listener set for this whole page session.
 

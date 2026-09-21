@@ -277,7 +277,7 @@ def test_decode_failure_never_reports_ready_or_publishes_half_built_synth(failur
   const h = await harness(), p = h.engine;
   const {promise, synth} = await h.start();
   if (failure === 'rejection') synth.ready.reject(new Error('Invalid soundfont'));
-  else h.fire(8000);
+  else h.fire(15000);
   await promise; await flush();
   assert.equal(p._spessa, null);
   assert.equal(p._synth, null);

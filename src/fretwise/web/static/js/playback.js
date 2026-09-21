@@ -1666,11 +1666,14 @@ export class PlaybackEngine {
       // tabs play as percussion. _resolveProgram() avoids that.
       // Wait for the worklet to ACTUALLY finish parsing before marking ready.
       // Big banks (StrixGuitarPack 186 MB, East_West 426 MB) take many seconds —
-      // a fixed 4 s cap would mark the synth "ready" mid-parse, so notes would hit
-      // a half-built synth (silence) and presetList would still be empty. Resolve
-      // as soon as isReady fires; scale the *safety* cap with file size so a huge
-      // bank gets the time it needs (~0.5 ms/KB ⇒ ~95 s for 186 MB), capped at 3 min.
-      const readyCapMs = Math.min(180000, Math.max(8000, (sf2Buffer.byteLength / 1024) * 0.5));
+      // A fixed short cap can reject a valid bank on a busy browser/device and
+      // unnecessarily switch to the lower-quality fallback. Resolve as soon
+      // as isReady fires; scale the safety cap with file size and allow small
+      // banks enough startup time for worklet parsing.
+      const readyCapMs = Math.min(
+        180000,
+        Math.max(15000, (sf2Buffer.byteLength / 1024) * 1.25),
+      );
       await this._waitForAudio(spessa.isReady, readyCapMs, signal);
       this._assertSynthCurrent(generation, signal);
       console.log(`[FretWise] SF2 parsed/ready in ${(performance.now() - tParse).toFixed(0)} ms `
