@@ -54,6 +54,15 @@ def test_main_js_wires_hand3d_iframe() -> None:
     assert "handVizPanel" not in js
 
 
+def test_main_js_freezes_selected_view_while_recalculating() -> None:
+    """A 3D solve must not flash the stale 2D canvas during reload."""
+    js = (_STATIC_DIR / "js" / "main.js").read_text(encoding="utf-8")
+    assert "function _prepareRepresentationLoading(mode)" in js
+    assert "_prepareRepresentationLoading(getSelectedRepresentationMode());" in js
+    assert "if (tabCanvas) tabCanvas.style.display = 'none';" in js
+    assert "hand3dViewFrame.style.display = showHand3d ? 'block' : 'none';" in js
+
+
 def test_hand_viz_renderer_carries_top_projection_control_only() -> None:
     """Dedicated view exposes top projection, not legacy hand/2D selectors."""
     html = (_STATIC_DIR / "hand_viz.html").read_text(encoding="utf-8")

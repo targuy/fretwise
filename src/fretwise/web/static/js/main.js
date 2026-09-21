@@ -1347,6 +1347,9 @@ async function selectTrack(trackId, trackName) {
       _syncViewSegPills();
     }
   }
+  // Freeze selected view before clearing/rebuilding renderer. This prevents
+  // a 2D canvas flash when recalculating from the 3D hand view.
+  _prepareRepresentationLoading(getSelectedRepresentationMode());
   _applyTrackKindLock();
   // Capture playback position BEFORE pausing/recreating so we can restore
   // it on the new track. Without this, switching tracks always restarts
@@ -1933,6 +1936,32 @@ function applyRepresentationModeView(data) {
       _syncCoreSvgAnnotations();
       _syncCoreSvgHandOverlay();
     }
+  }
+}
+
+/**
+ * Keep selected representation stable while a new solve is loading.
+ *
+ * ``selectTrack`` can be called by a fingering recalculation while the user
+ * is already looking at the hand view. The renderer used to clear/repaint
+ * the tablature canvas before ``applyRepresentationModeView`` ran, making
+ * the 2D view flash (and sometimes remain visible) over the 3D iframe.
+ * Hide stale renderers before the async solve starts; normal view application
+ * below will populate fresh renderer once data arrives.
+ */
+function _prepareRepresentationLoading(mode) {
+  const showHand3d = mode === MODES.HAND_3D;
+  if (tabCanvas) tabCanvas.style.display = 'none';
+  if (cursorCanvas) cursorCanvas.style.display = 'none';
+  if (coreSvgView) coreSvgView.style.display = 'none';
+  if (slopeCanvas) slopeCanvas.style.display = 'none';
+  if (rainCanvas) rainCanvas.style.display = 'none';
+  if (hand3dViewFrame) hand3dViewFrame.style.display = showHand3d ? 'block' : 'none';
+  if (showHand3d) {
+    resizeHand3dViewport();
+    _ensureHand3dViewFrame();
+  } else {
+    _releaseHand3dViewFrame();
   }
 }
 
