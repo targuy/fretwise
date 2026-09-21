@@ -1917,9 +1917,7 @@ function _ensureHand3dViewFrame() {
   if (_hand3dFrameLoaded && hand3dViewFrame.contentWindow) return true;
   const src = hand3dViewFrame.getAttribute('src');
   if (!src) {
-    let next = hand3dViewFrame.dataset.src || '/static/hand_viz.html?view=3d';
-    const engine = new URLSearchParams(location.search).get('handRenderer');
-    if (engine === 'v1' || engine === 'v2') next += '&handRenderer=' + engine;
+    const next = hand3dViewFrame.dataset.src || '/static/hand_viz.html?view=3d';
     hand3dViewFrame.setAttribute('src', next);
     _hand3dFrameLoaded = true;
     return false;

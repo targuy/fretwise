@@ -183,12 +183,11 @@
     body.dedicated-3d #notelog {
       display: none;
     }
-    /* Camera-view preset toggle: only meaningful for the dedicated tab's 3D
-       renderer (the non-dedicated inspector free-orbits; 2D mode has no
-       camera to preset). Hidden by default; shown by dedicated-mode CSS,
-       then further hidden/shown by JS (_syncCamViewButton) when 2D/3D toggles. */
+    /* Camera controls belong to the dedicated reference-hand renderer. */
     #btn-cam-view { display: none; }
     body.dedicated-3d #btn-cam-view { display: inline-block; }
+    #btn-top-view { display: none; }
+    body.dedicated-3d #btn-top-view { display: inline-block; }
     body.dedicated-3d #scene-wrap {
       flex: 1 1 auto;
       min-height: 0;
@@ -217,13 +216,8 @@
     <div class="spacer"></div>
     <div class="meta" id="hud-meta"></div>
     <button class="ctrl" id="btn-rewind">Rewind</button>
-    <button class="ctrl" id="btn-cam-view" title="Basculer entre la vue POV (joueur) et la vue de face — la caméra seule change, pas la main">Vue : POV</button>
-    <button class="ctrl" id="btn-3d" title="Basculer entre la vue 3D et la vue 2D">3D : off</button>
-    <label for="hand-engine">Main</label>
-    <select id="hand-engine" aria-label="Moteur de la main">
-      <option value="v1">Historique</option>
-      <option value="v2">Nouvelle main · aperçu</option>
-    </select>
+    <button class="ctrl" id="btn-cam-view" title="Changer le point de vue 3D">Vue : doigts</button>
+    <button class="ctrl" id="btn-top-view" aria-pressed="false" title="Afficher la table des frettes à 90° en projection orthographique">Vue dessus</button>
     <button class="ctrl primary" id="btn-play">Lecture</button>
   </div>
 
@@ -1124,12 +1118,12 @@ function _defaultSplay() {
 //           presses tilt the palm back toward the player, treble-side tilts
 //           the palm onto the strings)
 //   yaw   → in-plane rotation around the palm normal (kept 0 here — wrist yaw
-//           is owned by the SVG-derived atan2 in hand3d.js; palmNormal.yaw is
+//           is owned by the SVG-derived atan2; palmNormal.yaw is
 //           reserved for future use).
 //
-// SVG ignores palmNormal entirely; hand3d.js applies it after the wrist yaw
+// SVG ignores palmNormal entirely; 3D consumers apply it after wrist yaw
 // using Euler order 'YXZ' (yaw dominant).  When the field is absent (older
-// snapshots / fallback), hand3d.js skips the extra rotation.
+// snapshots / fallback), 3D consumers skip the extra rotation.
 function _palmNormalDefault() { return { roll: 0, pitch: 0, yaw: 0 }; }
 
 function _palmNormalRest()    { return { roll: 0, pitch: 0.20, yaw: 0 }; }
@@ -1366,7 +1360,7 @@ function evaluatePose(spec, fallbackHp) {
   }
   // Step 8: per-pose fine-tilt triplet — pulled from the spec (or default
   // zero-triplet for hand-rolled specs that don't set it).  Passed through
-  // every return branch so downstream consumers (buildKinSnapshot → hand3d.js)
+  // every return branch so downstream snapshot consumers
   // always see a value.  SVG ignores this field.
   const palmNormal = (spec && spec.palmNormal) ? spec.palmNormal : _palmNormalDefault();
   // fallbackHp = the previous smoothed hand_position (this.smoothHandPos in
@@ -1615,9 +1609,8 @@ class HandSimulator {
     this.palmCup   = 0;        // silhouette deformation only, MCP anchors stay fixed
     this.forearmDrift = 0;     // px; forearm lateral sway
     this.thumb = solveThumbAnchor([], 3, 0, false, false);
-    // Step 8: smoothed palm fine-tilt triplet (roll/pitch/yaw, radians) in the
-    // GRIP frame.  SVG ignores this; the 3D rig reads it through
-    // buildKinSnapshot to refine palm orientation beyond the wrist yaw.
+    // Smoothed palm fine-tilt triplet retained by the schematic fallback's
+    // pose model. SVG silhouette currently ignores this field.
     this.palmNormal = _palmNormalDefault();
     // Step 9: pose-level easing state.  poseSignature tracks the LAST pose we
     // saw; when selectPose() (or the chord-snap override) returns a different
@@ -2400,7 +2393,7 @@ function formatHUD(data) {
   document.getElementById("hud-track").textContent  = m.track ? ("> " + m.track) : "";
   document.getElementById("hud-meta").textContent   =
     Math.round(m.tempo || 120) + " BPM - " + data.frames.length + " notes - " +
-    (m.max_seconds || 10) + "s - " + (HAND_ENGINE === 'v2' ? 'main de référence · aperçu' : HAND_MODEL_LABEL);
+    (m.max_seconds || 10) + "s - main de référence · aperçu";
 }
 
 /* ---------- Runtime state (mutable, reassignable via postMessage) -------- */
@@ -2421,53 +2414,14 @@ const HAND3D_RAF_CAP_MS = 0;
 const HUD_FRAME_MS = 1000 / 15;
 const LOG_FRAME_MS = 1000 / 10;
 
-/* ---------- Milestone 5: optional 3D renderer (feature flag, OFF by default) -
-   The 3D hand is a strictly additive, opt-in alternative to the SVG renderer
-   above.  EVERYTHING ABOVE THIS LINE is the unchanged 2.5D path; the default
-   experience never touches three.js.  The flag is read from (in priority order):
-     1. URL param  ?hand3d=1      (explicit per-link opt-in / opt-out with =0)
-     2. localStorage "fretwise.hand3d" === "1"
-   Absence of any flag → false → SVG, unchanged.  three.js is only fetched when
-   the flag is on, via a dynamic import() of ./js/hand3d.js (so the default path
-   carries zero extra bytes).  If that import fails or WebGL is unavailable, we
-   fall back to the SVG view — never a blank/broken panel. */
-const HAND3D_STORAGE_KEY = "fretwise.hand3d";
-function hand3dRequested() {
-  try {
-    const params = new URLSearchParams(window.location.search || "");
-    if (params.get("view") === "3d") return true;
-    if (params.has("hand3d")) {
-      const v = params.get("hand3d");
-      return v === "" || v === "1" || v === "true";   // ?hand3d, =1, =true → on
-    }
-  } catch (e) { /* no URL (srcdoc/test) → fall through to storage */ }
-  try {
-    if (window.localStorage &&
-        window.localStorage.getItem(HAND3D_STORAGE_KEY) === "1") {
-      return true;
-    }
-  } catch (e) { /* storage blocked → treated as off */ }
-  return false;
-}
-function setHand3dFlag(on) {
-  try {
-    if (window.localStorage) {
-      window.localStorage.setItem(HAND3D_STORAGE_KEY, on ? "1" : "0");
-    }
-  } catch (e) { /* ignore */ }
-}
-
-let HAND3D_ACTIVE   = false;  // true once the 3D renderer is live (SVG hidden)
+/* ---------- Reference-hand renderer -------------------------------------
+   HandPerformance v2 is the sole selectable hand.  The SVG scene remains an
+   automatic failure fallback, not a user-selectable historical mode. */
+let HAND3D_ACTIVE   = false;
 let HAND3D_RENDERER = null;   // Hand3DRenderer instance, or null (→ SVG)
-let HAND3D_MODULE   = null;   // cached imported module
 let HAND3D_LOADING  = false;  // guard against concurrent enable() calls
-let HAND_ENGINE = (() => {
-  const requested = new URLSearchParams(location.search).get('handRenderer');
-  if (requested === 'v1' || requested === 'v2') return requested;
-  try { return localStorage.getItem('fretwise.handRenderer') === 'v2' ? 'v2' : 'v1'; }
-  catch (_) { return 'v1'; }
-})();
 let HAND_CAMERA = 'fingers';
+let HAND_PERSPECTIVE_CAMERA = 'fingers';
 let HAND_LOAD_REVISION = 0;
 let HAND_INIT_REVISION = 0;
 let HAND_RATE = 1;
@@ -2482,7 +2436,7 @@ function handStatus(message) {
 }
 
 async function loadHandPerformance() {
-  if (HAND_ENGINE !== 'v2' || !HAND3D_RENDERER) return;
+  if (!HAND3D_RENDERER) return;
   const view = HAND3D_RENDERER;
   const revision = ++HAND_LOAD_REVISION;
   if (!CURRENT_DATA?.handPerformance) {
@@ -2508,345 +2462,45 @@ async function loadHandPerformance() {
   }
 }
 
-/* Build the per-frame kinematic snapshot the 3D rig consumes.  This is derived
-   ENTIRELY from the SHARED model: the same HandSimulator `sim`, the same
-   solveFinger() IK, and the same geometry helpers the SVG path uses — we do NOT
-   re-solve angles here, we just package the already-solved joints so hand3d.js
-   can re-express them as 3D bones.  Keeping this the single producer guarantees
-   the two renderers never diverge kinematically. */
-function buildKinSnapshot(sim, sampled) {
-  const fingers = {};
-  for (const fname of FINGER_ORDER) {
-    const mcp = sim.getMcpPos(fname);
-    const fg  = sim.fingers[fname];
-    const ik  = solveFinger(mcp.x, mcp.y, fg.tipX, fg.tipY, fname, fg.role);
-    fingers[fname] = {
-      ik,
-      role:    fg.role,
-      fret:    fg.fret,
-      strings: fg.strings,
-      width:   fingerPxWidth(fname, fg.fret),
-    };
-  }
-  const idxMcp = sim.getMcpPos("index");
-  const pnkMcp = sim.getMcpPos("pinky");
-  const θ       = sim.wristRot;
-  const nPalmX  = Math.sin(θ);
-  const nPalmY  = -Math.cos(θ);
-  const palmTopX = sim.palmX + nPalmX * PALM_TOP_FROM_MCP;
-  const palmTopY = sim.pivotY + nPalmY * PALM_TOP_FROM_MCP;
-  return {
-    fingers,
-    palm: {
-      mcpL: idxMcp.x - 10,
-      mcpR: pnkMcp.x + 10,
-      topX: palmTopX,
-      topY: palmTopY,
-      botY: sim.pivotY + 12,
-      // Step 8: per-pose fine-tilt triplet (radians) in the GRIP frame.
-      // The 3D rig (hand3d.js) applies this AFTER the wrist yaw via Euler
-      // order 'YXZ' so the yaw stays dominant.  The 2D SVG renderer ignores
-      // this field — adding it does not change SVG output.  Older snapshots
-      // (no simulator) simply omit it and hand3d.js skips the rotation.
-      palmNormal: sim.palmNormal
-        ? { roll: sim.palmNormal.roll, pitch: sim.palmNormal.pitch, yaw: sim.palmNormal.yaw }
-        : undefined,
-    },
-    forearm: {
-      wristX:   palmTopX + sim.forearmDrift * 0.3,
-      forearmX: palmTopX + sim.forearmDrift,
-      topY:     FOREARM_TOP_Y,
-    },
-    thumb: { x: sim.thumb.x, y: sim.thumb.y, role: sim.thumb.role },
-    // T-P2.2 (H-7): open-string playback has no finger to key off of, so the
-    // 3D rig needs this passed explicitly — sampleState() already computes
-    // it (duration-filtered: membership means "sounding right now").
-    openStrings: sampled ? sampled.openStrings : new Set(),
-  };
-}
-
-/* ---------- 3D pose look-ahead prefill (deferred rendering) ----------------
-   The articulated 3D rig's converged pose is CPU-expensive to solve but is a
-   pure function of the fingering signature (see hand3d.js / pose_cache.js).
-   The per-frame render loop already replays cached keyframes cheaply; here we
-   fill that cache AHEAD of the playhead during idle time, so the frame that
-   reaches each new shape is a cheap cache hit rather than a solve hitch.
-
-   We build a MINIMAL warm kin ({ fingers:{ <name>:{role,fret,strings} } }) — the
-   only fields hand3d.js's solver reads — directly from a pure sampleState() at a
-   future time, mirroring the live simulator's role classification (a finger is
-   active/planted iff it is sounding/held at that instant, otherwise idle).  This
-   is best-effort: any signature that diverges (e.g. a chord pre-warp window)
-   simply isn't pre-warmed and falls back to the normal lazy solve. */
-function _warmKinFromSampled(st) {
-  const fingers = {};
-  for (const f of FINGER_ORDER) {
-    const a = st.active[f], p = st.planted[f];
-    if (a) fingers[f] = { role: "active", fret: a.fret, strings: a.strings || [a.string] };
-    else if (p) fingers[f] = { role: "planted", fret: p.fret, strings: p.strings || [p.string] };
-    else fingers[f] = { role: "idle", fret: 0, strings: [] };
-  }
-  return { fingers };
-}
-
-let _prefillScheduled = false;
-let _lastPrefillT = -1;
-const _requestIdle = (typeof window !== "undefined" && window.requestIdleCallback)
-  ? window.requestIdleCallback.bind(window)
-  : (cb) => setTimeout(() => cb({ timeRemaining: () => 4 }), 16);
-
-/* Schedule an idle-time pass that warms the pose cache for the next few
-   distinct upcoming shapes.  Throttled (~5x/s) and budgeted so it never
-   competes with the render loop; entirely wrapped so a prefill fault can never
-   break playback. */
-function _scheduleHandPosePrefill(tNow) {
-  if (_prefillScheduled) return;
-  if (_lastPrefillT >= 0 && Math.abs(tNow - _lastPrefillT) < 0.2) return;
-  _prefillScheduled = true;
-  _lastPrefillT = tNow;
-  _requestIdle((deadline) => {
-    _prefillScheduled = false;
-    try {
-      if (!CURRENT_DATA || !CURRENT_DATA.frames || !HAND3D_RENDERER
-          || typeof HAND3D_RENDERER.warmPose !== "function") return;
-      const frames = CURRENT_DATA.frames;
-      const LOOKAHEAD = 2.5, STEP = 0.12;
-      let budget = 6;   // cap real solves per idle slice
-      for (let d = STEP; d <= LOOKAHEAD && budget > 0; d += STEP) {
-        if (deadline && typeof deadline.timeRemaining === "function" && deadline.timeRemaining() <= 1) break;
-        const st = sampleState(tNow + d, frames);
-        if (HAND3D_RENDERER.warmPose(_warmKinFromSampled(st))) budget--;
-      }
-    } catch (e) { /* best-effort; never break playback */ }
-  });
-}
-
-/* ============================================================================
-   T-B.1 — deterministic self-test harness (docs/plan_impl_slope_main3d.md §B).
-
-   Sweeps the current (or an injected) song through the articulated 3D rig at
-   a fixed step, entirely off the real clock, and returns the metrics each
-   spec acceptance criterion (§5) is defined against: contact (H-11),
-   collision (H-9), perf (H-16), stillness (H-15), camera invariant (H-18),
-   distal-phalanx angle (H-10).
-
-   PURE OBSERVER — calls only the same public entry points a real frame
-   would (CURRENT_SIM.update / buildKinSnapshot / renderer._updateArticulated
-   / renderer.setCameraView), never reaches into product state to force an
-   outcome.  Every metric here was hand-run in the browser console during the
-   hand3d.js work (this formalizes those ad-hoc checks into one reusable,
-   regression-checkable call).  Requires the 3D renderer to already be
-   enabled (call enableHand3d() first, or load with ?view=3d which does this
-   automatically).
-
-   Usage: window.__handSelfTest({ step: 0.08, settleFrames: 15 })
-   ========================================================================= */
-window.__handSelfTest = function (opts) {
-  opts = opts || {};
-  const r = HAND3D_RENDERER;
-  if (!r || r._rigMode !== "articulated") {
-    return { error: "3D articulated renderer not active — call enableHand3d() first" };
-  }
-  if (!HAND3D_MODULE || typeof HAND3D_MODULE.STRING_SURFACE !== "number") {
-    return { error: "hand3d.js module not loaded (STRING_SURFACE export missing)" };
-  }
-  const STRING_SURFACE_VAL = HAND3D_MODULE.STRING_SURFACE;
-  // Reset all per-frame easing/latch state before sweeping — without this,
-  // a second call to __handSelfTest() in the same page load starts from
-  // whatever pose the FIRST sweep left the rig in (a mid-note wrist ease,
-  // stale finger latches, ...), making runs non-reproducible (confirmed
-  // live: back-to-back calls on identical code showed collision.fingerHits
-  // swinging 0->12 and distalAngle.avg swinging 32->38 from this alone).
-  delete r._wristPose;
-  delete r._wristEaseTarget;
-  delete r._wristConverged;
-  delete r._lastFoldOk;
-  delete r._lastKinSig;
-  delete r._lastIdxFret;
-  delete r._lastUnreachable;
-  delete r._wristTries;
-  r._fingerLatch = {};
-  for (const f of FINGER_ORDER) r._fingerMotion[f] = { x: null, y: null, z: null, role: "idle" };
-  const data = opts.data || CURRENT_DATA;
-  const chordGroups = opts.chordGroups || CURRENT_CHORD_GROUPS;
-  if (!data || !Array.isArray(data.frames) || !data.frames.length) {
-    return { error: "no frames to sweep (no data loaded)" };
-  }
-  const frames = data.frames;
-  const step = opts.step || 0.08;
-  // Real frames' worth at 60fps to let the wrist/finger ease fully converge
-  // before the metric for that instant is sampled — a mid-glide sample would
-  // conflate "still transitioning" (expected) with "genuinely can't reach"
-  // (a real H-11 regression). 15 frames ≈ 250ms, several times tau (110ms).
-  const settleFrames = opts.settleFrames || 15;
-  const dtSettle = 1 / 60;
-
-  const last = frames[frames.length - 1];
-  const dur = (last ? last.onset_sec + last.duration_sec : 0) + 0.5;
-
-  const contactDists = [];
-  const distalAngles = [];
-  const perfTimes = [];
-  let collisionPalmHits = 0, collisionFingerHits = 0, collisionThumbHits = 0;
-  let framesSampled = 0;
-
-  for (let t = 0; t < dur; t += step) {
-    CURRENT_SIM.update(t, step, frames, chordGroups);
-    const kin = buildKinSnapshot(CURRENT_SIM, sampleState(t, frames));
-    r._updateDt = dtSettle;
-    for (let i = 0; i < settleFrames; i++) {
-      const t0 = performance.now();
-      r._updateArticulated(kin);
-      perfTimes.push(performance.now() - t0);
-    }
-    framesSampled++;
-
-    const m = r.main;
-    // --- H-9 collision: palm/thumb/each finger's phalanx chain vs. the neck
-    if (r._palmHitsNeck(m)) collisionPalmHits++;
-    for (const f of FINGER_ORDER) {
-      if (r._segmentsHitNeck(m.doigt(f).segments())) { collisionFingerHits++; break; }
-    }
-    if (r._segmentsHitNeck(m.doigt("thumb").segments())) collisionThumbHits++;
-
-    // --- H-11 contact + H-10 distal-phalanx angle, active fingers only
-    for (const f of FINGER_ORDER) {
-      const fg = kin.fingers[f];
-      if (!fg || fg.role !== "active" || !(fg.fret > 0) || !fg.strings || !fg.strings.length) continue;
-      const d = m.doigt(f);
-      const tip = d.tipWorld();
-      const target = { x: r._pressX(fg.fret), y: STRING_SURFACE_VAL, z: r._stringZAt(fg.strings[0]) };
-      contactDists.push(Math.hypot(tip.x - target.x, tip.y - target.y, tip.z - target.z));
-
-      // Angle between the last phalanx and the fretboard's normal (+Y): 0° =
-      // perpendicular to the board (ideal press per H-10), 90° = flat/raking.
-      const segs = d.segments();
-      const [base, distalTip] = segs[segs.length - 1];
-      const dx = distalTip.x - base.x, dy = distalTip.y - base.y, dz = distalTip.z - base.z;
-      const len = Math.hypot(dx, dy, dz) || 1;
-      distalAngles.push(Math.acos(Math.min(1, Math.abs(dy) / len)) * 180 / Math.PI);
-    }
-  }
-
-  // --- H-15 stillness: hold the LAST sampled kin static, measure drift
-  const stillKin = buildKinSnapshot(CURRENT_SIM);
-  r._updateDt = dtSettle;
-  for (let i = 0; i < 20; i++) r._updateArticulated(stillKin);   // pre-settle
-  const beforePos = { ...r.main.node.position };
-  const beforeAngles = FINGER_ORDER.map((f) => JSON.stringify(r.main.doigt(f).theta));
-  let stillDWrist = 0;
-  for (let i = 0; i < 20; i++) {
-    r._updateArticulated(stillKin);
-    const p = r.main.node.position;
-    stillDWrist += Math.abs(p.x - beforePos.x) + Math.abs(p.y - beforePos.y) + Math.abs(p.z - beforePos.z);
-  }
-  const afterAngles = FINGER_ORDER.map((f) => JSON.stringify(r.main.doigt(f).theta));
-  let stillDAngle = 0;
-  for (let i = 0; i < FINGER_ORDER.length; i++) if (beforeAngles[i] !== afterAngles[i]) stillDAngle++;
-
-  // --- H-18 camera invariant: POV<->Face must never move the rig
-  let camInvariantOk = null;
-  if (typeof r.setCameraView === "function" && typeof r.getCameraView === "function") {
-    const view0 = r.getCameraView();
-    const tip0 = r.main.doigt("index").tipWorld();
-    const before = { x: tip0.x, y: tip0.y, z: tip0.z };
-    r.setCameraView(view0 === "pov" ? "face" : "pov");
-    r.setCameraView(view0);
-    const tip1 = r.main.doigt("index").tipWorld();
-    camInvariantOk = (before.x === tip1.x && before.y === tip1.y && before.z === tip1.z);
-  }
-
-  perfTimes.sort((a, b) => a - b);
-  const pct = (p) => (perfTimes.length ? perfTimes[Math.min(perfTimes.length - 1, Math.floor(perfTimes.length * p))] : 0);
-  let maxConsecutiveOver33 = 0, run = 0;
-  for (const ms of perfTimes) { if (ms > 33) { run++; maxConsecutiveOver33 = Math.max(maxConsecutiveOver33, run); } else run = 0; }
-  const avg = (arr) => (arr.length ? arr.reduce((s, v) => s + v, 0) / arr.length : 0);
-  const max = (arr) => (arr.length ? Math.max(...arr) : 0);
-
-  return {
-    contact: { avg: +avg(contactDists).toFixed(3), max: +max(contactDists).toFixed(3), over1: contactDists.filter((d) => d > 1.0).length, n: contactDists.length },
-    collision: { palmHits: collisionPalmHits, fingerHits: collisionFingerHits, thumbHits: collisionThumbHits, framesSampled },
-    perf: { p50: +pct(0.5).toFixed(2), p95: +pct(0.95).toFixed(2), p99: +pct(0.99).toFixed(2), max: +max(perfTimes).toFixed(2), maxConsecutiveOver33 },
-    still: { sumDAngle: stillDAngle, dWrist: +stillDWrist.toFixed(4) },
-    camInvariant: { ok: camInvariantOk },
-    distalAngle: { avg: +avg(distalAngles).toFixed(2), max: +max(distalAngles).toFixed(2), n: distalAngles.length },
-  };
-};
-
-/* Geometry snapshot for the 3D board — same helpers/constants as the SVG path
-   so the 3D fretboard shares one coordinate space with the hand. */
-function hand3dGeometry() {
-  return {
-    NUT_X,
-    fretX,
-    stringY,
-    stringTop:    STRING_Y_TOP,
-    stringBottom: STRING_Y_BOTTOM,
-    // Board-edge slab Y range (outer strings sit BOARD_EDGE_INSET inboard of
-    // these edges).  Shipped as a pair so the 3D neck slab matches the SVG
-    // board; hand3d.js falls back to stringTop/Bottom ± 24 if absent.
-    boardTop:     BOARD_TOP_Y - BOARD_EDGE_INSET,
-    boardBot:     STRING_Y_BOTTOM + BOARD_TOP_MARGIN + BOARD_EDGE_INSET,
-    fretWireW:    FRET_WIRE_W,
-    numFrets:     NUM_FRETS,
-    numStrings:   NUM_STRINGS,
-  };
-}
-
-/* Enable the 3D renderer: dynamically import three.js + the rig, create the
-   renderer, and on success hide the SVG and show the 3D canvas.  On ANY failure
+/* Enable the reference renderer: dynamically import three.js + hand v2, create
+   the renderer, and on success hide the SVG and show the 3D canvas. On any failure
    (import error, WebGL unavailable, construction throw) we stay on SVG and
    surface a small note — never a broken panel.  Returns true on success. */
 async function enableHand3d() {
   if (HAND3D_ACTIVE || HAND3D_LOADING) return HAND3D_ACTIVE;
   HAND3D_LOADING = true;
   const generation = ++HAND_INIT_REVISION;
-  const engine = HAND_ENGINE;
-  const selector = document.getElementById('hand-engine');
-  if (selector) selector.disabled = true;
   const mount = document.getElementById("scene3d");
   const svg   = document.getElementById("scene");
   try {
-    const module = HAND3D_MODULE || (engine === 'v2'
-      ? await import('./js/hand_v2.js') : await import("./js/hand3d.js"));
+    const module = await import('./js/hand_v2.js');
     if (generation !== HAND_INIT_REVISION) return false;
-    HAND3D_MODULE = module;
     const renderer = await module.create(mount);
     if (generation !== HAND_INIT_REVISION) { renderer?.dispose(); return false; }
     if (!renderer) throw new Error("WebGL unavailable or renderer creation failed");
     HAND3D_RENDERER = renderer;
     HAND3D_ACTIVE   = true;
-    if (engine === 'v2') await loadHandPerformance();
-    else renderer.setGeometry(hand3dGeometry());
+    await loadHandPerformance();
     if (generation !== HAND_INIT_REVISION) return false;
     if (mount) mount.style.display = "block";
     if (svg)   svg.style.display   = "none";
-    _syncHand3dButton();
+    _syncTopViewButton();
     _syncCamViewButton();
     return true;
   } catch (e) {
     if (generation !== HAND_INIT_REVISION) return false;
-    // Silent fall back to SVG: log a single warning so the regression is
-    // traceable in DevTools, then revert HAND3D_ACTIVE so the toggle button
-    // ('3D : off') reflects the state and the SVG path resumes rendering.
-    // The import() above is what most commonly fails (network, parse, missing
-    // hand3d.js); we treat any throw (renderer null, setGeometry, WebGL) the
-    // same so the panel is never left blank.
-    console.warn("[hand3d] enable failed; reverting to SVG hand", e);
-    handStatus('Repli schématique 2D : ' + e.message);
+    console.warn("[hand-v2] enable failed; reverting to schematic fallback", e);
+    handStatus('Nouvelle main indisponible : ' + e.message);
     HAND3D_RENDERER?.dispose();
     HAND3D_RENDERER = null;
     HAND3D_ACTIVE   = false;
     if (mount) mount.style.display = "none";
     if (svg)   svg.style.display   = "block";
-    _syncHand3dButton();
+    _syncTopViewButton();
     _syncCamViewButton();
     return false;
   } finally {
-    if (generation === HAND_INIT_REVISION) {
-      HAND3D_LOADING = false;
-      if (selector) selector.disabled = false;
-    }
+    if (generation === HAND_INIT_REVISION) HAND3D_LOADING = false;
   }
 }
 
@@ -2854,8 +2508,6 @@ async function enableHand3d() {
 function disableHand3d() {
   HAND_INIT_REVISION++;
   HAND3D_LOADING = false;
-  const selector = document.getElementById('hand-engine');
-  if (selector) selector.disabled = false;
   HAND_LOAD_REVISION++;
   if (HAND3D_RENDERER) {
     try { HAND3D_RENDERER.dispose(); } catch (e) { /* ignore */ }
@@ -2866,33 +2518,31 @@ function disableHand3d() {
   const svg   = document.getElementById("scene");
   if (mount) mount.style.display = "none";
   if (svg)   svg.style.display   = "block";
-  _syncHand3dButton();
+  _syncTopViewButton();
   _syncCamViewButton();
 }
 
-function _syncHand3dButton() {
-  const btn = document.getElementById("btn-3d");
+function _syncTopViewButton() {
+  const btn = document.getElementById("btn-top-view");
   if (!btn) return;
-  // Label reads as the mode a click switches TO (standard toggle convention).
-  btn.textContent = HAND3D_ACTIVE ? "Vue 2D" : "Vue 3D";
+  btn.style.display = HAND3D_ACTIVE ? "" : "none";
+  const topActive = HAND_CAMERA === 'top';
+  btn.setAttribute("aria-pressed", String(topActive));
+  btn.textContent = topActive ? "Vue 3D" : "Vue dessus";
+  btn.title = topActive
+    ? "Revenir au point de vue 3D précédent"
+    : "Afficher la table des frettes à 90° en projection orthographique";
 }
 
-/* Camera-view preset toggle (#btn-cam-view): only relevant while the 3D
-   renderer is live (2D mode has no camera to preset). CSS already restricts
-   the button to the dedicated tab; this hides/shows it further by 2D/3D
-   state and keeps its label in sync with the renderer's current preset. */
+/* Camera preset selector for the reference hand. */
 function _syncCamViewButton() {
   const btn = document.getElementById("btn-cam-view");
   if (!btn) return;
   btn.style.display = HAND3D_ACTIVE ? "" : "none";
-  if (HAND_ENGINE === 'v2') {
-    btn.textContent = 'Vue : ' + ({fingers:'doigts',thumb:'pouce',palm:'paume',profile:'profil'}[HAND_CAMERA]);
-    btn.title = 'Changer la caméra : doigts, pouce, paume, profil';
-    return;
-  }
-  if (!HAND3D_ACTIVE || !HAND3D_RENDERER || typeof HAND3D_RENDERER.getCameraView !== "function") return;
-  // Label reads as the mode a click switches TO (standard toggle convention).
-  btn.textContent = HAND3D_RENDERER.getCameraView() === "pov" ? "Vue : Face" : "Vue : POV";
+  btn.textContent = 'Vue : ' + ({
+    fingers:'doigts', thumb:'pouce', palm:'paume', profile:'profil', top:'dessus',
+  }[HAND_CAMERA] || HAND_CAMERA);
+  btn.title = 'Changer la caméra : doigts, pouce, paume, profil';
 }
 
 /* A payload has no playable fingering when it has zero frames or every frame is
@@ -2930,8 +2580,7 @@ function installData(data) {
   // geometry (string count / fret span can change between tracks).  The SVG
   // path is geometry-rebuilt by buildFretboard() above; mirror that for 3D.
   if (HAND3D_ACTIVE && HAND3D_RENDERER) {
-    if (HAND_ENGINE === 'v2') loadHandPerformance();
-    else try { HAND3D_RENDERER.setGeometry(hand3dGeometry()); } catch (e) { /* keep SVG-safe */ }
+    loadHandPerformance();
   }
 }
 
@@ -2990,7 +2639,7 @@ window.addEventListener("message", (ev) => {
     EXT_SYNCED = true;
     if (HAND_RATE !== accepted.rate) {
       HAND_RATE = accepted.rate;
-      if (HAND_ENGINE === 'v2' && HAND3D_RENDERER) {
+      if (HAND3D_RENDERER) {
         HAND3D_RENDERER.setPlaybackRate(HAND_RATE).catch(e => handStatus(e.message));
       }
     }
@@ -3005,67 +2654,45 @@ window.addEventListener("message", (ev) => {
   }
 });
 
-/* 3D toggle (Milestone 5).  Clicking flips the persisted flag and swaps
-   renderers cleanly.  Default stays SVG; the 3D path is purely opt-in.
-
-   This is wired at TOP LEVEL (not inside the async data-load IIFE below) on
-   purpose: the script tag sits at the end of <body>, so #btn-3d already exists,
-   and binding here means the toggle is reachable the instant the page parses —
-   independent of whether loadData()/installData() succeed.  Previously this
-   binding lived after `installData(await loadData())`, so any throw while
-   installing data left the visible "3D : off" button dead (clicks did nothing),
-   which is exactly the "I can't reach 3D mode" symptom.  The boot-time flag
-   honouring is likewise hoisted so a saved/URL opt-in still applies on first
-   paint. */
-(function wireHand3dToggle() {
-  const engineSelect = document.getElementById('hand-engine');
-  engineSelect.value = HAND_ENGINE;
-  engineSelect.addEventListener('change', async () => {
-    disableHand3d();
-    HAND_ENGINE = engineSelect.value;
-    try { localStorage.setItem('fretwise.handRenderer', HAND_ENGINE); } catch (_) { /* optional */ }
-    formatHUD(CURRENT_DATA);
-    HAND3D_MODULE = null;
-    await enableHand3d();
-  });
-  const btn3d = document.getElementById("btn-3d");
-  if (btn3d) {
-    _syncHand3dButton();
-    btn3d.addEventListener("click", async () => {
-      if (HAND3D_ACTIVE) {
-        setHand3dFlag(false);
-        disableHand3d();
-      } else {
-        setHand3dFlag(true);
-        await enableHand3d();   // falls back to SVG on failure (button stays "off")
-      }
-    });
-  }
-
-  // Camera-view preset toggle (POV / face) — camera-only, see setCameraView.
+/* Reference-hand camera controls.  Renderer starts unconditionally; failed
+   WebGL/import creation degrades to the non-selectable schematic fallback. */
+(function wireReferenceHandControls() {
   const btnCamView = document.getElementById("btn-cam-view");
   if (btnCamView) {
     _syncCamViewButton();
     btnCamView.addEventListener("click", () => {
-      if (HAND_ENGINE === 'v2' && HAND3D_RENDERER) {
-        const views = ['fingers', 'thumb', 'palm', 'profile'];
-        HAND_CAMERA = views[(views.indexOf(HAND_CAMERA) + 1) % views.length];
-        HAND3D_RENDERER.setCamera(HAND_CAMERA);
-        _syncCamViewButton();
-        return;
-      }
-      if (!HAND3D_RENDERER || typeof HAND3D_RENDERER.setCameraView !== "function") return;
-      const next = HAND3D_RENDERER.getCameraView() === "pov" ? "face" : "pov";
-      HAND3D_RENDERER.setCameraView(next);
+      if (!HAND3D_RENDERER) return;
+      const views = ['fingers', 'thumb', 'palm', 'profile'];
+      const current = HAND_CAMERA === 'top' ? -1 : views.indexOf(HAND_CAMERA);
+      HAND_CAMERA = views[(current + 1) % views.length];
+      HAND_PERSPECTIVE_CAMERA = HAND_CAMERA;
+      HAND3D_RENDERER.setCameraView(HAND_CAMERA);
       _syncCamViewButton();
+      _syncTopViewButton();
     });
   }
 
-  /* Honour an OFF-by-default flag from the URL / localStorage at boot.  Absence
-     of the flag leaves the SVG renderer in place, unchanged. */
-  if (hand3dRequested()) {
-    enableHand3d().then(() => _syncCamViewButton());   // async; SVG keeps rendering until/unless it succeeds
+  const btnTopView = document.getElementById("btn-top-view");
+  if (btnTopView) {
+    _syncTopViewButton();
+    btnTopView.addEventListener("click", () => {
+      if (!HAND3D_RENDERER) return;
+      if (HAND_CAMERA === 'top') {
+        HAND_CAMERA = HAND_PERSPECTIVE_CAMERA;
+      } else {
+        HAND_PERSPECTIVE_CAMERA = HAND_CAMERA;
+        HAND_CAMERA = 'top';
+      }
+      HAND3D_RENDERER.setCameraView(HAND_CAMERA);
+      _syncCamViewButton();
+      _syncTopViewButton();
+    });
   }
+
+  enableHand3d().then(() => {
+    _syncCamViewButton();
+    _syncTopViewButton();
+  });
 })();
 
 (async () => {
@@ -3310,7 +2937,7 @@ window.addEventListener("message", (ev) => {
       };
       /* Only animate the hand when playing; freeze in place on pause so
          the user can inspect/screenshot the current finger positions. */
-      if ((playing || EXT_SYNCED) && !(threeDLive && HAND_ENGINE === 'v2')) {
+      if ((playing || EXT_SYNCED) && !threeDLive) {
         CURRENT_SIM.update(tNow, dt, CURRENT_DATA.frames, CURRENT_CHORD_GROUPS);
       }
       // Renderer selection: when the 3D flag is on AND the renderer is live, the
@@ -3320,11 +2947,7 @@ window.addEventListener("message", (ev) => {
       // kinematics are shared with zero divergence.
       if (threeDLive) {
         try {
-          if (HAND_ENGINE === 'v2') HAND3D_RENDERER.renderAt(tNow);
-          else HAND3D_RENDERER.update(buildKinSnapshot(CURRENT_SIM, getSampledState()));
-          // Warm the pose cache for upcoming shapes during idle time so the
-          // frame that reaches each new shape is a cheap cache hit, not a solve.
-          if (playing && HAND_ENGINE !== 'v2') _scheduleHandPosePrefill(tNow);
+          HAND3D_RENDERER.renderAt(tNow);
         } catch (e) {
           // A render fault must never blank the panel: fall back to SVG.
           disableHand3d();

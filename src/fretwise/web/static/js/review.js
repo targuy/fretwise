@@ -48,6 +48,9 @@ const activeFilters = new Set(['impossible', 'suspect', 'high_cost']);
 let _vizTempo = 120;
 let _vizTuning = [40, 45, 50, 55, 59, 64];
 let _vizFrame = null;
+const _vizSessionId = globalThis.crypto?.randomUUID?.()
+  || `review-hand-${performance.timeOrigin}-${Math.random().toString(36).slice(2)}`;
+let _vizSequence = 0;
 
 /**
  * Initialize the review panel.
@@ -226,7 +229,7 @@ async function _openAlternatives(item, row) {
     const head = document.createElement('div');
     head.className = 'review-cur-head';
     head.innerHTML = '<span>Doigté actuel</span>';
-    const curBtn = _vizButton(current.fingerings);
+    const curBtn = _vizButton(current);
     head.appendChild(curBtn);
     box.appendChild(head);
     box.appendChild(_tabRow(current.fingerings));
@@ -300,7 +303,7 @@ function _midiToNoteName(midi) {
  * Onsets are normalised so the measure starts ~0.3 s in, and each note is held
  * long enough to read the pose. Mirrors main.js's _buildHandVizPayload shape.
  */
-function _buildAltHandPayload(fingerings) {
+function _buildAltHandPayload(fingerings, handPerformance) {
   const tempo = _vizTempo || 120;
   const tuning = (_vizTuning && _vizTuning.length) ? _vizTuning : [40, 45, 50, 55, 59, 64];
   const sorted = fingerings.slice()
@@ -340,8 +343,39 @@ function _buildAltHandPayload(fingerings) {
       num_strings: tuning.length,
     },
     frames,
+    // Main v2 consumes canonical HandPerformance. Frames remain only for the
+    // host's compact look-ahead and version-1 transport envelope.
+    handPerformance,
   };
 }
+
+function _postVizPayload(frame, payload) {
+  if (!frame?.contentWindow) return;
+  const hp = payload.handPerformance;
+  const planId = hp
+    ? `${hp.scoreId}:${hp.trackId}:${hp.scoreRevision}:${hp.fingeringRevision}`
+    : `review-unavailable-${_vizSequence + 1}`;
+  frame.contentWindow.postMessage({
+    type: 'fretwise:load',
+    protocolVersion: 1,
+    sessionId: _vizSessionId,
+    planId,
+    sequence: ++_vizSequence,
+    payload,
+  }, window.location.origin);
+}
+
+function _onVizMessage(event) {
+  if (event.origin !== window.location.origin || event.source !== _vizFrame?.contentWindow) return;
+  if (event.data?.type !== 'fretwise:ready' || event.data.protocolVersion !== 1) return;
+  _vizFrame._ready = true;
+  if (_vizFrame._pending) {
+    _postVizPayload(_vizFrame, _vizFrame._pending);
+    _vizFrame._pending = null;
+  }
+}
+
+window.addEventListener('message', _onVizMessage);
 
 /** Create (once per alternatives box) the shared embedded hand-viz iframe. */
 function _ensureVizFrame(container) {
@@ -352,12 +386,9 @@ function _ensureVizFrame(container) {
   frame._ready = false;
   frame._pending = null;
   frame.addEventListener('load', () => {
-    frame._ready = true;
-    if (frame._pending && frame.contentWindow) {
-      frame.contentWindow.postMessage(
-        { type: 'fretwise-hand-data', payload: frame._pending }, '*');
-      frame._pending = null;
-    }
+    // Wait for the renderer's versioned ready message. iframe load fires before
+    // its async HandTransportReceiver necessarily exists.
+    frame._ready = false;
   });
   // Cache-bust so a fresh standalone instance loads each open.
   frame.src = `/static/hand_viz.html?embed=1&v=${Date.now()}`;
@@ -367,19 +398,21 @@ function _ensureVizFrame(container) {
 }
 
 /** Feed the given fingerings to the shared hand-viz iframe. */
-function _showHand(fingerings) {
+function _showHand(alternative) {
   if (!_vizFrame || !_vizFrame.isConnected) return;
-  const payload = _buildAltHandPayload(fingerings);
+  const payload = _buildAltHandPayload(
+    alternative.fingerings,
+    alternative.hand_performance || null,
+  );
   if (_vizFrame._ready && _vizFrame.contentWindow) {
-    _vizFrame.contentWindow.postMessage(
-      { type: 'fretwise-hand-data', payload }, '*');
+    _postVizPayload(_vizFrame, payload);
   } else {
-    _vizFrame._pending = payload;   // posted on iframe load
+    _vizFrame._pending = payload;   // posted after renderer-ready handshake
   }
 }
 
-/** A "Voir la main" button that loads *fingerings* into the shared viz. */
-function _vizButton(fingerings) {
+/** A "Voir la main" button that loads one canonical alternative into the shared viz. */
+function _vizButton(alternative) {
   const b = document.createElement('button');
   b.type = 'button';
   b.className = 'review-viz-btn';
@@ -388,12 +421,16 @@ function _vizButton(fingerings) {
     'stroke-width="1.7" stroke-linecap="round"><path d="M18 11V6a2 2 0 00-4 0v5"/>' +
     '<path d="M14 10V4a2 2 0 00-4 0v6"/><path d="M10 10.5V6a2 2 0 00-4 0v8"/>' +
     '<path d="M6 14v1a6 6 0 0012 0v-2"/></svg> Voir la main';
+  if (!alternative.hand_performance) {
+    b.disabled = true;
+    b.title = alternative.hand_performance_error || 'Aperçu de la main indisponible';
+  }
   b.addEventListener('click', (ev) => {
     ev.stopPropagation();
     panel.querySelectorAll('.review-viz-btn.is-viz-active')
       .forEach((x) => x.classList.remove('is-viz-active'));
     b.classList.add('is-viz-active');
-    _showHand(fingerings);
+    _showHand(alternative);
   });
   return b;
 }
@@ -414,7 +451,7 @@ function _altCard(item, alt, current) {
   if (diff) card.appendChild(diff);
   const actions = document.createElement('div');
   actions.className = 'review-alt-actions';
-  actions.appendChild(_vizButton(alt.fingerings));
+  actions.appendChild(_vizButton(alt));
   const pick = document.createElement('button');
   pick.className = 'review-alt-pick';
   pick.textContent = 'Choisir ce doigté';

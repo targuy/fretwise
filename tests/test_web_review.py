@@ -8,7 +8,8 @@ from urllib.parse import quote
 import pytest
 from fastapi.testclient import TestClient
 
-from fretwise.web.app import create_app
+from fretwise.models import Finger, FingeringResult, FingeringState, NoteEvent
+from fretwise.web.app import _build_review_hand_performance, create_app
 
 _FIXTURE = (
     Path(__file__).parent / "fixtures"
@@ -44,13 +45,100 @@ def test_alternatives_endpoint_responds(client: TestClient) -> None:
     body = res.json()
     assert body["measure_index"] == 1
     assert isinstance(body["alternatives"], list)
-    # Tempo + tuning are returned so the frontend can build a hand-viz payload.
+    # Tempo + tuning remain available for the compact look-ahead host.
     assert isinstance(body["tempo"], (int, float))
     assert isinstance(body["tuning"], list) and len(body["tuning"]) == 6
-    # Proposed (non-current) alternatives are all playable.
     for alt in body["alternatives"]:
+        # Animation consumes the canonical v2 contract, not a reconstruction
+        # from the legacy frame list in the browser.
+        assert alt["hand_performance_error"] is None
+        performance = alt["hand_performance"]
+        assert performance["schemaVersion"] == "1.1"
+        assert performance["range"]["startTick"] == 0
+        rendered = {
+            (note["fingering"]["stringNo"], note["fingering"]["fretAbs"],
+             note["fingering"]["finger"])
+            for note in performance["notes"]
+        }
+        expected = {
+            (fingering["string"], fingering["fret"], fingering["finger"])
+            for fingering in alt["fingerings"]
+        }
+        assert rendered == expected
+        # Proposed (non-current) alternatives are all playable.
         if not alt["is_current"]:
             assert alt["playable"] is True
+
+
+def test_review_alternative_builds_shifted_canonical_hand_performance() -> None:
+    events = [
+        NoteEvent(
+            pitch=60,
+            onset=8.0,
+            duration=0.5,
+            tempo=120,
+            string_hint=2,
+            fret_hint=1,
+            voice_hint=0,
+            measure_index=3,
+            source_note_id="review-a",
+        ),
+        NoteEvent(
+            pitch=64,
+            onset=8.5,
+            duration=0.5,
+            tempo=120,
+            string_hint=1,
+            fret_hint=0,
+            voice_hint=0,
+            measure_index=3,
+            source_note_id="review-b",
+        ),
+    ]
+    results = [
+        FingeringResult(10, events[0], FingeringState(2, 1, Finger.INDEX, 1), 0.0),
+        FingeringResult(11, events[1], FingeringState(1, 0, Finger.OPEN, 1), 0.0),
+    ]
+    alternative = [
+        {"note_id": 10, "string": 3, "fret": 5, "finger": "ring", "hand_position": 3},
+        {"note_id": 11, "string": 1, "fret": 0, "finger": "open", "hand_position": 3},
+    ]
+
+    performance = _build_review_hand_performance(
+        results,
+        alternative,
+        filename="review.gp",
+        track_id=2,
+        measure_index=3,
+        score_revision_value="source-revision",
+        tuning=[40, 45, 50, 55, 59, 64],
+    )
+
+    assert performance["schemaVersion"] == "1.1"
+    assert performance["range"]["startTick"] == 0
+    assert performance["notes"][0]["onTick"] == 0
+    assert performance["notes"][0]["fingering"] == {
+        "finger": "ring",
+        "stringNo": 3,
+        "fretAbs": 5,
+        "handPositionHint": 3,
+        "provenance": "computed",
+        "locked": False,
+    }
+
+
+def test_review_hand_preview_uses_versioned_same_origin_transport() -> None:
+    js = (
+        Path(__file__).parents[1]
+        / "src" / "fretwise" / "web" / "static" / "js" / "review.js"
+    ).read_text(encoding="utf-8")
+
+    assert "alternative.hand_performance" in js
+    assert "type: 'fretwise:load'" in js
+    assert "type !== 'fretwise:ready'" in js
+    assert "window.location.origin" in js
+    assert "{ type: 'fretwise-hand-data'" not in js
+    assert "}, '*');" not in js
 
 
 def test_choice_persists_sidecar_and_corpus(client: TestClient, tmp_path: Path) -> None:

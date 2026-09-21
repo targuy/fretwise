@@ -8,6 +8,8 @@ import {createReferenceRig} from "./hand_reference_rig.js";
 
 const V = (x = 0, y = 0, z = 0) => new THREE.Vector3(x, y, z);
 const toInternal = p => V(p[0] * 1000, p[2] * 1000, p[1] * 1000);
+const TOP_VIEW_HEIGHT = 184;
+const TOP_CAMERA_DISTANCE = 900;
 
 function disposeTree(object) {
   const geometries = new Set(), materials = new Set(), textures = new Set();
@@ -120,6 +122,8 @@ export class HandV2View {
     container.append(this.renderer.domElement);
     this.scene = new THREE.Scene(); this.scene.background = new THREE.Color(0x222b28);
     this.camera = new THREE.PerspectiveCamera(36, 1, 1, 2500);
+    this.perspectiveCamera = this.camera;
+    this.topCamera = new THREE.OrthographicCamera(-1, 1, 1, -1, 1, 2500);
     this.world = new THREE.Group(); this.scene.add(this.world);
     // The canonical bake is reflective; world correction retains LEFT laterality.
     this.world.scale.x = -1; this.world.rotation.set(Math.PI / 2 - .08, 0, .20, "ZYX");
@@ -151,6 +155,7 @@ export class HandV2View {
     }, {signal});
     this.renderer.domElement.addEventListener("pointermove", e => {
       if (!point) return;
+      if (this.cameraView === "top") { point = [e.clientX, e.clientY]; return; }
       this.theta -= (e.clientX - point[0]) * .007;
       this.phi = Math.max(.1, Math.min(3, this.phi + (e.clientY - point[1]) * .006));
       point = [e.clientX, e.clientY]; this.renderAt(this.time);
@@ -279,8 +284,19 @@ export class HandV2View {
       : V(this.rig.hand.position.x + 20, -18, 35);
     const focus = this.world.localToWorld(center);
     const dist = (this.container.clientWidth < 480 ? 312 : 264) * this.zoom;
-    this.camera.position.set(focus.x + dist * Math.sin(this.phi) * Math.sin(this.theta),
-      focus.y + dist * Math.cos(this.phi), focus.z + dist * Math.sin(this.phi) * Math.cos(this.theta));
+    this._updateProjection();
+    if (this.cameraView === "top") {
+      // Pure plan projection: look along fretboard normal. Across-string axis
+      // stays vertical on screen, leaving neck/frets horizontal like 2D view.
+      const boardNormal = V(0, 1, 0).applyQuaternion(this.world.quaternion).normalize();
+      const screenUp = V(0, 0, 1).applyQuaternion(this.world.quaternion).normalize();
+      this.camera.up.copy(screenUp);
+      this.camera.position.copy(focus).addScaledVector(boardNormal, TOP_CAMERA_DISTANCE);
+    } else {
+      this.camera.up.set(0, 1, 0);
+      this.camera.position.set(focus.x + dist * Math.sin(this.phi) * Math.sin(this.theta),
+        focus.y + dist * Math.cos(this.phi), focus.z + dist * Math.sin(this.phi) * Math.cos(this.theta));
+    }
     this.camera.lookAt(focus); this.keyLight.target.position.copy(focus); this.keyLight.target.updateMatrixWorld();
     const issues = this.poseDiagnostics.length + sample.diagnostics.length;
     this.badge.textContent = `Main v2 · modèle de référence${issues ? ` · ${issues} contrainte(s) non résolue(s)` : " · pouce et collisions non qualifiés"}`;
@@ -288,12 +304,17 @@ export class HandV2View {
   }
 
   setCamera(view) {
-    const cameras = {fingers: [.9, 1.1], thumb: [3, 1.65], palm: [.25, 1.30], profile: [1.48, 1.25]};
-    if (!cameras[view]) return;
-    this.cameraView = view; [this.theta, this.phi] = cameras[view]; this.renderAt(this.time);
+    const cameras = {face: [.9, 1.1], fingers: [.9, 1.1], thumb: [3, 1.65],
+      palm: [.25, 1.30], profile: [1.48, 1.25], top: null};
+    if (!(view in cameras)) return false;
+    this.cameraView = view;
+    if (cameras[view]) [this.theta, this.phi] = cameras[view];
+    this._updateProjection(); this.renderAt(this.time);
+    return true;
   }
-  setCameraView(view) { this.setCamera(view); }
+  setCameraView(view) { return this.setCamera(view); }
   getCameraView() { return this.cameraView; }
+  getCameraProjection() { return this.camera.isOrthographicCamera ? "orthographic" : "perspective"; }
   setDiagnostics(enabled) {
     this.diagnosticsEnabled = Boolean(enabled);
     this.rig.setDiagnostics(this.diagnosticsEnabled && Boolean(this.plan)); this.renderAt(this.time);
@@ -301,11 +322,23 @@ export class HandV2View {
   getDiagnostics() { return [...this.diagnostics, ...this.poseDiagnostics]; }
   getMetrics() { return {fingers: this.metrics || [], planId: this.plan?.key,
     vertices: this.rig.geometry.attributes.position.count, triangles: this.rig.geometry.index.count / 3}; }
+  _updateProjection() {
+    const width = Math.max(1, this.container.clientWidth), height = Math.max(1, this.container.clientHeight);
+    const aspect = width / height;
+    if (this.cameraView === "top") {
+      this.camera = this.topCamera;
+      const halfHeight = TOP_VIEW_HEIGHT * this.zoom / 2;
+      this.camera.left = -halfHeight * aspect; this.camera.right = halfHeight * aspect;
+      this.camera.top = halfHeight; this.camera.bottom = -halfHeight;
+    } else {
+      this.camera = this.perspectiveCamera; this.camera.aspect = aspect;
+    }
+    this.camera.updateProjectionMatrix();
+  }
   resize() {
     if (this.disposed) return;
     const width = Math.max(1, this.container.clientWidth), height = Math.max(1, this.container.clientHeight);
-    this.renderer.setSize(width, height, false); this.camera.aspect = width / height;
-    this.camera.updateProjectionMatrix(); this.renderAt(this.time);
+    this.renderer.setSize(width, height, false); this._updateProjection(); this.renderAt(this.time);
   }
   dispose() {
     if (this.disposed) return;

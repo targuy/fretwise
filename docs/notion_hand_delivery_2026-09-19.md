@@ -22,16 +22,16 @@ personnelles et les captures du prototype ne sont pas intégrées au produit.
 | Mouvement, §§8–10 | Plan déterministe, anticipation, tenues, transitions quintiques, Worker annulable, invalidation vitesse/révision | tests moteur et Worker |
 | Chronologie commune, §19 | Temps nominal issu de l'AudioContext quand actif ; tempo intégré ; pause/seek/vitesse ; bascule audio/métronome sans saut | `test_hand_transport.py`, `test_playback_clock_switch.py` |
 | Échange iframe, §11 | Origine et fenêtre exactes, protocole/session/plan/séquence, gel après 250 ms et diagnostic de désynchronisation | tests transport |
-| Migration, §13 | Moteur historique conservé ; sélection « Nouvelle main · aperçu » ou `?handRenderer=v2`, préférence locale | recette navigateur |
+| Migration, §13 | Main de référence unique ; moteur historique, sélecteur et flags supprimés ; vue dessus orthographique 90° | recette navigateur + tests caméra |
 
 M5/Viterbi conserve son interface. Les données personnelles, configurations serveur,
 modèles ONNX, partitions et travaux HeadRush ne font pas partie de cette release.
 
 ## Utilisation
 
-Ouvrir un morceau avec doigtés enregistrés, choisir **3D**, puis
-**Main → Nouvelle main · aperçu**. L'URL `/?handRenderer=v2` active également le choix.
-Le menu caméra passe entre doigts, pouce, paume et profil. Les changements de piste
+Ouvrir un morceau avec doigtés enregistrés, puis choisir **3D**. La main de référence
+marquée « aperçu » démarre directement. Le menu caméra passe entre doigts, pouce, paume
+et profil ; **Vue dessus** affiche une projection orthographique à 90°. Les changements de piste
 effacent immédiatement l'ancien plan ; une performance absente ne réutilise pas une main ancienne.
 L'aperçu des accords garde les six cordes et se renouvelle à chaque partition.
 

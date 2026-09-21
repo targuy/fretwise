@@ -2,13 +2,10 @@
 
 The hand-viz feature is purely client-side: the "3D" view-segment button
 (data-mode="hand_3d") shows an iframe (#hand3d-view-frame) pointing at the
-committed renderer ``/static/hand_viz.html?view=3d``. That renderer defaults
-to the 3D rig but also carries its own internal 2D/3D toggle (#btn-3d,
-unhidden in dedicated mode) so the tab can fall back to the SVG rendering
-that used to live in the removed floating panel. There is no HTTP endpoint
-to hit, so these guards assert that (1) the app serves the renderer and the
-static shell, and (2) the shell + JS still carry the iframe wiring described
-by the milestone. Mirrors the review-panel smoke test in ``test_web_review.py``.
+committed renderer ``/static/hand_viz.html?view=3d``. That renderer boots the
+single HandPerformance implementation. Schematic SVG remains automatic
+failure fallback, never a user-selectable mode. These guards assert static
+serving, iframe wiring, and absence of historical controls.
 """
 from __future__ import annotations
 
@@ -57,12 +54,14 @@ def test_main_js_wires_hand3d_iframe() -> None:
     assert "handVizPanel" not in js
 
 
-def test_hand_viz_renderer_carries_dedicated_2d_toggle() -> None:
-    """hand_viz.html exposes #btn-3d (unhidden in dedicated mode) as the 2D fallback."""
+def test_hand_viz_renderer_carries_top_projection_control_only() -> None:
+    """Dedicated view exposes top projection, not legacy hand/2D selectors."""
     html = (_STATIC_DIR / "hand_viz.html").read_text(encoding="utf-8")
-    assert 'id="btn-3d"' in html
-    # Dedicated-mode CSS must NOT hide the toggle (it did before this milestone).
-    assert "body.dedicated-3d #btn-3d" not in html
+    assert 'id="btn-top-view"' in html
+    assert "Vue dessus" in html
+    assert 'id="btn-3d"' not in html
+    assert 'id="hand-engine"' not in html
+    assert "Historique" not in html
 
 
 def test_renderer_file_committed_and_nonempty() -> None:

@@ -1,7 +1,8 @@
 # Main v2 : intégration de la référence du 14 septembre 2026
 
 Traçabilité : `specifications/notion_hand_replacement_2026-09-14.md`, sections 7–11,
-16–19. La sélection `handRenderer=v2` conserve le moteur historique disponible.
+16–19. Depuis le 21 septembre 2026, ce moteur est l'unique vue de main. Le sélecteur
+Historique/Nouvelle main et les activations URL/localStorage ont été supprimés.
 
 ## Actif livré
 
@@ -44,14 +45,17 @@ s'agit donc pas encore d'un plan articulaire complet calculé hors rendu.
 - `clearPerformance()` : annule immédiatement le Worker et efface l'ancienne main ;
 - `setPlaybackRate(rate)` : recompile, y compris pendant un premier chargement ;
 - `renderAt(nominalScoreSec)` : échantillonne directement, sans horloge locale ;
-- `setCamera('fingers'|'thumb'|'palm'|'profile')`, `setDiagnostics(enabled)` ;
+- `setCamera('fingers'|'thumb'|'palm'|'profile'|'top')`, `setDiagnostics(enabled)` ;
+- `top` emploie une caméra orthographique alignée sur la normale de la touche :
+  projection du dessus exacte à 90°, sans rotation libre ;
 - `getCapabilities()`, `getDiagnostics()`, `getMetrics()`, `dispose()`.
 
 Le moteur ne reçoit pas de messages iframe et ne crée pas de boucle RAF.
 Le parent gère transport et sécurité du protocole. Le composant ignore les rendus
 hors écran ; il libère géométries, matériaux, textures, Workers et écouteurs à sa
 destruction. Une perte WebGL suspend le rendu ; sa restauration réaffiche le même
-instant musical. Un échec d'import ou de création remonte au parent pour son repli SVG.
+instant musical. Un échec d'import ou de création remonte au parent pour son repli SVG
+automatique. Ce repli n'est pas sélectionnable dans l'interface.
 
 ## Couverture et limites affichées
 

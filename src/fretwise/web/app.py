@@ -5,11 +5,13 @@ from __future__ import annotations
 import asyncio
 import json
 import json as _json
+import logging
 import os
 import re
 import shutil
 import threading
 from collections.abc import Mapping
+from dataclasses import replace
 from datetime import date as _date
 from pathlib import Path
 from typing import Any
@@ -2590,6 +2592,31 @@ def _register_routes(app: FastAPI) -> None:
                 seen_strings[e.string_hint] = e.pitch - e.fret_hint
         for s, open_pitch in seen_strings.items():
             tuning[s - 1] = open_pitch
+        score_rev = source_revision(filepath)
+        serialized_alternatives: list[dict[str, Any]] = []
+        for alt in alts:
+            serialized = _serialize_alternative(alt)
+            try:
+                serialized["hand_performance"] = _build_review_hand_performance(
+                    payload.results,
+                    alt.fingerings,
+                    filename=filename,
+                    track_id=track_id,
+                    measure_index=measure_index,
+                    score_revision_value=score_rev,
+                    tuning=tuning,
+                )
+                serialized["hand_performance_error"] = None
+            except (ValueError, TypeError, KeyError, IndexError) as exc:
+                logging.getLogger(__name__).warning(
+                    "Review hand performance unavailable for %s/%s: %s",
+                    filename,
+                    alt.variant_id,
+                    exc,
+                )
+                serialized["hand_performance"] = None
+                serialized["hand_performance_error"] = str(exc)
+            serialized_alternatives.append(serialized)
         return {
             "filename": filename,
             "measure_index": measure_index,
@@ -2597,7 +2624,7 @@ def _register_routes(app: FastAPI) -> None:
             "incomplete": len(alts) < requested,
             "tempo": events[0].tempo if events else 120.0,
             "tuning": tuning,
-            "alternatives": [_serialize_alternative(a) for a in alts],
+            "alternatives": serialized_alternatives,
         }
 
     @app.post("/api/review/{filename}/choice")
@@ -2909,6 +2936,75 @@ def _serialize_alternative(alt: Any) -> dict[str, Any]:
         "label": alt.label,
         "playable": alt.playable,
     }
+
+
+def _build_review_hand_performance(
+    results: list[FingeringResult],
+    alternative: list[dict[str, object]],
+    *,
+    filename: str,
+    track_id: int | None,
+    measure_index: int,
+    score_revision_value: str,
+    tuning: list[int],
+) -> dict[str, Any]:
+    """Build v2 hand data for one review alternative without re-optimizing it.
+
+    Review previews intentionally contain only the selected measure. Their score
+    time starts at zero so the standalone iframe can loop immediately. The
+    alternative's exact decisions replace the matching final-result rows before
+    the shared HandPerformance builder validates source occurrences and emits the
+    canonical contract.
+    """
+    alternative_by_id = {int(row["note_id"]): row for row in alternative}
+    selected = [
+        result for result in results
+        if result.note_event.measure_index == measure_index
+    ]
+    selected_ids = {result.note_id for result in selected}
+    if not selected or set(alternative_by_id) != selected_ids:
+        raise ValueError("Review alternative does not cover the complete measure")
+
+    onset_origin = min(result.note_event.onset for result in selected)
+    shifted_events: list[NoteEvent] = []
+    rows: list[dict[str, Any]] = []
+    for result in selected:
+        shifted_event = replace(
+            result.note_event,
+            onset=result.note_event.onset - onset_origin,
+        )
+        shifted_events.append(shifted_event)
+        row = _serialize_result(result)
+        row["onset"] = shifted_event.onset
+        decision = alternative_by_id[result.note_id]
+        row.update({
+            "string": int(decision["string"]),
+            "fret": int(decision["fret"]),
+            "finger": str(decision["finger"]),
+            "hand_position": int(decision["hand_position"]),
+            # Holds from the current solution may be invalid for another variant.
+            # The canonical builder derives note lifetimes from the shifted events.
+            "planted_fingers": {},
+        })
+        rows.append(row)
+
+    tempo = shifted_events[0].tempo if shifted_events else 120.0
+    build_performance(rows, default_tempo=tempo)
+    revision = fingering_revision(rows)
+    context = {
+        "scoreId": f"{filename}#review-{measure_index}",
+        "trackId": str(track_id or 0),
+        "scoreRevision": score_revision_value,
+        "fingeringRevision": revision,
+    }
+    instrument = {
+        "capoFret": 0,
+        "strings": [
+            {"number": number, "openPitchMidi": pitch}
+            for number, pitch in enumerate(reversed(tuning), start=1)
+        ],
+    }
+    return build_saved_hand_performance(shifted_events, rows, context, instrument)
 
 
 def _features_for(results: list[FingeringResult], note_id: int) -> dict[str, float]:
