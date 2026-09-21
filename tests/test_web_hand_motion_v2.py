@@ -151,6 +151,15 @@ console.log(JSON.stringify({{output,vertices:rig.geometry.attributes.position.co
             assert finger["valid"] is True
 
 
+def test_reference_hand_does_not_add_unanchored_procedural_nails() -> None:
+    """Finger skin remains authoritative until nail anatomy is part of the asset."""
+    source = (JS / "hand_reference_rig.js").read_text(encoding="utf-8")
+    assert "putNail(" not in source
+    assert "const nails=" not in source
+    assert "nailMat=" not in source
+    assert "SphereGeometry(1,20,12)" not in source
+
+
 def test_reference_forearm_bends_below_and_across_neck_without_moving_contacts() -> None:
     result = run_js(f"""
 const T=await import({json.dumps((JS / 'vendor/three.module.min.js').as_uri())});

@@ -114,8 +114,6 @@ const armAxisPoints=Array.from({length:24},(_,i)=>canonical([-.03732416,.0559862
 const armAxis=new T.Line(new T.BufferGeometry().setFromPoints(armAxisPoints),new T.LineBasicMaterial({color:0x459379,depthTest:false}));armAxis.name='reference-forearm-axis';jointGroup.add(armAxis);
 const contactGroup=new T.Group();world.add(contactGroup);contactGroup.visible=false;const contactMat=new T.MeshBasicMaterial({color:0x57bd94,transparent:true,opacity:.95,depthTest:false}),rings=Array.from({length:4},()=>{const o=mesh(new T.TorusGeometry(2.1,.32,8,20),contactMat,contactGroup);o.rotation.x=-Math.PI/2;o.renderOrder=6;return o;});
 const fretContactMat=new T.MeshBasicMaterial({color:0xc78936,depthTest:false});const fretRings=Array.from({length:4},()=>{const o=mesh(new T.TorusGeometry(1.2,.25,8,20),fretContactMat,contactGroup);o.rotation.x=-Math.PI/2;o.renderOrder=5;return o;});
-const nailMat=new T.MeshPhysicalMaterial({color:0xe8c5b2,roughness:.38,clearcoat:.25});const nails=Array.from({length:5},()=>mesh(new T.SphereGeometry(1,20,12),nailMat,hand));
-function putNail(n,a,b,padNormal,width,length){const d=b.clone().sub(a).normalize(),normal=padNormal.clone().addScaledVector(d,-padNormal.dot(d)).normalize().negate(),x=d.clone().cross(normal).normalize(),y=normal.clone().cross(x);n.position.copy(a).lerp(b,.52).addScaledVector(normal,4.8);n.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(x,y,normal));n.scale.set(width,length,.55);}
 const padSamples=chains.map(c=>{
  const axis=rest[c[4]].clone().sub(rest[c[3]]),length=axis.length();axis.normalize();
  return verts.map((v,i)=>({v,i})).filter(({v})=>{const d=v.p.clone().sub(rest[c[3]]);return d.dot(axis)>length*.25&&v.p.distanceTo(rest[c[4]])<18;}).map(({i})=>i);
@@ -141,7 +139,7 @@ function solveContact(f,goal){
  const result={sol,point,error};if(contactCache.size>750)contactCache.delete(contactCache.keys().next().value);contactCache.set(key,result);return result;
 }
 function thumbPose(){const base=rest[tc[0]].clone(),baseWorld=base.clone().add(hand.position),dy=8,dx=-15,dz=-Math.sqrt(Math.max(.1,tl[0]**2-dy**2-dx**2)),mcp=base.clone().add(V(dx,dy,dz)),direction=V(-.20,.19,-.961).normalize(),ip=mcp.clone().addScaledVector(direction,tl[1]),tip=ip.clone().addScaledVector(direction,tl[2]),points=[base,mcp,ip,tip];
-function frame(d,n){const y=d.clone().normalize(),z=n.clone().addScaledVector(y,-n.dot(y)).normalize(),x=y.clone().cross(z).normalize();return new T.Matrix4().makeBasis(x,y,z);}for(let j=0;j<3;j++){const i=tc[j],d=points[j+1].clone().sub(points[j]),old=rest[tc[j+1]].clone().sub(rest[i]);let q;if(j===0)q=new T.Quaternion().setFromUnitVectors(old.normalize(),d.normalize());else {const swing=new T.Quaternion().setFromUnitVectors(old.clone().normalize(),d.clone().normalize()),facing=new T.Quaternion().setFromRotationMatrix(frame(d,up).multiply(frame(old,P).invert()));q=swing.slerp(facing,Math.min(1,rad(20)/Math.max(.001,swing.angleTo(facing))));}setBone(i,points[j],q);}setBone(tc[3],tip,boneQ[tc[2]]);const thumbNormal=P.clone().applyQuaternion(boneQ[tc[2]]);putNail(nails[4],ip,tip,thumbNormal,5.0,5.4);return points;}
+function frame(d,n){const y=d.clone().normalize(),z=n.clone().addScaledVector(y,-n.dot(y)).normalize(),x=y.clone().cross(z).normalize();return new T.Matrix4().makeBasis(x,y,z);}for(let j=0;j<3;j++){const i=tc[j],d=points[j+1].clone().sub(points[j]),old=rest[tc[j+1]].clone().sub(rest[i]);let q;if(j===0)q=new T.Quaternion().setFromUnitVectors(old.normalize(),d.normalize());else {const swing=new T.Quaternion().setFromUnitVectors(old.clone().normalize(),d.clone().normalize()),facing=new T.Quaternion().setFromRotationMatrix(frame(d,up).multiply(frame(old,P).invert()));q=swing.slerp(facing,Math.min(1,rad(20)/Math.max(.001,swing.angleTo(facing))));}setBone(i,points[j],q);}setBone(tc[3],tip,boneQ[tc[2]]);return points;}
 
 let lastMetrics=[];
 return {
@@ -159,9 +157,6 @@ return {
         ? V(value.targetM[0]*1000,value.targetM[2]*1000,value.targetM[1]*1000)
         : V(shift+rest[chains[f][1]].x+3,12,16+f*1.5);
       const result=solveContact(f,tg.clone().sub(hand.position)),sol=result.sol;
-      const endAngle=A-sol.q.reduce((a,b)=>a+b,0);
-      const pad=sol.h.clone().multiplyScalar(Math.sin(endAngle)).addScaledVector(up,-Math.cos(endAngle));
-      putNail(nails[f],sol.points[2],sol.points[3],pad,[4.3,4.7,4.4,3.6][f],[4.5,4.8,4.5,4][f]);
       const point=result.point.clone().add(hand.position);
       rings[f].position.copy(point);rings[f].visible=value.pressure01>0&&result.error<.5;
       fretRings[f].visible=rings[f].visible;

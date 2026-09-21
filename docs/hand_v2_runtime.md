@@ -30,6 +30,11 @@ avant-bras situé sous le manche, avec retour transversal vers celui-ci. Cette
 correction visuelle conserve la paume et les contacts résolus des doigts ; elle
 ne constitue pas une recommandation ergonomique ni un modèle de bras articulé.
 
+Les faux ongles procéduraux ont été retirés : ils n'étaient pas ancrés à une
+géométrie de lit unguéal et rendaient des pastilles visibles aux extrémités. La
+main reste rendue avec le mesh de peau de référence jusqu'à disponibilité d'un
+actif d'ongles anatomiquement qualifié.
+
 ## Transport et cycle de vie
 
 `hand_motion.js` compile HandPerformance 1.0/1.1 en contacts indépendants par doigt,
