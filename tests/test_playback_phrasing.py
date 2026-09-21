@@ -141,6 +141,18 @@ def test_prebend_starts_already_bent() -> None:
     assert curve[0][1] >= 1.9  # pre-bent from the very start
 
 
+def test_partial_source_bend_curve_is_normalized_without_breaking_playback() -> None:
+    p = _perf(_note(
+        duration=1.0,
+        bend_points=[(0.0, 0.0), (0.0, 80.0), (0.75, 200.0)],
+    ))
+    curve = p["bend"]
+    assert curve is not None
+    assert max(point[1] for point in curve) >= 1.9
+    assert curve[0][0] == 0.0
+    assert curve[-1][1] == 0.0
+
+
 def test_shift_slide_targets_next_note_on_string() -> None:
     notes = [
         _note(onset=0.0, duration=1.0, pitch=60, string=3, slide_type="shift"),

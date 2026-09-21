@@ -171,17 +171,33 @@ def _bend_control_points(
     points: list[tuple[float, float]] = []
 
     # Source curves take precedence over maximum-amplitude approximations.
-    # NoteEvent positions are normalized; values are cents, player uses semitones.
+    # Importers sometimes preserve a partial curve (or duplicate control points).
+    # Playback must remain available when that optional expression data is malformed.
+    # Values are cents; the player uses semitones.
     source_points = note.get("bend_points")
     if source_points:
-        points = [(float(position), float(cents) / 100.0)
-                  for position, cents in source_points]
-        if any(not math.isfinite(p) or not math.isfinite(v) for p, v in points):
-            raise ValueError("Bend curve contains a non-finite value")
-        if (len(points) < 2 or points[0][0] != 0 or points[-1][0] != 1
-                or any(a[0] >= b[0] for a, b in zip(points, points[1:]))):
-            raise ValueError("Bend curve must cover 0..1 with increasing positions")
-        return points
+        try:
+            source_curve = [(float(position), float(cents) / 100.0)
+                            for position, cents in source_points]
+        except (TypeError, ValueError):
+            source_curve = []
+
+        if (source_curve
+                and all(math.isfinite(position) and math.isfinite(value)
+                        for position, value in source_curve)
+                and all(0.0 <= position <= 1.0 for position, _ in source_curve)):
+            source_curve.sort(key=lambda point: point[0])
+            for position, value in source_curve:
+                if points and position == points[-1][0]:
+                    # A later point at the same instant supersedes the earlier one.
+                    points[-1] = (position, value)
+                else:
+                    points.append((position, value))
+            if points[0][0] > 0.0:
+                points.insert(0, (0.0, points[0][1]))
+            if points[-1][0] < 1.0:
+                points.append((1.0, points[-1][1]))
+            return points
 
     bend_value = note.get("bend_value")
     if isinstance(bend_value, (int, float)) and abs(float(bend_value)) > 0.001:
