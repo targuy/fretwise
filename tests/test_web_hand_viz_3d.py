@@ -16,8 +16,8 @@ _THREE_JS = _STATIC_DIR / "js" / "vendor" / "three.module.min.js"
 _NODE = shutil.which("node")
 
 
-def test_reference_hand_is_unconditional_and_legacy_mode_is_removed() -> None:
-    """HandPerformance v2 boots directly; old engine has no runtime path."""
+def test_reference_hand_is_default_when_performance_is_available_and_legacy_mode_is_removed() -> None:
+    """HandPerformance v2 is automatic; old engine has no runtime path."""
     html = _HAND_VIZ.read_text(encoding="utf-8")
     main = _MAIN_JS.read_text(encoding="utf-8")
 
@@ -36,6 +36,21 @@ def test_reference_hand_is_unconditional_and_legacy_mode_is_removed() -> None:
     ):
         assert removed not in html
         assert removed not in main
+
+
+def test_missing_hand_performance_keeps_schematic_fallback_visible() -> None:
+    """A legacy/standalone frames payload must never leave a blank 3D panel."""
+    html = _HAND_VIZ.read_text(encoding="utf-8")
+
+    assert "function hasHandPerformance(data = CURRENT_DATA)" in html
+    assert "Aperçu schématique affiché." in html
+    enable = html[html.index("async function enableHand3d()") :]
+    enable = enable[: enable.index("\nfunction disableHand3d")]
+    assert "if (!hasHandPerformance())" in enable
+    assert "await import('./js/hand_v2.js')" in enable
+    assert enable.index("if (!hasHandPerformance())") < enable.index(
+        "await import('./js/hand_v2.js')"
+    )
 
 
 def test_reference_assets_and_schematic_failure_fallback_remain() -> None:

@@ -2435,14 +2435,19 @@ function handStatus(message) {
     ? 'TRANSPORT_DESYNC · synchronisation interrompue, pose figée. ' + message : message;
 }
 
+function hasHandPerformance(data = CURRENT_DATA) {
+  const performance = data?.handPerformance;
+  return !!performance && Array.isArray(performance.notes) && performance.notes.length > 0;
+}
+
 async function loadHandPerformance() {
-  if (!HAND3D_RENDERER) return;
+  if (!HAND3D_RENDERER) return false;
   const view = HAND3D_RENDERER;
   const revision = ++HAND_LOAD_REVISION;
-  if (!CURRENT_DATA?.handPerformance) {
+  if (!hasHandPerformance()) {
     view.clearPerformance();
     handStatus('Nouvelle main : données de performance indisponibles pour cette piste.');
-    return;
+    return false;
   }
   handStatus('Nouvelle main : préparation des mouvements…');
   try {
@@ -2454,11 +2459,13 @@ async function loadHandPerformance() {
     handStatus('Main v2 · maquette intégrée' + (diagnostics.length
       ? ' · ' + diagnostics.length + ' diagnostic(s) : ' + diagnostics[0].message : ''));
     view.renderAt(extT || 0);
+    return true;
   } catch (error) {
     if (revision === HAND_LOAD_REVISION) {
       view.clearPerformance();
       handStatus('Main v2 indisponible : ' + error.message);
     }
+    return false;
   }
 }
 
@@ -2468,6 +2475,12 @@ async function loadHandPerformance() {
    surface a small note — never a broken panel.  Returns true on success. */
 async function enableHand3d() {
   if (HAND3D_ACTIVE || HAND3D_LOADING) return HAND3D_ACTIVE;
+  if (!hasHandPerformance()) {
+    handStatus('Nouvelle main : données de performance indisponibles pour cette piste. Aperçu schématique affiché.');
+    _syncTopViewButton();
+    _syncCamViewButton();
+    return false;
+  }
   HAND3D_LOADING = true;
   const generation = ++HAND_INIT_REVISION;
   const mount = document.getElementById("scene3d");
@@ -2480,7 +2493,7 @@ async function enableHand3d() {
     if (!renderer) throw new Error("WebGL unavailable or renderer creation failed");
     HAND3D_RENDERER = renderer;
     HAND3D_ACTIVE   = true;
-    await loadHandPerformance();
+    if (!await loadHandPerformance()) throw new Error("HandPerformance loading failed");
     if (generation !== HAND_INIT_REVISION) return false;
     if (mount) mount.style.display = "block";
     if (svg)   svg.style.display   = "none";
@@ -2576,11 +2589,22 @@ function installData(data) {
   // Clear any hand drawn for a previous (fingered) track and show/hide the
   // graceful empty-state message.
   renderNoFingeringState();
-  // If the 3D renderer is live, refresh its fretboard for the new track's
-  // geometry (string count / fret span can change between tracks).  The SVG
-  // path is geometry-rebuilt by buildFretboard() above; mirror that for 3D.
+  // A track without canonical HandPerformance keeps the non-selectable SVG
+  // fallback visible. A later parent payload with valid performance turns the
+  // reference renderer on automatically.
   if (HAND3D_ACTIVE && HAND3D_RENDERER) {
-    loadHandPerformance();
+    if (hasHandPerformance(data)) {
+      loadHandPerformance().then((loaded) => {
+        if (!loaded && HAND3D_ACTIVE) disableHand3d();
+      });
+    } else {
+      handStatus('Nouvelle main : données de performance indisponibles pour cette piste. Aperçu schématique affiché.');
+      disableHand3d();
+    }
+  } else if (hasHandPerformance(data)) {
+    void enableHand3d();
+  } else {
+    handStatus('Nouvelle main : données de performance indisponibles pour cette piste. Aperçu schématique affiché.');
   }
 }
 
