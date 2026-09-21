@@ -2,10 +2,9 @@
 
 from __future__ import annotations
 
-from pathlib import Path
-
 import pytest
 
+from fretwise.generator import StateGenerator
 from fretwise.ml.phrase_window import LearnedPhraseWindowFingerer
 from fretwise.models import (
     Articulation,
@@ -15,7 +14,9 @@ from fretwise.models import (
     FingeringState,
     NoteEvent,
 )
+from fretwise.optimizer import ViterbiOptimizer
 from fretwise.pipeline import run_pipeline_with_guard_report, split_by_voice
+from fretwise.scoring import CostFunction
 
 
 def _note(pitch: int, onset: float, voice: int | None = None) -> NoteEvent:
@@ -148,9 +149,19 @@ def test_phrase_window_runtime_failure_falls_back_to_rule_result(
     monkeypatch: pytest.MonkeyPatch,
     caplog: pytest.LogCaptureFixture,
 ) -> None:
-    model = LearnedPhraseWindowFingerer.from_model_dir(Path("data/models"), version="v2")
+    # This test injects a resolver failure, so loading ONNX heads is unrelated.
+    model = object.__new__(LearnedPhraseWindowFingerer)
 
-    def fail_inference(*args: object, **kwargs: object) -> None:
+    events = [_note(60, float(index), 0) for index in range(3)]
+    baseline = run_pipeline_with_guard_report(
+        events, StateGenerator(), ViterbiOptimizer(CostFunction()),
+    )
+
+    def fail_inference(results: list[FingeringResult], *args: object, **kwargs: object) -> None:
+        # Even a failing third-party resolver must not corrupt the fallback.
+        results[0].state.finger = Finger.PINKY
+        results[0].state.hand_position = 19
+        results[0].cost = 999999
         raise RuntimeError("injected ONNX failure")
 
     monkeypatch.setattr(
@@ -159,13 +170,13 @@ def test_phrase_window_runtime_failure_falls_back_to_rule_result(
     )
 
     payload = run_pipeline_with_guard_report(
-        [_note(60, 0.0, 0)],
-        _StubGenerator(),  # type: ignore[arg-type]
-        _StubOptimizer(),  # type: ignore[arg-type]
+        events, StateGenerator(), ViterbiOptimizer(CostFunction()),
         phrase_window_fingerer=model,
     )
 
-    assert len(payload.results) == 1
+    assert len(payload.results) == 3
+    assert [row.state for row in payload.results] == [row.state for row in baseline.results]
+    assert [row.cost for row in payload.results] == [row.cost for row in baseline.results]
     assert payload.stats["phrase_window_fallback"] == 1
     assert "using rules" in caplog.text
 

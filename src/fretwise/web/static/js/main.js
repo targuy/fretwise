@@ -27,6 +27,7 @@ import { chooseMidiOutput, connectedMidiOutputs, requestWebMidiAccess, sendMidiM
 // ── State ───────────────────────────────────────────────────────────
 
 let currentFile = null;
+let _selectFileToken = 0;
 let currentTrackId = null;
 let _reviewTrackName = null;
 let currentTracks = [];   // all tracks for the current file
@@ -98,6 +99,7 @@ let _browserMidiAccess = null;
 // /api/solve response. Avoids re-hitting the network (and re-deserialising a
 // large payload) when the user flips back to a track/mode already viewed.
 const _solveCache = new Map();
+let _solveCacheRevision = 0;
 // key: primaryTrackId → Set<secondaryTrackId> — tracks explicitly muted by the user
 const _mutedSecondaryTracks = new Map();
 // Files discovered (via solve) to have chord diagrams embedded — used for the
@@ -159,8 +161,9 @@ function _backendRepresentationMode(mode) {
 async function _cachedSolve(file, trackId, mode, prefs, svgWidth) {
   const key = _solveCacheKey(file, trackId, mode, prefs, svgWidth);
   if (_solveCache.has(key)) return _solveCache.get(key);
+  const revision = _solveCacheRevision;
   const data = await fetchSolve(file, trackId, mode, prefs, svgWidth);
-  _solveCache.set(key, data);
+  if (revision === _solveCacheRevision) _solveCache.set(key, data);
   return data;
 }
 
@@ -919,7 +922,7 @@ function _renderPager(pageCount) {
 // ── Library multi-select + batch fingering calculation ───────────────────────
 
 // Algo version must match FINGERING_ALGO_VERSION in app.py (bumped on pipeline changes).
-const FINGERING_ALGO_VERSION = '2.1';
+const FINGERING_ALGO_VERSION = '2.3';
 
 function _updateSelectionBar() {
   const bar = $('#lib-selection-bar');
@@ -1212,8 +1215,16 @@ async function _showSongInfo(f) {
 // ── Track selector ──────────────────────────────────────────────────
 
 async function selectFile(filename) {
+  const fileToken = ++_selectFileToken;
+  ++_selectTrackToken;
+  _resetStaleFingeringWarning(true);
+  _updateFingeringValidity(null);
+  playback?.detachRenderer();
+  _synthTask?.close();
+  _synthTask = null;
   currentFile = filename;
   _notesCache.clear();
+  ++_solveCacheRevision;
   _solveCache.clear();
   _mutedSecondaryTracks.clear();
   resetReview();
@@ -1224,6 +1235,7 @@ async function selectFile(filename) {
 
   try {
     const tracks = await fetchTracks(filename);
+    if (fileToken !== _selectFileToken) return;
     currentTracks = tracks;
     if (!tracks.length) {
       // Stay on file selector and surface the error
@@ -1236,11 +1248,13 @@ async function selectFile(filename) {
     // first track when the song has no guitar at all.
     const firstGuitar = tracks.find((t) => isGuitarKind(t.kind)) || tracks[0];
     await selectTrack(firstGuitar.id, firstGuitar.name);
+    if (fileToken !== _selectFileToken) return;
     // Warm the server-side solve cache for every track × representation
     // mode while the user is reading the first one. Runs entirely in the
     // background; failures are silent (next interactive solve will retry).
     _prefetchAllTrackModes(filename, tracks);
   } catch (err) {
+    if (fileToken !== _selectFileToken) return;
     const libEmpty = $('#lib-empty');
     if (libEmpty) { libEmpty.style.display = ''; libEmpty.textContent = `Error loading "${sanitize(filename)}": ${sanitize(err.message)}`; }
   }
@@ -1290,7 +1304,11 @@ function _prefetchAllTrackModes(filename, tracks) {
       // Warm BOTH the server LRU and our client-side object cache so the next
       // interactive switch to this (track, mode) renders without any network.
       fetchSolve(filename, t.id, mode, prefs, svgW)
-        .then((data) => { _solveCache.set(key, data); })
+        .then((data) => {
+          if (myToken === _prefetchAbortToken && filename === currentFile) {
+            _solveCache.set(key, data);
+          }
+        })
         .catch(() => { /* silent — interactive solve will retry */ });
     }
   }
@@ -1311,6 +1329,8 @@ let _autoPlayAfterSolve = false;   // play was requested before fingerings exist
 
 async function selectTrack(trackId, trackName) {
   const myToken = ++_selectTrackToken;
+  _resetStaleFingeringWarning();
+  _updateFingeringValidity(null);
   _solveInFlight = true;
   currentTrackId = trackId;
   _reviewTrackName = trackName;  // remembered so the review panel can re-solve
@@ -1332,7 +1352,7 @@ async function selectTrack(trackId, trackName) {
   // it on the new track. Without this, switching tracks always restarts
   // from measure 0 — confirmed annoying by the PO.
   let restorePos = null;
-  if (playback) {
+  if (playback?.renderer) {
     const wasPlaying = playback.isPlaying;
     if (wasPlaying) {
       playback.pause();
@@ -1402,6 +1422,7 @@ async function selectTrack(trackId, trackName) {
       _applyTrackKindLock();
     }
     initRenderer(viewData);
+    _showStaleFingeringWarning(viewData);
     // Record chord-diagram availability for this file and update the library badge.
     if (viewData?.chord_diagrams?.length && currentFile && !_chordFilesSet.has(currentFile)) {
       _chordFilesSet.add(currentFile);
@@ -1419,6 +1440,10 @@ async function selectTrack(trackId, trackName) {
       }
     }
     renderAuditBanner(viewData?.audit, {
+      fingeringValidity: viewData.fingering_validation_scope === 'saved'
+        ? 'unknown' : viewData.fingering_validity,
+      biomechanicalFatal: viewData.fingering_validation_scope === 'saved'
+        ? null : viewData.biomechanical_fatal,
       onMaskedMeasuresChange: () => _syncCoreSvgFingering(),
     });
     _gateReviewButton(viewData?.audit);
@@ -1483,6 +1508,7 @@ async function selectTrack(trackId, trackName) {
     // in flight.
     if (myToken === _selectTrackToken) {
       _solveInFlight = false;
+      _refreshStaleFingeringControls();
       _setSongLoading(false);
       _setTabsBusy(false);
     }
@@ -1563,28 +1589,14 @@ async function exportGP() {
 }
 
 async function saveGP() {
-  if (!currentFile) return;
-  if (!currentFile.toLowerCase().endsWith('.gp')) {
-    _setPdfExportStatus(
-      'Sauvegarde GP réservée aux fichiers GP 7/8 (.gp)', 'warn',
-    );
-    return;
-  }
+  if (!currentFile || _insertRunning || _bgComputeRunning || _solveInFlight) return;
   if (btnHeaderSave) {
     btnHeaderSave.disabled = true;
     btnHeaderSave.setAttribute('aria-label', 'Sauvegarde…');
   }
-  _setPdfExportStatus('Sauvegarde des doigtés…', 'neutral');
-  const _t = notifyTask('Sauvegarde des doigtés…');
   try {
-    const { saved, annotated_notes } = await fetchSaveGp(currentFile, currentTrackId);
-    _t.done(`Doigtés sauvegardés (${annotated_notes} notes)`);
-    _setPdfExportStatus(
-      `Doigtés sauvegardés → ${saved} (${annotated_notes} notes)`, 'ok',
-    );
-  } catch (err) {
-    _t.error(err.message || 'Sauvegarde GP échouée');
-    _setPdfExportStatus(err.message || 'Sauvegarde GP échouée', 'error');
+    // Saving recomputes: refresh the displayed notes, audit and validity together.
+    await _insertFingerings({ background: false, stream: true });
   } finally {
     if (btnHeaderSave) {
       btnHeaderSave.disabled = false;
@@ -2549,6 +2561,7 @@ function initRenderer(data) {
   }
   // Update "Insérer les doigtés" button appearance based on sidecar status.
   _updateInsertFingeringsBtn(data);
+  _updateFingeringValidity(data);
   renderer.render();
   _slopeRenderer?.setVisible((data.__client_view_mode || getSelectedRepresentationMode()) === MODES.SLOPE);
   _rainRenderer?.setVisible((data.__client_view_mode || getSelectedRepresentationMode()) === MODES.RAIN);
@@ -2658,24 +2671,10 @@ function initRenderer(data) {
     try { notifyTask('Soundfont').error(message); } catch (_) { /* notices optional */ }
   };
   // Enable audio immediately (muting is handled per-track in the multi-track bar)
+  if (playback._synthLoading) playback.onSynthStatusChange('loading');
   playback.enableAudio();
 
-  // Safari/iOS: enableAudio() above creates the AudioContext in a 'suspended'
-  // state because page load is not a user gesture, and the browser only resumes
-  // it from within one. The splash screen now consumes the very first click, so
-  // resume the context on the first user gesture anywhere — the splash dismiss
-  // click bubbles to this capture-phase listener, unlocking sound before any
-  // playback. Self-removing: later play handlers already re-resume as a backup.
-  {
-    const _unlockAudio = () => {
-      playback.resumeAudioContext();
-      if (!playback.audioEnabled) playback.enableAudio();
-      ['pointerdown', 'touchend', 'keydown'].forEach((evt) =>
-        window.removeEventListener(evt, _unlockAudio, { capture: true }));
-    };
-    ['pointerdown', 'touchend', 'keydown'].forEach((evt) =>
-      window.addEventListener(evt, _unlockAudio, { capture: true }));
-  }
+  // The engine owns one gesture-unlock listener set for this whole page session.
 
   // Wire position scrubber
   playback.onPositionChange = (frac) => {
@@ -3188,7 +3187,13 @@ function _rebuildMultiTrackBar(primaryTrackId) {
 }
 
 async function _toggleSecondaryTrack(trackId, trackName, btn) {
-  if (!playback) return;
+  if (!playback || !renderer) return;
+  const engine = playback;
+  const score = renderer;
+  const file = currentFile;
+  const primaryTrack = currentTrackId;
+  const current = () => engine === playback && score === renderer
+    && file === currentFile && primaryTrack === currentTrackId;
   const isMuted = !playback._secondaryChannels.some(c => c.trackId === trackId);
   const iconSpan = btn.querySelector('.mt-icon');
   if (!isMuted) {
@@ -3208,17 +3213,20 @@ async function _toggleSecondaryTrack(trackId, trackName, btn) {
     let notesData = _notesCache.get(cacheKey);
     if (!notesData) {
       notesData = await fetchNotes(
-        currentFile,
+        file,
         trackId,
         getRulePreferences(),
       );
+      if (!current()) return;
       _notesCache.set(cacheKey, notesData);
     }
+    if (!current()) return;
     playback.addSecondaryChannel(trackId, trackName, notesData.results, notesData.beats_per_measure, notesData.midi_program, notesData.kind);
     _mutedSecondaryTracks.get(currentTrackId)?.delete(trackId);
     btn.className = 'mt-track-btn mt-active';
     if (iconSpan) { iconSpan.textContent = '🔈'; iconSpan.title = `Muter ${sanitize(trackName)}`; }
   } catch (err) {
+    if (!current()) return;
     console.error('[FretWise] secondary track load failed:', err);
     if (iconSpan) iconSpan.textContent = '❌';
     setTimeout(() => { if (iconSpan) { iconSpan.textContent = '🔇'; iconSpan.title = `Activer ${sanitize(trackName)}`; } }, 2000);
@@ -3229,8 +3237,11 @@ async function _toggleSecondaryTrack(trackId, trackName, btn) {
 
 /** Activate all secondary tracks that are not explicitly muted for this primary track. */
 async function _restoreSecondaryTracks(primaryTrackId) {
+  const score = renderer;
+  const file = currentFile;
   const muted = _mutedSecondaryTracks.get(primaryTrackId) ?? new Set();
   for (const t of currentTracks) {
+    if (score !== renderer || file !== currentFile || primaryTrackId !== currentTrackId) return;
     if (t.id === primaryTrackId) continue;
     if (muted.has(t.id)) continue;
     const btn = _multiTrackBar?.querySelector(`[data-track-id="${t.id}"]`);
@@ -3369,7 +3380,7 @@ function _setChordsOpen(open) {
 
 if (btnPlay) {
   btnPlay.addEventListener('click', () => {
-    if (!playback) return;
+    if (!playback?.renderer) return;
     // Autoplay policy: the AudioContext was created (and possibly resumed)
     // outside a gesture during render, so it may still be suspended. This
     // click IS a user gesture, so resume here to guarantee sound on first
@@ -3495,9 +3506,18 @@ if (btnMetronome) {
 
 /** Leave whatever song/track is loaded and return to the library list. */
 function _backToLibrary() {
-  if (playback) playback.stop();
+  ++_selectFileToken;
+  ++_selectTrackToken;
+  _resetStaleFingeringWarning(true);
+  _updateFingeringValidity(null);
+  _autoPlayAfterSolve = false;
+  _solveInFlight = false;
+  _setSongLoading(false);
+  _setTabsBusy(false);
+  playback?.detachRenderer();
+  _synthTask?.close();
+  _synthTask = null;
   renderer = null;
-  playback = null;
   // Without this, "back to song" nav (settings/training) stayed enabled
   // after leaving the viewer — it would flip the page to 'viewer' with no
   // renderer left to draw anything.
@@ -3514,6 +3534,14 @@ if (btnHeaderBack) btnHeaderBack.addEventListener('click', _backToLibrary);
 // library regardless of how deep the user navigated (settings, training…).
 const btnHome = $('#btn-home');
 if (btnHome) btnHome.addEventListener('click', _backToLibrary);
+
+// A cached page keeps its engine; a document being discarded releases it completely.
+window.addEventListener('pagehide', (event) => {
+  if (event.persisted) return;
+  const engine = playback;
+  playback = null;
+  engine?.destroy();
+});
 
 if (btnHeaderGp) {
   btnHeaderGp.addEventListener('click', exportGP);
@@ -3553,11 +3581,18 @@ function _updateInsertFingeringsBtn(data) {
   const hasSaved = data?.has_saved_fingering;
   const isCurrent = data?.fingering_is_current;
   btnInsertFingerings.classList.toggle('is-needed', !hasSaved);
-  btnInsertFingerings.classList.toggle('is-outdated', hasSaved && !isCurrent);
-  if (!hasSaved) {
+  const invalid = data?.fingering_validity === 'invalid' || data?.biomechanical_fatal > 0;
+  btnInsertFingerings.classList.toggle('is-outdated', invalid || (hasSaved && !isCurrent));
+  if (invalid) {
+    btnInsertFingerings.title = 'Doigtés non validés — contraintes biomécaniques à corriger';
+  } else if (!hasSaved) {
     btnInsertFingerings.title = 'Aucun doigté enregistré — cliquer pour calculer et sauvegarder';
-  } else if (!isCurrent) {
+  } else if (data.fingering_is_outdated === true) {
     btnInsertFingerings.title = `Doigtés créés avec une version antérieure de l'algorithme (${data.fingering_algo_version || '?'}) — cliquer pour recalculer`;
+  } else if (!isCurrent) {
+    btnInsertFingerings.title = 'Doigtés enregistrés à vérifier — cliquer pour recalculer';
+  } else if (data.fingering_validity === 'unknown') {
+    btnInsertFingerings.title = 'Doigtés enregistrés — validation biomécanique non disponible';
   } else {
     btnInsertFingerings.title = 'Doigtés à jour — cliquer pour recalculer';
   }
@@ -3584,12 +3619,115 @@ function _gateReviewButton(audit) {
   }
 }
 
+// ── Saved fingering version warning ──────────────────────────────────────────
+// Dismissals live only for this file opening; they never change the score.
+const _staleFingeringDismissed = new Set();
+let _staleFingeringContext = null;
 let _insertRunning = false;
 
-async function _insertFingerings() {
-  if (_insertRunning) return;
+function _resetStaleFingeringWarning(newOpening = false) {
+  _staleFingeringContext = null;
+  const banner = document.getElementById('stale-fingering-warning');
+  if (banner) banner.hidden = true;
+  if (newOpening) _staleFingeringDismissed.clear();
+}
+
+function _updateFingeringValidity(data) {
+  const banner = document.getElementById('fingering-validity-warning');
+  if (!banner) return;
+  const invalid = data?.fingering_validity === 'invalid' || data?.biomechanical_fatal > 0;
+  const unknown = data?.fingering_validity === 'unknown';
+  banner.hidden = !invalid && !unknown;
+  if (banner.hidden) return;
+  banner.classList.toggle('is-invalid', invalid);
+  const saved = data.fingering_validation_scope === 'saved';
+  document.getElementById('fingering-validity-title').textContent = invalid
+    ? `${saved ? 'Doigtés enregistrés (ancienne version)' : 'Doigtés'} non validés`
+    : 'Validation des doigtés non disponible';
+  const measures = Array.isArray(data.fatal_measures) ? data.fatal_measures : [];
+  const count = Number.isInteger(data.biomechanical_fatal) ? data.biomechanical_fatal : null;
+  document.getElementById('fingering-validity-message').textContent = invalid
+    ? (count === 1 ? '1 contrainte biomécanique non respectée'
+      : `${count == null ? 'Des' : count} contraintes biomécaniques non respectées`)
+      + (measures.length ? ` (mesures ${measures.join(', ')}${data.fatal_measure_count > measures.length ? ', …' : ''})` : '')
+      + '. Ces doigtés restent à corriger. La partition reste consultable.'
+    : 'Les doigtés enregistrés ne disposent pas d’une validation biomécanique exploitable.'
+      + ' Recalculez-les pour les vérifier. La partition reste consultable.';
+}
+
+function _sameFingeringContext(context) {
+  return context && context.file === currentFile && context.trackId === currentTrackId
+    && context.fileToken === _selectFileToken && context.trackToken === _selectTrackToken;
+}
+
+function _refreshStaleFingeringControls() {
+  const context = _staleFingeringContext;
+  if (!context) return;
+  const save = document.getElementById('stale-fingering-recalculate');
+  const later = document.getElementById('stale-fingering-later');
+  const banner = document.getElementById('stale-fingering-warning');
+  if (save) {
+    save.disabled = _insertRunning || _bgComputeRunning || _solveInFlight || !context.canSave;
+    save.textContent = context.busy ? 'Recalcul et enregistrement…' : 'Recalculer et enregistrer';
+  }
+  if (later) later.disabled = !!context.busy;
+  if (banner) banner.setAttribute('aria-busy', context.busy ? 'true' : 'false');
+  const status = document.getElementById('stale-fingering-status');
+  const waiting = 'Un calcul est déjà en cours. Attendez sa fin pour recalculer cette piste.';
+  if (context.canSave && !context.busy && (_insertRunning || _bgComputeRunning)) {
+    if (status) status.textContent = waiting;
+  } else if (status?.textContent === waiting) {
+    status.textContent = '';
+  }
+}
+
+function _showStaleFingeringWarning(data) {
+  _resetStaleFingeringWarning();
+  if (!data?.has_saved_fingering || data.fingering_is_outdated !== true
+      || currentFile == null || currentTrackId == null
+      || _staleFingeringDismissed.has(currentTrackId)) return;
+  const banner = document.getElementById('stale-fingering-warning');
+  if (!banner) return;
+  const context = {
+    file: currentFile, trackId: currentTrackId, trackName: _reviewTrackName,
+    fileToken: _selectFileToken, trackToken: _selectTrackToken,
+    canSave: currentFile.toLowerCase().endsWith('.gp'), busy: false,
+  };
+  _staleFingeringContext = context;
+  document.getElementById('stale-fingering-message').textContent =
+    `Les doigtés de « ${context.trackName || `Piste ${context.trackId}`} » ont été calculés`
+    + ` avec le moteur ${data.fingering_algo_version}. Version actuelle : ${data.fingering_current_algo_version}.`
+    + ' Recalculer remplacera les doigtés enregistrés de cette piste.';
+  document.getElementById('stale-fingering-status').textContent = context.canSave ? ''
+    : 'L’enregistrement sur place est disponible uniquement pour les fichiers Guitar Pro 7/8 (.gp).';
+  banner.hidden = false;
+  _refreshStaleFingeringControls();
+}
+
+function _dismissStaleFingeringWarning() {
+  const context = _staleFingeringContext;
+  if (!_sameFingeringContext(context) || context.busy) return;
+  _staleFingeringDismissed.add(context.trackId);
+  _resetStaleFingeringWarning();
+}
+
+async function _recalculateStaleFingerings() {
+  const context = _staleFingeringContext;
+  if (!_sameFingeringContext(context) || !context.canSave
+      || _insertRunning || _bgComputeRunning || _solveInFlight) return;
+  return _insertFingerings({ background: false, stream: true, context });
+}
+
+document.getElementById('stale-fingering-later')
+  ?.addEventListener('click', _dismissStaleFingeringWarning);
+document.getElementById('stale-fingering-recalculate')
+  ?.addEventListener('click', _recalculateStaleFingerings);
+
+async function _insertFingerings({ background = true, stream = false, context = null } = {}) {
+  if (_insertRunning || _bgComputeRunning || _solveInFlight) return;
   if (currentTrackId == null || currentFile == null) return;
-  if (!currentFile.endsWith('.gp')) {
+  if (context && !_sameFingeringContext(context)) return;
+  if (!currentFile.toLowerCase().endsWith('.gp')) {
     _setPdfExportStatus('Insertion de doigtés uniquement disponible pour les fichiers .gp', 'warn');
     return;
   }
@@ -3601,24 +3739,59 @@ async function _insertFingerings() {
   }
   const file = currentFile;
   const primaryTrack = currentTrackId;
+  const target = context || {
+    file, trackId: primaryTrack, trackName: _reviewTrackName,
+    fileToken: _selectFileToken, trackToken: _selectTrackToken,
+  };
+  if (context) {
+    context.busy = true;
+    document.getElementById('stale-fingering-status').textContent =
+      'Recalcul des doigtés et enregistrement en cours…';
+  }
+  _refreshStaleFingeringControls();
+  _setPdfExportStatus('Recalcul des doigtés et enregistrement…', 'neutral');
   try {
-    await fetchSaveGp(file, primaryTrack);
+    const result = await fetchSaveGp(file, primaryTrack, { stream });
+    if (!result.sidecar_saved) {
+      throw new Error('L’enregistrement des doigtés est incomplet. Vous pouvez réessayer.');
+    }
+    // A pre-save prefetch must not repopulate the cache with an old version.
+    ++_prefetchAbortToken;
+    ++_solveCacheRevision;
     // Invalidate client-side solve cache so the reload reads the fresh sidecar.
     const prefix = `${file}#${primaryTrack}#`;
     for (const key of Array.from(_solveCache.keys())) {
       if (key.startsWith(prefix)) _solveCache.delete(key);
     }
-    await selectTrack(primaryTrack, _reviewTrackName);   // current tab shown ASAP
+    if (!_sameFingeringContext(target)) return;
+    _resetStaleFingeringWarning();
+    await selectTrack(primaryTrack, target.trackName);   // current tab shown ASAP
+    if (currentFile !== file || currentTrackId !== primaryTrack
+        || _selectFileToken !== target.fileToken) return;
+    const invalid = result.fingering_validity === 'invalid' || result.biomechanical_fatal > 0;
+    _setPdfExportStatus(invalid
+      ? `Doigtés enregistrés — ${result.biomechanical_fatal} contrainte${result.biomechanical_fatal === 1 ? '' : 's'} biomécanique${result.biomechanical_fatal === 1 ? '' : 's'} à corriger`
+      : result.gp_embed_skipped
+        ? 'Doigtés recalculés et enregistrés dans FretWise ; fichier Guitar Pro inchangé'
+        : 'Doigtés recalculés et enregistrés', invalid ? 'warn' : 'ok');
     // Bug #3: now compute the OTHER guitar tracks asynchronously in the
     // background, so the user reads the current tab while the rest fill in and
     // become instant to switch to. Sequential (one save at a time) to avoid
     // racing the per-track sidecar; non-blocking (no await here).
-    _computeOtherGuitarTracks(file, primaryTrack);
+    if (background) _computeOtherGuitarTracks(file, primaryTrack);
   } catch (err) {
     console.error('Insert fingerings failed:', err);
-    _setPdfExportStatus(`Erreur : ${err.message}`, 'warn');
+    if (_sameFingeringContext(target)) {
+      _setPdfExportStatus(`Erreur : ${err.message}`, 'warn');
+      if (context && context === _staleFingeringContext) {
+        document.getElementById('stale-fingering-status').textContent =
+          `Échec du recalcul ou de l’enregistrement : ${err.message}`;
+      }
+    }
   } finally {
     _insertRunning = false;
+    if (context) context.busy = false;
+    _refreshStaleFingeringControls();
     if (btnInsertFingerings) {
       btnInsertFingerings.disabled = false;
       btnInsertFingerings.classList.remove('is-busy');
@@ -3642,6 +3815,7 @@ async function _computeOtherGuitarTracks(file, primaryTrack) {
     .map((t) => t.id);
   if (!others.length) return;
   _bgComputeRunning = true;
+  _refreshStaleFingeringControls();
   let done = 0;
   try {
     for (const tid of others) {
@@ -3663,10 +3837,11 @@ async function _computeOtherGuitarTracks(file, primaryTrack) {
     }
   } finally {
     _bgComputeRunning = false;
+    _refreshStaleFingeringControls();
   }
 }
 
-if (btnInsertFingerings) btnInsertFingerings.addEventListener('click', _insertFingerings);
+if (btnInsertFingerings) btnInsertFingerings.addEventListener('click', () => _insertFingerings());
 
 // ── Rig GP-180 floating panel ──────────────────────────────────────────
 
@@ -4940,10 +5115,10 @@ if (metaImportInput) {
 // Browsers create the AudioContext in a "suspended" state and refuse to
 // resume() it outside a user gesture. We enable audio during render (no
 // gesture), so without this the very first playback is silent (B1.3). A
-// one-shot capture-phase listener on the first real user interaction resumes
+// session-wide capture-phase listener on a real user interaction resumes
 // the context (and re-kicks the synth load if it failed before any gesture).
 function _unlockAudioOnFirstGesture() {
-  if (playback) {
+  if (playback?.renderer) {
     playback.resumeAudioContext();
     if (!playback.audioEnabled) playback.enableAudio();
   }
@@ -4957,7 +5132,7 @@ function _unlockAudioOnFirstGesture() {
 // ── Keyboard shortcuts ──────────────────────────────────────────────
 
 document.addEventListener('keydown', (e) => {
-  if (!playback) return;
+  if (!playback?.renderer) return;
   if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
 
   switch (e.key) {
@@ -5429,6 +5604,7 @@ if (btnSettings) {
   btnSettings.addEventListener('click', () => {
     showPage('settings');
     initSettingsPage();
+    headrush.refreshAiSettings();
   });
 }
 
@@ -5807,6 +5983,7 @@ async function _loadSoundfontsPanel() {
         const name = e.currentTarget.dataset.sf;
         try {
           await activateSoundfont(name);
+          playback?.reloadSoundfont().catch(err => console.error('[FretWise] Soundfont reload:', err));
           await _loadSoundfontsPanel();
         } catch (err) { console.error(err); }
       });
@@ -5815,6 +5992,9 @@ async function _loadSoundfontsPanel() {
         if (!confirm(`Delete soundfont "${name}"? This cannot be undone.`)) return;
         try {
           await deleteSoundfont(name);
+          if (sf.active) {
+            playback?.reloadSoundfont().catch(err => console.error('[FretWise] Soundfont reload:', err));
+          }
           await _loadSoundfontsPanel();
         } catch (err) { console.error(err); alert('Delete failed: ' + err.message); }
       });

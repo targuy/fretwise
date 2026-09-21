@@ -11,9 +11,9 @@ NAS deployment:
 
 * every request must name a loopback host (or one passed with ``--allow-host``),
   which defeats DNS rebinding;
-* a state-changing request carrying an ``Origin`` header must come from one of
-  those hosts, which stops another web page in the same browser from posting to
-  it (the plan token already makes a blind push impossible; this closes the rest).
+* state-changing browser requests must come from the same origin, including
+  scheme and port; another localhost service cannot change keys or spend credits.
+  Native clients without browser origin metadata remain supported.
 
 The routes are FretWise's own device routes (:mod:`fretwise.web.device_routes`),
 and the settings are the same ``~/.fretwise/config.json`` keys, so a rig designed
@@ -27,6 +27,7 @@ import threading
 import webbrowser
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlsplit
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, JSONResponse, Response
@@ -72,6 +73,34 @@ def _local_operator(app: FastAPI) -> None:
     del app
 
 
+def _same_origin(origin: str, request: Request) -> bool:
+    """Compare browser origins, including effective ports, without host aliases."""
+    try:
+        source = urlsplit(origin)
+        target = request.url
+        default_ports = {"http": 80, "https": 443}
+        if (
+            source.scheme not in default_ports
+            or source.username is not None
+            or source.password is not None
+            or source.path not in ("", "/")
+            or source.query
+            or source.fragment
+        ):
+            return False
+        return (
+            source.scheme,
+            source.hostname,
+            source.port if source.port is not None else default_ports[source.scheme],
+        ) == (
+            target.scheme,
+            target.hostname,
+            target.port if target.port is not None else default_ports.get(target.scheme),
+        )
+    except ValueError:
+        return False
+
+
 def create_studio_app(*, allowed_hosts: set[str] | frozenset[str] | None = None) -> FastAPI:
     """Build the Studio application.
 
@@ -90,13 +119,13 @@ def create_studio_app(*, allowed_hosts: set[str] | frozenset[str] | None = None)
         """Refuse requests addressed to a foreign host, or posted from a foreign page."""
         if _hostname(request.headers.get("host", "")) not in allowed:
             return JSONResponse({"detail": "hôte non autorisé"}, status_code=403)
-        origin = request.headers.get("origin")
-        if (
-            request.method in _UNSAFE_METHODS
-            and origin is not None
-            and _hostname(origin) not in allowed
-        ):
-            return JSONResponse({"detail": "origine non autorisée"}, status_code=403)
+        if request.method in _UNSAFE_METHODS:
+            origin = request.headers.get("origin")
+            fetch_site = request.headers.get("sec-fetch-site")
+            if (fetch_site is not None and fetch_site not in ("same-origin", "none")) or (
+                origin is not None and not _same_origin(origin, request)
+            ):
+                return JSONResponse({"detail": "origine non autorisée"}, status_code=403)
         return await call_next(request)
 
     device_routes.register_device_routes(app, _local_operator)

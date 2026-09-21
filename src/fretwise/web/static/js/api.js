@@ -246,15 +246,62 @@ export async function fetchExportGp(filename, trackId) {
   return { blob, filename: m ? m[1] : 'fingered.gp', annotatedNotes };
 }
 
-export async function fetchSaveGp(filename, trackId) {
+export async function fetchSaveGp(filename, trackId, { stream = false } = {}) {
   let url = `/api/save/gp/${encodeURIComponent(filename)}`;
   if (trackId !== null && trackId !== undefined) url += `?track_id=${trackId}`;
+  if (stream) url += `${url.includes('?') ? '&' : '?'}stream=true`;
   const res = await fetch(url, { method: 'POST' });
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: 'Sauvegarde GP échouée' }));
     throw new Error(err.detail || 'Sauvegarde GP échouée');
   }
-  return res.json();
+  if (!stream) return res.json();
+  if (!res.body) throw new Error('Réponse de sauvegarde interrompue. Vérifiez puis réessayez.');
+  const reader = res.body.getReader();
+  const decoder = new TextDecoder();
+  let buffer = '';
+  let ended = false;
+  function parseLine(line) {
+    if (!line.trim()) return null;
+    let event;
+    try { event = JSON.parse(line); } catch {
+      throw new Error('Réponse de sauvegarde invalide. Vérifiez puis réessayez.');
+    }
+    if (event?.type === 'error') {
+      throw new Error(event.error || 'Le recalcul ou l’enregistrement a échoué.');
+    }
+    if (event?.type === 'result' && event.result && typeof event.result === 'object'
+        && !Array.isArray(event.result)) return event.result;
+    if (event?.type !== 'started' && event?.type !== 'heartbeat') {
+      throw new Error('Réponse de sauvegarde invalide. Vérifiez puis réessayez.');
+    }
+    return null;
+  }
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      ended = done;
+      buffer += done ? decoder.decode() : decoder.decode(value, { stream: true });
+      let newline;
+      while ((newline = buffer.indexOf('\n')) !== -1) {
+        const line = buffer.slice(0, newline);
+        buffer = buffer.slice(newline + 1);
+        const result = parseLine(line);
+        if (result) return result;
+      }
+      if (buffer.length > 1024 * 1024) {
+        throw new Error('Réponse de sauvegarde invalide. Vérifiez puis réessayez.');
+      }
+      if (done) {
+        const result = parseLine(buffer);
+        if (result) return result;
+        throw new Error('Réponse de sauvegarde interrompue. Vérifiez puis réessayez.');
+      }
+    }
+  } finally {
+    if (!ended) await reader.cancel().catch(() => {});
+    reader.releaseLock();
+  }
 }
 
 export async function cleanupLibrary() {

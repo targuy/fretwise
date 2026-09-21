@@ -1,9 +1,9 @@
-"""Copy-paste LLM workflow for authoring a HeadRush Core rig.
+"""Shared prompt and validation for authoring a HeadRush Core rig.
 
-Same shape as the GP-180 flow in :mod:`fretwise.gears.verify`: FretWise calls no
-provider. It builds a prompt the user pastes into whatever LLM they already have
-open, and validates the JSON they paste back before anything reaches the
-instrument.
+The manual flow follows :mod:`fretwise.gears.verify`: the user copies a prompt
+into their LLM and pastes its response. The optional server-side API flow uses
+the same prompt and validates its returned JSON with the same domain checks.
+Neither flow sends the result to the instrument automatically.
 
 What differs from the GP-180 version, and why it matters: the prompt is
 **generated from the device's own catalog**, so the model is handed the exact
@@ -23,128 +23,39 @@ a document that writes into an amplifier cannot.
 from __future__ import annotations
 
 import json
+import math
+
+# Existing binding documents contain heterogeneous JSON values. Runtime shape
+# checks below preserve that public API while rejecting malformed provider input.
 from typing import Any
 
 from fretwise.devices.headrush_core.catalog import Catalog
 from fretwise.devices.headrush_core.chain import FREE_SLOTS, FROZEN_HEAD, REVERB_SLOT
 from fretwise.devices.headrush_core.plan import BINDING_SCHEMA_VERSION, GENERATED_PREFIX, build_plan
-
-#: Categories worth offering the model. The device has 21, but Vocal, Synth,
-#: FX-Loop and Unreleased are noise for a guitar rig prompt.
-_OFFERED_CATEGORIES: tuple[str, ...] = (
-    "Amp", "Cab", "Clone", "Overdrive", "Distortion", "Eq", "Compressor",
-    "Delay", "Reverb", "Chorus", "Phaser", "Vib", "Filter", "Pitch",
-    "Dynamics", "Utility",
+from fretwise.devices.headrush_core.prompt_catalog import (
+    block_parameters,
+    catalog_vocabulary,
+    example_params,
+    offered_modules,
 )
 
-#: Parameters whose enumerations carry the actual tone identity, so they are
-#: spelled out in full rather than left to the model's memory.
-_KEY_ENUMS: tuple[tuple[str, str], ...] = (
-    ("Amp", "Type"),
-    ("ReValver_Amp", "Type"),
-    ("Cab", "CabType"),
-    ("Cab", "MicType"),
-)
+_CONFIDENCE = frozenset({"high", "medium/high", "medium", "low", "unknown"})
 
 
 class PromptError(ValueError):
     """The pasted response is not a usable rig document."""
 
 
-def _catalog_vocabulary(catalog: Catalog) -> str:
-    """Render the device's real vocabulary, compactly enough to fit in a prompt."""
-    lines: list[str] = ["### Blocs disponibles (noms EXACTS, par catégorie)", ""]
-    for category in _OFFERED_CATEGORIES:
-        blocks = catalog.category_blocks.get(category)
-        if not blocks:
-            continue
-        lines.append(f"- **{category}** : {', '.join(blocks)}")
-    lines.append("")
-    for block_name, param_name in _KEY_ENUMS:
-        block = catalog.block(block_name)
-        param = block.param(param_name) if block else None
-        if param is None or not param.options:
-            continue
-        lines.append(
-            f"### `{block_name.replace('_', ' ')}.{param_name}` — "
-            f"{len(param.options)} valeurs EXACTES"
-        )
-        lines.append("")
-        lines.append(", ".join(f"`{o}`" for o in param.options))
-        lines.append("")
-    return "\n".join(lines)
-
-
-#: Plumbing every block carries. Listing it would triple the prompt and none of it
-#: belongs in a tone sheet: slot EQ, pre/post trim, doubling, preset name, colour.
-_PLUMBING = ("PreGain", "PostGain", "PresetName", "Colour", "In-Bus", "Doubling",
-             "DoubleMode", "Balance", "Width", "StereoAmp", "FileMissing", "Tails")
-
-
-def _param_line(catalog: Catalog, module: str) -> str:
-    """Render one block's tunable parameters, with their real ranges.
-
-    Without this the model invents plausible names — the first real reply used
-    `Middle` (the block is `Mid`), `Level` on a Cab (it is `OutGain`) and `Decay`
-    on a C-Verb (a convolution reverb has no decay knob). Every block name it
-    chose was correct, because those *were* in the prompt.
-    """
-    block = catalog.block(module)
-    if block is None:
-        return ""
-    bits: list[str] = []
-    for param in block.params:
-        name = param.name
-        if (
-            param.read_only
-            or name in _PLUMBING
-            or name.startswith("Slt")
-            or (name.endswith("2") and not name.endswith("_2"))
-        ):
-            continue
-        if param.options:
-            bits.append(f"{name} (liste, {len(param.options)} valeurs)")
-        elif param.type == "boolean":
-            bits.append(f"{name} (true/false)")
-        elif param.minimum is not None and param.maximum is not None:
-            unit = (param.unit_format or "").replace("%.0f", "").replace("%.1f", "")
-            unit = unit.replace("%.2f", "").replace("%%", "%").strip()
-            low = f"{param.minimum:g}"
-            high = f"{param.maximum:g}"
-            bits.append(f"{name} {low}-{high}{(' ' + unit) if unit else ''}")
-        else:
-            bits.append(name)
-    return f"- **{module}** : {', '.join(bits)}" if bits else ""
-
-
-def _block_parameters(catalog: Catalog) -> str:
-    """Render the parameter index the model needs to fill any block it picks."""
-    lines = [
-        "### Paramètres de chaque bloc (noms EXACTS)",
-        "",
-        "N'écris que des paramètres de cette liste. Les bornes sont en unités "
-        "d'affichage : c'est ce que tu dois donner.",
-        "",
-    ]
-    for category in _OFFERED_CATEGORIES:
-        for module in catalog.category_blocks.get(category, ()):
-            line = _param_line(catalog, module)
-            if line:
-                lines.append(line)
-    lines.append("")
-    return "\n".join(lines)
-
-
 def _layout_rules() -> str:
-    """Render the slot rules measured on the device's own 119-rig corpus."""
+    """Describe the current importer's layout, not a universal hardware restriction."""
     head = "\n".join(
         f"| {slot} | {role} | figé |" for slot, role in sorted(FROZEN_HEAD.items())
     )
     return f"""### Emplacement des blocs
 
-Mesuré sur les 119 rigs de l'appareil : la tête de chaîne est rigide
-(`Filter < Overdrive < Amp < Cab` tient dans 100 % des rigs guitare), la queue est
-libre (`Cab < Delay` n'est vrai que dans 57 % des cas — les deux se défendent).
+Ce profil est imposé par l'importeur FretWise actuel, inspiré d'un corpus de rigs.
+Ce n'est pas une restriction universelle du HeadRush. Un seul bloc par rôle figé;
+Amp et Clone se partagent le slot 6. La queue conserve l'ordre fourni.
 
 | Slot | Rôle | |
 |---|---|---|
@@ -152,9 +63,12 @@ libre (`Cab < Delay` n'est vrai que dans 57 % des cas — les deux se défendent
 | {min(FREE_SLOTS)}–{max(FREE_SLOTS)} | libres : EQ, modulation, volume, delay, pitch | au choix |
 | {REVERB_SLOT} | réverbe | figé |
 
-Tu n'écris PAS les numéros de slot : donne les blocs dans l'ordre du signal,
-FretWise les place. Ne demande jamais deux fois le même bloc — pour une seconde
-instance, nomme le jumeau (`"Amp 2"`, `"BBD Delay 2"`)."""
+Tu n'écris PAS les numéros de slot : FretWise applique ce placement. Un ordre
+historique différent peut donc nécessiter une adaptation à expliquer dans `why`.
+Ne répète pas un module. N'invente pas de jumeau avec un suffixe « 2 » : son nom
+doit être fourni par le catalogue et son rôle doit tenir dans ce profil.
+Deux amplis ou deux réverbes se disputent leur slot figé, même si l'appareil
+possède leurs types d'instances. N'ajoute aucun effet pour remplir un slot."""
 
 
 def build_rig_prompt(
@@ -173,7 +87,8 @@ def build_rig_prompt(
         catalog: Catalog generated from the target device — the source of every
             legal name in the prompt.
         existing: A previous binding to correct rather than start from scratch.
-        guidance: Free-text note from the user ("plus sombre", "moins de gain"…).
+        guidance: Free-text target version, part, guitar/pickups, input level,
+            listening system and tonal preferences supplied by the user.
 
     Returns:
         A Markdown prompt.
@@ -181,14 +96,38 @@ def build_rig_prompt(
     song = f"{artist} — {title}".strip(" —")
     mode = "corriger" if existing else "créer"
     rig_name = f"{GENERATED_PREFIX}{artist} - {title}".strip()
+    modules = offered_modules(catalog)
+    example_module = "Amp" if "Amp" in modules else next(iter(modules), "")
 
     parts = [
         f"# {mode.capitalize()} un rig HeadRush Core — {song}",
         "",
-        "Tu es ingénieur du son guitare. Recherche le son réel de ce morceau "
-        "(matériel de l'artiste à l'époque, captations live, interviews) puis "
-        "traduis-le sur un **HeadRush Core**, firmware "
+        "Conçois une adaptation documentée du son de guitare ciblé sur un "
+        "**HeadRush Core**, firmware "
         f"`{catalog.app_version}`.",
+        "",
+        "## Cible et preuves",
+        "",
+        "Lis la demande utilisateur et le document existant : version/enregistrement, "
+        "partie (clair, rythmique, solo), guitare et micros utilisés, niveau d'entrée, "
+        "écoute (casque, FRFR, ampli/retour), préférences. Si ces informations manquent, "
+        "ne les invente pas : choisis une seule cible de travail explicitée dans "
+        "`tone.summary` et indique les inconnues dans `why`. Un rig ne promet pas de "
+        "reproduire toutes les parties, couches studio ou chaînes parallèles.",
+        "Priorité aux sources liées à cette prise et cette partie : témoignage de "
+        "l'artiste/ingénieur et documents de session, puis recoupements datés. "
+        "Le matériel live ou actuel ne prouve pas le matériel studio; une information "
+        "sur un album ou un autre titre ne prouve pas cette prise. Sans recherche web "
+        "disponible, annonce cette limite et ne fabrique ni citation ni URL.",
+        "Dans `sources`, conserve des chaînes de texte donnant auteur/titre/date ou "
+        "URL vérifiable et portée de la preuve. Dans `why`, distingue **FAIT SOURCÉ** "
+        "(ou absence de preuve), **ADAPTATION** (modèle disponible, circuit non confirmé, "
+        "guitare/micros/écoute différents) et **À TESTER** (réglages initiaux et contrôle "
+        "à niveau égal). Ne transforme pas une famille d'ampli en circuit ou réglage exact.",
+        "`confidence` exprime la solidité documentaire de la proposition : "
+        "high, medium/high, medium, low ou unknown. Ce n'est ni une note de fidélité audio "
+        "ni la preuve d'une écoute ou d'un import réel. Les réglages restent à ajuster "
+        "à l'écoute; n'annonce aucune reproduction garantie.",
         "",
         "## Règles absolues",
         "",
@@ -197,15 +136,18 @@ def build_rig_prompt(
         "fait rejeter le document entier.",
         "2. **Valeurs en unités d'affichage**, pas en 0-1 : `62` pour 62 %, `300` "
         "pour 300 ms, `-3` pour −3 dB. FretWise convertit.",
-        "3. **Un seul bloc NAM (`Neural Amp Modeler`) et une seule réverbe à "
-        "convolution (`C-Verb`) par rig.**",
-        "4. Reste sobre : 5 à 9 blocs. Le CPU est déjà à ~59 % pour 9 blocs.",
+        "3. Respecte le profil de placement ci-dessous et les limites de l'importeur. "
+        "La disponibilité de fichiers, les scènes et le routage parallèle ne sont "
+        "pas décrits par ce binding.",
+        "4. Garde uniquement les blocs utiles, sans minimum. Vise au plus 9 blocs "
+        "par sobriété, pas comme limite matérielle. Le CPU doit être mesuré sur le "
+        "rig réel : le nombre de blocs ne permet pas de le prédire.",
         "5. Réponds **uniquement** par l'objet JSON, sans commentaire autour.",
         "",
         _layout_rules(),
         "",
-        _catalog_vocabulary(catalog),
-        _block_parameters(catalog),
+        catalog_vocabulary(catalog),
+        block_parameters(catalog),
         "## Format de sortie",
         "",
         "```json",
@@ -216,17 +158,18 @@ def build_rig_prompt(
                 "rig": {"name": rig_name, "programChange": None},
                 "song": {"artist": artist, "title": title},
                 "tone": {
-                    "summary": "une phrase sur le son visé",
+                    "summary": "version et partie ciblées; contexte manquant à confirmer",
                     "mustHave": ["…"],
                     "avoid": ["…"],
                 },
-                "confidence": "high | medium/high | medium | low | unknown",
-                "sources": ["…"],
+                "confidence": "unknown",
+                "sources": [],
                 "blocks": [
                     {
-                        "module": "Amp",
-                        "why": "pourquoi ce modèle pour ce morceau",
-                        "params": {"Type": "82 Lead 800 100W", "GainA": 62, "Master": 50},
+                        "module": example_module,
+                        "why": "FAIT SOURCÉ : à documenter; ADAPTATION : à expliquer; "
+                        "À TESTER : réglages initiaux à comparer à niveau égal",
+                        "params": example_params(catalog, example_module),
                     }
                 ],
             },
@@ -234,6 +177,9 @@ def build_rig_prompt(
             ensure_ascii=False,
         ),
         "```",
+        "",
+        "L'exemple illustre le format, pas le son du morceau. Garde exactement "
+        "les champs de ce binding; n'ajoute pas de champ d'audit ou de contexte.",
     ]
     if existing:
         parts += [
@@ -246,6 +192,14 @@ def build_rig_prompt(
         ]
     if guidance.strip():
         parts += ["", "## Demande de l'utilisateur", "", guidance.strip()]
+    parts += [
+        "",
+        "Avant de produire le JSON, contrôle chaque paire `module` / clé de `params` "
+        "dans la ligne de ce module : aucune clé empruntée à un autre EQ ou ampli; "
+        "respecte ses énumérations et bornes. Retire tout bloc sans utilité musicale, "
+        "sans remplir les slots. Respecte le placement et les limites de fichiers "
+        "signalées; vérifie la portée réelle de chaque source.",
+    ]
     return "\n".join(parts)
 
 
@@ -273,11 +227,12 @@ def parse_rig_response(
             rejected by the device planner.
     """
     document = _decode(raw)
+    _validate_binding(document, catalog)
 
     document.setdefault("schemaVersion", BINDING_SCHEMA_VERSION)
-    document.setdefault(
-        "device", {"deviceId": "headrush-core", "appVersion": catalog.app_version}
-    )
+    device = document.setdefault("device", {})
+    device.setdefault("deviceId", "headrush-core")
+    device.setdefault("appVersion", catalog.app_version)
     rig = document.setdefault("rig", {})
     if not str(rig.get("name", "")).strip() and (artist or title):
         rig["name"] = f"{GENERATED_PREFIX}{artist} - {title}".strip()
@@ -294,21 +249,86 @@ def parse_rig_response(
     return document, list(plan.warnings)
 
 
+def _text_list(value: object, label: str) -> None:
+    if not isinstance(value, list) or not all(isinstance(item, str) for item in value):
+        raise PromptError(f"{label} doit être une liste de chaînes de texte")
+
+
+def _validate_binding(document: dict[str, Any], catalog: Catalog) -> None:
+    """Check JSON shapes before the planner touches untrusted response fields."""
+    if "schemaVersion" in document and document["schemaVersion"] != BINDING_SCHEMA_VERSION:
+        raise PromptError(f"schemaVersion doit être {BINDING_SCHEMA_VERSION!r}")
+    for section in ("device", "rig", "song", "tone"):
+        if section in document and not isinstance(document[section], dict):
+            raise PromptError(f"{section} doit être un objet JSON")
+    device = document.get("device", {})
+    for name, expected in (("deviceId", "headrush-core"), ("appVersion", catalog.app_version)):
+        if name in device and device[name] != expected:
+            raise PromptError(f"device.{name} doit être {expected!r}")
+    for section, names in (("rig", ("name",)), ("song", ("artist", "title")),
+                           ("tone", ("summary",))):
+        values = document.get(section, {})
+        for name in names:
+            if name in values and not isinstance(values[name], str):
+                raise PromptError(f"{section}.{name} doit être une chaîne de texte")
+    program_change = document.get("rig", {}).get("programChange")
+    if program_change is not None and (
+        isinstance(program_change, bool) or not isinstance(program_change, int)
+        or not 0 <= program_change <= 127
+    ):
+        raise PromptError("rig.programChange doit être null ou un entier entre 0 et 127")
+    if "confidence" in document and (
+        not isinstance(document["confidence"], str) or document["confidence"] not in _CONFIDENCE
+    ):
+        raise PromptError("confidence doit être high, medium/high, medium, low ou unknown")
+    if "sources" in document:
+        _text_list(document["sources"], "sources")
+    tone = document.get("tone", {})
+    for name in ("mustHave", "avoid"):
+        if name in tone:
+            _text_list(tone[name], f"tone.{name}")
+    blocks = document.get("blocks")
+    if not isinstance(blocks, list) or not blocks:
+        raise PromptError("blocks doit être une liste non vide d'objets JSON")
+    for index, block in enumerate(blocks):
+        label = f"blocks[{index}]"
+        if not isinstance(block, dict):
+            raise PromptError(f"{label} doit être un objet JSON")
+        if not isinstance(block.get("module"), str) or not block["module"].strip():
+            raise PromptError(f"{label}.module doit être un nom de module non vide")
+        if "why" in block and not isinstance(block["why"], str):
+            raise PromptError(f"{label}.why doit être une chaîne de texte")
+        params = block.get("params", {})
+        if not isinstance(params, dict):
+            raise PromptError(f"{label}.params doit être un objet JSON")
+        for name, value in params.items():
+            if not isinstance(name, str) or not isinstance(value, (str, int, float, bool)):
+                raise PromptError(f"{label}.params contient un nom ou une valeur non scalaire")
+            if isinstance(value, float) and not math.isfinite(value):
+                raise PromptError(f"{label}.params.{name} doit être un nombre fini")
+
+
 def _decode(raw: str | dict[str, Any]) -> dict[str, Any]:
     """Pull a JSON object out of whatever the user pasted."""
     if isinstance(raw, dict):
         return dict(raw)
+    if not isinstance(raw, str):
+        raise PromptError("la réponse doit être du texte JSON ou un objet JSON")
     text = raw.strip()
     if text.startswith("```"):
         lines = [ln for ln in text.splitlines() if not ln.startswith("```")]
         text = "\n".join(lines).strip()
-    start, end = text.find("{"), text.rfind("}")
-    if start < 0 or end <= start:
-        raise PromptError("aucun objet JSON trouvé dans la réponse collée")
     try:
-        decoded = json.loads(text[start : end + 1])
-    except json.JSONDecodeError as exc:
-        raise PromptError(f"JSON invalide : {exc}") from exc
+        decoded = json.loads(text)
+    except json.JSONDecodeError:
+        # Preserve the existing manual paste workflow, including surrounding prose.
+        start, end = text.find("{"), text.rfind("}")
+        if start < 0 or end <= start:
+            raise PromptError("aucun objet JSON trouvé dans la réponse collée") from None
+        try:
+            decoded = json.loads(text[start : end + 1])
+        except json.JSONDecodeError as exc:
+            raise PromptError(f"JSON invalide : {exc}") from exc
     if not isinstance(decoded, dict):
         raise PromptError("la réponse doit être un objet JSON")
     return decoded

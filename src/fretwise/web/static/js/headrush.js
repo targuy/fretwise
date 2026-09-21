@@ -1,11 +1,7 @@
 /**
- * HeadRush Core UI: author a rig for a song through the user's own LLM, store
- * it, and show it in the Rig panel.
- *
- * FretWise calls no provider. The prompt is generated server-side from the
- * catalog read off the instrument — so every block name and enumeration label in
- * it is real — and the JSON pasted back is validated against that same catalog
- * before it is stored.
+ * HeadRush Core UI: author a rig manually or through the configured AI API.
+ * Prompts and JSON validation share the instrument catalog. API keys remain
+ * on the server and are never returned to the browser.
  *
  * Pushing a stored rig to the device goes through a preview and a confirmed
  * apply on the server, which only writes when the installation opted in.
@@ -87,6 +83,138 @@ function detailOf(data, res) {
   const d = data?.detail;
   if (d && typeof d === 'object') return d.detail || d.code || `Erreur ${res.status}`;
   return d || `Erreur ${res.status}`;
+}
+
+/** Display name for a configured rig generation mode. */
+export function rigAiProviderName(mode) {
+  return { anthropic: 'Claude', openai: 'OpenAI', manual: 'Texte manuel' }[mode] || 'Texte manuel';
+}
+
+/** Shared preferences for FretWise and standalone Studio; no key is read back. */
+export function initRigAiSettings({ container, onChange = () => {} }) {
+  let settings = null;
+  let saving = false;
+  let revision = 0;
+  if (container) {
+    container.innerHTML = '<h3>Génération IA des rigs HeadRush</h3>' +
+      '<label>Mode <select data-ai="mode"><option value="manual">Texte manuel</option>' +
+      '<option value="anthropic">Claude API</option><option value="openai">OpenAI API</option>' +
+      '</select></label>' +
+      '<p class="settings-hint st-muted">Les réglages sont partagés sur ce serveur. ' +
+      'Chaque génération API utilise la clé du fournisseur choisi.</p>' +
+      ['anthropic', 'openai'].map((provider) => (
+        `<fieldset data-provider="${provider}" hidden><legend>${rigAiProviderName(provider)}</legend>` +
+        `<label>Modèle <input data-ai="${provider}-model" type="text" autocomplete="off" spellcheck="false"></label>` +
+        `<p data-ai="${provider}-status" class="settings-hint st-muted"></p>` +
+        `<label data-ai="${provider}-key-field">Nouvelle clé API ` +
+        `<input data-ai="${provider}-key" type="password" autocomplete="new-password" spellcheck="false" ` +
+        'placeholder="Laisser vide pour conserver la clé"></label>' +
+        `<label data-ai="${provider}-clear-field" class="rig-ai-check">` +
+        `<input data-ai="${provider}-clear" type="checkbox"> Supprimer la clé enregistrée</label>` +
+        '</fieldset>'
+      )).join('') +
+      '<label data-ai="search-field" class="rig-ai-check" hidden><input data-ai="search" type="checkbox"> ' +
+      'Recherche web pour documenter le son (coût fournisseur possible)</label>' +
+      '<button data-ai="save" class="tx-btn st-btn st-primary" type="button">Enregistrer le mode IA</button>' +
+      '<p data-ai="status" class="settings-hint st-status" role="status" aria-live="polite"></p>';
+  }
+  const el = (name) => container?.querySelector(`[data-ai="${name}"]`);
+  function showFields() {
+    if (!container) return;
+    const mode = el('mode').value;
+    const canEdit = !!settings?.canEdit && !saving;
+    el('mode').disabled = !canEdit;
+    el('save').hidden = !settings?.canEdit;
+    el('save').disabled = !canEdit;
+    for (const provider of ['anthropic', 'openai']) {
+      const field = container.querySelector(`[data-provider="${provider}"]`);
+      field.hidden = mode !== provider;
+      field.disabled = mode !== provider || !canEdit;
+      const editable = canEdit && settings?.[provider]?.editable !== false;
+      el(`${provider}-key-field`).hidden = !editable;
+      el(`${provider}-clear-field`).hidden = !editable;
+      el(`${provider}-key`).disabled = !editable || mode !== provider;
+      el(`${provider}-clear`).disabled = !editable || mode !== provider;
+    }
+    el('search-field').hidden = mode === 'manual';
+    el('search').disabled = mode === 'manual' || !canEdit;
+  }
+  function render() {
+    if (!container || !settings) return;
+    el('mode').value = settings.mode || 'manual';
+    el('search').checked = !!settings.webSearch;
+    for (const provider of ['anthropic', 'openai']) {
+      const conf = settings[provider] || {};
+      el(`${provider}-model`).value = conf.model || '';
+      el(`${provider}-key`).value = '';
+      el(`${provider}-clear`).checked = false;
+      el(`${provider}-status`).textContent = (conf.configured ? 'Clé configurée.' : 'Clé absente.') +
+        (conf.editable === false ? ' Gérée par l’environnement du serveur.' : '');
+    }
+    showFields();
+  }
+  async function refresh() {
+    const request = ++revision;
+    try {
+      const res = await fetch('/api/rig-ai/settings', { credentials: 'same-origin' });
+      const data = await res.json().catch(() => ({}));
+      if (request !== revision) return settings;
+      if (!res.ok) throw new Error(detailOf(data, res));
+      settings = data;
+      render();
+      if (el('status')) el('status').textContent = data.canEdit ? '' : 'Réglages réservés aux administrateurs.';
+      onChange(settings);
+      return settings;
+    } catch (err) {
+      if (el('status')) el('status').textContent = `Réglages IA indisponibles : ${err.message}`;
+      return null;
+    }
+  }
+  el('mode')?.addEventListener('change', () => {
+    // Discard an unsaved secret when leaving its provider. Never retain it in memory.
+    for (const provider of ['anthropic', 'openai']) {
+      el(`${provider}-key`).value = '';
+      el(`${provider}-clear`).checked = false;
+    }
+    showFields();
+  });
+  el('save')?.addEventListener('click', async () => {
+    if (saving || !settings?.canEdit) return;
+    const mode = el('mode').value;
+    const body = { mode, web_search: el('search').checked };
+    if (mode !== 'manual') {
+      body[`${mode}_model`] = el(`${mode}-model`).value.trim();
+      if (settings[mode]?.editable !== false) {
+        const key = el(`${mode}-key`).value.trim();
+        const clear = el(`${mode}-clear`).checked;
+        if (key && clear) {
+          el('status').textContent = 'Choisissez remplacer ou supprimer la clé.';
+          return;
+        }
+        if (key) body[`${mode}_api_key`] = key;
+        if (clear) body[`clear_${mode}_key`] = true;
+      }
+    }
+    saving = true;
+    ++revision;
+    showFields();
+    el('status').textContent = 'Enregistrement…';
+    try {
+      const { res, data } = await postJson('/api/rig-ai/settings', body);
+      if (!res.ok) throw new Error(detailOf(data, res));
+      const refreshed = await refresh();
+      el('status').textContent = refreshed
+        ? 'Mode IA enregistré.' : 'Enregistré. Actualisez les préférences pour relire le mode IA.';
+    } catch (err) {
+      el('status').textContent = `Impossible d’enregistrer : ${err.message}`;
+    } finally {
+      for (const provider of ['anthropic', 'openai']) el(`${provider}-key`).value = '';
+      saving = false;
+      showFields();
+    }
+  });
+  showFields();
+  return { refresh, get: () => settings };
 }
 
 /**
@@ -240,8 +368,8 @@ export function renderRigView(container, payload, { onChanged, emptyHint } = {})
     container.innerHTML =
       '<p class="hr-empty">Aucun rig HeadRush pour ce morceau.</p>' +
       `<p class="settings-hint">${esc(emptyHint || (
-        'Cliquez « ✨ Créer avec l’IA » : FretWise génère le prompt, ' +
-        'vous collez la réponse de votre LLM, et le rig validé s’affiche ici.'))}</p>`;
+        'Cliquez « ✨ Créer avec l’IA ». Le mode choisi dans les préférences ' +
+        'permet la génération par API ou le copier-coller du JSON.'))}</p>`;
     return;
   }
   const prov = payload.provisioned;
@@ -315,6 +443,7 @@ export function initHeadrush({ getSong, onSaved, onDeviceChange }) {
     open: () => {},
     isActive: () => false,
     refreshDevices: async () => {},
+    refreshAiSettings: async () => {},
     ready: Promise.resolve(),
     fetchRigView,
     renderRigView,
@@ -337,6 +466,59 @@ export function initHeadrush({ getSong, onSaved, onDeviceChange }) {
   let activeDevice = 'valeton_gp180';
   let lastBinding = null;
   let lastFilename = 'rig.json';
+  let panelEpoch = 0;
+  let busy = false;
+  let panelSong = null;
+  let panelMode = null;
+  const resizedHeights = {};
+  const songKey = (song) => JSON.stringify([song?.artist || '', song?.title || '']);
+  const sameSong = () => panelSong && songKey(panelSong) === songKey(getSong());
+
+  function applyAiMode() {
+    const settings = aiSettings.get();
+    const manual = (settings?.mode || 'manual') === 'manual';
+    const mode = manual ? 'manual' : 'api';
+    if (panelMode !== mode) {
+      // Native resizing writes inline height. Keep that choice per mode so a
+      // resized manual editor does not leave empty space in the API panel.
+      if (panelMode) resizedHeights[panelMode] = panel.style.height;
+      panel.style.height = resizedHeights[mode] || '';
+      panelMode = mode;
+    }
+    panel.setAttribute('data-hr-mode', mode);
+    panel.querySelectorAll('[data-hr-manual]').forEach((el) => {
+      el.hidden = !manual;
+      if ('disabled' in el) el.disabled = !manual || busy || !settings;
+      el.querySelectorAll('button, input, textarea').forEach((input) => {
+        input.disabled = !manual || busy || !settings;
+      });
+    });
+    const generate = $('headrush-generate-btn');
+    if (generate) {
+      generate.hidden = manual;
+      generate.disabled = busy || !settings?.canGenerate || !settings?.[settings.mode]?.configured;
+      generate.textContent = `Générer / corriger avec ${rigAiProviderName(settings?.mode)}`;
+    }
+    if (guidanceEl) guidanceEl.disabled = busy;
+    panel.setAttribute('aria-busy', String(busy));
+    const hint = $('headrush-mode-hint');
+    if (hint) hint.textContent = manual
+      ? 'Copiez le prompt dans votre LLM, collez sa réponse JSON, puis validez.'
+      : `${rigAiProviderName(settings.mode)} produit le rig et FretWise le valide avant de l’enregistrer. ` +
+        (!settings.canGenerate ? 'Génération réservée aux administrateurs.' :
+          !settings[settings.mode]?.configured ? 'Configurez une clé dans les préférences.' :
+            '2 appels API maximum : génération et correction technique si nécessaire, sur votre crédit API. ' +
+            'L’envoi au HeadRush reste une action séparée.');
+  }
+  const aiSettings = initRigAiSettings({
+    container: $('settings-rig-ai'),
+    onChange: applyAiMode,
+  });
+
+  function setBusy(value) {
+    busy = value;
+    applyAiMode();
+  }
 
   const setStatus = (message, kind = '') => {
     statusEl.textContent = message;
@@ -370,12 +552,36 @@ export function initHeadrush({ getSong, onSaved, onDeviceChange }) {
       setStatus('Ouvrez un morceau d’abord.', 'error');
       return;
     }
+    const epoch = ++panelEpoch;
+    const changed = songKey(panelSong) !== songKey({ artist, title });
+    panelSong = { artist, title };
     titleEl.textContent = `HeadRush Core — ${[artist, title].filter(Boolean).join(' — ')}`;
     panel.style.display = '';
     resultEl.innerHTML = '';
     // A rig validated for the previous song must not stay downloadable here.
     lastBinding = null;
+    promptEl.value = '';
+    if (changed) {
+      pasteEl.value = '';
+      if (guidanceEl) guidanceEl.value = '';
+    }
     if (downloadBtn) downloadBtn.style.display = 'none';
+    setStatus('Lecture du mode IA…');
+    const settings = await aiSettings.refresh();
+    if (epoch !== panelEpoch || !sameSong()) return;
+    if (!settings) {
+      setStatus('Réglages IA indisponibles. Rouvrez ce panneau pour réessayer.', 'error');
+      return;
+    }
+    if (busy) {
+      setStatus('Une génération est encore en cours. Attendez sa fin avant de relancer.');
+      return;
+    }
+    applyAiMode();
+    if (settings.mode !== 'manual') {
+      setStatus('Prêt : précisez le son recherché, puis lancez la génération.');
+      return;
+    }
     setStatus('Génération du prompt…');
     const params = new URLSearchParams({ artist: artist || '', title: title || '' });
     if (guidanceEl?.value.trim()) params.set('guidance', guidanceEl.value.trim());
@@ -383,29 +589,87 @@ export function initHeadrush({ getSong, onSaved, onDeviceChange }) {
       const res = await fetch(`/api/devices/headrush/prompt?${params}`, {
         credentials: 'same-origin',
       });
+      const prompt = await res.text();
+      if (epoch !== panelEpoch || !sameSong()) return;
       if (!res.ok) {
-        const body = await res.json().catch(() => ({}));
-        setStatus(body?.detail?.detail || body?.detail || `Erreur ${res.status}`, 'error');
+        let body = {};
+        try { body = JSON.parse(prompt); } catch { /* non-JSON server response */ }
+        setStatus(detailOf(body, res), 'error');
         promptEl.value = '';
         return;
       }
-      promptEl.value = await res.text();
+      promptEl.value = prompt;
       const version = res.headers.get('X-FretWise-App-Version') || '';
       const mode = res.headers.get('X-FretWise-Prompt-Mode') === 'verify'
         ? ' — corrige le rig existant' : '';
       setStatus(`Prompt prêt${version ? ` — firmware ${version}` : ''}${mode}`);
     } catch (err) {
-      setStatus(`Erreur réseau : ${err}`, 'error');
+      if (epoch === panelEpoch && sameSong()) setStatus(`Erreur réseau : ${err}`, 'error');
+    }
+  }
+
+  function showSaved(data) {
+    lastBinding = data.binding;
+    lastFilename = data.suggestedFilename || 'rig.json';
+    const source = data.generation ? ` · ${rigAiProviderName(data.generation.provider)} · ${data.generation.model}` : '';
+    setStatus(`Validé et enregistré — ${data.blocks} blocs${source}`, 'ok');
+    const warn = (data.warnings || []).length
+      ? `<ul class="hr-warn">${data.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>`
+      : '';
+    resultEl.innerHTML =
+      `<p class="hr-rig">${esc(data.rig)}</p>${chainRows(data.view)}${warn}` +
+      '<p class="settings-hint">Le rig est enregistré dans le panneau Rig de ce morceau. ' +
+      'Ouvrez ce panneau pour prévisualiser puis confirmer son envoi au HeadRush.</p>';
+    if (downloadBtn) downloadBtn.style.display = '';
+    onSaved?.();
+  }
+
+  async function generate() {
+    const settings = aiSettings.get();
+    if (busy || !settings?.canGenerate || settings.mode === 'manual') return;
+    if (!sameSong()) {
+      await open();
+      return;
+    }
+    const song = { ...panelSong };
+    const epoch = panelEpoch;
+    setBusy(true);
+    setStatus(`${rigAiProviderName(settings.mode)} : génération et validation en cours… ` +
+      'Correction technique automatique si nécessaire (2 appels API maximum). Cela peut prendre quelques minutes.');
+    resultEl.innerHTML = '';
+    lastBinding = null;
+    if (downloadBtn) downloadBtn.style.display = 'none';
+    try {
+      const { res, data } = await postJson('/api/devices/headrush/generate', {
+        ...song, guidance: guidanceEl?.value.trim() || '',
+      });
+      if (epoch !== panelEpoch || !sameSong()) return;
+      if (!res.ok) {
+        setStatus(`Génération interrompue : ${detailOf(data, res)} Vous pouvez réessayer.`, 'error');
+        return;
+      }
+      showSaved(data);
+    } catch (err) {
+      if (epoch === panelEpoch && sameSong()) setStatus(`Erreur réseau : ${err}. Vous pouvez réessayer.`, 'error');
+    } finally {
+      setBusy(false);
     }
   }
 
   async function validate() {
+    if (busy || aiSettings.get()?.mode !== 'manual') return;
+    if (!sameSong()) {
+      setStatus('Le morceau a changé. Rouvrez la création du rig avant de valider.', 'error');
+      return;
+    }
     const raw = pasteEl.value.trim();
     if (!raw) {
       setStatus('Collez d’abord la réponse du LLM.', 'error');
       return;
     }
-    const { artist, title } = getSong() || {};
+    const { artist, title } = panelSong;
+    const epoch = panelEpoch;
+    setBusy(true);
     setStatus('Validation contre le catalogue de l’appareil…');
     resultEl.innerHTML = '';
     try {
@@ -416,6 +680,7 @@ export function initHeadrush({ getSong, onSaved, onDeviceChange }) {
         body: JSON.stringify({ artist, title, response: raw, save: true }),
       });
       const data = await res.json().catch(() => ({}));
+      if (epoch !== panelEpoch || !sameSong()) return;
       if (res.status === 422) {
         setStatus('Refusé : non enregistré', 'error');
         resultEl.innerHTML =
@@ -425,27 +690,18 @@ export function initHeadrush({ getSong, onSaved, onDeviceChange }) {
         return;
       }
       if (!res.ok) {
-        setStatus(data?.detail || `Erreur ${res.status}`, 'error');
+        setStatus(detailOf(data, res), 'error');
         return;
       }
-      lastBinding = data.binding;
-      lastFilename = data.suggestedFilename || 'rig.json';
-      setStatus(`Validé et enregistré — ${data.blocks} blocs`, 'ok');
-      const warn = (data.warnings || []).length
-        ? `<ul class="hr-warn">${data.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>`
-        : '';
-      resultEl.innerHTML =
-        `<p class="hr-rig">${esc(data.rig)}</p>${chainRows(data.view)}${warn}` +
-        '<p class="settings-hint">Le rig est enregistré : il s’affiche maintenant dans le ' +
-        'panneau Rig de ce morceau.</p>';
-      if (downloadBtn) downloadBtn.style.display = '';
-      onSaved?.();
+      showSaved(data);
     } catch (err) {
-      setStatus(`Erreur réseau : ${err}`, 'error');
+      if (epoch === panelEpoch && sameSong()) setStatus(`Erreur réseau : ${err}`, 'error');
+    } finally {
+      setBusy(false);
     }
   }
 
-  $('headrush-close')?.addEventListener('click', () => { panel.style.display = 'none'; });
+  $('headrush-close')?.addEventListener('click', () => { ++panelEpoch; panel.style.display = 'none'; });
   $('headrush-copy-btn')?.addEventListener('click', async () => {
     if (!promptEl.value) return;
     try {
@@ -458,6 +714,7 @@ export function initHeadrush({ getSong, onSaved, onDeviceChange }) {
   });
   $('headrush-regen-btn')?.addEventListener('click', open);
   $('headrush-validate-btn')?.addEventListener('click', validate);
+  $('headrush-generate-btn')?.addEventListener('click', generate);
   downloadBtn?.addEventListener('click', () => {
     if (lastBinding) downloadJson(lastBinding, lastFilename);
   });
@@ -542,9 +799,10 @@ export function initHeadrush({ getSong, onSaved, onDeviceChange }) {
 
   // The Rig panel waits on this before choosing which view to draw, so a panel
   // opened right after page load does not flash the GP-180 sheet.
-  api.ready = refreshDevices();
+  api.ready = Promise.all([refreshDevices(), aiSettings.refresh()]);
   api.open = open;
   api.isActive = () => activeDevice === 'headrush_core';
   api.refreshDevices = refreshDevices;
+  api.refreshAiSettings = aiSettings.refresh;
   return api;
 }

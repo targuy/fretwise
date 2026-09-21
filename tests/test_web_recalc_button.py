@@ -58,12 +58,15 @@ def test_main_js_wires_insert_to_save_plumbing() -> None:
     # Element resolved.
     assert "$('#btn-insert-fingerings')" in js
     # Click handler wired to the insert routine.
-    assert "btnInsertFingerings.addEventListener('click', _insertFingerings)" in js
-    assert "async function _insertFingerings()" in js
+    assert "btnInsertFingerings.addEventListener('click', () => _insertFingerings())" in js
+    assert (
+        "async function _insertFingerings({ background = true, stream = false, "
+        "context = null } = {})" in js
+    )
     # Computes + saves, then invalidates cache and re-runs selectTrack.
-    assert "fetchSaveGp(currentFile, currentTrackId)" in js
+    assert "fetchSaveGp(file, primaryTrack, { stream })" in js
     assert "_solveCache.delete" in js
-    assert "selectTrack(currentTrackId, _reviewTrackName)" in js
+    assert "selectTrack(primaryTrack, target.trackName)" in js
 
 
 def test_main_js_insert_toggles_busy_and_handles_errors() -> None:

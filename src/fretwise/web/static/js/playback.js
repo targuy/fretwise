@@ -69,6 +69,12 @@ export class PlaybackEngine {
     this._spessa = null;          // SpessaSynth Synthetizer (shared, all MIDI channels)
     this._synth = null;           // 'spessa' sentinel | soundfont-player Player | null (osc)
     this._synthLoading = false;   // loading guard to avoid double-init
+    this._synthInitPromise = null;
+    this._synthGeneration = 0;
+    this._synthAbort = null;
+    this._pendingSpessa = null;
+    this._workletPromise = null;
+    this._destroyed = false;
     this._midiProgram = 25;       // GM program for primary track (25 = acoustic steel guitar)
     this._instrumentName = 'electric_guitar_clean'; // soundfont-player fallback instrument
     this._pitchBendRangeSemitones = 12; // wide enough for guitar slides, bends and vibrato
@@ -113,10 +119,14 @@ export class PlaybackEngine {
   _installAudioResilience() {
     if (typeof document === 'undefined' || this._resilienceInstalled) return;
     this._resilienceInstalled = true;
-    const resume = () => { this.resumeAudioContext(); };
-    document.addEventListener('visibilitychange', () => {
+    const resume = () => {
+      if (this.audioEnabled || this.isPlaying || this.metronome) this.resumeAudioContext();
+    };
+    const visibility = () => {
       if (!document.hidden) resume();
-    });
+    };
+    this._resilienceListeners = { resume, visibility };
+    document.addEventListener('visibilitychange', visibility);
     window.addEventListener('focus', resume);
     window.addEventListener('pointerdown', resume, true);
     window.addEventListener('keydown', resume, true);
@@ -143,6 +153,86 @@ export class PlaybackEngine {
     }
     const cursor = this.renderer ? (this.renderer.cursorMeasure || 0) : 0;
     return this._measureStartSec(cursor) + (this._resumeSubMeasureSec || 0);
+  }
+
+  /** Release song state while retaining the session's decoded soundfont. */
+  detachRenderer() {
+    if (this.renderer) this.stop();
+    this.audioEnabled = false;
+    this.metronome = false;
+    for (const ch of this._secondaryChannels) {
+      if (ch.synth !== 'spessa') this._disposeSynth(ch.synth);
+    }
+    this._secondaryChannels = [];
+    this.renderer = null;
+    this._timelineRendererRef = null;
+    this._timelineHandPerformance = null;
+    this._tempoDocument = null;
+    this._slotStartBeat = null;
+    this._instrumentOverrides = {};
+    this.onMeasureChange = this.onPositionChange = this.onTimeChange = this.onStop = null;
+    this.onSynthStatusChange = this.onSynthProgress = this.onSoundfontWarning = null;
+  }
+
+  /** Dispose one owned synth, including a candidate that finished after cancellation. */
+  _disposeSynth(synth) {
+    if (!synth || synth === 'spessa') return;
+    try { synth.stopAll?.(); synth.stop?.(); } catch (_) { /* already stopped */ }
+    try { synth.destroy?.(); } catch (_) { /* already destroyed */ }
+  }
+
+  /** Cancel the current load and release synths without closing the shared clock. */
+  _resetSynth() {
+    this._synthGeneration++;
+    this._synthAbort?.abort();
+    this._synthAbort = null;
+    this._soundfontPlayerPromise = null;
+    for (const synth of new Set([this._pendingSpessa, this._spessa, this._synth])) {
+      this._disposeSynth(synth);
+    }
+    this._pendingSpessa = this._spessa = this._synth = null;
+    this._synthInitPromise = null;
+    this._synthLoading = false;
+    this._spessaFailed = false;
+    this._spessaPresets = [];
+    this._pitchBendRangeChannels.clear();
+    for (const ch of this._secondaryChannels) {
+      if (ch.synth !== 'spessa') this._disposeSynth(ch.synth);
+      ch.synth = null;
+      ch._loading = false;
+    }
+  }
+
+  /** Apply an explicitly selected soundfont while preserving the AudioContext clock. */
+  reloadSoundfont() {
+    if (this._destroyed) return Promise.resolve();
+    this._resetSynth();
+    SF2_BUFFER_CACHE.clear();
+    return this._audioCtx ? this._initSynth() : Promise.resolve();
+  }
+
+  /** Permanently release this engine and all browser resources it owns. */
+  destroy() {
+    if (this._destroyed) return this._destroyPromise || Promise.resolve();
+    this.detachRenderer();
+    this._destroyed = true;
+    this._resetSynth();
+    clearInterval(this._resilienceTimer);
+    const listeners = this._resilienceListeners;
+    if (listeners) {
+      document.removeEventListener('visibilitychange', listeners.visibility);
+      window.removeEventListener('focus', listeners.resume);
+      window.removeEventListener('pointerdown', listeners.resume, true);
+      window.removeEventListener('keydown', listeners.resume, true);
+      this._resilienceListeners = null;
+    }
+    try { this._masterGain?.disconnect(); } catch (_) { /* already disconnected */ }
+    const context = this._audioCtx;
+    this._audioCtx = this._masterGain = null;
+    this._workletPromise = null;
+    this.onSynthStatusChange = this.onSynthProgress = this.onSoundfontWarning = null;
+    this._destroyPromise = Promise.resolve().then(() => context?.close()).catch(() => {});
+    return this._destroyPromise;
   }
 
   /** Score seconds at nominal speed; shared by notation and hand animation. */
@@ -217,6 +307,7 @@ export class PlaybackEngine {
    * @param {number} [opts.beatsPerMeasure]
    */
   rebind(renderer, opts = {}) {
+    if (this._destroyed) return;
     // Stop anything currently sounding before swapping the score out.
     try { this.pause(); } catch (_) { /* not playing */ }
     if (this._spessa) {
@@ -253,7 +344,7 @@ export class PlaybackEngine {
   }
 
   get totalMeasures() {
-    return this.renderer.measures.length;
+    return this.renderer?.measures?.length || 0;
   }
 
   /** Seconds per measure for a uniform 4/4-style score (legacy approximation).
@@ -429,6 +520,7 @@ export class PlaybackEngine {
 
   /** Enable audio — must be called on user gesture */
   enableAudio() {
+    if (this._destroyed || !this.renderer) return false;
     const hadAudioClock = !!this._audioCtx && (this.audioEnabled || this.metronome);
     const songSec = this.getCurrentTimeSec();
     if (!this._audioCtx) {
@@ -461,7 +553,7 @@ export class PlaybackEngine {
    * @returns {Promise<void>}
    */
   async resumeAudioContext() {
-    if (!this._audioCtx) return;
+    if (this._destroyed || !this._audioCtx) return;
     // 'interrupted' is the iOS/Safari state after an audio-focus loss (call,
     // other app); 'suspended' is the standard autoplay/backgrounding state.
     if (this._audioCtx.state !== 'running') {
@@ -619,6 +711,7 @@ export class PlaybackEngine {
    *   authoritative percussion signal (a mis-named drum track no longer plays as piano)
    */
   addSecondaryChannel(trackId, trackName, results, beatsPerMeasure, midiProgram, kind) {
+    if (this._destroyed || !this.renderer) return;
     this.removeSecondaryChannel(trackId); // remove if already present
     const bpm = beatsPerMeasure || this.bpm;
     const measures = PlaybackEngine._buildMeasures(results, bpm);
@@ -673,7 +766,7 @@ export class PlaybackEngine {
    * @param {Object} ch — secondary channel object
    */
   async _loadChannelInstrument(ch) {
-    if (ch._loading || ch.synth) return;
+    if (this._destroyed || ch._loading || ch.synth || !this._secondaryChannels.includes(ch)) return;
 
     if (this._spessa) {
       // Channel 9 is the GM drum kit: do NOT send a melodic programChange (it would
@@ -702,36 +795,24 @@ export class PlaybackEngine {
     if (!this._spessaFailed) return;
 
     ch._loading = true;
+    const generation = this._synthGeneration;
+    const signal = this._synthAbort?.signal;
+    const current = () => !this._destroyed && generation === this._synthGeneration
+      && this._secondaryChannels.includes(ch);
     try {
-      if (!window.Soundfont) {
-        await new Promise((resolve, reject) => {
-          if (document.querySelector('script[src*="soundfont-player"]')) { resolve(); return; }
-          const s = document.createElement('script');
-          s.src = '/static/js/vendor/soundfont-player.min.js';
-          s.onload = resolve;
-          s.onerror = () => reject(new Error('soundfont-player load failed'));
-          document.head.appendChild(s);
-        });
-      }
-      if (!window.Soundfont) throw new Error('Soundfont not available');
       const instName = PlaybackEngine._inferInstrument(ch.trackName);
-      ch.synth = await window.Soundfont.instrument(
-        this._audioCtx, instName, {
-          soundfont: 'MusyngKite',
-          format: 'mp3',
-          nameToUrl: (name, sf, format) =>
-            `/static/js/vendor/soundfonts/${sf}/${name}-${format}.js`,
-          destination: this._masterGain || this._audioCtx.destination,
-          gain: 4,
-        }
-      );
+      const synth = await this._loadFallbackInstrument(instName, signal, current);
+      if (!current()) { this._disposeSynth(synth); return; }
+      ch.synth = synth;
       console.log(`[FretWise] secondary "${ch.trackName}" ready (${instName})`);
       this._catchUpChannel(ch);
     } catch (err) {
-      console.warn(`[FretWise] secondary "${ch.trackName}" load failed:`, err);
-      ch.synth = null;
+      if (current()) {
+        console.warn(`[FretWise] secondary "${ch.trackName}" load failed:`, err);
+        ch.synth = null;
+      }
     } finally {
-      ch._loading = false;
+      if (current()) ch._loading = false;
     }
   }
 
@@ -860,6 +941,7 @@ export class PlaybackEngine {
    * @param {string} trackName — human-readable name from the API
    */
   setInstrument(trackName) {
+    if (this._destroyed) return;
     const inst = PlaybackEngine._inferInstrument(trackName);
     if (this._spessa) {
       // SpessaSynth is active: instrument is set via setMidiProgram; nothing to reload
@@ -872,7 +954,6 @@ export class PlaybackEngine {
       try { this._synth.stop(); } catch (_) {}
       this._synth = null;
     }
-    this._synthLoading = false;
     if (this.audioEnabled) {
       this._initSynth().catch(() => {});
     }
@@ -996,7 +1077,7 @@ export class PlaybackEngine {
 
   /** Start or resume playback from current cursor */
   play() {
-    if (this.isPlaying) return;
+    if (this._destroyed || !this.renderer || this.isPlaying) return;
     this.isPlaying = true;
     this._startMeasure = this.renderer.cursorMeasure;
     // Resume at the sub-measure offset captured by the last pause() (if any),
@@ -1164,6 +1245,7 @@ export class PlaybackEngine {
 
   /** Stop and reset to beginning */
   stop() {
+    if (!this.renderer) return;
     this.pause();
     this._resumeSubMeasureSec = 0;
     this.discontinuityId = (this.discontinuityId || 0) + 1;
@@ -1175,6 +1257,7 @@ export class PlaybackEngine {
 
   /** Jump to specific measure */
   goToMeasure(m) {
+    if (this._destroyed || !this.renderer) return;
     this.discontinuityId = (this.discontinuityId || 0) + 1;
     const wasPlaying = this.isPlaying;
     this.pause();
@@ -1192,13 +1275,14 @@ export class PlaybackEngine {
   }
 
   /** Go to previous measure */
-  prev() { this.goToMeasure(this.renderer.cursorMeasure - 1); }
+  prev() { if (this.renderer) this.goToMeasure(this.renderer.cursorMeasure - 1); }
 
   /** Go to next measure */
-  next() { this.goToMeasure(this.renderer.cursorMeasure + 1); }
+  next() { if (this.renderer) this.goToMeasure(this.renderer.cursorMeasure + 1); }
 
   /** Set speed multiplier (0.1 – 2.0) */
   setSpeed(s) {
+    if (this._destroyed || !this.renderer) return;
     if (!Number.isFinite(s) || s <= 0) return;
     const wasMeasure = this.renderer.cursorMeasure;
     const wasPlaying = this.isPlaying;
@@ -1218,6 +1302,7 @@ export class PlaybackEngine {
 
   /** Set loop A marker (start) */
   setLoopStart(m) {
+    if (this._destroyed || !this.renderer) return;
     this.loopStart = Math.max(0, Math.min(m, this.totalMeasures - 1));
     this.renderer.loopStart = this.loopStart;
     if (this.loopEnd < this.loopStart) {
@@ -1229,6 +1314,7 @@ export class PlaybackEngine {
 
   /** Set loop B marker (end) */
   setLoopEnd(m) {
+    if (this._destroyed || !this.renderer) return;
     this.loopEnd = Math.max(0, Math.min(m, this.totalMeasures - 1));
     this.renderer.loopEnd = this.loopEnd;
     if (this.loopStart < 0) {
@@ -1244,6 +1330,7 @@ export class PlaybackEngine {
 
   /** Clear loop range */
   clearLoop() {
+    if (this._destroyed || !this.renderer) return;
     this.loopStart = -1;
     this.loopEnd = -1;
     this.renderer.loopStart = -1;
@@ -1253,6 +1340,7 @@ export class PlaybackEngine {
 
   /** Set loop range directly (for legacy full-song loop) */
   setLoop(start, end) {
+    if (this._destroyed || !this.renderer) return;
     this.loopStart = start;
     this.loopEnd = end;
     this.renderer.loopStart = start;
@@ -1262,6 +1350,7 @@ export class PlaybackEngine {
 
   /** Toggle metronome */
   toggleMetronome() {
+    if (this._destroyed || !this.renderer) return false;
     const hadAudioClock = !!this._audioCtx && (this.audioEnabled || this.metronome);
     const songSec = this.getCurrentTimeSec();
     this.metronome = !this.metronome;
@@ -1431,16 +1520,121 @@ export class PlaybackEngine {
    * Fallback: soundfont-player + MusyngKite MP3 samples (6 guitar presets).
    * If both fail: oscillator synthesis (this._synth stays null).
    */
-  async _initSynth() {
-    if (this._spessa || this._synth || this._synthLoading) return;
+  _initSynth() {
+    if (this._destroyed) return Promise.resolve();
+    if (this._synthInitPromise) return this._synthInitPromise;
+    if (this._spessa || this._synth) return Promise.resolve();
+    const generation = ++this._synthGeneration;
+    const controller = new AbortController();
+    this._synthAbort = controller;
     this._synthLoading = true;
     if (this.onSynthStatusChange) this.onSynthStatusChange('loading');
+    const pending = this._loadSynth(generation, controller.signal).finally(() => {
+      if (generation !== this._synthGeneration) return;
+      this._synthInitPromise = null;
+      this._synthLoading = false;
+      if (!this._spessa) {
+        this._spessaFailed = true;
+        for (const ch of this._secondaryChannels) {
+          if (!ch.synth) this._loadChannelInstrument(ch).catch(() => {});
+        }
+      }
+    });
+    this._synthInitPromise = pending;
+    return pending;
+  }
+
+  _assertSynthCurrent(generation, signal) {
+    if (this._destroyed || signal?.aborted || generation !== this._synthGeneration) {
+      const error = new Error('Audio initialization cancelled');
+      error.name = 'AbortError';
+      throw error;
+    }
+  }
+
+  /** Bound asynchronous audio work; a deadline rejects, never means "ready". */
+  _waitForAudio(promise, timeoutMs, signal) {
+    return new Promise((resolve, reject) => {
+      let timer;
+      const finish = (callback, value) => {
+        clearTimeout(timer);
+        signal?.removeEventListener('abort', abort);
+        callback(value);
+      };
+      const abort = () => {
+        const error = new Error('Audio initialization cancelled');
+        error.name = 'AbortError';
+        finish(reject, error);
+      };
+      // Install handlers even when already aborted: the underlying operation can reject later.
+      Promise.resolve(promise).then(value => finish(resolve, value), error => finish(reject, error));
+      if (signal?.aborted) { abort(); return; }
+      signal?.addEventListener('abort', abort, { once: true });
+      timer = setTimeout(() => finish(reject, new Error('Audio initialization timed out')), timeoutMs);
+    });
+  }
+
+  /** Fetch the entire bank within one deadline, including streamed body reads. */
+  async _fetchSoundfont(signal) {
+    const controller = new AbortController();
+    const abort = () => controller.abort();
+    if (signal.aborted) abort();
+    signal.addEventListener('abort', abort, { once: true });
+    let response;
+    let bodyReleased = false;
     try {
+      return await this._waitForAudio((async () => {
+        response = await fetch('/api/soundfont', { signal: controller.signal });
+        if (!response.ok) throw new Error(`SF2 fetch: HTTP ${response.status}`);
+        let buffer = SF2_BUFFER_CACHE.get(response.url);
+        if (buffer) {
+          await response.body?.cancel();
+          bodyReleased = true;
+          if (controller.signal.aborted) throw new Error('Soundfont fetch cancelled');
+          this.onSynthProgress?.(1, (buffer.byteLength / 1048576).toFixed(1),
+            (buffer.byteLength / 1048576).toFixed(1));
+          console.log(`[FretWise] SF2 reused from in-memory cache: ${response.url}`);
+        } else {
+          buffer = await this._fetchWithProgress(response, controller.signal);
+          bodyReleased = true;
+          if (controller.signal.aborted) throw new Error('Soundfont fetch cancelled');
+          SF2_BUFFER_CACHE.clear();
+          SF2_BUFFER_CACHE.set(response.url, buffer);
+        }
+        return { buffer, url: response.url };
+      })(), 180000, signal);
+    } finally {
+      controller.abort();
+      // Also release an unconsumed error response or a stream left by a timeout.
+      if (!bodyReleased && response?.body && !response.body.locked) {
+        Promise.resolve(response.body.cancel()).catch(() => {});
+      }
+      signal.removeEventListener('abort', abort);
+    }
+  }
+
+  async _loadSynth(generation, signal) {
+    let spessa;
+    try {
+      if (this._spessaFailed) {
+        await this._initSynthFallback(generation, signal);
+        return;
+      }
       // ── Primary path: SpessaSynth + SF2 ───────────────────────────────────
-      const { Synthetizer } = await import('/static/js/vendor/spessasynth.esm.js');
-      await this._audioCtx.audioWorklet.addModule(
-        '/static/js/vendor/synthetizer/worklet_processor.min.js'
-      );
+      const { Synthetizer } = await this._waitForAudio(
+        import('/static/js/vendor/spessasynth.esm.js'), 30000, signal);
+      this._assertSynthCurrent(generation, signal);
+      if (!this._workletPromise) {
+        const context = this._audioCtx;
+        this._workletPromise = context.audioWorklet.addModule(
+          '/static/js/vendor/synthetizer/worklet_processor.min.js'
+        ).catch(error => {
+          if (this._audioCtx === context) this._workletPromise = null;
+          throw error;
+        });
+      }
+      await this._waitForAudio(this._workletPromise, 30000, signal);
+      this._assertSynthCurrent(generation, signal);
 
       // ── Soundfont fetch (diagnostic-instrumented; see point #1) ──────────
       // `/api/soundfont` 307-redirects to a versioned, immutable URL, so resp.url
@@ -1450,30 +1644,19 @@ export class PlaybackEngine {
       // which is the difference between a multi-second reload and an instant one.
       console.log('[FretWise] SpessaSynth: fetching SF2 soundfont…');
       const tFetch = performance.now();
-      const resp = await fetch('/api/soundfont');
-      if (!resp.ok) throw new Error(`SF2 fetch: HTTP ${resp.status}`);
-      let sf2Buffer = SF2_BUFFER_CACHE.get(resp.url);
-      if (sf2Buffer) {
-        this.onSynthProgress?.(1, (sf2Buffer.byteLength / 1048576).toFixed(1),
-          (sf2Buffer.byteLength / 1048576).toFixed(1));
-        console.log(`[FretWise] SF2 reused from in-memory cache: ${resp.url} `
-          + `(${(sf2Buffer.byteLength / 1048576).toFixed(1)} MB, no download)`);
-      } else {
-        sf2Buffer = await this._fetchWithProgress(resp);
-        SF2_BUFFER_CACHE.clear();                       // keep at most one bank
-        SF2_BUFFER_CACHE.set(resp.url, sf2Buffer);
-        console.log(`[FretWise] SF2 downloaded in ${(performance.now() - tFetch).toFixed(0)} ms: `
-          + `${resp.url} (${(sf2Buffer.byteLength / 1048576).toFixed(1)} MB)`);
-      }
-      if (this._lastSf2Url && this._lastSf2Url !== resp.url) {
+      const { buffer: sf2Buffer, url } = await this._fetchSoundfont(signal);
+      this._assertSynthCurrent(generation, signal);
+      console.log(`[FretWise] SF2 fetched/cached in ${(performance.now() - tFetch).toFixed(0)} ms`);
+      if (this._lastSf2Url && this._lastSf2Url !== url) {
         console.warn(`[FretWise] active soundfont bank CHANGED `
-          + `(${this._lastSf2Url} → ${resp.url}) — this forces a synth reload.`);
+          + `(${this._lastSf2Url} → ${url}) — this forces a synth reload.`);
       }
-      this._lastSf2Url = resp.url;
+      this._lastSf2Url = url;
 
       const dest = this._masterGain || this._audioCtx.destination;
       const tParse = performance.now();
-      const spessa = new Synthetizer(dest, sf2Buffer);
+      spessa = new Synthetizer(dest, sf2Buffer);
+      this._pendingSpessa = spessa;
 
       // Wait for the worklet to finish parsing the soundfont, then snapshot its
       // preset list. We need it to map GM programs onto presets the soundfont
@@ -1488,17 +1671,14 @@ export class PlaybackEngine {
       // as soon as isReady fires; scale the *safety* cap with file size so a huge
       // bank gets the time it needs (~0.5 ms/KB ⇒ ~95 s for 186 MB), capped at 3 min.
       const readyCapMs = Math.min(180000, Math.max(8000, (sf2Buffer.byteLength / 1024) * 0.5));
-      try {
-        await Promise.race([
-          spessa.isReady,
-          new Promise((r) => setTimeout(r, readyCapMs)),
-        ]);
-      } catch (_) { /* isReady rejected — proceed with whatever presets exist */ }
+      await this._waitForAudio(spessa.isReady, readyCapMs, signal);
+      this._assertSynthCurrent(generation, signal);
       console.log(`[FretWise] SF2 parsed/ready in ${(performance.now() - tParse).toFixed(0)} ms `
         + `(worklet decode; cap was ${(readyCapMs / 1000).toFixed(0)} s)`);
       this._spessaPresets = Array.isArray(spessa.presetList) ? spessa.presetList.slice() : [];
 
       this._spessa = spessa;
+      this._pendingSpessa = null;
       this._synth = 'spessa';
 
       // Set the (resolved) GM program for primary and any registered secondary channels
@@ -1526,7 +1706,7 @@ export class PlaybackEngine {
       // Warn when the active bank is not General MIDI: without GM programs for
       // bass/drums/keys, the browser synth collapses every track onto a guitar
       // (or preset 0 = drums), so tabs sound wrong whatever soundfont is tried.
-      this._warnIfNotGeneralMidi(resp.url);
+      this._warnIfNotGeneralMidi(url);
       // DIAGNOSTIC: confirm what the synth itself thinks is on each channel after
       // our programChange calls, vs what we asked for — exposes any internal
       // override (e.g. drum-channel auto-reset, preset-not-found fallback).
@@ -1537,20 +1717,13 @@ export class PlaybackEngine {
       } catch (_) { /* diagnostic only */ }
       if (this.onSynthStatusChange) this.onSynthStatusChange('ready');
     } catch (err) {
+      this._disposeSynth(spessa);
+      if (this._pendingSpessa === spessa) this._pendingSpessa = null;
+      if (this._spessa === spessa) this._spessa = this._synth = null;
+      if (this._destroyed || signal.aborted || generation !== this._synthGeneration) return;
       console.warn('[FretWise] SpessaSynth unavailable, falling back to MusyngKite:', err.message);
-      await this._initSynthFallback();
-    } finally {
-      this._synthLoading = false;
-      // Secondary channels deferred their load while SpessaSynth was resolving
-      // (see _loadChannelInstrument). If SpessaSynth ultimately failed, open the
-      // MusyngKite fallback gate and bind them now; on success _initSynth has
-      // already bound them to the shared synth above.
-      if (!this._spessa) {
-        this._spessaFailed = true;
-        for (const ch of this._secondaryChannels) {
-          if (!ch.synth) this._loadChannelInstrument(ch).catch(() => {});
-        }
-      }
+      this._spessaFailed = true;
+      await this._initSynthFallback(generation, signal);
     }
   }
 
@@ -1558,35 +1731,79 @@ export class PlaybackEngine {
    * Fallback synthesizer: soundfont-player + MusyngKite pre-rendered MP3 samples.
    * Only 6 guitar/bass presets available.  Used when SpessaSynth fails to load.
    */
-  async _initSynthFallback() {
-    try {
-      if (!window.Soundfont) {
-        await new Promise((resolve, reject) => {
-          const s = document.createElement('script');
-          s.src = '/static/js/vendor/soundfont-player.min.js';
-          s.onload = resolve;
-          s.onerror = () => reject(new Error('soundfont-player script failed to load'));
-          document.head.appendChild(s);
-        });
-      }
-      if (!window.Soundfont) throw new Error('window.Soundfont not defined');
+  async _loadSoundfontPlayer(signal) {
+    if (window.Soundfont) return;
+    if (!this._soundfontPlayerPromise) {
+      const script = document.createElement('script');
+      script.src = '/static/js/vendor/soundfont-player.min.js';
+      const loaded = new Promise((resolve, reject) => {
+        script.onload = resolve;
+        script.onerror = () => reject(new Error('soundfont-player script failed to load'));
+      });
+      document.head.appendChild(script);
+      const pending = this._waitForAudio(loaded, 30000, signal).finally(() => {
+        script.onload = script.onerror = null;
+        if (!window.Soundfont) script.remove();
+        if (this._soundfontPlayerPromise === pending) this._soundfontPlayerPromise = null;
+      });
+      this._soundfontPlayerPromise = pending;
+    }
+    await this._waitForAudio(this._soundfontPlayerPromise, 30000, signal);
+    if (!window.Soundfont) throw new Error('window.Soundfont not defined');
+  }
 
-      const instName = this._instrumentName;
-      console.log(`[FretWise] soundfont-player: loading ${instName}…`);
-      this._synth = await window.Soundfont.instrument(
-        this._audioCtx, instName, {
-          soundfont: 'MusyngKite',
-          format: 'mp3',
-          nameToUrl: (name, sf, format) =>
-            `/static/js/vendor/soundfonts/${sf}/${name}-${format}.js`,
-          destination: this._masterGain || this._audioCtx.destination,
-          gain: 4,
-        }
-      );
-      this._synth.play(69, this._audioCtx.currentTime, { duration: 0.5, gain: 0.8 });
-      console.log(`[FretWise] soundfont-player ready — ${instName}`);
-      if (this.onSynthStatusChange) this.onSynthStatusChange('ready');
+  /** A late MP3 decode must not publish into a replaced track or closed engine. */
+  async _loadFallbackInstrument(instName, signal, current) {
+    await this._loadSoundfontPlayer(signal);
+    if (signal?.aborted || !current()) throw new Error('Audio initialization cancelled');
+    let active = true;
+    const pending = Promise.resolve(window.Soundfont.instrument(this._audioCtx, instName, {
+      soundfont: 'MusyngKite',
+      format: 'mp3',
+      nameToUrl: (name, sf, format) =>
+        `/static/js/vendor/soundfonts/${sf}/${name}-${format}.js`,
+      destination: this._masterGain || this._audioCtx.destination,
+      gain: 4,
+    })).then(synth => {
+      if (!active || signal?.aborted || !current()) {
+        this._disposeSynth(synth);
+        throw new Error('Audio initialization cancelled');
+      }
+      return synth;
+    });
+    try {
+      return await this._waitForAudio(pending, 60000, signal);
+    } finally {
+      active = false;
+    }
+  }
+
+  async _initSynthFallback(generation, signal) {
+    const current = () => !this._destroyed && !signal.aborted
+      && generation === this._synthGeneration;
+    try {
+      await this._loadSoundfontPlayer(signal);
+      // A track switch can change the desired instrument while MP3s are decoding.
+      const deadline = performance.now() + 90000;
+      while (current()) {
+        const instName = this._instrumentName;
+        let active = true;
+        let synth;
+        try {
+          synth = await this._waitForAudio(
+            this._loadFallbackInstrument(instName, signal, () => active && current()),
+            Math.max(1, deadline - performance.now()), signal);
+        } finally { active = false; }
+        if (!current()) { this._disposeSynth(synth); return; }
+        if (instName !== this._instrumentName) { this._disposeSynth(synth); continue; }
+        this._synth = synth;
+        if (this.isPlaying) this._resyncSchedulerToNow();
+        console.log(`[FretWise] soundfont-player ready — ${instName}`);
+        this.onSynthStatusChange?.('ready');
+        return;
+      }
     } catch (err) {
+      if (!current()) return;
       console.error('[FretWise] soundfont-player FAILED, oscillator fallback:', err);
       this._synth = null;
       if (this.onSynthStatusChange) this.onSynthStatusChange('error');
@@ -1930,22 +2147,41 @@ export class PlaybackEngine {
    * @param {Response} resp
    * @returns {Promise<ArrayBuffer>}
    */
-  async _fetchWithProgress(resp) {
+  async _fetchWithProgress(resp, signal) {
     const total = Number(resp.headers.get('Content-Length')) || 0;
-    if (!resp.body || !total) {
+    const maxBytes = 1024 * 1024 * 1024;
+    if (total > maxBytes) throw new Error('Soundfont exceeds 1 GiB');
+    if (!resp.body) {
       this.onSynthProgress?.(null);
-      return resp.arrayBuffer();
+      const buffer = await resp.arrayBuffer();
+      if (signal?.aborted) throw new Error('Soundfont fetch cancelled');
+      if (buffer.byteLength > maxBytes) throw new Error('Soundfont exceeds 1 GiB');
+      return buffer;
     }
     const MB = 1048576;
     const reader = resp.body.getReader();
     const chunks = [];
     let loaded = 0;
-    for (;;) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-      loaded += value.length;
-      this.onSynthProgress?.(loaded / total, (loaded / MB).toFixed(1), (total / MB).toFixed(1));
+    const cancel = () => { Promise.resolve(reader.cancel()).catch(() => {}); };
+    signal?.addEventListener('abort', cancel, { once: true });
+    try {
+      for (;;) {
+        if (signal?.aborted) throw new Error('Soundfont fetch cancelled');
+        const { done, value } = await reader.read();
+        if (signal?.aborted) throw new Error('Soundfont fetch cancelled');
+        if (done) break;
+        chunks.push(value);
+        loaded += value.length;
+        if (loaded > maxBytes) throw new Error('Soundfont exceeds 1 GiB');
+        this.onSynthProgress?.(total ? loaded / total : null,
+          (loaded / MB).toFixed(1), total ? (total / MB).toFixed(1) : null);
+      }
+    } catch (error) {
+      cancel();
+      throw error;
+    } finally {
+      signal?.removeEventListener('abort', cancel);
+      reader.releaseLock();
     }
     const out = new Uint8Array(loaded);
     let off = 0;

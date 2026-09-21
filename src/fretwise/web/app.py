@@ -10,9 +10,11 @@ import os
 import re
 import shutil
 import threading
-from collections.abc import Mapping
+from collections.abc import AsyncIterator, Callable, Mapping
+from contextvars import copy_context
 from dataclasses import replace
 from datetime import date as _date
+from math import isfinite
 from pathlib import Path
 from typing import Any
 
@@ -38,7 +40,7 @@ from fretwise.auth.resolver import StorageNotConfigured, resolve_user_storage
 from fretwise.auth.secrets import UserSecretsStore
 from fretwise.auth.users import UserStore
 from fretwise.auth.web import current_request_user, setup_auth
-from fretwise.biomechanics import NON_ACTIONABLE_CODES
+from fretwise.biomechanics import NON_ACTIONABLE_CODES, BiomechanicalReport
 from fretwise.config import config as _fw_config
 from fretwise.control_surface import (
     build_gp180_control_surface_catalog,
@@ -1059,19 +1061,15 @@ def _register_routes(app: FastAPI) -> None:
         meta: dict[str, Any] | None = None
         if base["fingered"] and filepath.suffix.lower() == ".gp":
             meta = _read_fingering_meta(filepath)
-            if meta is not None:
-                has_saved_fingering = True
-                fingering_is_current = _fingering_meta_is_current(meta, filepath)
-                fingering_algo_version = meta.get("algo_version")
 
         audit: dict[str, Any] = {}
-        if base["fingered"] and fingering_is_current:
-            # Happy path: serve pre-computed fingerings + audit from sidecar.
-            # Per-track (bug #3): a multi-guitar song caches one entry per track
-            # under data["tracks"][str(track_id)]. Prefer the exact track entry;
-            # else serve the top-level "primary" (the most-recently-saved track,
-            # recorded in meta["track_id"], OR a legacy single-track sidecar with
-            # no track_id); else this track simply has not been fingered yet.
+        fingering_validation = _fingering_validation_summary(None, has_fingerings=False)
+        fingering_validation_scope = "displayed"
+        serialized_results: list[dict[str, Any]] = []
+        if base["fingered"] and meta is not None:
+            # Inspect the selected track even when the header is old or the
+            # source changed. Its version determines the warning; freshness
+            # independently determines whether its saved results can be served.
             import json as _json
             data_path = _fingering_data_path(filepath)
             try:
@@ -1080,24 +1078,46 @@ def _register_routes(app: FastAPI) -> None:
                 tkey = str(track_id) if track_id is not None else None
                 primary_tid = meta.get("track_id") if meta else None
                 if tkey is not None and tkey in tracks:
-                    serialized_results = tracks[tkey].get("results", [])
-                    audit = tracks[tkey].get("audit") or {}
+                    entry = tracks[tkey]
                 elif primary_tid == track_id or (
                     # Sidecar written before per-track support (primary_tid=None)
                     # is only served for the default single-track case (no
                     # explicit track requested, or track 0/None).
                     primary_tid is None and (track_id is None or track_id == 0)
                 ):
-                    serialized_results = data.get("results", [])
-                    audit = data.get("audit") or {}
+                    entry = data
                 else:
                     # Another track was fingered, not this one.
-                    serialized_results = []
+                    entry = None
+                if isinstance(entry, dict):
+                    saved_results = entry.get("results")
+                    has_saved_fingering = isinstance(saved_results, list) and bool(saved_results)
+                    if isinstance(saved_results, list) and saved_results:
+                        fingering_validation = _saved_fingering_validation(
+                            saved_results, entry.get("audit"), entry.get("validation"),
+                            base["events"] if _fingering_source_is_unchanged(meta, filepath)
+                            else None,
+                        )
+                        fingering_validation_scope = "saved"
+                        version = entry.get("algo_version", meta.get("algo_version"))
+                        fingering_algo_version = version if isinstance(version, str) else None
+                        fingering_is_current = (
+                            fingering_algo_version == FINGERING_ALGO_VERSION
+                            and _fingering_source_is_unchanged(meta, filepath)
+                        )
+                        if fingering_is_current:
+                            fingering_validation_scope = "displayed"
+                            serialized_results = saved_results
+                            audit = entry.get("audit") or {}
+                else:
                     has_saved_fingering = False
+                    fingering_is_current = False
             except Exception:
                 serialized_results = []
                 has_saved_fingering = False
                 fingering_is_current = False
+                fingering_algo_version = None
+        if base["fingered"] and fingering_is_current:
             stats: dict[str, Any] = {
                 "parsed": len(base["events"]),
                 "fingered": len(serialized_results),
@@ -1113,11 +1133,26 @@ def _register_routes(app: FastAPI) -> None:
                 if filepath.suffix.lower() == ".gp"
                 else {}
             )
+            # An annotation on another track is not a saved fingering for this
+            # selection. GPIF note identifiers are shared across the score.
+            embedded = {
+                event.source_note_id: embedded[event.source_note_id]
+                for event in base["events"] if event.source_note_id in embedded
+            }
             if embedded:
                 emb_results = _embedded_results_from_events(
                     base["events"], embedded,
                 )
                 serialized_results = [_serialize_result(r) for r in emb_results]
+                from fretwise.biomechanics import validate_fingering_results
+
+                displayed_validation = _fingering_validation_summary(
+                    validate_fingering_results(emb_results),
+                )
+                if (displayed_validation["fingering_validity"] == "invalid"
+                        or fingering_validation["fingering_validity"] != "invalid"):
+                    fingering_validation = displayed_validation
+                    fingering_validation_scope = "displayed"
                 has_saved_fingering = True
                 fingering_is_current = False
                 if fingering_algo_version is None:
@@ -1223,12 +1258,18 @@ def _register_routes(app: FastAPI) -> None:
             "midi_program": base["midi_program"],
             "kind": base["kind"],
             # fingered: True = guitar track that should show tablature + finger UI.
-            # has_saved_fingering: True = a sidecar exists and was loaded.
+            # has_saved_fingering: selected track has saved or embedded decisions.
             # fingering_is_current: True = algo_version matches + source unchanged.
             "fingered": base["fingered"],
             "has_saved_fingering": has_saved_fingering,
             "fingering_is_current": fingering_is_current,
             "fingering_algo_version": fingering_algo_version,
+            "fingering_current_algo_version": FINGERING_ALGO_VERSION,
+            "fingering_is_outdated": _fingering_version_is_older(
+                fingering_algo_version, FINGERING_ALGO_VERSION,
+            ),
+            **fingering_validation,
+            "fingering_validation_scope": fingering_validation_scope,
             "mode": "performance",
             "representation_mode": render_mode.value,
             "tempo": base["tempo"],
@@ -1439,7 +1480,11 @@ def _register_routes(app: FastAPI) -> None:
         for f in sources:
             if not force:
                 meta = _read_fingering_meta(f)
-                if meta is not None and _fingering_meta_is_current(meta, f):
+                if (
+                    meta is not None
+                    and _fingering_meta_is_current(meta, f)
+                    and _fingering_sidecar_tracks_are_current(meta, f)
+                ):
                     pre_skipped.append(f)
                     continue
             to_process.append(f)
@@ -1694,18 +1739,43 @@ def _register_routes(app: FastAPI) -> None:
             },
         )
 
-    @app.post("/api/save/gp/{filename}")
+    @app.post("/api/save/gp/{filename}", response_model=None)
     def save_gp(
         filename: str,
         track_id: int | None = Query(None),
+        stream: bool = Query(False),
+    ) -> dict[str, object] | StreamingResponse:
+        """Recompute and save one track, optionally streaming keepalive events."""
+        storage = _current_storage(app)
+        if stream is True:
+            return _stream_fingering_save(lambda: _save_gp_impl(filename, track_id, storage))
+        return _save_gp_impl(filename, track_id, storage)
+
+    def _save_gp_impl(
+        filename: str, track_id: int | None, storage: StorageBackend,
     ) -> dict[str, object]:
-        """Compute LH fingerings and write ``{stem}_fingered.gp`` into the storage backend.
+        """Serialize writes to one actual score, including disconnected streams."""
+        filepath = _resolve_file(app, filename, storage=storage)
+        key = os.path.normcase(str(filepath.resolve()))
+        with _SAVE_FILES_LOCK:
+            if key in _SAVE_FILES:
+                raise HTTPException(409, "Un recalcul est déjà en cours pour cette partition.")
+            _SAVE_FILES.add(key)
+        try:
+            return _save_gp_to_storage(filepath, track_id, storage)
+        finally:
+            with _SAVE_FILES_LOCK:
+                _SAVE_FILES.discard(key)
+
+    def _save_gp_to_storage(
+        filepath: Path, track_id: int | None, storage: StorageBackend,
+    ) -> dict[str, object]:
+        """Compute LH fingerings and update the original score and its sidecar.
 
         Identical pipeline to the GP export but the result is saved server-side
         instead of returned as a download.  Works with both local and cloud
         storage backends (uses ``storage.write_bytes``).
         """
-        filepath = _resolve_file(app, filename)
         if filepath.suffix.lower() != ".gp":
             raise HTTPException(
                 400, "Save GP only supports Guitar Pro 7/8 (.gp) files",
@@ -1731,7 +1801,6 @@ def _register_routes(app: FastAPI) -> None:
         mapping = fingerings_by_source_id(payload.results)
         merged_mapping = _merged_gp_fingering_mapping(filepath, mapping)
         out_name = filepath.name
-        storage: StorageBackend = _current_storage(app)
         # Write the fingerings back into the original file (in place) — no
         # "_fingered" suffix, no duplicate. write_gp_with_fingerings has already
         # read the source fully into memory, so overwriting it here is safe and
@@ -1753,6 +1822,19 @@ def _register_routes(app: FastAPI) -> None:
         except StorageError as exc:
             raise HTTPException(502, f"Storage error: {exc}")
 
+        if gp_embed_error is None and storage.local_root is None:
+            # A cloud write updates the remote object, not its parse cache.
+            # Refresh before recording source_mtime or the next GET would
+            # immediately invalidate the newly saved sidecar.
+            try:
+                filepath = storage.ensure_local(out_name)
+            except (StorageError, OSError) as exc:
+                _solve_cache_clear()
+                raise HTTPException(
+                    502, "GP saved, but refreshing its local source failed; "
+                    "the fingering sidecar was not updated.",
+                ) from exc
+
         # Compute the audit on the freshly-computed results — it flags the
         # impossible passages (biomechanical FATAL → verdict "bad") FIRST — and
         # persist it in the sidecar so /api/solve serves a real audit banner
@@ -1765,11 +1847,13 @@ def _register_routes(app: FastAPI) -> None:
             payload.results,
             audit=audit,
             track_id=track_id,
+            validation=_fingering_validation_summary(payload.biomechanical_report),
         )
         _solve_cache_clear()
 
         return {
             "saved": out_name,
+            **_fingering_validation_summary(payload.biomechanical_report),
             "annotated_notes": len(merged_mapping),
             "track_annotated_notes": len(mapping),
             "unexportable_notes": _count_unexportable_gp_fingerings(payload.results),
@@ -1784,8 +1868,8 @@ def _register_routes(app: FastAPI) -> None:
             "gp_embed_skipped": gp_embed_error is not None,
             "gp_embed_error": gp_embed_error,
             # False when the sidecar could not be written (disk full, read-only
-            # path, etc.).  The GP file itself may still be saved, but /api/solve
-            # will re-run Viterbi on next open instead of using the cache.
+            # path, etc.). The GP file itself may still be saved, but /api/solve
+            # cannot certify current saved decisions without their sidecar.
             "sidecar_saved": sidecar_ok,
         }
 
@@ -3337,7 +3421,9 @@ def _target_rig_modules_from_view(view: Mapping[str, object] | None) -> tuple[Ri
     return tuple(modules)
 
 
-def _resolve_file(app: FastAPI, filename: str) -> Path:
+def _resolve_file(
+    app: FastAPI, filename: str, *, storage: StorageBackend | None = None,
+) -> Path:
     """Resolve a filename to a readable local score path via the storage backend.
 
     Guards (all enforced by the storage layer):
@@ -3348,7 +3434,7 @@ def _resolve_file(app: FastAPI, filename: str) -> Path:
          cached path is returned, so parsers (which need a real file) work
          transparently. For the local backend the real path is returned.
     """
-    storage: StorageBackend = _current_storage(app)
+    storage = storage if storage is not None else _current_storage(app)
     try:
         safe_name = safe_score_name(filename)
     except StorageValidationError as exc:
@@ -3584,7 +3670,63 @@ _PHRASE_WINDOW_FINGERER_LOADED: bool = False
 # Current fingering algorithm version — bump this when the pipeline changes
 # significantly enough that existing saved fingerings should be recalculated.
 # "2.1" = preserve source-tab notes with no valid generated state as red review items.
-FINGERING_ALGO_VERSION = "2.1"
+FINGERING_ALGO_VERSION = "2.3"
+
+_SAVE_HEARTBEAT_SECONDS = 10.0
+_SAVE_TASKS: set[asyncio.Task[dict[str, object]]] = set()
+_SAVE_FILES: set[str] = set()
+_SAVE_FILES_LOCK = threading.Lock()
+
+
+def _stream_fingering_save(operation: Callable[[], dict[str, object]]) -> StreamingResponse:
+    """Run one save with request context and keep the connection active until completion.
+
+    Disconnecting stops only the stream. The existing worker continues once;
+    its strong reference and completion callback are released when it finishes.
+    """
+    context = copy_context()
+
+    def completed(task: asyncio.Task[dict[str, object]]) -> None:
+        _SAVE_TASKS.discard(task)
+        if not task.cancelled() and (error := task.exception()) is not None:
+            logging.getLogger(__name__).warning(
+                "Fingering save worker failed (%s)", type(error).__name__,
+            )
+
+    async def events() -> AsyncIterator[str]:
+        task = asyncio.create_task(asyncio.to_thread(operation), context=context)
+        _SAVE_TASKS.add(task)
+        task.add_done_callback(completed)
+        yield _json.dumps({"type": "started"}) + "\n"
+        while True:
+            # asyncio.wait never cancels the worker on timeout or disconnect.
+            done, _ = await asyncio.wait({task}, timeout=_SAVE_HEARTBEAT_SECONDS)
+            if not done:
+                yield _json.dumps({"type": "heartbeat"}) + "\n"
+                continue
+            try:
+                result = task.result()
+            except HTTPException as exc:
+                message = str(exc.detail) if exc.status_code < 500 else (
+                    "Le calcul ou l’enregistrement a échoué. Vérifiez la partition "
+                    "avant de relancer le recalcul."
+                )
+                yield _json.dumps({
+                    "type": "error", "error": message, "status": exc.status_code,
+                }) + "\n"
+            except Exception:  # noqa: BLE001 - worker callback logs a sanitized failure
+                yield _json.dumps({
+                    "type": "error", "error": "Le calcul ou l’enregistrement a échoué. "
+                    "Vérifiez la partition avant de relancer le recalcul.", "status": 500,
+                }) + "\n"
+            else:
+                yield _json.dumps({"type": "result", "result": result}) + "\n"
+            return
+
+    return StreamingResponse(
+        events(), media_type="application/x-ndjson",
+        headers={"X-Accel-Buffering": "no", "Cache-Control": "no-cache"},
+    )
 
 # In-memory LRU cache for /api/solve responses. Keyed by (file, mtime, params)
 # so it auto-invalidates when the source file is edited. Bounded entry count
@@ -3881,6 +4023,86 @@ def _guard_summary(payload: PipelineResult) -> dict[str, Any]:
     }
 
 
+def _fingering_validation_summary(
+    report: BiomechanicalReport | None, *, has_fingerings: bool = True,
+) -> dict[str, Any]:
+    """Distinguish physical validity from persistence and algorithm freshness."""
+    if report is None:
+        return {
+            "fingering_validity": "unknown" if has_fingerings else "unavailable",
+            "biomechanical_fatal": None, "fatal_measures": [], "fatal_measure_count": 0,
+        }
+    measures = sorted({
+        violation.measure_index for violation in report.violations
+        if str(violation.severity) == "fatal" and violation.measure_index is not None
+    })
+    return {
+        "fingering_validity": "invalid" if report.fatal_count else "valid",
+        "biomechanical_fatal": report.fatal_count,
+        "fatal_measures": measures[:20], "fatal_measure_count": len(measures),
+    }
+
+
+def _saved_fingering_validation(
+    rows: list[dict[str, Any]], audit: object, validation: object,
+    events: list[NoteEvent] | None,
+) -> dict[str, Any]:
+    """Read the saved guard, or validate legacy decisions without optimizing.
+
+    Legacy rows are matched to source occurrences, never only to reusable GP
+    note IDs. Ambiguous/missing occurrences leave validation unknown.
+    """
+    from collections import defaultdict, deque
+
+    from fretwise.biomechanics import validate_fingering_results
+
+    if isinstance(validation, dict):
+        count = validation.get("biomechanical_fatal")
+        if type(count) is int and count >= 0:
+            return {
+                "fingering_validity": "invalid" if count else "valid",
+                "biomechanical_fatal": count,
+                "fatal_measures": validation.get("fatal_measures", []),
+                "fatal_measure_count": validation.get("fatal_measure_count", 0),
+            }
+    report = audit.get("biomechanical_report") if isinstance(audit, dict) else None
+    violations = report.get("violations") if isinstance(report, dict) else None
+    if isinstance(violations, list):
+        fatal = [v for v in violations if isinstance(v, dict) and v.get("severity") == "fatal"]
+        measures = sorted({v["measure_index"] for v in fatal
+                           if type(v.get("measure_index")) is int})
+        return {
+            "fingering_validity": "invalid" if fatal else "valid",
+            "biomechanical_fatal": len(fatal), "fatal_measures": measures[:20],
+            "fatal_measure_count": len(measures),
+        }
+    if events is not None:
+        try:
+            occurrences: dict[tuple[object, ...], deque[NoteEvent]] = defaultdict(deque)
+            for event in events:
+                key = (event.source_note_id, event.onset, event.duration, event.pitch,
+                       event.voice_hint, event.measure_index)
+                occurrences[key].append(event)
+            results = []
+            for row in rows:
+                key = (row.get("source_note_id"), row["onset"], row["duration"], row["pitch"],
+                       row.get("voice_hint"), row.get("measure_index"))
+                event = occurrences[key].popleft()
+                results.append(FingeringResult(
+                    note_id=int(row["note_id"]), note_event=event,
+                    state=FingeringState(
+                        string_num=int(row["string"]), fret=int(row["fret"]),
+                        finger=Finger(row["finger"]), hand_position=int(row["hand_position"]),
+                    ), cost=float(row.get("cost", 0)),
+                ))
+            return _fingering_validation_summary(validate_fingering_results(results))
+        except (KeyError, IndexError, TypeError, ValueError):
+            logging.getLogger("fretwise.web").warning(
+                "Saved fingering occurrences could not be validated against the source",
+            )
+    return _fingering_validation_summary(None)
+
+
 def _safe_audit(
     events: list[NoteEvent],
     results: list[FingeringResult],
@@ -4068,7 +4290,10 @@ def _process_single_gp(path_str: str) -> dict[str, Any]:
 
             section_markers = dict(getattr(adapter, "section_markers", {}) or {})
             audit = _safe_audit(events, results, section_markers)
-            if not _write_fingering_sidecar(p, results, audit=audit, track_id=track_id):
+            if not _write_fingering_sidecar(
+                p, results, audit=audit, track_id=track_id,
+                validation=_fingering_validation_summary(payload.biomechanical_report),
+            ):
                 sidecar_ok = False
 
         if not total_annotated:
@@ -4513,7 +4738,10 @@ def _current_sidecar_fingering_mapping(filepath: Path) -> dict[str, str]:
     out = _serialized_fingerings_by_source_id(data.get("results"))
     tracks = data.get("tracks") if isinstance(data.get("tracks"), dict) else {}
     for entry in tracks.values():
-        if isinstance(entry, dict):
+        if (
+            isinstance(entry, dict)
+            and entry.get("algo_version", meta.get("algo_version")) == FINGERING_ALGO_VERSION
+        ):
             out.update(_serialized_fingerings_by_source_id(entry.get("results")))
     return out
 
@@ -4558,7 +4786,8 @@ def _read_fingering_meta(filepath: Path) -> dict[str, Any] | None:
     if not p.exists():
         return None
     try:
-        return _json.loads(p.read_text(encoding="utf-8"))
+        meta = _json.loads(p.read_text(encoding="utf-8"))
+        return meta if isinstance(meta, dict) else None
     except Exception:  # noqa: BLE001
         return None
 
@@ -4567,13 +4796,59 @@ def _fingering_meta_is_current(meta: dict[str, Any], filepath: Path) -> bool:
     """True when the sidecar version matches the current algo and the source file is unchanged."""
     if meta.get("algo_version") != FINGERING_ALGO_VERSION:
         return False
+    return _fingering_source_is_unchanged(meta, filepath)
+
+
+def _fingering_source_is_unchanged(meta: dict[str, Any], filepath: Path) -> bool:
+    """Check source freshness independently of the selected track's algorithm."""
     try:
         stored = meta.get("source_mtime")
-        if stored is not None and abs(float(stored) - filepath.stat().st_mtime) > 1.0:
-            return False
-    except OSError:
+        if stored is not None:
+            timestamp = float(stored)
+            if not isfinite(timestamp) or abs(timestamp - filepath.stat().st_mtime) > 1.0:
+                return False
+    except (OSError, TypeError, ValueError, OverflowError):
         return False
     return True
+
+
+def _fingering_version_is_older(saved: str | None, current: str) -> bool:
+    """Compare dotted numeric versions; unknown or embedded provenance is not old."""
+    if saved is None or not re.fullmatch(r"[0-9]+(?:\.[0-9]+)*", saved):
+        return False
+    if not re.fullmatch(r"[0-9]+(?:\.[0-9]+)*", current):
+        return False
+    try:
+        previous = tuple(int(part) for part in saved.split("."))
+        active = tuple(int(part) for part in current.split("."))
+    except ValueError:
+        return False
+    width = max(len(previous), len(active))
+    return previous + (0,) * (width - len(previous)) < active + (0,) * (width - len(active))
+
+
+def _fingering_sidecar_tracks_are_current(meta: dict[str, Any], filepath: Path) -> bool:
+    """Check every retained track before skipping a file in an explicit batch."""
+    import json as _json
+
+    try:
+        data = _json.loads(_fingering_data_path(filepath).read_text(encoding="utf-8"))
+        if (
+            not isinstance(data, dict)
+            or not isinstance(data.get("results"), list)
+            or not data["results"]
+        ):
+            return False
+        tracks = data.get("tracks", {})
+        return isinstance(tracks, dict) and all(
+            isinstance(entry, dict)
+            and entry.get("algo_version", meta.get("algo_version")) == FINGERING_ALGO_VERSION
+            and isinstance(entry.get("results"), list)
+            and bool(entry["results"])
+            for entry in tracks.values()
+        )
+    except (OSError, ValueError):
+        return False
 
 
 def _write_fingering_sidecar(
@@ -4581,6 +4856,7 @@ def _write_fingering_sidecar(
     results: list[FingeringResult],
     audit: dict[str, Any] | None = None,
     track_id: int | None = None,
+    validation: dict[str, Any] | None = None,
 ) -> bool:
     """Write both sidecar files next to *filepath* (best-effort, never raises).
 
@@ -4598,12 +4874,14 @@ def _write_fingering_sidecar(
     most recently saved track (the "primary"), and ``meta["track_id"]`` records
     which track that is — both for backward compatibility with old single-track
     sidecars and so /api/solve can serve the primary without a tracks lookup.
-    Existing tracks are preserved on each save (read-merge-write).
+    Existing tracks and their original algorithm versions are preserved on each
+    save (read-merge-write). Only the newly computed track gains this version.
     """
     import datetime
     import json as _json
     try:
         serialized = [_serialize_result(r) for r in results]
+        previous_meta = _read_fingering_meta(filepath) or {}
         source_mtime = filepath.stat().st_mtime
         meta = {
             "algo_version": FINGERING_ALGO_VERSION,
@@ -4612,9 +4890,6 @@ def _write_fingering_sidecar(
             "source_mtime": source_mtime,
             "track_id": track_id,
         }
-        _fingering_meta_path(filepath).write_text(
-            _json.dumps(meta, ensure_ascii=False), encoding="utf-8"
-        )
         # Merge into any existing data sidecar so OTHER tracks survive this save.
         existing: dict[str, Any] = {}
         try:
@@ -4626,16 +4901,41 @@ def _write_fingering_sidecar(
         tracks: dict[str, Any] = (
             existing.get("tracks") if isinstance(existing.get("tracks"), dict) else {}
         )
-        entry: dict[str, Any] = {"results": serialized}
+        # A legacy primary can predate the tracks map. Preserve it when its
+        # explicit track identity is known before replacing the primary mirror.
+        previous_track_id = previous_meta.get("track_id")
+        if previous_track_id is not None and "results" in existing:
+            previous_entry = {"results": existing["results"]}
+            if "audit" in existing:
+                previous_entry["audit"] = existing["audit"]
+            if "validation" in existing:
+                previous_entry["validation"] = existing["validation"]
+            tracks.setdefault(str(previous_track_id), previous_entry)
+        for retained in tracks.values():
+            if isinstance(retained, dict):
+                # None deliberately records unknown provenance when the old
+                # header is missing; never upgrade an unversioned old entry.
+                retained.setdefault("algo_version", previous_meta.get("algo_version"))
+        entry: dict[str, Any] = {
+            "results": serialized, "algo_version": FINGERING_ALGO_VERSION,
+        }
         if audit is not None:
             entry["audit"] = audit
+        if validation is not None:
+            entry["validation"] = validation
         if track_id is not None:
             tracks[str(track_id)] = entry
         data: dict[str, Any] = {"results": serialized, "tracks": tracks}
         if audit is not None:
             data["audit"] = audit
+        if validation is not None:
+            data["validation"] = validation
         _fingering_data_path(filepath).write_text(
             _json.dumps(data, ensure_ascii=False), encoding="utf-8"
+        )
+        # Publish the new header only after its results were written.
+        _fingering_meta_path(filepath).write_text(
+            _json.dumps(meta, ensure_ascii=False), encoding="utf-8"
         )
     except Exception:  # noqa: BLE001
         return False

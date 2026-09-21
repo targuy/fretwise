@@ -69,8 +69,8 @@ def test_fret_disc_uses_snapped_positions_and_dpr_scaled_floors() -> None:
     body = js[disc_start:disc_end]
     assert "this._snapPx(point.x)" in body
     assert "this._snapFontSizeClamped(fretSizeRaw, Math.round(13 * dpr))" in body
-    # Fret digit is never optional — it must always be drawn.
-    assert "ctx.fillText(String(note.fret)" in body
+    # Fret digit or muted-note X is never optional — one must always be drawn.
+    assert "ctx.fillText(note.muted ? 'X' : String(note.fret)" in body
     # The note-name letter was removed entirely (the reading band carries it) —
     # no leftover conditional branch for it.
     assert "noteName" not in body

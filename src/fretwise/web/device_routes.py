@@ -236,6 +236,7 @@ _HOST_RE = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9.-]{0,251}[A-Za-z0-9])?(?::\d{1
 #: One write at a time: the device has no transaction, and two interleaved
 #: provisioning runs would each read back the other's writes.
 _push_lock = threading.Lock()
+_rig_store_lock = threading.Lock()
 
 def make_read_client(host: str) -> CoreClient:
     """Return a read-only client; replaced in tests by an in-memory fake."""
@@ -429,6 +430,10 @@ def register_device_routes(app: FastAPI, require_admin: Any) -> None:
             writing to the instrument is admin-only.
     """
 
+    from fretwise.web.rig_ai_routes import _atomic_json, register_rig_ai_routes
+
+    register_rig_ai_routes(app, require_admin)
+
     @app.get("/api/devices")
     async def list_devices() -> JSONResponse:
         """List the units FretWise can drive, and which one is selected.
@@ -483,8 +488,8 @@ def register_device_routes(app: FastAPI, require_admin: Any) -> None:
     async def headrush_prompt(artist: str, title: str, guidance: str = "") -> Response:
         """Serve the copy-paste prompt for one song.
 
-        FretWise calls no LLM provider: this is the text the user pastes into
-        whatever model they already have open. It is generated from the device's
+        This is the manual-mode text the user pastes into their own model.
+        It is generated from the device's
         own catalog, so every block name and enumeration label in it is real.
         """
         if not artist.strip() and not title.strip():
@@ -841,11 +846,8 @@ def register_device_routes(app: FastAPI, require_admin: Any) -> None:
             binding = _song_document(binding, artist, title)
             target = _rig_file(artist, title)
             try:
-                target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_text(
-                    json.dumps(binding, indent=1, ensure_ascii=False) + "\n",
-                    encoding="utf-8",
-                )
+                with _rig_store_lock:
+                    _atomic_json(target, binding)
             except OSError as exc:
                 raise HTTPException(500, f"écriture du rig impossible : {exc}") from exc
             saved = target.name

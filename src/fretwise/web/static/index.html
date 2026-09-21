@@ -343,6 +343,27 @@
     <span class="song-loading-text">Chargement du morceau…</span>
   </div>
 
+  <section id="stale-fingering-warning" class="stale-fingering-warning" hidden
+           aria-labelledby="stale-fingering-title">
+    <div class="stale-fingering-copy">
+      <strong id="stale-fingering-title">Doigtés calculés avec une ancienne version</strong>
+      <p id="stale-fingering-message"></p>
+      <p id="stale-fingering-status" role="status" aria-live="polite"></p>
+    </div>
+    <div class="stale-fingering-actions">
+      <button id="stale-fingering-recalculate" type="button" class="tx-btn">Recalculer et enregistrer</button>
+      <button id="stale-fingering-later" type="button" class="tx-btn">Plus tard</button>
+    </div>
+  </section>
+
+  <section id="fingering-validity-warning" class="stale-fingering-warning" hidden
+           aria-labelledby="fingering-validity-title" role="status">
+    <div class="stale-fingering-copy">
+      <strong id="fingering-validity-title"></strong>
+      <p id="fingering-validity-message"></p>
+    </div>
+  </section>
+
   <!-- Audit banner / status bar — always visible, messages appear here -->
   <div id="audit-banner" class="audit-banner">
     <div class="audit-summary" id="audit-summary">
@@ -603,36 +624,33 @@
     </div>
   </div>
   <div class="rig-body">
-    <p class="gear-verify-hint">
-      1. Copiez le prompt et collez-le dans votre LLM. 2. Collez sa réponse JSON.
-      3. Validez : FretWise la confronte au catalogue lu sur votre appareil.
-      Rien n'est écrit dans l'ampli depuis cette page.
-    </p>
+    <p id="headrush-mode-hint" class="gear-verify-hint"></p>
     <div class="gear-verify-field">
       <div class="gear-verify-field-row">
-        <label for="headrush-guidance">Consigne (optionnelle)</label>
-        <button id="headrush-regen-btn" class="tx-btn" type="button">Régénérer</button>
+        <label for="headrush-guidance">Son recherché (optionnel)</label>
+        <button id="headrush-regen-btn" data-hr-manual class="tx-btn" type="button">Actualiser le prompt</button>
       </div>
       <input id="headrush-guidance" class="settings-input" type="text"
-             placeholder="ex. plus sombre, moins de gain, sans delay…">
+             maxlength="8000" placeholder="Version studio/live, partie rythmique/solo, guitare et micros, casque/FRFR/ampli…">
     </div>
-    <div class="gear-verify-field">
+    <div class="gear-verify-field" data-hr-manual>
       <div class="gear-verify-field-row">
         <label for="headrush-prompt">Prompt à copier</label>
         <button id="headrush-copy-btn" class="tx-btn" type="button">Copier</button>
       </div>
       <textarea id="headrush-prompt" class="gear-verify-textarea" readonly rows="7"></textarea>
     </div>
-    <div class="gear-verify-field">
+    <div class="gear-verify-field" data-hr-manual>
       <label for="headrush-paste">Réponse JSON du LLM</label>
       <textarea id="headrush-paste" class="gear-verify-textarea" rows="9"
                 placeholder="Collez ici le JSON renvoyé par le LLM…"></textarea>
     </div>
     <div class="gear-verify-actions">
-      <button id="headrush-validate-btn" class="tx-btn" type="button">Valider</button>
+      <button id="headrush-validate-btn" data-hr-manual class="tx-btn" type="button">Valider et enregistrer</button>
+      <button id="headrush-generate-btn" class="tx-btn" type="button" hidden>Générer le rig</button>
       <button id="headrush-download-btn" class="tx-btn" type="button"
               style="display:none">Télécharger le rig</button>
-      <span id="headrush-status" class="gear-verify-status"></span>
+      <span id="headrush-status" class="gear-verify-status" role="status" aria-live="polite"></span>
     </div>
     <div id="headrush-result" class="headrush-result"></div>
   </div>
@@ -680,6 +698,7 @@
         <p id="set-headrush-conn" class="settings-hint"></p>
       </div>
     </section>
+    <section id="settings-rig-ai" class="settings-section rig-ai-settings"></section>
     <section id="settings-cloud-section" class="settings-section" style="display:none">
       <h3>Cloud Storage</h3>
       <div class="settings-field">

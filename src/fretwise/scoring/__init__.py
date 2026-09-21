@@ -358,7 +358,9 @@ class CostFunction:
     def emission_cost(self, state: FingeringState) -> float:
         """Initial cost for the first note in a sequence.
 
-        Uses the intrinsic finger difficulty as a simple emission cost.
+        Includes the initial stretch as well as intrinsic finger difficulty.
+        Otherwise an extended finger can win the first note cheaply, before
+        any transition has a chance to charge its initial hand configuration.
 
         Args:
             state: Fingering state for the first note.
@@ -366,7 +368,10 @@ class CostFunction:
         Returns:
             Non-negative cost.
         """
-        return _FINGER_BASE_COST.get(state.finger, 1.0)
+        return (
+            _FINGER_BASE_COST.get(state.finger, 1.0)
+            + self._weights.alpha * cost_stretch(state, state)
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -396,11 +401,12 @@ def cost_position_shift(s1: FingeringState, s2: FingeringState, note: NoteEvent)
         or s2.fret == 0
     )
 
-    # hand_position = fret - finger_offset, so changing finger alone can change hp by up
-    # to 3 even if the hand stays physically anchored. Absorb a 1-fret tolerance so that
-    # adjacent finger swaps (e.g. INDEX@3 → MIDDLE@5: hp 3→4) don't read as a real shift.
+    # Fretted hp estimates can differ slightly with the finger's inferred offset.
+    # An open state's hp is an explicit hand placement, not inferred from a finger:
+    # tolerating each open edge would allow a free two-step shift via open strings.
     raw_shift = abs(s2.hand_position - s1.hand_position)
-    shift = max(0, raw_shift - _POSITION_SHIFT_TOLERANCE_FRETS)
+    tolerance = 0 if open_transition else _POSITION_SHIFT_TOLERANCE_FRETS
+    shift = max(0, raw_shift - tolerance)
     if shift == 0:
         return 0.0
     # beats_per_minute / 60 = beats per second; duration in beats → seconds
@@ -423,14 +429,11 @@ def cost_position_shift_segment_aware(
 ) -> float:
     """Segment-aware variant of ``cost_position_shift`` (B integration).
 
-    When both notes belong to the same segment (same anchor), the cost is 0:
-    the hand is physically anchored, no real wrist motion is required. When
-    they belong to different segments, the cost is proportional to the
-    anchor delta — which is the actual physical hand-position change.
-
-    This eliminates the F2/F3/F4 pathologies caused by the per-state
-    ``hand_position = fret - finger_offset`` confounding finger changes with
-    real wrist shifts.
+    A segment describes a fret window, but does not constrain the candidate
+    states to one hand position. Always charge their actual movement, with
+    the usual inferred-offset tolerance for fretted transitions. Across
+    segments, retain the anchor-distance estimate as a floor rather than
+    replacing (and potentially suppressing) a larger actual movement.
 
     Args:
         s1: Source state.
@@ -440,10 +443,11 @@ def cost_position_shift_segment_aware(
         anchor_curr: Hand anchor of the segment containing s2.
 
     Returns:
-        Non-negative cost. 0.0 when same segment.
+        Non-negative cost, at least the per-state position-shift cost.
     """
+    actual_cost = cost_position_shift(s1, s2, note)
     if anchor_prev == anchor_curr:
-        return 0.0
+        return actual_cost
 
     open_transition = (
         s1.finger == Finger.OPEN
@@ -455,8 +459,8 @@ def cost_position_shift_segment_aware(
     seconds = note.duration * 60.0 / max(note.tempo, 1.0)
     tempo_factor = 1.0 / max(seconds, _POSITION_SHIFT_MIN_SECONDS)
     if open_transition:
-        return _POSITION_SHIFT_OPEN_FACTOR * shift * tempo_factor
-    return shift * tempo_factor
+        return max(actual_cost, _POSITION_SHIFT_OPEN_FACTOR * shift * tempo_factor)
+    return max(actual_cost, shift * tempo_factor)
 
 
 def cost_stretch(s1: FingeringState, s2: FingeringState) -> float:

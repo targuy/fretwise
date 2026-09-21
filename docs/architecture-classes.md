@@ -154,7 +154,7 @@ doit rester synchronisé avec `modeConfig.js` côté front (voir §9.2).
 
 - `ChordFingerClassifier` (ABC) → `LearnedChordFingerClassifier` (ONNX `finger_classifier.onnx`, 24 features) / `FixedChordFingerClassifier`. Utilisé par `resolve_chord_learned_fingers`.
 - `PlayerCostModel` (ABC) → `LearnedPlayerCost` (ONNX `transition_cost_v3.onnx`, 26 features) / `FixedPlayerCost`. Composante γ du scoring.
-- `LearnedPhraseWindowFingerer` + `resolve_phrase_window_fingers()` ([`phrase_window.py`](../src/fretwise/ml/phrase_window.py)) — override des doigtés mélodiques (hors accords) + « pinky demotion belt », avant l'annotation sédentaire.
+- `LearnedPhraseWindowFingerer` + `resolve_phrase_window_fingers()` ([`phrase_window.py`](../src/fretwise/ml/phrase_window.py)) — propositions de doigtés mélodiques (hors accords) + « pinky demotion belt ». Le pipeline arbitre la séquence entre les états des règles et les propositions admissibles avec le coût M4 injecté dans M5 ; il conserve la référence si la proposition viole une contrainte ou augmente le coût. Les états candidats sont isolés des mutations des résolveurs. Voir [continuité des propositions ML](phrase_fingering_continuity.md).
 
 ---
 
@@ -233,6 +233,17 @@ de chaque changement de mode. `playback.usesSvgCursor = !!_svgDriver` arbitre le
   scalaire — toutes les pistes partagent le **même** début de mesure, ce qui les garde
   synchronisées (et calées sur la notation) à travers les changements de signature /
   mesures de levée. Sans `measure_beats` (MusicXML/MIDI), repli sur le tempo uniforme.
+  **Cycle de vie audio** : un moteur est conservé pendant la session de la page.
+  `detachRenderer()` arrête et détache le morceau en quittant la partition ; `rebind()`
+  rattache le suivant sans recréer le contexte ni décoder la même banque.
+  L'initialisation est partagée par une seule promesse ; un changement de piste
+  pendant son exécution ne lance pas un second synthétiseur. `reloadSoundfont()`
+  invalide explicitement la banque et les chargements antérieurs ; `destroy()`
+  retire les listeners, minuteries et synthétiseurs puis ferme le contexte.
+  Les délais de réseau/décodage conduisent au repli ou à l'erreur, jamais à un
+  succès fictif du synthétiseur principal. Les réponses tardives d'un chargement
+  annulé ne peuvent plus remplacer le synthétiseur courant.
+  Régression : [`test_playback_audio_session.py`](../tests/test_playback_audio_session.py).
 
 ### 9.5 Panneaux (boucle de feedback)
 
@@ -241,6 +252,24 @@ de chaque changement de mode. `playback.usesSvgCursor = !!_svgDriver` arbitre le
 - [`review.js`](../src/fretwise/web/static/js/review.js) — panneau flottant « doigtés
   à revoir » : filtres par sévérité, comparaison d'alternatives (avec hand-viz embarquée),
   persistance du choix.
+
+---
+
+### 9.6 Rigs HeadRush et fournisseurs IA
+
+[`headrush.js`](../src/fretwise/web/static/js/headrush.js) partage réglages et génération
+entre FretWise web et HeadRush Studio. Le binding reste `fretwise.device.binding.v1`.
+
+| Module | Responsabilité |
+|---|---|
+| [`rig_ai/settings.py`](../src/fretwise/rig_ai/settings.py) | Préférences d'installation, secrets privés et état public sans clé |
+| [`rig_ai/providers.py`](../src/fretwise/rig_ai/providers.py) | Appels bornés OpenAI Responses / Claude Messages et provenance des sources |
+| [`web/rig_ai_routes.py`](../src/fretwise/web/rig_ai_routes.py) | Autorisation, génération explicite, validation puis sauvegarde atomique sans commande instrument |
+| [`headrush_core/prompt.py`](../src/fretwise/devices/headrush_core/prompt.py) | Prompt commun texte/API et validation des réponses contre le catalogue |
+| [`headrush_core/prompt_catalog.py`](../src/fretwise/devices/headrush_core/prompt_catalog.py) | Paramètres réellement importables, enums complètes et limites du catalogue |
+
+Configuration et frontière entre conformité JSON et qualification sonore :
+[fournisseurs IA](rig_ai_providers.md), [qualité du prompt](headrush_prompt_quality.md).
 
 ---
 
@@ -261,6 +290,8 @@ Les doigtés sont persistés dans un sidecar `*.gp_fingerings.json`.
 | `POST /api/library/cleanup` | post-traitement par lot | Nettoyage bibliothèque |
 | `GET /api/review/{file}` · `/alternatives` · `POST /choice` | `review.flag_fingerings` / `measure_alternatives` / `save_choice` | Panneau révision |
 | `GET/POST /api/settings`, `/api/storage*`, `/api/soundfonts*`, `/api/me` | config / `storage.factory` / soundfonts / auth | Page paramètres, en-tête |
+| `GET/POST /api/rig-ai/settings` | `rig_ai_routes` / `rig_ai.settings` | Modes, modèles et état des clés ; écriture administrateur |
+| `POST /api/devices/headrush/generate` | `rig_ai_routes` / `rig_ai.providers` / `headrush_core.prompt` | Génération administrateur, validation et rig enregistré dans FretWise |
 
 ---
 

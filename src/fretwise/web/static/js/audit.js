@@ -67,6 +67,14 @@ export function renderAuditBanner(audit, opts = {}) {
   _onMaskChange = opts.onMaskedMeasuresChange || null;
   _maskedMeasures = new Set();
 
+  // A movement verdict cannot certify a result rejected by the physical guard.
+  const invalid = opts.fingeringValidity === 'invalid' || opts.biomechanicalFatal > 0;
+  if (invalid) audit = { ...audit, available: true, overall: 'bad' };
+  if (opts.fingeringValidity === 'unknown') {
+    statusBanner('Validation biomécanique non disponible');
+    return;
+  }
+
   // Show a neutral ready state when there is no real audit verdict.
   if (!audit || audit.available === false || !audit.overall) {
     statusBanner('');
@@ -94,7 +102,9 @@ export function renderAuditBanner(audit, opts = {}) {
   const mlNote = audit.ml_signal_available ? '' : ' (signal ML indisponible)';
 
   if (summary) {
-    if (audit.overall === 'clean') {
+    if (invalid) {
+      summary.textContent = 'Doigtés non validés — contraintes biomécaniques à corriger';
+    } else if (audit.overall === 'clean') {
       summary.textContent = `Audit : tous les mouvements OK (${movements.length})${mlNote}`;
     } else {
       summary.textContent =
@@ -118,7 +128,8 @@ export function renderAuditBanner(audit, opts = {}) {
     if (!nonClean.length) {
       const empty = document.createElement('div');
       empty.style.opacity = '0.7';
-      empty.textContent = 'Aucun mouvement à signaler.';
+      empty.textContent = invalid ? 'Consultez les mesures signalées dans l’avertissement.'
+        : 'Aucun mouvement à signaler.';
       details.appendChild(empty);
     }
   }

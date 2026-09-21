@@ -37,7 +37,7 @@
         <h1>Un rig par morceau</h1>
         <p>Choisissez un morceau à gauche, ou saisissez un artiste et un titre pour en concevoir un nouveau.</p>
         <ol>
-          <li><b>Concevoir</b> — le prompt, généré depuis le catalogue de votre Core, part dans votre LLM ; vous collez sa réponse.</li>
+          <li><b>Concevoir</b> — choisissez Texte manuel, Claude ou OpenAI dans les réglages.</li>
           <li><b>Vérifier</b> — chaque bloc est validé et placé : slot, CC de bypass, réglages.</li>
           <li><b>Envoyer</b> — création sur l’appareil à partir du rig vide « #FW - SCRATCH », avec son Program Change.</li>
         </ol>
@@ -54,19 +54,21 @@
         </div>
         <div id="tab-rig" class="st-panel rig-headrush-view"></div>
         <div id="tab-design" class="st-panel st-design" hidden>
-          <label>Consigne pour le LLM <span class="st-muted">(optionnel)</span>
-            <textarea id="st-guidance" rows="2" placeholder="ex. : son du live de 1979, plus de gain pour le solo"></textarea>
+          <p id="st-ai-hint" class="st-muted"></p>
+          <label>Son recherché <span class="st-muted">(optionnel)</span>
+            <textarea id="st-guidance" maxlength="8000" rows="2" placeholder="Version studio/live, partie rythmique/solo, guitare et micros, casque/FRFR/ampli…"></textarea>
           </label>
           <div class="st-row">
-            <button id="st-gen" class="st-btn st-primary" type="button">1. Générer le prompt</button>
-            <button id="st-copy" class="st-btn" type="button" disabled>Copier</button>
-            <span id="st-gen-status" class="st-status"></span>
+            <button id="st-gen" data-st-manual class="st-btn st-primary" type="button">1. Générer le prompt</button>
+            <button id="st-copy" data-st-manual class="st-btn" type="button" disabled>Copier</button>
+            <button id="st-api-generate" class="st-btn st-primary" type="button" hidden>Générer le rig</button>
+            <span id="st-gen-status" class="st-status" role="status" aria-live="polite"></span>
           </div>
-          <textarea id="st-prompt" rows="7" readonly placeholder="Le prompt apparaîtra ici."></textarea>
-          <label>2. Réponse de votre LLM
+          <textarea id="st-prompt" data-st-manual rows="7" readonly placeholder="Le prompt apparaîtra ici."></textarea>
+          <label data-st-manual>2. Réponse de votre LLM
             <textarea id="st-paste" rows="7" placeholder="Collez ici le JSON renvoyé par le LLM, avec ou sans ```json."></textarea>
           </label>
-          <div class="st-row">
+          <div class="st-row" data-st-manual>
             <button id="st-validate" class="st-btn st-primary" type="button">3. Valider et enregistrer</button>
             <span id="st-validate-status" class="st-status"></span>
           </div>
@@ -95,6 +97,7 @@
 <dialog id="st-settings">
   <form method="dialog" class="st-settings-form">
     <h2>Réglages</h2>
+    <section id="st-rig-ai-settings" class="rig-ai-settings"></section>
     <label>Adresse du HeadRush Core
       <input id="st-host" autocomplete="off" spellcheck="false" placeholder="192.168.1.34">
     </label>

@@ -50,7 +50,7 @@ def _state(fret: int, finger: Finger) -> FingeringState:
 
 
 def test_intra_segment_is_zero() -> None:
-    """Same anchor on both sides → free transition, regardless of state hp."""
+    """Same anchor and actual hand position → no wrist movement."""
     s1 = _state(5, Finger.INDEX)   # hp=5
     s2 = _state(8, Finger.PINKY)   # hp=5 too (5 = 8-3)
     note = _note(1, 8)
@@ -58,8 +58,8 @@ def test_intra_segment_is_zero() -> None:
     assert cost == 0.0
 
 
-def test_intra_segment_is_zero_even_when_hp_differs() -> None:
-    """Even with hp delta on the state, same segment anchor → 0 cost."""
+def test_intra_segment_preserves_one_fret_inferred_offset_tolerance() -> None:
+    """Adjacent fretted-finger offset estimates retain their one-fret tolerance."""
     s1 = _state(5, Finger.INDEX)   # hp=5
     s2 = _state(7, Finger.MIDDLE)  # hp=6 (offset 1)
     note = _note(1, 7)

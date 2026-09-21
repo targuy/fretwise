@@ -4,7 +4,9 @@
  * The rig view itself (slot cards, push preview and confirmation) is the module
  * FretWise's Rig panel uses, served at /shared/headrush.js.
  */
-import { fetchRigView, renderRigView, setSettingsLabel } from '/shared/headrush.js';
+import {
+  fetchRigView, renderRigView, setSettingsLabel, initRigAiSettings, rigAiProviderName,
+} from '/shared/headrush.js';
 
 setSettingsLabel('Réglages');
 
@@ -45,6 +47,39 @@ function setStatus(el, text, kind = '') {
 }
 
 const state = { songs: [], current: null, device: null, settings: null };
+let songEpoch = 0;
+let designBusy = false;
+const aiSettings = initRigAiSettings({ container: $('st-rig-ai-settings'), onChange: applyAiMode });
+
+function applyAiMode() {
+  const settings = aiSettings.get();
+  const manual = (settings?.mode || 'manual') === 'manual';
+  document.querySelectorAll('[data-st-manual]').forEach((el) => {
+    el.hidden = !manual;
+    if ('disabled' in el) el.disabled = !manual || designBusy || !settings;
+    el.querySelectorAll('input, textarea, button').forEach((input) => {
+      input.disabled = !manual || designBusy || !settings;
+    });
+  });
+  $('st-copy').disabled = !manual || designBusy || !settings || !$('st-prompt').value;
+  $('st-api-generate').hidden = manual;
+  $('st-api-generate').disabled = designBusy || !settings?.canGenerate || !settings?.[settings.mode]?.configured;
+  $('st-api-generate').textContent = `Générer / corriger avec ${rigAiProviderName(settings?.mode)}`;
+  $('st-guidance').disabled = designBusy;
+  $('tab-design').setAttribute('aria-busy', String(designBusy));
+  $('st-ai-hint').textContent = manual
+    ? 'Copiez le prompt dans votre LLM, collez son JSON puis validez.'
+    : `${rigAiProviderName(settings.mode)} génère le rig, validé puis enregistré par FretWise. ` +
+      (!settings.canGenerate ? 'Génération réservée aux administrateurs.' :
+        !settings[settings.mode]?.configured ? 'Configurez une clé dans les réglages.' :
+          '2 appels API maximum : génération et correction technique si nécessaire, sur votre crédit API. ' +
+          'L’envoi au HeadRush reste une action séparée.');
+}
+
+function setDesignBusy(value) {
+  designBusy = value;
+  applyAiMode();
+}
 
 // ── Device status pill ────────────────────────────────────────────────────
 
@@ -114,6 +149,7 @@ function selectTab(name) {
 }
 
 async function selectSong(artist, title) {
+  const epoch = ++songEpoch;
   state.current = { artist, title };
   $('st-empty').hidden = true;
   $('st-song').hidden = false;
@@ -121,23 +157,25 @@ async function selectSong(artist, title) {
   $('st-song-artist').textContent = artist;
   $('st-prompt').value = '';
   $('st-paste').value = '';
+  $('st-guidance').value = '';
   $('st-copy').disabled = true;
   $('st-validate-result').innerHTML = '';
   setStatus($('st-gen-status'), '');
   setStatus($('st-validate-status'), '');
   renderSongs();
   const hasRig = await showRig();
-  selectTab(hasRig ? 'rig' : 'design');
+  if (epoch === songEpoch) selectTab(hasRig ? 'rig' : 'design');
 }
 
 async function showRig() {
   const { artist, title } = state.current;
+  const epoch = songEpoch;
   const view = $('tab-rig');
   view.innerHTML = '<p class="st-muted">Chargement…</p>';
   const payload = await fetchRigView(artist, title);
+  if (epoch !== songEpoch) return false;
   renderRigView(view, payload, {
-    emptyHint: 'Ouvrez l’onglet « Concevoir avec l’IA » : le prompt part dans votre LLM, ' +
-      'vous collez sa réponse, et le rig validé s’affiche ici.',
+    emptyHint: 'Ouvrez l’onglet « Concevoir avec l’IA ». Choisissez le mode manuel ou API dans les réglages.',
     onChanged: async () => {
       await Promise.all([showRig(), loadSongs(), refreshStatus()]);
     },
@@ -164,7 +202,10 @@ document.querySelectorAll('.st-tab').forEach((tab) => {
 // ── Design with the user's LLM ───────────────────────────────────────────
 
 $('st-gen').addEventListener('click', async () => {
+  if (designBusy || !state.current || aiSettings.get()?.mode !== 'manual') return;
   const { artist, title } = state.current;
+  const epoch = songEpoch;
+  setDesignBusy(true);
   const status = $('st-gen-status');
   setStatus(status, 'Génération…');
   const params = new URLSearchParams({ artist, title });
@@ -172,18 +213,55 @@ $('st-gen').addEventListener('click', async () => {
   if (guidance) params.set('guidance', guidance);
   try {
     const res = await fetch(`/api/devices/headrush/prompt?${params}`, { credentials: 'same-origin' });
+    const prompt = await res.text();
+    if (epoch !== songEpoch) return;
     if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
+      let data = {};
+      try { data = JSON.parse(prompt); } catch { /* non-JSON server response */ }
       setStatus(status, detailOf(data, res), 'error');
       return;
     }
-    $('st-prompt').value = await res.text();
+    $('st-prompt').value = prompt;
     $('st-copy').disabled = false;
     const correcting = res.headers.get('X-FretWise-Prompt-Mode') === 'verify';
     setStatus(status, `Prompt prêt — firmware ${res.headers.get('X-FretWise-App-Version') || '?'}` +
       (correcting ? ' — demande de corriger le rig existant' : ''), 'ok');
   } catch (err) {
-    setStatus(status, `Erreur réseau : ${err}`, 'error');
+    if (epoch === songEpoch) setStatus(status, `Erreur réseau : ${err}`, 'error');
+  } finally {
+    setDesignBusy(false);
+  }
+});
+
+$('st-api-generate').addEventListener('click', async () => {
+  const settings = aiSettings.get();
+  if (designBusy || !state.current || !settings?.canGenerate || settings.mode === 'manual') return;
+  const song = { ...state.current };
+  const epoch = songEpoch;
+  const status = $('st-gen-status');
+  setDesignBusy(true);
+  setStatus(status, `${rigAiProviderName(settings.mode)} : génération et validation en cours… ` +
+    'Correction technique automatique si nécessaire (2 appels API maximum). Cela peut prendre quelques minutes.');
+  $('st-validate-result').innerHTML = '';
+  try {
+    const { res, data } = await postJson('/api/devices/headrush/generate', {
+      ...song, guidance: $('st-guidance').value.trim(),
+    });
+    if (epoch !== songEpoch) return;
+    if (!res.ok) {
+      setStatus(status, `Génération interrompue : ${detailOf(data, res)} Vous pouvez réessayer.`, 'error');
+      return;
+    }
+    setStatus(status, `Validé et enregistré — ${data.blocks} blocs.`, 'ok');
+    if ((data.warnings || []).length) {
+      $('st-validate-result').innerHTML = `<ul class="st-warn">${data.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>`;
+    }
+    await Promise.all([loadSongs(), showRig()]);
+    if (epoch === songEpoch) selectTab('rig');
+  } catch (err) {
+    if (epoch === songEpoch) setStatus(status, `Erreur réseau : ${err}. Vous pouvez réessayer.`, 'error');
+  } finally {
+    setDesignBusy(false);
   }
 });
 
@@ -199,6 +277,7 @@ $('st-copy').addEventListener('click', async () => {
 });
 
 $('st-validate').addEventListener('click', async () => {
+  if (designBusy || !state.current || aiSettings.get()?.mode !== 'manual') return;
   const status = $('st-validate-status');
   const result = $('st-validate-result');
   const raw = $('st-paste').value.trim();
@@ -207,12 +286,15 @@ $('st-validate').addEventListener('click', async () => {
     return;
   }
   const { artist, title } = state.current;
+  const epoch = songEpoch;
+  setDesignBusy(true);
   setStatus(status, 'Validation contre le catalogue…');
   result.innerHTML = '';
   try {
     const { res, data } = await postJson('/api/devices/headrush/ingest', {
       artist, title, response: raw, save: true,
     });
+    if (epoch !== songEpoch) return;
     if (res.status === 422) {
       setStatus(status, 'Refusé : rien n’a été enregistré.', 'error');
       result.innerHTML = `<pre class="st-errors">${esc(data.detail)}</pre>` +
@@ -229,9 +311,11 @@ $('st-validate').addEventListener('click', async () => {
       result.innerHTML = `<ul class="st-warn">${data.warnings.map((w) => `<li>${esc(w)}</li>`).join('')}</ul>`;
     }
     await Promise.all([loadSongs(), showRig()]);
-    selectTab('rig');
+    if (epoch === songEpoch) selectTab('rig');
   } catch (err) {
-    setStatus(status, `Erreur réseau : ${err}`, 'error');
+    if (epoch === songEpoch) setStatus(status, `Erreur réseau : ${err}`, 'error');
+  } finally {
+    setDesignBusy(false);
   }
 });
 
@@ -321,6 +405,7 @@ document.querySelectorAll('.st-nav-btn').forEach((b) => {
 // ── Settings ─────────────────────────────────────────────────────────────
 
 async function openSettings() {
+  await aiSettings.refresh();
   const { res, data } = await getJson('/api/studio/settings');
   const status = $('st-settings-status');
   setStatus(status, '');
@@ -381,5 +466,6 @@ $('st-test').addEventListener('click', async () => {
 // ── Start ────────────────────────────────────────────────────────────────
 
 refreshStatus();
+aiSettings.refresh();
 loadSongs();
 setInterval(() => { if (!document.hidden) refreshStatus(); }, 30000);

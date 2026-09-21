@@ -22,6 +22,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -40,7 +41,7 @@ from fretwise.ml.phrase_window import _PER_NOTE_KEYS, PAD_VALUE, WINDOW_SIZE
 from fretwise.models import Finger, FingeringResult, FingeringState, NoteEvent
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
-MODELS = REPO_ROOT / "data" / "models"
+MODELS = Path(os.environ.get("FRETWISE_TEST_MODEL_DIR", str(REPO_ROOT / "data/models")))
 VERSIONS = ("v1", "v2")
 
 ATOL_FEATURE = 1e-6
@@ -364,12 +365,14 @@ def test_resolver_overrides_melodic_fingers_and_counts() -> None:
         _result(1, 6, Finger.INDEX),
         _result(2, 7, Finger.RING),
     ]
+    before = copy.deepcopy(results)
     stats: dict[str, int] = {}
-    resolve_phrase_window_fingers(
+    resolved = resolve_phrase_window_fingers(
         results, _StubFingerer(["index", "middle", "pinky"]),  # type: ignore[arg-type]
         stats_out=stats,
     )
-    assert [r.state.finger for r in results] == [
+    assert results == before
+    assert [r.state.finger for r in resolved] == [
         Finger.INDEX, Finger.MIDDLE, Finger.PINKY,
     ]
     assert stats["phrase_window_applied"] == 2
@@ -381,12 +384,14 @@ def test_resolver_keeps_open_strings_and_rejects_open_on_fretted() -> None:
         _result(1, 6, Finger.MIDDLE),
         _result(2, 7, Finger.RING),
     ]
-    resolve_phrase_window_fingers(
+    before = copy.deepcopy(results)
+    resolved = resolve_phrase_window_fingers(
         results, _StubFingerer(["pinky", "open", "index"]),  # type: ignore[arg-type]
     )
-    assert results[0].state.finger is Finger.OPEN   # fret 0 untouched
-    assert results[1].state.finger is Finger.MIDDLE  # "open" on fretted ignored
-    assert results[2].state.finger is Finger.INDEX
+    assert results == before
+    assert resolved[0].state.finger is Finger.OPEN   # fret 0 untouched
+    assert resolved[1].state.finger is Finger.MIDDLE  # "open" on fretted ignored
+    assert resolved[2].state.finger is Finger.INDEX
 
 
 def test_resolver_skips_chord_onsets_and_short_runs() -> None:
@@ -397,8 +402,9 @@ def test_resolver_skips_chord_onsets_and_short_runs() -> None:
         _result(2, 6, Finger.MIDDLE, onset=1.0),
         _result(3, 8, Finger.PINKY, onset=2.0),
     ]
-    before = [r.state.finger for r in results]
-    resolve_phrase_window_fingers(
+    before = copy.deepcopy(results)
+    resolved = resolve_phrase_window_fingers(
         results, _StubFingerer(["pinky", "pinky", "pinky", "pinky"]),  # type: ignore[arg-type]
     )
-    assert [r.state.finger for r in results] == before
+    assert results == before
+    assert resolved == before

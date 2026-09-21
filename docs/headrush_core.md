@@ -8,6 +8,14 @@
 > État du matériel au moment de la rédaction : firmware `5.1.0.2a63755`,
 > `DeviceName = HeadRush Core_3570`, 118 rigs, aucun `loadedProgMIDICC` assigné.
 
+**Implémentation actuelle (20 septembre 2026).** Le parcours disponible construit
+un prompt depuis le catalogue puis valide directement un binding ; le compilateur
+d'intention présenté ci-dessous reste une cible de conception. Le mode texte manuel
+et les modes Claude/OpenAI partagent ce contrat. Voir
+[modes IA, secrets et génération](rig_ai_providers.md) et
+[qualité du prompt, validation et limites](headrush_prompt_quality.md).
+La sauvegarde FretWise après génération ne transfère rien à l'instrument.
+
 ---
 
 ## 1. L'idée en une page

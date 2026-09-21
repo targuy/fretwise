@@ -7,14 +7,16 @@ anchor* (the fret covered by the index finger), using a bundle of six ONNX
 heads: one finger classifier per window slot plus one binary anchor head.
 
 Integration status — **v2 ACTIVE in production** (GDS-026 #63 GO decision):
-``resolve_phrase_window_fingers`` applies the v2 melodic finger predictions
-(with the pinky→ring demotion belt, :func:`apply_pinky_demotion`) to pipeline
-output.  v2 passed the production gate #59 on golden_set_v1 under the
+``resolve_phrase_window_fingers`` proposes v2 melodic finger predictions
+(with the pinky→ring demotion belt, :func:`apply_pinky_demotion`). The pipeline
+accepts only admissible, physically valid sequences no costlier than the rules.
+Raw v2 inference passed production gate #59 on golden_set_v1 under the
 canonical protocol: pinky_FPR 3.64 % ≤ 5 % (1.82 % with demotion) and
 per_note_accuracy 0.7627 ≥ 0.678 — see
-``data/models/phrase_window_fingering_v2_metrics.json``.  The deterministic
-biomechanical guard (``fretwise.biomechanics``) stays in place downstream as
-the unchanged fallback contract.  v1 (shadow-only era, FW-015) remains loadable
+``data/models/phrase_window_fingering_v2_metrics.json``. These model metrics
+are distinct from the pipeline's accepted-proposal counts. The deterministic
+biomechanical guard (``fretwise.biomechanics``) remains downstream.
+v1 (shadow-only era, FW-015) remains loadable
 for A/B via ``from_model_dir(..., version="v1")``.
 
 Contract source of truth (identical layout for v1 and v2):
@@ -35,7 +37,7 @@ from __future__ import annotations
 import json
 import math
 from collections.abc import Sequence
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -708,15 +710,15 @@ def resolve_phrase_window_fingers(
     *,
     stats_out: dict[str, int] | None = None,
 ) -> list[FingeringResult]:
-    """Apply phrase_window melodic finger predictions to pipeline output.
+    """Propose phrase_window melodic fingers without modifying input decisions.
 
     Production resolver (GDS-026 #63): per voice, monophonic (non-chord)
     notes form one melodic sequence; the model predicts their fingers via
     ``predict_sequence`` and the pinky demotion belt
-    (:func:`apply_pinky_demotion`) filters the result before it overrides
-    ``state.finger`` in place.  String, fret and hand_position always stay
-    rule-chosen — only the finger label changes, so the downstream
-    biomechanical guard contract is untouched.
+    (:func:`apply_pinky_demotion`) filters the result before proposing a new
+    ``state.finger``. String, fret and hand_position stay rule-chosen.
+    The pipeline arbitrates complete sequences under M4/M5 and validates
+    admissibility and whole-hand contacts before accepting these proposals.
 
     Safety rules (deterministic):
       - chord onsets (≥2 results sharing a rounded onset in a voice) are
@@ -734,16 +736,18 @@ def resolve_phrase_window_fingers(
             firings) counters.
 
     Returns:
-        The same list with melodic fingers rewritten in place.
+        Independent result/state copies containing the melodic proposals.
     """
     from fretwise.models import Finger
+    from fretwise.phrase_arbitration import copy_fingering_results
 
+    resolved = copy_fingering_results(results)
     finger_by_name = {f.value: f for f in Finger}
     applied = 0
     demoted = 0
 
-    by_voice: dict[int, list[Any]] = {}
-    for r in results:
+    by_voice: dict[int, list[FingeringResult]] = {}
+    for r in resolved:
         v = r.note_event.voice_hint or 0
         by_voice.setdefault(v, []).append(r)
 
@@ -782,10 +786,10 @@ def resolve_phrase_window_fingers(
             if finger == "open":
                 continue  # incompatible with a fretted note — keep the rule
             if r.state.finger.value != finger:
-                r.state.finger = finger_by_name[finger]
+                r.state = replace(r.state, finger=finger_by_name[finger])
                 applied += 1
 
     if stats_out is not None:
         stats_out["phrase_window_applied"] = applied
         stats_out["phrase_window_demoted"] = demoted
-    return results
+    return resolved

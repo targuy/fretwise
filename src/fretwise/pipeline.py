@@ -8,7 +8,7 @@ sorted by onset for rendering.
 from __future__ import annotations
 
 import logging
-from dataclasses import dataclass
+from dataclasses import dataclass, replace
 
 from fretwise.biomechanics import (
     BiomechanicalReport,
@@ -21,6 +21,7 @@ from fretwise.hand_planning import plan_hand_configurations, refresh_fingering_c
 from fretwise.models import Finger, FingeringResult, FingeringState, NoteEvent
 from fretwise.optimizer import ViterbiOptimizer
 from fretwise.patterns import PatternMatcher
+from fretwise.phrase_arbitration import arbitrate_phrase_proposals, copy_fingering_results
 from fretwise.scoring import (
     CostFunction,
     resolve_arpeggio_chord_fingering,
@@ -157,16 +158,16 @@ def run_pipeline(
         pattern_matcher: Optional PatternMatcher to reorder states before Viterbi.
         chord_finger_classifier: Optional learned chord-finger model.
         phrase_window_fingerer: Optional ``LearnedPhraseWindowFingerer``; when
-            given, melodic (non-chord) fingers are overridden by the
-            phrase_window predictions with the pinky demotion belt
-            (GDS-026 #63 production activation). Positions stay rule-chosen.
+            given, admissible melodic finger proposals compete with the
+            physically validated rule sequence under the active cost function.
+            Positions and chord choices stay rule-chosen.
 
     Returns:
         Tuple of:
         - ``results``: FingeringResult list sorted by (onset, voice).
         - ``stats``: dict with keys ``parsed``, ``valid_states``, ``viterbi``,
-          ``dropped`` (plus ``phrase_window_applied`` / ``phrase_window_demoted``
-          when the fingerer is active).
+          ``dropped`` (plus ``phrase_window_proposed``, ``phrase_window_applied``,
+          ``phrase_window_rejected`` / ``phrase_window_demoted`` when active).
     """
     voices = split_by_voice(events)
     all_results: list[FingeringResult] = []
@@ -182,7 +183,9 @@ def run_pipeline(
         valid_pairs: list[tuple[NoteEvent, list[FingeringState]]] = []
         fallback_event_ids: set[int] = set()
         for event, states in zip(voice_events, state_lists):
-            candidates_by_event[id(event)] = states
+            # M5 returns references to its input states. Keep independent
+            # admissibility snapshots before any later resolver edits states.
+            candidates_by_event[id(event)] = [replace(state) for state in states]
             if states:
                 valid_pairs.append((event, states))
                 continue
@@ -227,6 +230,7 @@ def run_pipeline(
         finally:
             if segment_activated:
                 optimizer.clear_segment_anchors()
+        results = copy_fingering_results(results)
         # Cost-aware arpeggio stabilisation: pass the same CostFunction used by
         # this voice's Viterbi run so the resolver only overrides finger/
         # hand_position when it is cost-neutral-or-better under the active
@@ -279,10 +283,34 @@ def run_pipeline(
     all_results = resolve_pinky_run_to_index(all_results)
     all_results = _resolve_final_chord_guards(all_results)
 
-    # phrase_window production pass (GDS-026 #63) — overrides melodic
-    # (non-chord) fingers with the ML prediction + pinky demotion belt.
-    # Runs after every rule resolver so chords and positions are final, and
-    # BEFORE sedentary annotation so the hand model sees the applied fingers.
+    hand_stats: dict[str, int] = {}
+    baseline_valid = False
+    if isinstance(generator, StateGenerator):
+        # Rule resolvers can change a locked finger. Restore admissibility
+        # before joint search and establish the protected baseline before ML.
+        for result in all_results:
+            allowed = candidates_by_event.get(id(result.note_event), [])
+            if allowed and result.state not in allowed:
+                result.state = replace(min(allowed, key=lambda state: (
+                    state.string_num != result.state.string_num,
+                    state.fret != result.state.fret,
+                    state.finger != result.state.finger,
+                    abs(state.hand_position - result.state.hand_position),
+                )))
+        planned = plan_hand_configurations(
+            all_results, candidates_by_event, optimizer.cost_fn,
+        )
+        all_results = copy_fingering_results(planned.results)
+        baseline_valid = planned.status == "valid"
+        hand_stats = {
+            "hand_plan_changed": planned.changed_notes,
+            "hand_plan_expanded": planned.expanded_states,
+            "hand_plan_search_failed": int(planned.status != "valid"),
+        }
+
+    # ML proposes fingers; M5 selects a complete per-voice path including
+    # both phrase boundaries. The protected baseline survives failed inference,
+    # incompatible contacts, source locks and any increase in sequence cost.
     pw_stats: dict[str, int] = {}
     if phrase_window_fingerer is not None:
         from fretwise.ml.phrase_window import (
@@ -290,36 +318,43 @@ def run_pipeline(
             resolve_phrase_window_fingers,
         )
         if isinstance(phrase_window_fingerer, LearnedPhraseWindowFingerer):
-            try:
-                all_results = resolve_phrase_window_fingers(
-                    all_results, phrase_window_fingerer, stats_out=pw_stats,
-                )
-            except Exception as exc:  # noqa: BLE001 - preserve rule-only result
-                _LOGGER.warning("Phrase-window CPU inference failed; using rules: %s", exc)
-                pw_stats["phrase_window_fallback"] = 1
-
-    hand_stats: dict[str, int] = {}
-    if isinstance(generator, StateGenerator):
-        # Heuristics/ML can change a locked finger. Restore admissible states
-        # before joint search, including its explicit search-failure fallback.
-        for result in all_results:
-            allowed = candidates_by_event.get(id(result.note_event), [])
-            if allowed and result.state not in allowed:
-                result.state = min(allowed, key=lambda state: (
-                    state.string_num != result.state.string_num,
-                    state.fret != result.state.fret,
-                    state.finger != result.state.finger,
-                    abs(state.hand_position - result.state.hand_position),
-                ))
-        planned = plan_hand_configurations(
-            all_results, candidates_by_event, optimizer.cost_fn,
-        )
-        all_results = planned.results
-        hand_stats = {
-            "hand_plan_changed": planned.changed_notes,
-            "hand_plan_expanded": planned.expanded_states,
-            "hand_plan_search_failed": int(planned.status != "valid"),
-        }
+            pw_stats = {
+                "phrase_window_proposed": 0,
+                "phrase_window_applied": 0,
+                "phrase_window_rejected": 0,
+                "phrase_window_demoted": 0,
+            }
+            if not baseline_valid:
+                pw_stats["phrase_window_skipped_invalid_baseline"] = 1
+            else:
+                baseline = copy_fingering_results(all_results)
+                try:
+                    proposals = resolve_phrase_window_fingers(
+                        copy_fingering_results(baseline), phrase_window_fingerer,
+                        stats_out=pw_stats,
+                    )
+                    pw_stats["phrase_window_proposed"] = pw_stats["phrase_window_applied"]
+                    selected = arbitrate_phrase_proposals(
+                        baseline, proposals, candidates_by_event, optimizer.cost_fn,
+                    )
+                    all_results = selected.results
+                    pw_stats.update({
+                        "phrase_window_proposed": selected.proposed,
+                        "phrase_window_applied": selected.applied,
+                        "phrase_window_rejected": selected.proposed - selected.applied,
+                        "phrase_window_hand_plan_changed": selected.hand_plan_changed,
+                        "phrase_window_hand_plan_expanded": selected.hand_plan_expanded,
+                    })
+                    if selected.fallback:
+                        pw_stats["phrase_window_fallback"] = 1
+                except Exception as exc:  # noqa: BLE001 - preserve rule-only result
+                    _LOGGER.warning(
+                        "Phrase-window inference/arbitration failed; using rules: %s", exc,
+                    )
+                    all_results = baseline
+                    pw_stats["phrase_window_applied"] = 0
+                    pw_stats["phrase_window_rejected"] = pw_stats["phrase_window_proposed"]
+                    pw_stats["phrase_window_fallback"] = 1
     if optimizer.cost_fn is not None:
         refresh_fingering_costs(all_results, optimizer.cost_fn)
     for result in all_results:
