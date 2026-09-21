@@ -546,6 +546,24 @@ export class PlaybackEngine {
   }
 
   /**
+   * Initialize audio from a user gesture and wait for a usable instrument.
+   * `enableAudio()` returns synchronously for toolbar callers; starting the
+   * transport needs the stronger guarantee provided here.
+   *
+   * @returns {Promise<boolean>} true when SpessaSynth or sample fallback is ready
+   */
+  async prepareAudioForPlayback() {
+    if (!this.enableAudio()) return false;
+    try {
+      await this._initSynth();
+    } catch (error) {
+      console.warn('[FretWise] Instrument preparation failed:', error?.message || error);
+      return false;
+    }
+    return Boolean(this._spessa || this._synth);
+  }
+
+  /**
    * Resume the AudioContext if the browser left it suspended (autoplay policy).
    * Browsers only permit resume() from within a user-gesture handler, so this
    * must be called from a click / keydown / touch listener. Safe to call when
@@ -1676,7 +1694,26 @@ export class PlaybackEngine {
         180000,
         Math.max(15000, (sf2Buffer.byteLength / 1024) * 1.25),
       );
-      await this._waitForAudio(spessa.isReady, readyCapMs, signal);
+      // SpessaSynth reports malformed or unsupported SF2/SF3 data through its
+      // event channel while leaving `isReady` pending. Turn that signal into
+      // an immediate fallback instead of waiting pointlessly for the deadline.
+      const parseEventKey = `fretwise-parse-${generation}`;
+      const waitForParsedSoundfont = new Promise((resolve, reject) => {
+        const cleanup = () => spessa.eventHandler.removeEvent('soundfonterror', parseEventKey);
+        spessa.eventHandler.addEvent('soundfonterror', parseEventKey, (message) => {
+          cleanup();
+          reject(new Error(`Soundfont parse error: ${String(message)}`));
+        });
+        Promise.resolve(spessa.isReady).then(
+          () => { cleanup(); resolve(); },
+          (error) => { cleanup(); reject(error); },
+        );
+      });
+      try {
+        await this._waitForAudio(waitForParsedSoundfont, readyCapMs, signal);
+      } finally {
+        spessa.eventHandler.removeEvent('soundfonterror', parseEventKey);
+      }
       this._assertSynthCurrent(generation, signal);
       console.log(`[FretWise] SF2 parsed/ready in ${(performance.now() - tParse).toFixed(0)} ms `
         + `(worklet decode; cap was ${(readyCapMs / 1000).toFixed(0)} s)`);

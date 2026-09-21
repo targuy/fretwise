@@ -1326,6 +1326,7 @@ function populateTrackSwitcher(_trackId) {
 let _selectTrackToken = 0;
 let _solveInFlight = false;        // a selectTrack() solve is currently running
 let _autoPlayAfterSolve = false;   // play was requested before fingerings existed
+let _playStartPending = false;     // Play requested while instrument prepares
 
 async function selectTrack(trackId, trackName) {
   const myToken = ++_selectTrackToken;
@@ -1480,9 +1481,7 @@ async function selectTrack(trackId, trackName) {
         playback.onTimeChange(playback.getCurrentTimeSec());
       }
       if (restorePos.wasPlaying) {
-        playback.play();
-        updatePlayButton(true);
-        startCursorLoop();
+        void _startPlaybackAfterInstrumentReady();
       }
       // Focus the restored measure so opening a tab lands on where you were
       // (or the start), not at the top — and tracks the playhead if it's moving.
@@ -1493,10 +1492,7 @@ async function selectTrack(trackId, trackName) {
     if (_autoPlayAfterSolve && playback) {
       _autoPlayAfterSolve = false;
       if (playback.totalMeasures > 0 && !playback.isPlaying) {
-        _setFollowPlayhead(true);
-        playback.play();
-        updatePlayButton(true);
-        startCursorLoop();
+        void _startPlaybackAfterInstrumentReady();
       }
     }
   } catch (err) {
@@ -3388,6 +3384,26 @@ function _ensureSolvedThenPlay() {
   return true;
 }
 
+/** Start transport only after the requested instrument has finished loading. */
+async function _startPlaybackAfterInstrumentReady() {
+  const engine = playback;
+  if (!engine?.renderer || engine.isPlaying || _playStartPending) return;
+  _playStartPending = true;
+  if (btnPlay) btnPlay.disabled = true;
+  try {
+    const ready = await engine.prepareAudioForPlayback();
+    // A track switch may have replaced this engine during the async load.
+    if (engine !== playback || !engine.renderer || engine.isPlaying || !ready) return;
+    _setFollowPlayhead(true);
+    engine.play();
+    updatePlayButton(true);
+    startCursorLoop();
+  } finally {
+    if (engine === playback && btnPlay) btnPlay.disabled = false;
+    _playStartPending = false;
+  }
+}
+
 /**
  * Bring a measure into view and highlight it — used when opening a tab so the
  * user lands on the measure they were at (or the playhead if it's moving),
@@ -3420,20 +3436,19 @@ function _setChordsOpen(open) {
 if (btnPlay) {
   btnPlay.addEventListener('click', () => {
     if (!playback?.renderer) return;
-    // Autoplay policy: the AudioContext was created (and possibly resumed)
-    // outside a gesture during render, so it may still be suspended. This
-    // click IS a user gesture, so resume here to guarantee sound on first
-    // play (B1.3). enableAudio() also (re)kicks the synth load if needed.
-    playback.resumeAudioContext();
-    if (!playback.audioEnabled) playback.enableAudio();
-    if (_ensureSolvedThenPlay()) return;  // nothing solved yet → compute first
-    if (!playback.isPlaying) {
-      _setFollowPlayhead(true);  // resume following when starting play
+    if (playback.isPlaying) {
+      playback.pause();
+      updatePlayButton(false);
+      stopCursorLoop();
+      return;
     }
-    playback.toggle();
-    updatePlayButton(playback.isPlaying);
-    if (playback.isPlaying) startCursorLoop();
-    else stopCursorLoop();
+    if (_ensureSolvedThenPlay()) {
+      // Keep AudioContext creation inside this click even though the solve can
+      // finish later. The subsequent auto-play waits for this same load.
+      playback.enableAudio();
+      return;
+    }
+    void _startPlaybackAfterInstrumentReady();
   });
 }
 
@@ -5176,12 +5191,15 @@ document.addEventListener('keydown', (e) => {
   switch (e.key) {
     case ' ':
       e.preventDefault();
-      playback.resumeAudioContext();
-      if (!playback.audioEnabled) playback.enableAudio();
-      if (_ensureSolvedThenPlay()) break;  // nothing solved yet → compute first
-      playback.toggle();
-      updatePlayButton(playback.isPlaying);
-      if (playback.isPlaying) startCursorLoop();
+      if (playback.isPlaying) {
+        playback.pause();
+        updatePlayButton(false);
+        stopCursorLoop();
+      } else if (_ensureSolvedThenPlay()) {
+        playback.enableAudio();
+      } else {
+        void _startPlaybackAfterInstrumentReady();
+      }
       break;
     case 'ArrowLeft':
       e.preventDefault();

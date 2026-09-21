@@ -102,7 +102,16 @@ async function harness() {
       this.presetList = Array.from({length: 128}, (_, program) => ({program, bank: 0}));
       this.programs = []; this.stopCalls = 0; this.destroyCalls = 0;
       this.disconnectCalls = 0;
-      this.eventHandler = {addEvent() {}, removeEvent() {}};
+      this.eventHandler = {
+        events: new Map(),
+        addEvent(type, key, handler) {this.events.set(`${type}:${key}`, handler);},
+        removeEvent(type, key) {this.events.delete(`${type}:${key}`);},
+        emit(type, value) {
+          for (const [key, handler] of this.events) {
+            if (key.startsWith(`${type}:`)) handler(value);
+          }
+        },
+      };
       this.worklet = {disconnect: () => {this.disconnectCalls++;},
         port: {close() {}, postMessage() {}}};
       h.synths.push(this);
@@ -211,6 +220,38 @@ def test_loading_tracks_share_one_initialization_and_apply_latest_program() -> N
   assert.deepEqual(synth.programs.filter(([channel]) => channel === 0).at(-1), [0, 0]);
   assert.deepEqual(h.statuses, ['loading', 'ready']);
   assert.equal(p._synthLoading, false);
+  await p.destroy();
+""")
+
+
+def test_prepare_audio_for_playback_waits_for_soundfont_readiness() -> None:
+    _run(r"""
+  const h = await harness(), p = h.engine;
+  const ready = p.prepareAudioForPlayback();
+  await until(() => h.synths.length === 1);
+  assert.equal(p.isPlaying, false);
+  let settled = false;
+  ready.then(() => { settled = true; });
+  await flush();
+  assert.equal(settled, false);
+  h.synths[0].ready.resolve();
+  assert.equal(await ready, true);
+  assert.strictEqual(p._spessa, h.synths[0]);
+  assert.equal(p.isPlaying, false);
+  await p.destroy();
+""")
+
+
+def test_soundfont_parse_error_exits_wait_and_uses_existing_fallback() -> None:
+    _run(r"""
+  const h = await harness(), p = h.engine;
+  const {promise, synth} = await h.start();
+  synth.eventHandler.emit('soundfonterror', 'unsupported soundfont data');
+  await promise; await flush();
+  assert.equal(p._spessa, null);
+  assert.equal(p._synthLoading, false);
+  assert.deepEqual(h.statuses, ['loading', 'error']);
+  assert.equal(h.fallbackCalls.length, 1);
   await p.destroy();
 """)
 

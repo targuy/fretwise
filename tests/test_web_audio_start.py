@@ -16,5 +16,10 @@ def test_song_opening_defers_soundfont_loading_until_playback_intent() -> None:
 
     assert "playback.enableAudio()" not in initial
     assert "playback.enableAudio()" not in unlock
-    assert "if (!playback.audioEnabled) playback.enableAudio();" in source
-
+    assert "async function _startPlaybackAfterInstrumentReady()" in source
+    assert "await engine.prepareAudioForPlayback();" in source
+    play_handler = source[source.index("if (btnPlay) {"):
+                          source.index("if (btnPrev)", source.index("if (btnPlay) {"))]
+    assert "void _startPlaybackAfterInstrumentReady();" in play_handler
+    assert "playback.enableAudio();" in play_handler
+    assert "playback.toggle();" not in play_handler
