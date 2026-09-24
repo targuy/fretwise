@@ -18,6 +18,11 @@ export const minimumJerk = t => {
 const distance = (a, b) => Math.hypot(...a.map((v, i) => v - b[i]));
 const lerp3 = (a, b, t) => a.map((v, i) => v + (b[i] - v) * t);
 const sameContact = (a, b) => a.stringNo === b.stringNo && a.fretAbs === b.fretAbs;
+const overlapping = (a, b) => Math.max(a.on, b.on) < Math.min(a.end, b.end) - 1e-7;
+// Nominal clearance for the delivered adult-reference-left rig, not a universal
+// anatomical limit. The fixed pad spacing must never shrink to fit high frets.
+const SAME_FRET_PAD_SPACING_M = 0.0075;
+const FRET_WIRE_CLEARANCE_M = 0.003;
 const diagnostic = (code, message, noteIds = [], interval = null, severity = "warning") =>
   ({code, message, noteIds, ...(interval ? {interval} : {}), severity});
 
@@ -104,17 +109,75 @@ export function makeInstrumentGeometry(instrument) {
     ?? [0.00013, 0.00017, 0.00022, 0.00033, 0.00046, 0.00058][stringNo - 1] ?? 0.00058;
   const freeHeight = x => (instrument.nutActionM ?? 0.0015)
     + (instrument.bridgeActionM ?? 0.0045) * x / scale + fretHeight;
+  function targetAt(fingering, x, hover = 0) {
+    const y = stringY(fingering.stringNo, x);
+    return [x, y, surfaceZ(x, y) + fretHeight + 2 * stringRadius(fingering.stringNo) + hover];
+  }
   function target(fingering, hover = 0) {
     const fret = fingering.fretAbs;
     const right = fretX(fret), left = fretX(Math.max(capo, fret - 1));
     // Stay on wood before the crown; adapt offset in closely spaced high frets.
     const offset = Math.min(0.005, Math.max(0.001, (right - left) * 0.30));
     const x = fret > capo ? right - offset : fretX(capo);
-    const y = stringY(fingering.stringNo, x);
-    return [x, y, surfaceZ(x, y) + fretHeight + 2 * stringRadius(fingering.stringNo) + hover];
+    return targetAt(fingering, x, hover);
   }
-  return {scale, count, capo, fretX, stringY, surfaceZ, stringRadius, freeHeight, target,
+  return {scale, count, capo, fretX, stringY, surfaceZ, stringRadius, freeHeight, target, targetAt,
     profile: {nutSpacing, bridgeSpacing, radius, fretHeight}};
+}
+
+function spreadSameFretContacts(byFinger, geometry, fail) {
+  const contacts = FINGERS.flatMap(finger => byFinger[finger]);
+  const frets = [...new Set(contacts.map(contact => contact.fretAbs))];
+  for (const fret of frets) {
+    if (fret <= geometry.capo) continue;
+    const row = contacts.filter(contact => contact.fretAbs === fret);
+    const shared = row.filter(contact => row.some(other => other.finger !== contact.finger
+      && overlapping(contact, other)));
+    if (shared.length < 2) continue;
+    // The pinky is furthest from the thumb: put it nearest the fret crown.
+    // A contact only constrains another when their sounding intervals overlap.
+    shared.sort((a, b) => FINGERS.indexOf(b.finger) - FINGERS.indexOf(a.finger)
+      || a.on - b.on || a.id.localeCompare(b.id));
+    const wireRight = geometry.fretX(fret), wireLeft = geometry.fretX(fret - 1);
+    const fretWidth = wireRight - wireLeft;
+    const edge = Math.min(FRET_WIRE_CLEARANCE_M, fretWidth / 3);
+    const right = wireRight - edge, left = wireLeft + edge;
+    const usableWidth = fretWidth - 2 * FRET_WIRE_CLEARANCE_M;
+    const boundaries = [...new Set(shared.flatMap(contact => [contact.on, contact.end]))]
+      .sort((a, b) => a - b);
+    const impossible = [];
+    for (let i = 0; i + 1 < boundaries.length; i++) {
+      const begin = boundaries[i], end = boundaries[i + 1];
+      if (end - begin <= 1e-7) continue;
+      const active = shared.filter(contact => contact.on <= begin && contact.end >= end);
+      const count = new Set(active.map(contact => contact.finger)).size;
+      if (count < 2 || (count - 1) * SAME_FRET_PAD_SPACING_M <= usableWidth + 1e-9) continue;
+      impossible.push({begin, end});
+      fail("SAME_FRET_CONTACTS_UNREACHABLE",
+        `Frette ${fret} trop étroite pour ${count} doigts simultanés sur plusieurs cordes.`,
+        [...new Set(active.flatMap(contact => contact.noteIds))], begin, end);
+    }
+    const placed = [];
+    for (const contact of shared) {
+      const later = placed.filter(other => other.finger !== contact.finger
+        && overlapping(contact, other));
+      const desired = later.length ? Math.min(right, ...later.map(other =>
+        other.desiredX - SAME_FRET_PAD_SPACING_M)) : right;
+      contact.desiredX = desired;
+      // Keep every visual press on its own fret even for an impossible row.
+      contact.target = geometry.targetAt(contact, clamp(desired, left, right));
+      if (desired < left - 1e-9 && !impossible.some(interval =>
+        interval.begin < contact.end && interval.end > contact.on)) {
+        const conflict = later.reduce((closest, other) => !closest
+          || other.desiredX < closest.desiredX ? other : closest, null);
+        fail("SAME_FRET_STATIC_LAYOUT_UNRESOLVED",
+          `Frette ${fret} : repositionnement latéral requis pendant le maintien ; pose non qualifiée.`,
+          [...new Set([...contact.noteIds, ...(conflict?.noteIds || [])])],
+          Math.max(contact.on, conflict.on), Math.min(contact.end, conflict.end));
+      }
+      placed.push(contact);
+    }
+  }
 }
 
 /** Linear, clamped absolute-tick expression curve, without spline overshoot. */
@@ -318,6 +381,13 @@ export function compilePerformance(performance, {playbackRate = 1, rigRevision =
         fail("FINGER_CONTACT_CONFLICT", "Un doigt ne peut assurer ces contacts simultanés.",
           [...previous.noteIds, ...contact.noteIds], contact.on, Math.min(contact.end, previous.end), finger);
       }
+    }
+  }
+  spreadSameFretContacts(byFinger, geometry, fail);
+  for (const finger of FINGERS) {
+    const merged = byFinger[finger];
+    for (let i = 0; i < merged.length; i++) {
+      const contact = merged[i], previous = merged[i - 1];
       const from = previous?.target || restTarget(finger, rootAt(rootFrames, contact.on, geometry.fretX(3)));
       const length = distance(from, contact.target);
       const realDuration = clamp(0.065 + length / 0.7, 0.065, 0.40);
@@ -351,7 +421,7 @@ export function compilePerformance(performance, {playbackRate = 1, rigRevision =
   if ((performance.barres || []).length) {
     diagnostics.push(diagnostic("BARRE_SURFACE_UNQUALIFIED", "Barrés conservés ; contact surfacique complet non qualifié."));
   }
-  const key = stableKey({performance, playbackRate, rigRevision, planner: 1});
+  const key = stableKey({performance, playbackRate, rigRevision, planner: 2});
   return {schemaVersion: "1.0", key, performance, playbackRate, clock, geometry,
     byFinger, expressions, details, diagnostics, invalid, events: events.sort((a, b) => a.sec - b.sec),
     rootFrames, startSec, endSec, status: invalid.length ? "partial" : "illustrative"};

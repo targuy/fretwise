@@ -290,11 +290,22 @@ export class HandV2View {
     this.time = nominalScoreSec;
     if (!this.plan || !this.visible || this.contextLost || document.visibilityState === "hidden") return;
     const sample = sampleMotion(this.plan, nominalScoreSec);
+    const rowFailure = sample.diagnostics.find(d =>
+      ["SAME_FRET_CONTACTS_UNREACHABLE", "SAME_FRET_STATIC_LAYOUT_UNRESOLVED"].includes(d.code));
     const measurements = this.rig.pose(sample, this.plan.geometry);
-    this.poseDiagnostics = measurements.filter(m => m.active && !m.valid).map(m => ({
+    this.poseDiagnostics = measurements.filter(m => m.active && m.errorMm >= .5).map(m => ({
       code: "CONTACT_RESIDUAL", severity: "error", finger: m.finger, noteIds: m.noteIds,
       message: `Contact ${m.finger} : résidu ${m.errorMm.toFixed(2)} mm ; pose non qualifiée.`, errorMm: m.errorMm,
     }));
+    const rowFrets = new Set();
+    const activeFretted = Object.values(sample.fingers).filter(f => f.pressure01 > 0 && f.fretAbs !== null);
+    for (const finger of activeFretted) {
+      if (activeFretted.some(other => other !== finger && other.fretAbs === finger.fretAbs
+          && other.stringNo !== finger.stringNo)) rowFrets.add(finger.fretAbs);
+    }
+    const rowPoseFailure = this.poseDiagnostics.find(d => rowFrets.has(sample.fingers[d.finger]?.fretAbs));
+    // The reference skin cannot hide one finger: omit an unqualified crossing pose.
+    this.rig.hand.visible = !rowFailure && !rowPoseFailure;
     this.lastSample = sample; this.metrics = measurements;
     for (let s = 1; s <= this.strings.length; s++) {
       const contacts = Object.values(sample.fingers).filter(f => f.stringNo === s && f.pressure01 > 0);
@@ -331,7 +342,9 @@ export class HandV2View {
     }
     this.camera.lookAt(focus); this.keyLight.target.position.copy(focus); this.keyLight.target.updateMatrixWorld();
     const issues = this.poseDiagnostics.length + sample.diagnostics.length;
-    this.badge.textContent = `Main v2 · modèle de référence${issues ? ` · ${issues} contrainte(s) non résolue(s)` : " · pouce et collisions non qualifiés"}`;
+    this.badge.textContent = rowFailure ? `Main v2 · ${rowFailure.message}`
+      : rowPoseFailure ? `Main v2 · ${rowPoseFailure.message}`
+      : `Main v2 · modèle de référence${issues ? ` · ${issues} contrainte(s) non résolue(s)` : " · pouce et collisions non qualifiés"}`;
     this.renderer.render(this.scene, this.camera);
   }
 

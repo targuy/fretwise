@@ -138,7 +138,8 @@ const cases=[
 cases[0].forEach(n=>n.fingering.handPositionHint=n.fingering.fretAbs);
 const output=[];
 for(const notes of cases){{const plan=compilePerformance(performance(notes));
-const sample=sampleMotion(plan,.3);output.push(rig.pose(sample,plan.geometry).filter(m=>m.active));}}
+const sample=sampleMotion(plan,.3);
+output.push(rig.pose(sample,plan.geometry).filter(m=>m.active));}}
 console.log(JSON.stringify({{output,vertices:rig.geometry.attributes.position.count,
  triangles:rig.geometry.index.count/3}}));
 """)
@@ -149,6 +150,106 @@ console.log(JSON.stringify({{output,vertices:rig.geometry.attributes.position.co
             assert finger["errorMm"] < 0.5, finger
             assert finger["lengthsMm"] == pytest.approx(finger["restLengthsMm"], abs=1e-10)
             assert finger["valid"] is True
+
+
+def test_same_fret_different_strings_stagger_contacts_in_thumb_order() -> None:
+    """Three simultaneous presses on fret 3 keep their strings and avoid one X lane."""
+    result = run_js("""
+const notes=[note('m','middle',2,3,0,1920),note('r','ring',3,3,0,1920),
+ note('p','pinky',4,3,0,1920)];
+const plan=compilePerformance(performance(notes));
+const row=['middle','ring','pinky'].map(f=>plan.byFinger[f][0]);
+const single=compilePerformance(performance([notes[0]])).byFinger.middle[0];
+console.log(JSON.stringify({targets:row.map(c=>c.target),strings:row.map(c=>c.stringNo),
+ left:plan.geometry.fretX(2),right:plan.geometry.fretX(3),
+ single:single.target,codes:plan.diagnostics.map(d=>d.code),
+ valid:sampleMotion(plan,.2).valid}));
+""")
+    x = [target[0] for target in result["targets"]]
+    assert result["strings"] == [2, 3, 4]
+    assert x[0] < x[1] < x[2]  # pinky furthest from thumb, nearest fret wire
+    assert [x[i + 1] - x[i] for i in range(2)] == pytest.approx([0.0075, 0.0075])
+    assert all(result["left"] < value < result["right"] for value in x)
+    assert result["codes"] == []
+    assert result["valid"] is True
+    assert result["single"][0] > x[0]  # isolated press retains its original target
+
+
+def test_reference_skin_reaches_staggered_fret_three_row() -> None:
+    """Reference mesh meets all three adjacent-string targets without reversing order."""
+    result = run_js(f"""
+const T=await import({json.dumps((JS / 'vendor/three.module.min.js').as_uri())});
+const {{createReferenceRig}}=await import({json.dumps((JS / 'hand_reference_rig.js').as_uri())});
+const rig=createReferenceRig(new T.Group());
+const notes=[note('m','middle',2,3,0,1920),note('r','ring',3,3,0,1920),
+ note('p','pinky',4,3,0,1920)];
+const plan=compilePerformance(performance(notes));
+const measured=rig.pose(sampleMotion(plan,.2),plan.geometry).filter(m=>m.active);
+const joints=rig.hand.getObjectByName('reference-forearm-axis').parent;
+const chains=joints.children.filter(c=>c.type==='Line' && c.name!=='reference-forearm-axis');
+const chainX=[1,2,3].map(f=>Array.from({{length:5}},(_,i)=>
+ new T.Vector3().fromBufferAttribute(chains[f].geometry.attributes.position,i).x));
+console.log(JSON.stringify({{measured:measured.map(m=>({{finger:m.finger,pointM:m.pointM,
+ errorMm:m.errorMm,valid:m.valid}})),chainX,codes:plan.diagnostics.map(d=>d.code)}}));
+""")
+    measured = {item["finger"]: item for item in result["measured"]}
+    assert set(measured) == {"middle", "ring", "pinky"}
+    assert all(item["errorMm"] < 0.5 and item["valid"] for item in measured.values())
+    assert measured["middle"]["pointM"][0] < measured["ring"]["pointM"][0]
+    assert measured["ring"]["pointM"][0] < measured["pinky"]["pointM"][0]
+    assert all(middle < ring < pinky for middle, ring, pinky
+               in zip(*result["chainX"], strict=True))
+    assert result["codes"] == []
+
+
+def test_extreme_high_fret_rejects_simultaneous_row_without_moving_notes() -> None:
+    """Too-narrow fret 24 keeps string/fret identity and reports invalid motion."""
+    result = run_js("""
+const p=performance([note('i','index',2,24,0,1920),note('m','middle',3,24,0,1920)]);
+const plan=compilePerformance(p),sample=sampleMotion(plan,.2);
+console.log(JSON.stringify({codes:plan.diagnostics.map(d=>d.code),status:plan.status,
+ targets:[plan.byFinger.index[0].target,plan.byFinger.middle[0].target],
+ left:plan.geometry.fretX(23),right:plan.geometry.fretX(24),
+ noteIds:plan.invalid.flatMap(d=>d.noteIds),valid:sample.valid,
+ strings:[sample.fingers.index.stringNo,sample.fingers.middle.stringNo],
+ frets:[sample.fingers.index.fretAbs,sample.fingers.middle.fretAbs]}));
+""")
+    assert "SAME_FRET_CONTACTS_UNREACHABLE" in result["codes"]
+    assert result["status"] == "partial"
+    assert result["valid"] is False
+    assert set(result["noteIds"]) == {"i", "m"}
+    assert result["strings"] == [2, 3]
+    assert result["frets"] == [24, 24]
+    assert all(result["left"] < target[0] < result["right"] for target in result["targets"])
+
+
+def test_same_fret_contacts_at_separate_times_keep_original_targets() -> None:
+    """Sequential presses on one fret do not acquire unnecessary spacing."""
+    result = run_js("""
+const p=performance([note('i','index',2,3,0,960),note('m','middle',3,3,1920,2880)]);
+const plan=compilePerformance(p);
+console.log(JSON.stringify({contacts:[plan.byFinger.index[0],plan.byFinger.middle[0]]
+ .map(c=>({x:c.target[0],baseline:plan.geometry.target(c)[0]})),
+ codes:plan.diagnostics.map(d=>d.code)}));
+""")
+    assert all(contact["x"] == pytest.approx(contact["baseline"])
+               for contact in result["contacts"])
+    assert "SAME_FRET_CONTACTS_UNREACHABLE" not in result["codes"]
+
+
+def test_held_finger_transition_is_not_mislabeled_physically_impossible() -> None:
+    """Two-at-a-time rows needing a moving held finger are a planner limit."""
+    result = run_js("""
+const p=performance([note('i','index',2,12,0,960),note('m','middle',3,12,0,1920),
+ note('r','ring',4,12,960,1920)]);
+const plan=compilePerformance(p);
+console.log(JSON.stringify({codes:plan.diagnostics.map(d=>d.code),
+ maxAtStart:sampleMotion(plan,.2).activeContactIds.length,
+ maxAtEnd:sampleMotion(plan,.7).activeContactIds.length}));
+""")
+    assert "SAME_FRET_CONTACTS_UNREACHABLE" not in result["codes"]
+    assert "SAME_FRET_STATIC_LAYOUT_UNRESOLVED" in result["codes"]
+    assert result["maxAtStart"] == result["maxAtEnd"] == 2
 
 
 def test_reference_hand_does_not_add_unanchored_procedural_nails() -> None:
@@ -205,7 +306,8 @@ def test_dead_note_keeps_x_semantics_without_an_ordinary_press() -> None:
     result = run_js("""
 const muted=note('muted','index',3,5,0,960);
 muted.expressionIds=['dead'];
-const p=performance([muted],[{id:'dead',kind:'dead_note',noteIds:['muted'],startTick:0,endTick:960}]);
+const p=performance([muted],[{id:'dead',kind:'dead_note',noteIds:['muted'],
+ startTick:0,endTick:960}]);
 const plan=compilePerformance(p);
 console.log(JSON.stringify({contacts:plan.byFinger.index.length,
   active:sampleMotion(plan,.2).activeContactIds,
@@ -288,7 +390,8 @@ def test_unexpanded_repeats_are_partial_and_invalid() -> None:
     result = run_js("""
 const p=performance([note('a','index',2,1,0,1920)]);
 p.diagnostics=[{code:'REPEAT_UNFOLDING_REQUIRED',message:'Repeat pending',noteIds:[]}];
-const plan=compilePerformance(p);console.log(JSON.stringify({status:plan.status,valid:sampleMotion(plan,.1).valid}));
+const plan=compilePerformance(p);
+console.log(JSON.stringify({status:plan.status,valid:sampleMotion(plan,.1).valid}));
 """)
     assert result == {"status": "partial", "valid": False}
 

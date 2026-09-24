@@ -84,6 +84,20 @@ en position et suivent une quintique à vitesse/accélération nulles aux extré
 Les conflits de maintien ne réaffectent pas les doigts et ne coupent pas les notes.
 Une recherche temporelle ne dépend pas des images précédemment affichées.
 
+Pour plusieurs doigts simultanés sur des cordes différentes d'une même frette,
+les contacts sont décalés dans l'axe du manche : auriculaire près de la couronne,
+puis annulaire, majeur et index vers le sillet, avec 7,5 mm entre centres de
+pulpe pour le profil de main de référence. Le calcul utilise la largeur réelle
+de chaque frette et conserve corde, frette, doigt et intervalles musicaux. Si la
+largeur ne suffit plus, le plan signale `SAME_FRET_CONTACTS_UNREACHABLE` sur
+l'intervalle concerné et masque la pose de main impossible. La main est également
+masquée si le rig de référence n'atteint pas l'un de ces contacts malgré une
+largeur suffisante ; le résidu de contact reste visible comme diagnostic. Un
+chevauchement enchaîné qui demanderait de déplacer latéralement un doigt déjà
+maintenu porte
+`SAME_FRET_STATIC_LAYOUT_UNRESOLVED` ; cette limite du plan statique ne prétend
+pas rendre le doigté musicalement impossible.
+
 Les liens hammer-on/pull-off/slide sont contrôlés contre les doigts, cordes et cases.
 Le pull-off prépare le doigt inférieur et possède une déviation tangentielle.
 Les courbes de bend/vibrato restent absolues ; sans courbe métrique calibrée,
