@@ -115,8 +115,9 @@ def _solve(client: TestClient, track: int = 1) -> dict[str, object]:
 
 @pytest.mark.parametrize(
     ("version", "outdated", "current"),
-    [("2.1", True, False), ("2.2", True, False), ("2.3", False, True),
-     ("2.4", False, False), ("2.10", False, False), ("2.3.0", False, False), (None, False, False),
+    [("2.1", True, False), ("2.2", True, False), ("2.3", True, False),
+     (FINGERING_ALGO_VERSION, False, True), ("2.10", False, False),
+     (FINGERING_ALGO_VERSION + ".0", False, False), (None, False, False),
      ("embedded", False, False), ("unknown", False, False)],
 )
 def test_numeric_versions_distinguish_older_current_future_and_unknown(

@@ -219,3 +219,130 @@ def test_tie_continuation_keeps_contact_across_measure_boundary() -> None:
     planned = plan_hand_configurations(results, candidates, CostFunction())
     assert planned.status == "valid"
     assert all(result.state.finger == Finger.MIDDLE for result in planned.results)
+
+
+def test_planner_releases_optional_ring_tail_without_changing_written_note() -> None:
+    first = _note(3, 5, duration=0.5, finger=Finger.INDEX, let_ring=True)
+    first.source_note_id = "reused"
+    second = _note(1, 2, onset=2, finger=Finger.INDEX)
+    repeated = replace(first, onset=4)
+    results = [_result(i, note, Finger.INDEX) for i, note in enumerate(
+        (first, second, repeated),
+    )]
+    candidates = {id(r.note_event): [r.state] for r in results}
+
+    planned = plan_hand_configurations(results, candidates)
+
+    assert planned.status == "valid"
+    assert planned.released_notes == 1
+    assert planned.results[0].let_ring_end == 2
+    assert planned.results[2].let_ring_end is None
+    assert planned.results[0].note_event is first
+    assert first.let_ring and first.duration == 0.5
+    assert all(r.let_ring_end is None for r in results)
+    assert validate_fingering_results(planned.results).fatal_count == 0
+
+
+def test_planner_preserves_ring_if_finger_repair_keeps_it_sounding() -> None:
+    notes = [_note(4, 2, duration=0.5, let_ring=True), _note(1, 3, onset=2)]
+    results = [_result(i, note, Finger.INDEX) for i, note in enumerate(notes)]
+    generator = StateGenerator()
+    planned = plan_hand_configurations(
+        results, {id(note): generator.states_for(note) for note in notes},
+    )
+    assert planned.status == "valid"
+    assert planned.changed_notes > 0
+    assert planned.released_notes == 0
+    assert all(r.let_ring_end is None for r in planned.results)
+
+
+def test_planner_cannot_release_ring_before_written_duration_ends() -> None:
+    notes = [_note(3, 5, duration=4, let_ring=True), _note(1, 2, onset=2)]
+    results = [_result(i, note, Finger.INDEX) for i, note in enumerate(notes)]
+    planned = plan_hand_configurations(results, {id(r.note_event): [r.state] for r in results})
+    assert planned.status == "search_failed"
+    assert planned.released_notes == 0
+    assert validate_fingering_results(planned.results).fatal_count > 0
+
+
+def test_planner_protects_complete_tie_before_releasing_ring_tail() -> None:
+    first = _note(3, 5, duration=1, let_ring=True)
+    continuation = replace(first, onset=1, duration=2, is_tie_dest=True)
+    notes = [first, _note(1, 2, onset=0.5), continuation]
+    results = [_result(i, note, Finger.INDEX) for i, note in enumerate(notes)]
+    planned = plan_hand_configurations(results, {id(r.note_event): [r.state] for r in results})
+    assert planned.status == "search_failed"
+    assert all(r.let_ring_end is None for r in planned.results)
+    assert validate_fingering_results(planned.results).fatal_count > 0
+
+
+def test_failed_chord_keeps_repairs_before_and_after_it() -> None:
+    notes = [
+        _note(3, 2, duration=2), _note(1, 3, onset=1),
+        _note(3, 5, onset=4), _note(4, 7, onset=4),
+        _note(3, 2, onset=6, duration=2), _note(1, 3, onset=7),
+    ]
+    results = [_result(i, note, Finger.INDEX) for i, note in enumerate(notes)]
+    generator = StateGenerator()
+    candidates = {id(note): generator.states_for(note) for note in notes}
+    for index in (2, 3):
+        candidates[id(notes[index])] = [results[index].state]
+
+    planned = plan_hand_configurations(results, candidates)
+
+    assert planned.status == "search_failed"
+    assert planned.unresolved_note_ids == (3,)
+    assert planned.results[1].state.finger != Finger.INDEX
+    assert planned.results[5].state.finger != Finger.INDEX
+    assert planned.results[2].state == results[2].state
+    assert planned.results[3].state == results[3].state
+    assert validate_fingering_results(planned.results).fatal_count > 0
+    assert all(r.state.finger == Finger.INDEX for r in results)
+
+
+def test_cross_voice_rearticulation_cannot_cut_written_let_ring_note() -> None:
+    results = [
+        _result(0, _note(1, 3, duration=4, voice=1, let_ring=True), Finger.RING),
+        _result(1, _note(1, 1, onset=1), Finger.INDEX),
+    ]
+    assert "BIO-SUSTAIN-001" in {
+        violation.code for violation in validate_fingering_results(results).violations
+    }
+
+
+def test_planner_never_certifies_invalid_existing_release() -> None:
+    result = _result(0, _note(3, 5, duration=2, let_ring=True), Finger.INDEX)
+    result.let_ring_end = 1
+    planned = plan_hand_configurations([result], {id(result.note_event): [result.state]})
+    assert planned.status == "search_failed"
+    assert validate_fingering_results(planned.results).fatal_count > 0
+
+
+def test_beam_keeps_distinct_fingers_before_equivalent_wrist_variants() -> None:
+    first = _result(0, _note(4, 4, duration=2, voice=1), Finger.INDEX)
+    first.state.hand_position = 4
+    second = _result(1, _note(1, 2, onset=1), Finger.INDEX)
+    candidates = {
+        id(first.note_event): [
+            first.state,
+            replace(first.state, hand_position=3),
+            replace(first.state, finger=Finger.RING, hand_position=2),
+        ],
+        id(second.note_event): [second.state],
+    }
+    planned = plan_hand_configurations([first, second], candidates, beam_width=2)
+    assert planned.status == "valid"
+    assert planned.results[0].state.finger == Finger.RING
+    assert validate_fingering_results(planned.results).fatal_count == 0
+
+
+def test_missing_candidate_does_not_discard_other_repairs() -> None:
+    notes = [_note(3, 2, duration=2), _note(1, 3, onset=1), _note(3, 5, onset=4)]
+    results = [_result(i, note, Finger.INDEX) for i, note in enumerate(notes)]
+    generator = StateGenerator()
+    candidates = {id(note): generator.states_for(note) for note in notes[:2]}
+    planned = plan_hand_configurations(results, candidates)
+    assert planned.status == "missing_candidates"
+    assert planned.unresolved_note_ids == (2,)
+    assert planned.results[1].state.finger != Finger.INDEX
+    assert planned.results[2].state == results[2].state

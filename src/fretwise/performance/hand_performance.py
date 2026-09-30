@@ -10,13 +10,14 @@ from __future__ import annotations
 from collections import defaultdict
 from collections.abc import Mapping, Sequence
 from fractions import Fraction
-from math import lcm
+from math import isfinite, lcm
 from typing import Annotated, Literal, Self, cast
 
 from pydantic import BaseModel, ConfigDict, Field, JsonValue, model_validator
 
 from fretwise.models import Articulation, FingeringResult, NoteEvent
 from fretwise.performance.tempo import TempoMap
+from fretwise.sustain import required_contact_ends
 
 Tick = Annotated[int, Field(ge=0)]
 Positive = Annotated[float, Field(gt=0)]
@@ -406,6 +407,7 @@ def build_hand_performance(
     source_events: dict[str, NoteEvent] = {}
     source_performance: dict[str, Mapping[str, object]] = {}
     source_results: dict[str, FingeringResult] = {}
+    required_ends = required_contact_ends([result for _event, result in joined])
     for event, result in joined:
         source_id = event.source_note_id or f"note-{result.note_id}"
         counts[source_id] += 1
@@ -503,6 +505,16 @@ def build_hand_performance(
             note.soundEndTick = max(
                 note.notatedEndTick, following.onTick if following else score_end
             )
+        result = source_results[note.occurrenceId]
+        has_release = event.let_ring and result.let_ring_end is not None
+        if has_release:
+            release = cast(float, result.let_ring_end)
+            if not isfinite(release):
+                raise ValueError("Let-ring release must be finite")
+            note.soundEndTick = max(
+                round(required_ends[result.note_id] * ppq),
+                min(note.soundEndTick, round(release * ppq)),
+            )
         group_id = f"attack-{note.onTick}"
         attack_kind: Literal["pick", "tapping", "continuation", "hammer_on", "pull_off"] = (
             "continuation" if event.is_tie_dest else "tapping" if event.tapping else "pick"
@@ -530,10 +542,10 @@ def build_hand_performance(
                 attackKind=attack_kind,
                 excitationGroupId=group_id,
                 sustainRequiredUntilTick=note.soundEndTick,
-                dampingAtTick=note.soundEndTick if has_timing else None,
+                dampingAtTick=note.soundEndTick if has_timing or has_release else None,
                 timingProvenance=(
                     "computed"
-                    if has_timing
+                    if has_timing or has_release
                     else "inferred"
                     if event.let_ring or event.staccato
                     else "source"

@@ -3,9 +3,9 @@
 from __future__ import annotations
 
 import bisect
+from dataclasses import replace
 
 from fretwise.config import config as _config
-
 from fretwise.core.canonical import NoteEvent as CanonicalNoteEvent
 from fretwise.core.canonical import Score
 from fretwise.core.layout import PageLayout, canonical_to_page_layout
@@ -13,24 +13,15 @@ from fretwise.core.notation_mode import has_standard as _has_standard_mode
 from fretwise.core.notation_mode import has_tab as _has_tab_mode
 from fretwise.core.notation_utils import (
     diatonic_step_from_metadata as _diatonic_step_from_metadata,
-    is_x_notehead_drum as _is_x_notehead_drum,
-    percussion_note_y as _notation_percussion_note_y,
-    standard_note_y as _notation_standard_note_y,
 )
-from .render_helpers import (
-    base_duration as _base_duration,
-    boolish as _boolish,
-    dot_count as _dot_count,
-    duration_class as _duration_class,
-    duration_components as _duration_components,
-    flag_count as _flag_count,
-    is_filled_notehead as _is_filled_notehead,
-    is_measure_rest_event as _is_measure_rest_event,
-    notated_duration as _notated_duration,
-    rest_kind as _rest_kind,
-    safe_int as _safe_int,
-    stem_direction as _stem_direction,
-    stem_x_for_notehead as _stem_x_for_notehead,
+from fretwise.core.notation_utils import (
+    is_x_notehead_drum as _is_x_notehead_drum,
+)
+from fretwise.core.notation_utils import (
+    percussion_note_y as _notation_percussion_note_y,
+)
+from fretwise.core.notation_utils import (
+    standard_note_y as _notation_standard_note_y,
 )
 from fretwise.core.scene.models import (
     DocumentScene,
@@ -42,6 +33,43 @@ from fretwise.core.scene.models import (
     StaffScene,
     SystemScene,
     TextInstance,
+)
+
+from .render_helpers import (
+    base_duration as _base_duration,
+)
+from .render_helpers import (
+    boolish as _boolish,
+)
+from .render_helpers import (
+    dot_count as _dot_count,
+)
+from .render_helpers import (
+    duration_class as _duration_class,
+)
+from .render_helpers import (
+    flag_count as _flag_count,
+)
+from .render_helpers import (
+    is_filled_notehead as _is_filled_notehead,
+)
+from .render_helpers import (
+    is_measure_rest_event as _is_measure_rest_event,
+)
+from .render_helpers import (
+    notated_duration as _notated_duration,
+)
+from .render_helpers import (
+    rest_kind as _rest_kind,
+)
+from .render_helpers import (
+    safe_int as _safe_int,
+)
+from .render_helpers import (
+    stem_direction as _stem_direction,
+)
+from .render_helpers import (
+    stem_x_for_notehead as _stem_x_for_notehead,
 )
 
 # Tunable scene metrics are sourced from the centralized config
@@ -209,16 +237,45 @@ def layout_to_render_scene(
     # Build tempo-change lookup: {measure_number: bpm} — only measures where tempo changes.
     _tempo_by_measure: dict[int, int] = _build_tempo_by_measure(score)
     page_systems: list[SystemScene] = []
+    tab_expansion = 0.0
     for system_index, system_layout in enumerate(page_layout.systems, start=1):
         staff_scenes: list[StaffScene] = []
+        system_extra_height = 0.0
         for staff_index, staff_layout in enumerate(system_layout.staves, start=1):
             staff_layer = LayerGroup(layer_id="staff")
             notes_layer = LayerGroup(layer_id="notes")
 
-            staff_std_y = staff_layout.y + 4.0
+            staff_std_y = staff_layout.y + tab_expansion + 4.0
             tab_y = staff_std_y + 4.0 * staff_spacing + standard_tab_gap
-            # Stem endpoints are bounded two staff-spaces outside the staff,
-            # matching the standard engraving rule for beam heights.
+            natural_tab_y = tab_y
+            if has_standard and has_tab:
+                for measure in staff_layout.measure_layouts:
+                    directions = _stem_direction_by_onset_voice(
+                        measure.event_layouts, staff_std_y=staff_std_y,
+                        staff_spacing=staff_spacing, clef=clef,
+                    )
+                    for event in measure.event_layouts:
+                        if event.metadata.get("event_type") == "RestEvent":
+                            continue
+                        voice = _safe_int(event.metadata.get("voice_number")) or 0
+                        if directions.get((round(event.onset, 6), voice)) != "down":
+                            continue
+                        if _base_duration(event.duration) >= 4.0:
+                            continue
+                        note_y = _standard_note_y(event.metadata, staff_std_y=staff_std_y,
+                                                  staff_spacing=staff_spacing, clef=clef)
+                        extension = max(
+                            _MIN_STEM_LENGTH, _STANDARD_STEM_LENGTH_SPACES * staff_spacing
+                        )
+                        if _base_duration(event.duration) < 1.0:
+                            extension = max(
+                                extension, _STANDARD_BEAMED_STEM_MIN_SPACES * staff_spacing
+                            )
+                            extension += _MAX_BEAM_VERTICAL_DELTA
+                        tab_y = max(tab_y, note_y + 3.0 + extension + 4.0)
+            staff_extra_height = tab_y - natural_tab_y
+            system_extra_height = max(system_extra_height, staff_extra_height)
+            # Preferred beam anchors; note clearance can extend beyond them.
             stem_top_y = staff_std_y - 2 * staff_spacing
             stem_bottom_y = staff_std_y + 6 * staff_spacing
             tab_rhythm_beam_y = tab_y + 5.0 * tab_spacing + 14.0
@@ -374,7 +431,7 @@ def layout_to_render_scene(
             # can be located by finding the next note on the same string across measures.
             all_tab_span_events: list[dict[str, object]] = []
             for measure_index, measure_layout in enumerate(staff_layout.measure_layouts):
-                standard_rhythm_events: list[tuple[float, float, float, float, str]] = []
+                standard_rhythm_events: list[tuple[float, float, float, float, str, int]] = []
                 tab_rhythm_events: list[tuple[float, float, float, float]] = []
                 tab_span_events: list[dict[str, object]] = []
                 standard_span_events: list[dict[str, object]] = []
@@ -785,6 +842,7 @@ def layout_to_render_scene(
                                     display_duration,
                                     note_y,
                                     stem_direction,
+                                    voice_number,
                                 )
                             )
                             standard_connection_events.append(
@@ -889,6 +947,8 @@ def layout_to_render_scene(
             # connected correctly.
             if has_standard and standard_connection_events:
                 _append_standard_connections(notes_layer, standard_connection_events)
+            if has_standard:
+                _clear_standard_annotations(notes_layer)
             # Draw slide diagonal lines after all measures using the full cross-measure
             # event list, so that slides at the end of a measure connect to the next
             # note even if it is in a different measure.
@@ -899,9 +959,9 @@ def layout_to_render_scene(
                 StaffScene(
                     staff_id=staff_layout.staff_id,
                     x=staff_layout.x,
-                    y=staff_layout.y,
+                    y=staff_layout.y + tab_expansion,
                     width=staff_layout.width,
-                    height=staff_layout.height,
+                    height=staff_layout.height + staff_extra_height,
                     layer_groups=[staff_layer, notes_layer],
                 )
             )
@@ -910,13 +970,16 @@ def layout_to_render_scene(
             SystemScene(
                 system_id=system_layout.system_id,
                 x=system_layout.x,
-                y=system_layout.y,
+                y=system_layout.y + tab_expansion,
                 width=system_layout.width,
-                height=system_layout.height,
+                height=system_layout.height + system_extra_height,
                 staves=staff_scenes,
             )
         )
+        tab_expansion += system_extra_height
 
+    if has_standard:
+        _reserve_standard_top_space(page_systems)
     page_width = page_layout.width or _PAGE_W
     page_height = page_layout.height or _PAGE_H
     if page_systems:
@@ -933,6 +996,73 @@ def layout_to_render_scene(
     )
     document_scene = DocumentScene(title=score.title, pages=[page_scene])
     return RenderScene(document_scene=document_scene)
+
+
+def _clear_standard_annotations(layer: LayerGroup) -> None:
+    """Keep chord names and let-ring captions above the final stem/beam envelope."""
+    extents: list[tuple[float, float, float]] = [
+        (glyph.x - 6.0, glyph.x + 6.0, glyph.y - 5.0)
+        for glyph in layer.glyph_instances if glyph.glyph_id == "notehead"
+    ]
+    for recipe in layer.recipe_instances:
+        params = recipe.params
+        if recipe.recipe_id == "stem_line":
+            x = float(params["x"])
+            extents.append((x - 1.0, x + 1.0, min(float(params["y0"]), float(params["y1"]))))
+        elif recipe.recipe_id == "beam_group":
+            extents.append((float(params["x0"]), float(params["x1"]),
+                            min(float(params["y0"]), float(params["y1"])) - 3.0))
+        elif recipe.recipe_id == "flag_stack":
+            extents.append((float(params["x"]) - 1.0, float(params["x"]) + 8.0,
+                            float(params["y"]) - 4.0))
+    for recipe in layer.recipe_instances:
+        if recipe.recipe_id != "let_ring_line":
+            continue
+        x0, x1 = float(recipe.params["x0"]), float(recipe.params["x1"])
+        overlaps = [y for left, right, y in extents if left <= x1 and right >= x0]
+        if overlaps:
+            recipe.params["y"] = min(float(recipe.params["y"]), min(overlaps) - 10.0)
+        extents.append((x0, x1, float(recipe.params["y"]) - 9.0))
+    for index, text in enumerate(layer.text_instances):
+        if text.metadata.get("kind") != "chord_name":
+            continue
+        right = text.x + len(text.text) * text.font_size * 0.65
+        overlaps = [y for left, end, y in extents if left <= right and end >= text.x]
+        if overlaps:
+            layer.text_instances[index] = replace(text, y=min(text.y, min(overlaps) - 5.0))
+
+
+def _reserve_standard_top_space(systems: list[SystemScene]) -> None:
+    """Expand system spacing when full stems and annotations need more headroom."""
+    accumulated_shift = 0.0
+    for system in systems:
+        top = system.y
+        for staff in system.staves:
+            for layer in staff.layer_groups:
+                for glyph in layer.glyph_instances:
+                    top = min(top, glyph.y - glyph.size)
+                for text in layer.text_instances:
+                    top = min(top, text.y - text.font_size)
+                for recipe in layer.recipe_instances:
+                    for key in ("y", "y0", "y1", "cy"):
+                        if key in recipe.params:
+                            top = min(top, float(recipe.params[key]) - 10.0)
+        extra = max(0.0, system.y - 28.0 - top)
+        shift = accumulated_shift + extra
+        if shift:
+            system.y += shift
+            for staff in system.staves:
+                staff.y += shift
+                for layer in staff.layer_groups:
+                    layer.glyph_instances = [replace(g, y=g.y + shift)
+                                             for g in layer.glyph_instances]
+                    layer.text_instances = [replace(t, y=t.y + shift)
+                                            for t in layer.text_instances]
+                    for recipe in layer.recipe_instances:
+                        for key in ("y", "y0", "y1", "cy"):
+                            if key in recipe.params:
+                                recipe.params[key] = float(recipe.params[key]) + shift
+        accumulated_shift += extra
 
 
 def _append_note_text(
@@ -1469,10 +1599,10 @@ def _stem_direction_by_onset_voice(
     clef: str = "treble",
 ) -> dict[tuple[float, int], str]:
     grouped_note_ys: dict[tuple[float, int], list[float]] = {}
-    # Track which voices are active at each specific onset, not globally.
-    # A measure with sparse Voice-1 notes (e.g. Stairway accompaniment) should
-    # still use pitch-based direction at onsets where only Voice 0 is present.
-    voices_at_onset: dict[float, set[int]] = {}
+    # A sustained accompaniment remains a voice between its attacks. Keep
+    # outward directions throughout a multi-voice measure so one melodic
+    # beam group cannot change direction halfway through a held bass note.
+    active_voices: set[int] = set()
     middle_line_y = staff_std_y + 2.0 * staff_spacing
 
     for event in events:
@@ -1481,7 +1611,7 @@ def _stem_direction_by_onset_voice(
             continue
         onset = round(float(getattr(event, "onset", 0.0)), 6)
         voice_number = _safe_int(getattr(event, "metadata", {}).get("voice_number")) or 0
-        voices_at_onset.setdefault(onset, set()).add(voice_number)
+        active_voices.add(voice_number)
         note_y = _standard_note_y(
             getattr(event, "metadata", {}),
             staff_std_y=staff_std_y,
@@ -1493,8 +1623,7 @@ def _stem_direction_by_onset_voice(
     direction_by_key: dict[tuple[float, int], str] = {}
     for key, note_ys in grouped_note_ys.items():
         onset, voice_number = key
-        onset_is_polyphonic = len(voices_at_onset.get(onset, set())) > 1
-        if onset_is_polyphonic:
+        if len(active_voices) > 1:
             direction_by_key[key] = "down" if voice_number >= 1 else "up"
         else:
             direction_by_key[key] = _stem_direction_for_cluster(
@@ -1644,6 +1773,45 @@ def _append_standard_rhythm(
     measure_number: int,
     beats_per_measure: int,
     time_denominator: int = 4,
+    events: list[tuple[float, float, float, float, str, int]],
+    stem_top_y: float,
+    stem_bottom_y: float,
+    staff_spacing: float,
+    stem_offset: float,
+    tab_y: float | None = None,
+    tuplet_by_onset: dict[float, tuple[int, int]] | None = None,
+) -> None:
+    """Build stems and beams independently for each musical voice."""
+    events_by_voice: dict[int, list[tuple[float, float, float, float, str]]] = {}
+    for x, onset, duration, note_y, direction, voice_number in events:
+        events_by_voice.setdefault(voice_number, []).append(
+            (x, onset, duration, note_y, direction)
+        )
+    for voice_number, voice_events in sorted(events_by_voice.items()):
+        first_recipe = len(layer.recipe_instances)
+        _append_standard_voice_rhythm(
+            layer,
+            measure_number=measure_number,
+            beats_per_measure=beats_per_measure,
+            time_denominator=time_denominator,
+            events=voice_events,
+            stem_top_y=stem_top_y,
+            stem_bottom_y=stem_bottom_y,
+            staff_spacing=staff_spacing,
+            stem_offset=stem_offset,
+            tab_y=tab_y,
+            tuplet_by_onset=tuplet_by_onset,
+        )
+        for recipe in layer.recipe_instances[first_recipe:]:
+            recipe.metadata["voice_number"] = voice_number
+
+
+def _append_standard_voice_rhythm(
+    layer: LayerGroup,
+    *,
+    measure_number: int,
+    beats_per_measure: int,
+    time_denominator: int = 4,
     events: list[tuple[float, float, float, float, str]],
     stem_top_y: float,
     stem_bottom_y: float,
@@ -1783,7 +1951,6 @@ def _append_standard_rhythm(
             required_len = max(stem_length, chord_reach)
             if chord_size > 1 and base_dur >= 1.0:
                 required_len = max(required_len, middle_line_y - stem_y0)
-            max_allowed = max(0.0, stem_bottom_y - stem_y0)
             if chord_size > 1:
                 # Chord stems may extend beyond the staff boundary to connect all notes.
                 max_cap = max(max_stem_length, chord_reach)
@@ -1792,17 +1959,11 @@ def _append_standard_rhythm(
             else:
                 max_cap = max_stem_length
                 current_len = min(required_len, max_cap)
-                if max_allowed > 0.0:
-                    current_len = min(current_len, max_allowed)
             if current_len <= 0.0:
                 continue
-            # For single notes below the staff boundary, let the stem go freely
-            # from the notehead (downward) rather than being clipped to an inverted
-            # result.  The 2-space boundary is a soft guideline, not a hard cap.
-            if chord_size > 1 or stem_y0 >= stem_bottom_y:
-                stem_y1 = stem_y0 + current_len
-            else:
-                stem_y1 = min(stem_bottom_y, stem_y0 + current_len)
+            # Staff boundaries do not cap stems: a high/low voice still needs
+            # a readable stem when its notes sit outside the five staff lines.
+            stem_y1 = stem_y0 + current_len
             # Hard cap: stems must never enter the TAB area (when displayed).
             if tab_y is not None:
                 tab_clearance = 4.0
@@ -1814,7 +1975,6 @@ def _append_standard_rhythm(
             required_len = max(stem_length, chord_reach)
             if chord_size > 1 and base_dur >= 1.0:
                 required_len = max(required_len, stem_y0 - middle_line_y)
-            max_allowed = max(0.0, stem_y0 - stem_top_y)
             if chord_size > 1:
                 # Chord stems may extend beyond the staff boundary to connect all notes.
                 max_cap = max(max_stem_length, chord_reach)
@@ -1823,17 +1983,9 @@ def _append_standard_rhythm(
             else:
                 max_cap = max_stem_length
                 current_len = min(required_len, max_cap)
-                if max_allowed > 0.0:
-                    current_len = min(current_len, max_allowed)
             if current_len <= 0.0:
                 continue
-            # For single notes above the staff boundary, let the stem go freely
-            # from the notehead (upward) rather than being clipped to an inverted
-            # result.  The 2-space boundary is a soft guideline, not a hard cap.
-            if chord_size > 1 or stem_y0 <= stem_top_y:
-                stem_y1 = stem_y0 - current_len
-            else:
-                stem_y1 = max(stem_top_y, stem_y0 - current_len)
+            stem_y1 = stem_y0 - current_len
         # Direction sanity: discard inverted stems (notehead beyond the staff boundary).
         if stem_direction == "down" and stem_y1 <= stem_y0:
             continue
@@ -2462,17 +2614,14 @@ def _beam_line_for_group(
     if low_shift <= high_shift:
         shift = min(max(0.0, low_shift), high_shift)
     else:
-        shift = (low_shift + high_shift) / 2.0
+        # A wide pitch span can make the preferred maximum impossible.
+        # Preserve clearance and minimum length rather than averaging into
+        # a beam that cuts through a notehead or leaves a truncated stem.
+        shift = low_shift if direction == "down" else high_shift
     y0 += shift
     y1 += shift
-    # Hard-clamp: beam must NOT exceed 2 staff-spaces above/below the staff.
-    # stem_top_y and stem_bottom_y already encode that limit.
-    if direction == "down":
-        y0 = min(y0, stem_bottom_y)
-        y1 = min(y1, stem_bottom_y)
-    else:
-        y0 = max(y0, stem_top_y)
-        y1 = max(y1, stem_top_y)
+    # The noteheads and minimum stem length determine the beam envelope;
+    # clamping it back to the staff would undo those constraints.
     return y0, y1
 
 
@@ -2574,7 +2723,9 @@ def _append_standard_connections(
             for candidate in reversed(ordered):
                 if float(candidate.get("onset", 0.0)) >= curr_onset:
                     continue
-                cand_end = float(candidate.get("onset", 0.0)) + float(candidate.get("duration", 0.0))
+                cand_end = float(candidate.get("onset", 0.0)) + float(
+                    candidate.get("duration", 0.0)
+                )
                 if abs(cand_end - curr_onset) > _ARC_ONSET_TOLERANCE:
                     continue
                 if int(candidate.get("pitch", 64)) == curr_pitch:

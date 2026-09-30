@@ -61,6 +61,17 @@ Les modèles ML (si présents dans `data/models/` et `onnxruntime` installé) so
 chargés automatiquement et améliorent le choix des doigts ; sans eux, le pipeline
 retombe proprement sur les règles biomécaniques.
 
+Le moteur de doigtés **2.4** conserve les durées écrites et les liaisons, mais peut
+terminer explicitement une prolongation « laisser sonner » lorsqu'un changement
+de doigté l'exige. Cette fin de maintien est sauvegardée avec les doigtés et
+partagée par l'audio et la main 3D. Les anciens calculs demandent un recalcul
+explicite dans le lecteur ; les conflits restants restent signalés. Voir le
+[contrat de maintien des doigts](finger_placement_strategy.md).
+
+En affichage Staff/Mixed, hampes et ligatures sont calculées par voix musicale,
+y compris pendant les basses tenues. Les groupes de croches suivent la métrique
+et les espaces au-dessus de la portée s'adaptent aux hampes et noms d'accords.
+
 Batch sur toute la bibliothèque : `pixi run python tools/finger_batch.py`
 (reprise sur interruption, multi-cœurs).
 

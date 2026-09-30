@@ -26,6 +26,27 @@ Three vocabulary conventions:
   *specifically because it is shared with the next chord voicing*. (Subset of
   sedentary.)
 
+### Sounding sustains and optional let-ring tails
+
+Sounding contacts are distinct from silent sedentary fingers. The joint hand
+planner checks all voices together. Written durations and complete tied chains
+are mandatory; optional `let_ring` tails normally last until the next attack on
+the same string. If that extra resonance prevents the next fingering, the
+planner may release the fewest expired contacts and records the absolute beat
+in `FingeringResult.let_ring_end`. It never changes `NoteEvent.duration`, pitch,
+source identity, or the original `let_ring` notation.
+
+`sustain.py` supplies the shared written/tied minimum to the planner, validator,
+audio and HandPerformance. Release decisions are stored per occurrence in the
+sidecar, not per reusable GPIF note ID. Algorithm 2.4 invalidates older cached
+fingerings for explicit recalculation. GP notation export retains the source
+let-ring marking; the computed performance release belongs to the sidecar and
+playback contract, not an invented notated duration.
+
+A hard source conflict or exhausted bounded search remains invalid. The planner
+keeps safe repairs before and after the unresolved event, reports its identity,
+and never erases a sustained voice merely to obtain a green audit.
+
 ---
 
 ## 2. Why this matters

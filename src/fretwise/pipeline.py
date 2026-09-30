@@ -306,6 +306,8 @@ def run_pipeline(
             "hand_plan_changed": planned.changed_notes,
             "hand_plan_expanded": planned.expanded_states,
             "hand_plan_search_failed": int(planned.status != "valid"),
+            "hand_plan_released_notes": planned.released_notes,
+            "hand_plan_unresolved_notes": len(planned.unresolved_note_ids),
         }
 
     # ML proposes fingers; M5 selects a complete per-voice path including

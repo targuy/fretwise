@@ -69,6 +69,8 @@ def build_saved_hand_performance(
         results.append(FingeringResult(
             note_id=index, note_event=event, state=state, cost=0.0,
             planted_fingers={key: (value[0], value[1]) for key, value in planted.items()},
+            let_ring_end=(float(cast(float, row["let_ring_end"]))
+                          if row.get("let_ring_end") is not None else None),
         ))
         if isinstance(row.get("perf"), dict):
             playback_timing[str(index)] = row["perf"]

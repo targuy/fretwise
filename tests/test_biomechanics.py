@@ -2,12 +2,17 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
+
+import pytest
+
 from fretwise.biomechanics import (
     BiomechanicalRuleConfig,
     BiomechanicalSeverity,
     validate_fingering_results,
 )
 from fretwise.models import Finger, FingeringResult, FingeringState, NoteEvent
+from fretwise.sustain import contact_end, required_contact_ends
 
 
 def _result(
@@ -54,6 +59,32 @@ def test_clean_single_note_has_no_violations() -> None:
     assert report.is_clean
     assert report.checked_notes == 1
     assert report.fatal_count == 0
+
+
+@pytest.mark.parametrize("release", [0.5, float("nan"), float("inf")])
+def test_invalid_ring_release_cannot_hide_written_contact(release: float) -> None:
+    first = _result(0, duration=2)
+    first.note_event.let_ring = True
+    first.let_ring_end = release
+    second = _result(1, onset=1, string_num=4, fret=7, pitch=57)
+    codes = _codes([first, second])
+    assert "BIO-SUSTAIN-002" in codes
+    assert "BIO-TRANS-002" in codes
+
+
+def test_explicit_ring_release_cannot_shorten_tied_chain() -> None:
+    first = _result(0, duration=1)
+    first.note_event.let_ring = True
+    first.let_ring_end = 1.5
+    continuation = replace(
+        first, note_id=1,
+        note_event=replace(first.note_event, onset=1, duration=2, is_tie_dest=True),
+        let_ring_end=None,
+    )
+    ends = required_contact_ends([first, continuation])
+    assert ends == {0: 3, 1: 3}
+    assert contact_end(first, ends[0]) == 3
+    assert "BIO-SUSTAIN-002" in _codes([first, continuation])
 
 
 def test_state_pitch_mismatch_is_reported() -> None:

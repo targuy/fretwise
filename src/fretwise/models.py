@@ -231,6 +231,8 @@ class FingeringResult:
             ``resolve_sedentary_fingers`` post-processing pass; empty by
             default.  See ``docs/finger_placement_strategy.md`` for the
             rules that govern sedentary fingers.
+        let_ring_end: Optional absolute beat at which the chosen performance
+            releases a let-ring extension. Never shortens written notes or ties.
     """
 
     note_id: int
@@ -239,6 +241,10 @@ class FingeringResult:
     cost: float
     alternatives: list[tuple[FingeringState, float]] = field(default_factory=list)
     planted_fingers: dict[str, tuple[int, int]] = field(default_factory=dict)
+    # Explicit performance release of an optional let-ring extension, in beats.
+    # Source notation/duration remain unchanged; written sustains and ties must
+    # finish before this bound. None retains the source's natural string decay.
+    let_ring_end: float | None = None
 
 
 @dataclass

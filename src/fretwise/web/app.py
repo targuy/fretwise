@@ -3670,7 +3670,7 @@ _PHRASE_WINDOW_FINGERER_LOADED: bool = False
 # Current fingering algorithm version — bump this when the pipeline changes
 # significantly enough that existing saved fingerings should be recalculated.
 # "2.1" = preserve source-tab notes with no valid generated state as red review items.
-FINGERING_ALGO_VERSION = "2.3"
+FINGERING_ALGO_VERSION = "2.4"
 
 _SAVE_HEARTBEAT_SECONDS = 10.0
 _SAVE_TASKS: set[asyncio.Task[dict[str, object]]] = set()
@@ -4094,6 +4094,8 @@ def _saved_fingering_validation(
                         string_num=int(row["string"]), fret=int(row["fret"]),
                         finger=Finger(row["finger"]), hand_position=int(row["hand_position"]),
                     ), cost=float(row.get("cost", 0)),
+                    let_ring_end=(float(row["let_ring_end"])
+                                  if row.get("let_ring_end") is not None else None),
                 ))
             return _fingering_validation_summary(validate_fingering_results(results))
         except (KeyError, IndexError, TypeError, ValueError):
@@ -4556,6 +4558,8 @@ def _serialize_result(r: FingeringResult) -> dict[str, Any]:
         },
         # Notation fields
         "let_ring": ne.let_ring,
+        "let_ring_end": r.let_ring_end,
+        "is_tie_dest": ne.is_tie_dest,
         "bend_value": ne.bend_value,
         "bend_type": ne.bend_type,
         "bend_points": [list(point) for point in ne.bend_points],

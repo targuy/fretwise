@@ -29,6 +29,8 @@ from __future__ import annotations
 import math
 from typing import Any
 
+from fretwise.sustain import required_tie_ends
+
 # GM velocity per dynamic marking (matches the player's _dynamicToVelocity).
 _DYNAMIC_VELOCITY: dict[str, int] = {
     "pp": 32, "p": 48, "mp": 64, "mf": 80, "f": 96, "ff": 112,
@@ -340,6 +342,14 @@ def build_performance(
     for events in by_string.values():
         events.sort(key=lambda e: e[0])
 
+    required_ends = required_tie_ends([
+        (index, float(note.get("onset", 0.0) or 0.0),
+         float(note.get("duration", 0.0) or 0.0), int(note.get("voice_hint") or 0),
+         int(note.get("string") or 0), int(note.get("pitch") or 0),
+         bool(note.get("is_tie_dest")))
+        for index, note in enumerate(notes)
+    ])
+
     def _next_on_string(string: Any, onset: float) -> tuple[float, Any] | None:
         events = by_string.get(string)
         if not events:
@@ -349,7 +359,7 @@ def build_performance(
                 return ev
         return None
 
-    for note in notes:
+    for index, note in enumerate(notes):
         onset = float(note.get("onset", 0.0) or 0.0)
         string = note.get("string")
         nxt = _next_on_string(string, onset) if string is not None else None
@@ -359,6 +369,12 @@ def build_performance(
         articulated = _articulation_duration_beats(note)
         if note.get("let_ring"):
             dur_beats = _let_ring_duration_beats(note, next_onset, articulated, max_ring_beats)
+            release = note.get("let_ring_end")
+            if isinstance(release, (int, float)) and math.isfinite(release):
+                # The planner releases only the optional extension. A written
+                # note or tied chain remains mandatory even for stale data.
+                required = max(0.0, required_ends[index] - onset)
+                dur_beats = max(required, min(dur_beats, float(release) - onset))
         else:
             dur_beats = articulated
 

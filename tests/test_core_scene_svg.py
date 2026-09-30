@@ -7,7 +7,6 @@ from pathlib import Path
 import pytest
 
 import fretwise.core.scene.builders as scene_builders
-
 from fretwise.core import run_core_pipeline_from_raw
 from fretwise.core.backends import render_scene_to_svg
 from fretwise.core.canonical import (
@@ -344,8 +343,7 @@ def test_canonical_to_render_scene_beams_clear_chord_noteheads_in_standard_plane
 
 
 def test_canonical_to_render_scene_standard_uses_voice_aware_stem_direction() -> None:
-    # Both voices at the SAME onset: polyphonic rule forces Voice 0 up / Voice 1 down
-    # regardless of pitch height.  Notes at different onsets use pitch-based direction.
+    # Polyphonic measures keep Voice 0 up / Voice 1 down regardless of pitch.
     raw_score = legacy_parse_to_raw_score(
         Path("song.gp"),
         source_format="gpif",
@@ -422,12 +420,10 @@ def test_canonical_to_render_scene_standard_uses_constant_unbeamed_stem_length()
     result = run_core_pipeline_from_raw(raw_score, representation_mode=RepresentationMode.STANDARD)
     staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
     staff_lines = next(
-        recipe for recipe in staff.layer_groups[0].recipe_instances if recipe.recipe_id == "staff_lines"
+        recipe
+        for recipe in staff.layer_groups[0].recipe_instances
+        if recipe.recipe_id == "staff_lines"
     )
-    staff_y = float(staff_lines.params.get("y", 0.0))
-    spacing = float(staff_lines.params.get("spacing", 8.0))
-    stem_top = staff_y - spacing
-    stem_bottom = staff_y + 5.0 * spacing
     expected_length = float(staff_lines.params.get("spacing", 8.0)) * 3.5
     stems = [
         recipe
@@ -444,12 +440,7 @@ def test_canonical_to_render_scene_standard_uses_constant_unbeamed_stem_length()
         y0 = float(stem.params.get("y0", 0.0))
         y1 = float(stem.params.get("y1", 0.0))
         length = abs(y1 - y0)
-        if abs(length - expected_length) < 0.1:
-            continue
-        # When a stem cannot keep the canonical 3.5-space length because it
-        # is capped by the outer staff boundary, the endpoint sits on that cap.
-        assert length < expected_length
-        assert abs(y1 - stem_top) < 0.1 or abs(y1 - stem_bottom) < 0.1
+        assert length == pytest.approx(expected_length)
 
 
 def test_canonical_to_render_scene_standard_contains_flag_for_unbeamed_note() -> None:
@@ -465,6 +456,181 @@ def test_canonical_to_render_scene_standard_contains_flag_for_unbeamed_note() ->
 
     assert "flag_stack" in recipe_ids
     assert svg.count("<path ") >= 1
+
+
+@pytest.mark.parametrize("with_bass", [False, True])
+@pytest.mark.parametrize("with_chord", [False, True])
+def test_arpeggio_keeps_four_eighth_beams_over_sustained_bass(
+    with_bass: bool, with_chord: bool,
+) -> None:
+    """Sparse bass attacks must not fragment either half-bar melody group."""
+    pitches = [57, 60, 64, 69, 71, 64, 60, 71, 72, 64, 60, 72, 66, 62, 57, 66]
+    notes = [
+        _note(pitch=pitch, onset=index * 0.5, duration=0.5, voice_hint=0, string_hint=1)
+        for index, pitch in enumerate(pitches)
+    ]
+    if with_bass:
+        notes.extend(
+            _note(pitch=pitch, onset=onset, duration=2.0, voice_hint=1, string_hint=4)
+            for onset, pitch in [(2.0, 56), (4.0, 55), (6.0, 54)]
+        )
+    if with_chord:
+        notes.append(_note(pitch=64, onset=2.0, duration=0.5, voice_hint=0, string_hint=2))
+    raw = legacy_parse_to_raw_score(
+        Path("polyphonic-arpeggio.gp"), source_format="gpif", events=notes
+    )
+    result = run_core_pipeline_from_raw(
+        raw, representation_mode=RepresentationMode.STANDARD_TAB, page_width=1800,
+    )
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    recipes = staff.layer_groups[1].recipe_instances
+    stems = [r for r in recipes if r.recipe_id == "stem_line"]
+    beams = [r for r in recipes if r.recipe_id == "beam_group" and r.params["level"] == 1]
+    assert len(beams) == 4
+    assert not [r for r in recipes if r.recipe_id == "flag_stack"]
+    for index, beam in enumerate(beams):
+        onsets = [
+            stem.metadata["onset"] for stem in stems
+            if stem.metadata["voice_number"] == beam.metadata["voice_number"]
+            and beam.params["x0"] - 1e-6 <= stem.params["x"] <= beam.params["x1"] + 1e-6
+        ]
+        assert onsets == [index * 2 + offset * 0.5 for offset in range(4)]
+    if with_bass:
+        assert all(stem.metadata["direction"] == "up" for stem in stems
+                   if stem.metadata["voice_number"] == 0)
+        assert all(stem.metadata["direction"] == "down" for stem in stems
+                   if stem.metadata["voice_number"] == 1)
+    spacing = next(r.params["spacing"] for r in staff.layer_groups[0].recipe_instances
+                   if r.recipe_id == "staff_lines")
+    assert all(abs(stem.params["y1"] - stem.params["y0"]) >= 3.5 * spacing - 1e-6
+               for stem in stems)
+
+
+@pytest.mark.parametrize("pitch", [71, 72])
+def test_high_polyphonic_note_keeps_full_stem_across_staff_boundary(pitch: int) -> None:
+    raw = legacy_parse_to_raw_score(
+        Path("high-polyphonic-note.gp"), source_format="gpif",
+        events=[
+            _note(pitch=pitch, onset=0.0, duration=0.5, voice_hint=0, string_hint=1),
+            _note(pitch=55, onset=0.0, duration=2.0, voice_hint=1, string_hint=4),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw, representation_mode=RepresentationMode.STANDARD_TAB)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    spacing = next(r.params["spacing"] for r in staff.layer_groups[0].recipe_instances
+                   if r.recipe_id == "staff_lines")
+    stem = next(r for r in staff.layer_groups[1].recipe_instances
+                if r.recipe_id == "stem_line" and r.metadata["voice_number"] == 0)
+    assert stem.metadata["direction"] == "up"
+    assert stem.params["y0"] - stem.params["y1"] == pytest.approx(3.5 * spacing)
+
+
+def test_same_direction_voices_keep_independent_stems_and_beams() -> None:
+    layer = LayerGroup(layer_id="independent-voices")
+    scene_builders._append_standard_rhythm(
+        layer, measure_number=1, beats_per_measure=4,
+        events=[
+            (100.0, 0.0, 0.5, 60.0, "down", 1),
+            (120.0, 0.5, 0.5, 65.0, "down", 1),
+            (100.0, 0.0, 1.0, 90.0, "down", 2),
+        ],
+        stem_top_y=20.0, stem_bottom_y=100.0, staff_spacing=8.0, stem_offset=3.3,
+    )
+    stems = [r for r in layer.recipe_instances if r.recipe_id == "stem_line"]
+    assert len(stems) == 3
+    assert [(r.metadata["voice_number"], r.metadata["duration"]) for r in stems] == [
+        (1, 0.5), (1, 0.5), (2, 1.0),
+    ]
+    beams = [r for r in layer.recipe_instances if r.recipe_id == "beam_group"]
+    assert len(beams) == 1
+    assert beams[0].metadata["voice_number"] == 1
+
+
+def test_polyphonic_annotations_clear_full_beams_and_stay_inside_page() -> None:
+    notes = [
+        _note(pitch=pitch, onset=index * 0.5, duration=0.5, voice_hint=0,
+              string_hint=1, let_ring=True)
+        for index, pitch in enumerate([71, 64, 60, 71, 72, 64, 60, 72])
+    ]
+    notes.extend([
+        _note(pitch=56, onset=0.0, duration=2.0, voice_hint=1, string_hint=4),
+        _note(pitch=55, onset=2.0, duration=2.0, voice_hint=1, string_hint=4),
+    ])
+    raw = legacy_parse_to_raw_score(
+        Path("polyphonic-annotations.gp"), source_format="gpif", events=notes,
+        chord_markers={"0.0": "E/G#", "2.0": "C/G"},
+    )
+    result = run_core_pipeline_from_raw(raw, representation_mode=RepresentationMode.STANDARD_TAB)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    layer = staff.layer_groups[1]
+    beams = [r for r in layer.recipe_instances if r.recipe_id == "beam_group"]
+    rings = [r for r in layer.recipe_instances if r.recipe_id == "let_ring_line"]
+    labels = [t for t in layer.text_instances if t.metadata.get("kind") == "chord_name"]
+    assert len(beams) == 2
+    assert rings
+    assert len(labels) == 2
+    beam_top = min(min(r.params["y0"], r.params["y1"]) for r in beams)
+    assert all(r.params["y"] < beam_top - 5.0 for r in rings)
+    assert all(t.y < min(r.params["y"] for r in rings) - 10.0 for t in labels)
+    assert min(t.y - t.font_size for t in labels) >= 40.0
+
+
+def test_low_bass_gets_full_stem_by_moving_tab_staff_down() -> None:
+    raw = legacy_parse_to_raw_score(
+        Path("low-bass-clearance.gp"), source_format="gpif",
+        events=[
+            _note(pitch=71, onset=0.0, duration=2.0, voice_hint=0, string_hint=1),
+            _note(pitch=45, onset=0.0, duration=2.0, voice_hint=1, string_hint=6),
+        ],
+    )
+    result = run_core_pipeline_from_raw(raw, representation_mode=RepresentationMode.STANDARD_TAB)
+    staff = result.render_scene.document_scene.pages[0].systems[0].staves[0]
+    staff_lines = next(r for r in staff.layer_groups[0].recipe_instances
+                       if r.recipe_id == "staff_lines")
+    tab_lines = next(r for r in staff.layer_groups[0].recipe_instances
+                     if r.recipe_id == "tab_lines")
+    stem = next(r for r in staff.layer_groups[1].recipe_instances
+                if r.recipe_id == "stem_line" and r.metadata["voice_number"] == 1)
+    assert stem.params["y1"] - stem.params["y0"] == pytest.approx(
+        3.5 * staff_lines.params["spacing"]
+    )
+    assert tab_lines.params["y"] >= stem.params["y1"] + 4.0
+
+
+def test_web_measure_regions_follow_expanded_polyphonic_systems() -> None:
+    from fretwise.web.app import _extract_measure_regions
+
+    notes = [
+        _note(pitch=pitch, onset=onset, duration=2.0, voice_hint=voice, string_hint=string)
+        for onset in range(0, 32, 4)
+        for pitch, voice, string in [(72, 0, 1), (45, 1, 6)]
+    ]
+    raw = legacy_parse_to_raw_score(
+        Path("expanded-cursor-regions.gp"), source_format="gpif", events=notes,
+        chord_markers={str(float(onset)): "C/G" for onset in range(0, 32, 4)},
+    )
+    result = run_core_pipeline_from_raw(
+        raw, representation_mode=RepresentationMode.STANDARD_TAB, page_width=260,
+    )
+    regions = _extract_measure_regions(result.render_scene, result.canonical_score, page_width=260)
+    systems = result.render_scene.document_scene.pages[0].systems
+    assert len(regions) == 8
+    assert len(systems) >= 2
+    previous_bottom = 0.0
+    for system in systems:
+        staff = system.staves[0]
+        bars = [r for layer in staff.layer_groups for r in layer.recipe_instances
+                if r.recipe_id == "barline"]
+        top = min(r.params["y0"] for r in bars)
+        bottom = max(r.params["y1"] for r in bars)
+        system_regions = [region for region in regions if region["y0"] == top]
+        assert system_regions
+        assert all(region["y1"] == bottom for region in system_regions)
+        head = next(g for g in staff.layer_groups[1].glyph_instances if g.glyph_id == "notehead")
+        assert system_regions[0]["columns"][0]["x"] == pytest.approx(head.x)
+        assert top > 76.0
+        assert top > previous_bottom
+        previous_bottom = bottom
 
 
 def test_canonical_to_render_scene_standard_contains_tie_and_slur_arcs() -> None:
@@ -854,7 +1020,9 @@ def test_canonical_to_render_scene_tablature_rhythm_anchors_time_signature_on_ta
     tab_spacing = float(tab_lines.params.get("spacing", 10.0))
 
     assert abs(time_signature.y - (tab_y + 2.0 * tab_spacing)) < 0.01
-    assert not any(text.metadata.get("kind") == "string_label" for text in staff_layer.text_instances)
+    assert not any(
+        text.metadata.get("kind") == "string_label" for text in staff_layer.text_instances
+    )
 
 
 def test_tuplet_brackets_are_mode_specific_between_standard_and_tab_rhythm_builders() -> None:
@@ -872,9 +1040,9 @@ def test_tuplet_brackets_are_mode_specific_between_standard_and_tab_rhythm_build
         beats_per_measure=4,
         time_denominator=4,
         events=[
-            (100.0, 0.0, 1.0 / 3.0, 60.0, "up"),
-            (120.0, 1.0 / 3.0, 1.0 / 3.0, 58.0, "up"),
-            (140.0, 2.0 / 3.0, 1.0 / 3.0, 56.0, "up"),
+            (100.0, 0.0, 1.0 / 3.0, 60.0, "up", 0),
+            (120.0, 1.0 / 3.0, 1.0 / 3.0, 58.0, "up", 0),
+            (140.0, 2.0 / 3.0, 1.0 / 3.0, 56.0, "up", 0),
         ],
         stem_top_y=20.0,
         stem_bottom_y=100.0,
@@ -896,8 +1064,12 @@ def test_tuplet_brackets_are_mode_specific_between_standard_and_tab_rhythm_build
         tuplet_by_onset=tuplet_by_onset,
     )
 
-    standard_tuplets = [r for r in standard_layer.recipe_instances if r.recipe_id == "tuplet_bracket"]
-    tab_rhythm_tuplets = [r for r in tab_rhythm_layer.recipe_instances if r.recipe_id == "tuplet_bracket"]
+    standard_tuplets = [
+        r for r in standard_layer.recipe_instances if r.recipe_id == "tuplet_bracket"
+    ]
+    tab_rhythm_tuplets = [
+        r for r in tab_rhythm_layer.recipe_instances if r.recipe_id == "tuplet_bracket"
+    ]
     tab_rhythm_beams = [r for r in tab_rhythm_layer.recipe_instances if r.recipe_id == "beam_group"]
     tab_rhythm_stems = [r for r in tab_rhythm_layer.recipe_instances if r.recipe_id == "stem_line"]
 
@@ -926,7 +1098,7 @@ def test_standard_tuplet_brackets_split_on_beat_windows() -> None:
         beats_per_measure=4,
         time_denominator=4,
         events=[
-            (100.0 + idx * 20.0, idx / 3.0, 1.0 / 3.0, 60.0, "up")
+            (100.0 + idx * 20.0, idx / 3.0, 1.0 / 3.0, 60.0, "up", 0)
             for idx in range(6)
         ],
         stem_top_y=20.0,
@@ -1037,8 +1209,8 @@ def test_standard_tuplet_bracket_emits_for_unbeamed_complete_time_window() -> No
         beats_per_measure=4,
         time_denominator=4,
         events=[
-            (100.0, 3.0, 1.0 / 3.0, 60.0, "up"),
-            (130.0, 10.0 / 3.0, 2.0 / 3.0, 62.0, "up"),
+            (100.0, 3.0, 1.0 / 3.0, 60.0, "up", 0),
+            (130.0, 10.0 / 3.0, 2.0 / 3.0, 62.0, "up", 0),
         ],
         stem_top_y=20.0,
         stem_bottom_y=100.0,
@@ -1210,7 +1382,9 @@ def test_canonical_to_render_scene_standard_tab_uses_tab_letters_without_string_
     tab_labels = [t for t in staff_layer.text_instances if t.metadata.get("kind") == "tab_label"]
 
     assert [t.text for t in tab_labels] == ["T", "A", "B"]
-    assert not any(text.metadata.get("kind") == "string_label" for text in staff_layer.text_instances)
+    assert not any(
+        text.metadata.get("kind") == "string_label" for text in staff_layer.text_instances
+    )
 
 
 def test_canonical_to_render_scene_standard_renders_header_and_rest_glyphs() -> None:
@@ -1636,7 +1810,6 @@ def test_canonical_to_render_scene_standard_displaces_colliding_chord_noteheads(
         if recipe.recipe_id == "stem_line" and abs(float(recipe.metadata.get("onset", 9.0))) < 1e-6
     )
     stem_x = float(stem.params.get("x", 0.0))
-    stem_direction = str(stem.metadata.get("direction", "up"))
 
     assert len(chord_noteheads) == 2
     assert (max(xs) - min(xs)) > 2.0
@@ -1884,7 +2057,9 @@ def test_canonical_to_render_scene_tablature_rhythm_emits_tuplet_bracket() -> No
     ]
 
     assert "tuplet_bracket" in recipe_ids, "Expected at least one tuplet_bracket recipe"
-    assert len(tuplet_recipes) == 1, f"Expected 1 bracket for 3 triplet notes, got {len(tuplet_recipes)}"
+    assert len(tuplet_recipes) == 1, (
+        f"Expected 1 bracket for 3 triplet notes, got {len(tuplet_recipes)}"
+    )
     bracket = tuplet_recipes[0]
     assert bracket.params["number"] == 3
 
@@ -2106,9 +2281,10 @@ def test_percussion_clef_collapses_drum_notes_into_staff_band() -> None:
     staff = scene.document_scene.pages[0].systems[0].staves[0]
     ys = _notehead_ys(staff)
     assert len(ys) == len(drum_keys)
-    # Heads must collapse into a tight band (no ledger-line explosion).  With an
-    # 8px staff spacing the staff is ~32px tall; allow a small margin for ledgers.
-    assert max(ys) - min(ys) <= 5 * 8.0
+    # Keep the invariant in staff-spaces, including configured engraving zoom.
+    spacing = next(r.params["spacing"] for r in staff.layer_groups[0].recipe_instances
+                   if r.recipe_id == "staff_lines")
+    assert max(ys) - min(ys) <= 5 * spacing
 
 
 def test_percussion_clef_uses_x_noteheads_for_cymbals() -> None:

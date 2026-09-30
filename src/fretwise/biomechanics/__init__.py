@@ -11,9 +11,11 @@ from collections import defaultdict
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 from enum import StrEnum
+from math import isfinite
 
 from fretwise.config import config
 from fretwise.models import Finger, FingeringResult
+from fretwise.sustain import contact_end, required_contact_ends
 
 # Constants sourced from fretwise.config -> defaults.yaml: ``biomechanics``.
 _BIOMECH_CONFIG = config().biomechanics
@@ -190,6 +192,7 @@ def validate_fingering_results(
     violations.extend(_validate_transitions(results, rule_config))
     violations.extend(_validate_occupations(results, rule_config))
     violations.extend(_validate_tie_contacts(results))
+    violations.extend(_validate_ring_releases(results))
     return BiomechanicalReport(
         checked_notes=len(results),
         violations=tuple(violations),
@@ -353,13 +356,36 @@ def _validate_tie_contacts(
     return violations
 
 
+def _validate_ring_releases(
+    results: Sequence[FingeringResult],
+) -> list[BiomechanicalViolation]:
+    required = required_contact_ends(results)
+    violations = []
+    for result in results:
+        release = result.let_ring_end
+        if release is not None and (
+            not result.note_event.let_ring
+            or not isfinite(release)
+            or release < required[result.note_id]
+        ):
+            violations.append(BiomechanicalViolation(
+                code="BIO-SUSTAIN-002", severity=BiomechanicalSeverity.FATAL,
+                message="A let-ring release cannot shorten a written duration or tie.",
+                note_ids=(result.note_id,), measure_index=result.note_event.measure_index,
+                onset=result.note_event.onset,
+                context={"release": release, "required_end": required[result.note_id]},
+            ))
+    return violations
+
+
 def sounding_occupations(
     results: Sequence[FingeringResult],
 ) -> list[tuple[float, tuple[FingeringResult, ...]]]:
     """Sweep all voices, retaining every sounding contact at each attack.
 
     Source duration occupies a contact until its end. Let-ring extends to the
-    next attack on its string. A later same-voice attack on that string replaces
+    next attack on its string or to an explicit planned release, never before
+    the written duration/tie ends. A later same-voice attack on that string replaces
     its previous pitch; other voices cannot silently truncate a notated sustain.
     Cross-voice unisons retain both score identities and share a physical contact.
     """
@@ -367,6 +393,7 @@ def sounding_occupations(
     for result in results:
         groups[(result.note_event.onset, result.note_event.measure_index)].append(result)
     active: list[FingeringResult] = []
+    required = required_contact_ends(results)
     frames: list[tuple[float, tuple[FingeringResult, ...]]] = []
     for (onset, measure), attacks in sorted(
         groups.items(), key=lambda item: (item[0][0], item[0][1] or 0),
@@ -376,12 +403,15 @@ def sounding_occupations(
             note = previous.note_event
             if note.onset == onset and note.measure_index != measure:
                 continue
-            if not note.let_ring and note.onset + note.duration <= onset:
+            if contact_end(previous, required[previous.note_id]) <= onset:
                 continue
             replaced = any(
                 previous.state.string_num == attack.state.string_num
                 and note.onset < onset
-                and (note.let_ring or _same_voice(previous, attack))
+                and (
+                    _same_voice(previous, attack)
+                    or (note.let_ring and required[previous.note_id] <= onset)
+                )
                 for attack in attacks
             )
             if not replaced:

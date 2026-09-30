@@ -290,11 +290,11 @@ def test_old_algorithm_sidecar_is_stale_until_recomputed(tmp_path: Path) -> None
     source = tmp_path / "synthetic.gp"
     source.write_bytes(b"Synthetic file used only for metadata freshness")
     old = {"algo_version": "2.1", "source_mtime": source.stat().st_mtime}
-    assert FINGERING_ALGO_VERSION == "2.3"
+    assert FINGERING_ALGO_VERSION == "2.4"
     assert not _fingering_meta_is_current(old, source)
     baseline, _, _ = _arbitration_rows()
     assert _write_fingering_sidecar(source, baseline, track_id=3)
     current = _read_fingering_meta(source)
     assert current is not None
-    assert current["algo_version"] == "2.3"
+    assert current["algo_version"] == FINGERING_ALGO_VERSION
     assert _fingering_meta_is_current(current, source)
