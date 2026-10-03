@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-import shutil
 import json
+import shutil
 import subprocess
 from pathlib import Path
 
@@ -75,20 +75,20 @@ def test_top_projection_has_readable_fingering_scale() -> None:
 
 @pytest.mark.skipif(shutil.which("node") is None, reason="node not available")
 def test_top_camera_stability_shifts_seeks_and_resize() -> None:
-    """Exercise the shipped camera policy against changing chords and transport."""
+    """The top camera stays put in frame and pans smoothly at its edges."""
     script = f"import {{topCameraFocus as focus}} from {json.dumps(_HAND_V2.as_uri())};" + """
 const initial = focus(null, 30, 110, 150, 0);
 let held = initial;
 for(let i=1;i<=120;i++) held=focus(held, 35+i%8, 105-i%9, 150, i/60);
-const shifted = focus(held, 120, 200, 150, 2+1/60);
+const nearEdge=focus(held, -40, 190, 150, 2+1/60);
+const shifted = focus(held, 250, 330, 150, 2+1/60);
 let settled=shifted;
-for(let i=2;i<=180;i++) settled=focus(settled,120,200,150,2+i/60);
+for(let i=2;i<=180;i++) settled=focus(settled,250,330,150,2+i/60);
 const paused=focus(settled,120,200,150,settled.time);
 const backward=focus(settled,300,360,150,1);
 const forward=focus(held,300,360,150,10);
-const resized=focus(held,30,110,55,held.time);
-const fast=focus(held,120,200,150,held.time+2/60,2);
-console.log(JSON.stringify({initial,held,shifted,settled,paused,backward,forward,resized,fast}));
+const resized=focus(held,30,140,55,held.time);
+console.log(JSON.stringify({initial,held,nearEdge,shifted,settled,paused,backward,forward,resized}));
 """
     proc = subprocess.run(
         [shutil.which("node"), "--input-type=module", "-e", script],
@@ -97,13 +97,61 @@ console.log(JSON.stringify({initial,held,shifted,settled,paused,backward,forward
     assert proc.returncode == 0, proc.stderr
     result = json.loads(proc.stdout)
     assert result["held"]["x"] == result["initial"]["x"] == 70
-    assert 70 < result["shifted"]["x"] < 80
-    assert result["settled"]["x"] == pytest.approx(117.5, abs=.001)
+    assert result["nearEdge"]["x"] == 70
+    assert 70 < result["shifted"]["x"] < 90
+    assert result["shifted"]["x"] - 70 <= 450 / 60
+    assert result["settled"]["x"] == pytest.approx(225, abs=.01)
     assert result["paused"] == result["settled"]
-    assert result["backward"]["x"] == result["forward"]["x"] == 330
-    assert abs(30 - result["resized"]["x"]) < 55
-    assert abs(110 - result["resized"]["x"]) < 55
-    assert result["fast"]["x"] == pytest.approx(result["shifted"]["x"])
+    assert result["backward"]["x"] == result["settled"]["x"]
+    assert 70 < result["forward"]["x"] < 255
+    assert result["resized"]["x"] == 70
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not available")
+def test_perspective_camera_only_pans_when_projected_fingers_leave_view() -> None:
+    """Screen-space bounds, including vertical movement, control perspective pans."""
+    script = f"import {{cameraPanDelta}} from {json.dumps(_HAND_V2.as_uri())};" + """
+const point=(x,y)=>({x,y,halfWidth:100,halfHeight:50});
+const inside=cameraPanDelta([point(-.8,.7),point(.82,-.85)]);
+const contactChanged=cameraPanDelta([point(-.8,.7),point(.82,-.85),point(.4,.3)]);
+const right=cameraPanDelta([point(1.05,.2)]);
+const left=cameraPanDelta([point(-1.05,.2)]);
+const up=cameraPanDelta([point(0,1.2)]);
+const both=cameraPanDelta([point(-1.1,0),point(1.1,0)]);
+console.log(JSON.stringify({inside,contactChanged,right,left,up,both}));
+"""
+    proc = subprocess.run(
+        [shutil.which("node"), "--input-type=module", "-e", script],
+        capture_output=True, text=True, timeout=30,
+    )
+    assert proc.returncode == 0, proc.stderr
+    result = json.loads(proc.stdout)
+    assert result["inside"] == result["contactChanged"] == {"x": 0, "y": 0}
+    assert result["right"] == {"x": pytest.approx(35), "y": 0}
+    assert result["left"] == {"x": pytest.approx(-35), "y": 0}
+    assert result["up"] == {"x": 0, "y": pytest.approx(25)}
+    assert result["both"] == {"x": 0, "y": 0}
+
+
+@pytest.mark.skipif(shutil.which("node") is None, reason="node not available")
+def test_perspective_distance_is_continuous_across_mobile_breakpoint() -> None:
+    """A one-pixel resize near 480 px cannot jump the whole neck by 48 mm."""
+    script = (
+        f"import {{perspectiveCameraDistance as distance}} from {json.dumps(_HAND_V2.as_uri())};"
+        "console.log(JSON.stringify([distance(360),distance(479),distance(480),"
+        "distance(481),distance(600),distance(480,2)]));"
+    )
+    proc = subprocess.run(
+        [shutil.which("node"), "--input-type=module", "-e", script],
+        capture_output=True, text=True, timeout=30,
+    )
+    assert proc.returncode == 0, proc.stderr
+    low, before, at, after, high, zoomed = json.loads(proc.stdout)
+    assert low == 312
+    assert high == 264
+    assert before > at > after
+    assert before - after < 1
+    assert zoomed == 2 * at
 
 
 def test_top_view_cannot_be_tilted_by_pointer_drag() -> None:

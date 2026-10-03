@@ -11,26 +11,47 @@ const toInternal = p => V(p[0] * 1000, p[2] * 1000, p[1] * 1000);
 // Frame the fingering area, not the entire neck and forearm.
 const TOP_VIEW_HEIGHT = 150;
 const TOP_CAMERA_DISTANCE = 900;
+const CAMERA_TRIGGER = .90;
+const CAMERA_SETTLE = .70;
+const CAMERA_EASE_SECONDS = .22;
+const CAMERA_MAX_SPEED = 450;
 
-/** Hold the top camera inside a dead zone; ease only actual position changes. */
-export function topCameraFocus(previous, minX, maxX, halfWidth, time, rate = 1) {
+/** Keep perspective distance continuous while the viewport crosses mobile widths. */
+export function perspectiveCameraDistance(width, zoom = 1) {
+  const t = Math.max(0, Math.min(1, (width - 360) / 240));
+  const blend = t * t * (3 - 2 * t);
+  return (312 - 48 * blend) * zoom;
+}
+
+/** Hold the top camera until the hand approaches the visible edge. */
+export function topCameraFocus(previous, minX, maxX, halfWidth, time) {
   const midpoint = (minX + maxX) / 2;
-  const dt = previous ? time - previous.time : 0;
-  // A seek starts a fresh framing; pauses never advance the camera animation.
-  if (!previous || dt < 0 || dt > .5 * rate) return {x: midpoint, time};
-  const safeHalfWidth = halfWidth * .55;
-  let target = previous.x;
-  if (maxX - minX > safeHalfWidth * 2) target = midpoint;
-  else if (minX < previous.x - safeHalfWidth) target = minX + safeHalfWidth;
-  else if (maxX > previous.x + safeHalfWidth) target = maxX - safeHalfWidth;
-  const alpha = 1 - Math.exp(-Math.max(0, dt) / (rate * .18));
-  let x = previous.x + (target - previous.x) * alpha;
-  // Keep contacts visible even after resizing or a large forward seek.
-  const visibleHalfWidth = halfWidth * .85;
-  if (maxX - minX <= visibleHalfWidth * 2) {
-    x = Math.max(maxX - visibleHalfWidth, Math.min(minX + visibleHalfWidth, x));
-  }
-  return {x, time};
+  if (!previous) return {x: midpoint, target: midpoint, time};
+  const trigger = halfWidth * CAMERA_TRIGGER;
+  const settle = halfWidth * CAMERA_SETTLE;
+  let target = previous.target ?? previous.x;
+  if (maxX - minX > trigger * 2) target = midpoint;
+  else if (minX < previous.x - trigger) target = minX + settle;
+  else if (maxX > previous.x + trigger) target = maxX - settle;
+  const dt = Math.max(0, Math.min(.1, time - previous.time));
+  const alpha = 1 - Math.exp(-dt / CAMERA_EASE_SECONDS);
+  const eased = (target - previous.x) * alpha;
+  const step = Math.sign(eased) * Math.min(Math.abs(eased), CAMERA_MAX_SPEED * dt);
+  return {x: previous.x + step, target, time};
+}
+
+/** Camera-plane shift needed when projected hand points leave the safe viewport. */
+export function cameraPanDelta(points) {
+  const axis = (coordinate, scale) => {
+    let positive = 0, negative = 0;
+    for (const point of points) {
+      const value = point[coordinate], half = point[scale];
+      if (value > CAMERA_TRIGGER) positive = Math.max(positive, (value - CAMERA_SETTLE) * half);
+      if (value < -CAMERA_TRIGGER) negative = Math.min(negative, (value + CAMERA_SETTLE) * half);
+    }
+    return positive && negative ? (positive + negative) / 2 : positive || negative;
+  };
+  return {x: axis("x", "halfWidth"), y: axis("y", "halfHeight")};
 }
 
 function disposeTree(object) {
@@ -234,7 +255,7 @@ export class HandV2View {
     if (this.disposed) return;
     this.generation++; this.compiler.cancel(); this.rig.clearCaches();
     this.performance = null; this.plan = null; this.metrics = []; this.lastSample = null;
-    this.topFocus = null;
+    this.topFocus = null; this.perspectiveFocus = null;
     this.diagnostics = []; this.poseDiagnostics = []; this.rig.hand.visible = false;
     this.rig.setDiagnostics(false);
     this.badge.textContent = message;
@@ -316,18 +337,22 @@ export class HandV2View {
     const center = active.length ? active.reduce((v, m) => v.add(toInternal(m.targetM)), V())
       .multiplyScalar(1 / active.length).add(V(8, -15, 16))
       : V(this.rig.hand.position.x + 20, -18, 35);
-    const dist = (this.container.clientWidth < 480 ? 312 : 264) * this.zoom;
+    const dist = perspectiveCameraDistance(this.container.clientWidth, this.zoom);
+    const frameTime = performance.now() / 1000;
+    const handPoints = this.rig.getCameraPoints();
     this._updateProjection();
     if (this.cameraView === "top") {
-      // Include the palm and all finger targets, including preparation/rest.
-      // Across-string motion must never move the camera vertically.
-      const xs = [this.rig.hand.position.x, ...Object.values(sample.fingers)
-        .map(f => f.targetM[0] * 1000)];
+      // All posed joints count; across-string motion does not move this camera vertically.
+      const xs = handPoints.map(p => p.x);
       this.topFocus = topCameraFocus(this.topFocus, Math.min(...xs) - 12,
-        Math.max(...xs) + 12, this.topCamera.right, nominalScoreSec, this.rate);
+        Math.max(...xs) + 12, this.topCamera.right, frameTime);
       center.set(this.topFocus.x, 0, 30);
     }
-    const focus = this.world.localToWorld(center);
+    const initialFocus = this.world.localToWorld(center);
+    if (this.cameraView !== "top" && !this.perspectiveFocus) {
+      this.perspectiveFocus = {point: initialFocus, target: initialFocus.clone(), time: frameTime};
+    }
+    const focus = this.cameraView === "top" ? initialFocus : this.perspectiveFocus.point;
     if (this.cameraView === "top") {
       // Pure plan projection: look along fretboard normal. Across-string axis
       // stays vertical on screen, leaving neck/frets horizontal like 2D view.
@@ -337,6 +362,31 @@ export class HandV2View {
       this.camera.position.copy(focus).addScaledVector(boardNormal, TOP_CAMERA_DISTANCE);
     } else {
       this.camera.up.set(0, 1, 0);
+      this.camera.position.set(focus.x + dist * Math.sin(this.phi) * Math.sin(this.theta),
+        focus.y + dist * Math.cos(this.phi), focus.z + dist * Math.sin(this.phi) * Math.cos(this.theta));
+      this.camera.lookAt(focus);
+      this.camera.updateMatrixWorld();
+      const forward = this.camera.getWorldDirection(V());
+      const right = V(1, 0, 0).applyQuaternion(this.camera.quaternion);
+      const up = V(0, 1, 0).applyQuaternion(this.camera.quaternion);
+      const tangent = Math.tan(THREE.MathUtils.degToRad(this.camera.fov / 2));
+      const projected = handPoints.map(point => {
+        const worldPoint = this.world.localToWorld(point.clone());
+        const depth = worldPoint.clone().sub(this.camera.position).dot(forward);
+        const ndc = worldPoint.project(this.camera);
+        return {x: ndc.x, y: ndc.y, halfWidth: depth * tangent * this.camera.aspect,
+          halfHeight: depth * tangent, depth};
+      }).filter(point => point.depth > this.camera.near && Number.isFinite(point.x));
+      const pan = cameraPanDelta(projected);
+      if (pan.x || pan.y) {
+        this.perspectiveFocus.target.copy(focus).addScaledVector(right, pan.x)
+          .addScaledVector(up, pan.y);
+      }
+      const dt = Math.max(0, Math.min(.1, frameTime - this.perspectiveFocus.time));
+      const alpha = 1 - Math.exp(-dt / CAMERA_EASE_SECONDS);
+      const step = this.perspectiveFocus.target.clone().sub(focus).multiplyScalar(alpha);
+      focus.add(step.clampLength(0, CAMERA_MAX_SPEED * dt));
+      this.perspectiveFocus.time = frameTime;
       this.camera.position.set(focus.x + dist * Math.sin(this.phi) * Math.sin(this.theta),
         focus.y + dist * Math.cos(this.phi), focus.z + dist * Math.sin(this.phi) * Math.cos(this.theta));
     }
@@ -352,7 +402,7 @@ export class HandV2View {
     const cameras = {face: [.9, 1.1], fingers: [.9, 1.1], thumb: [3, 1.65],
       palm: [.25, 1.30], profile: [1.48, 1.25], top: null};
     if (!(view in cameras)) return false;
-    if (view !== this.cameraView) this.topFocus = null;
+    if (view !== this.cameraView) { this.topFocus = null; this.perspectiveFocus = null; }
     this.cameraView = view;
     if (cameras[view]) [this.theta, this.phi] = cameras[view];
     this._updateProjection(); this.renderAt(this.time);

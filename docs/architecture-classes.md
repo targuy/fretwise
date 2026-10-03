@@ -219,7 +219,9 @@ de chaque changement de mode. `playback.usesSvgCursor = !!_svgDriver` arbitre le
 - [`hand_v2.js`](../src/fretwise/web/static/js/hand_v2.js) — moteur unique de la main
   de référence : HandPerformance 1.1, Worker de compilation, DQS et contacts.
   Caméras perspective doigts/pouce/paume/profil plus caméra orthographique `top`,
-  normale exacte à la touche pour la projection du dessus à 90°.
+  normale exacte à la touche pour la projection du dessus à 90°. Le cadrage reste
+  fixe tant que les articulations sont visibles ; un dépassement déclenche un
+  panoramique amorti, sans changer l'angle ni le zoom.
 
 ### 9.4 Lecture & audio
 

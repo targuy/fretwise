@@ -179,6 +179,7 @@ return {
     return lastMetrics;
   },
   getMetrics(){return lastMetrics;},
+  getCameraPoints(){return bonePos.map(p=>p.clone().add(hand.position));},
   clearCaches(){solveCache.clear();contactCache.clear();},
   dispose(){solveCache.clear();contactCache.clear();world.remove(hand,contactGroup);}
 };
