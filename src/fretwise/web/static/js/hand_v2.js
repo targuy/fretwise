@@ -325,8 +325,9 @@ export class HandV2View {
           && other.stringNo !== finger.stringNo)) rowFrets.add(finger.fretAbs);
     }
     const rowPoseFailure = this.poseDiagnostics.find(d => rowFrets.has(sample.fingers[d.finger]?.fretAbs));
-    // The reference skin cannot hide one finger: omit an unqualified crossing pose.
-    this.rig.hand.visible = !rowFailure && !rowPoseFailure;
+    // Keep the trajectory visible. The badge marks unqualified poses; contact
+    // rings never assert a failed press. Skin color and opacity remain steady.
+    const motionFailure = sample.diagnostics.some(d => d.code !== "REPEAT_UNFOLDING_REQUIRED");
     this.lastSample = sample; this.metrics = measurements;
     for (let s = 1; s <= this.strings.length; s++) {
       const contacts = Object.values(sample.fingers).filter(f => f.stringNo === s && f.pressure01 > 0);
@@ -391,10 +392,13 @@ export class HandV2View {
         focus.y + dist * Math.cos(this.phi), focus.z + dist * Math.sin(this.phi) * Math.cos(this.theta));
     }
     this.camera.lookAt(focus); this.keyLight.target.position.copy(focus); this.keyLight.target.updateMatrixWorld();
-    const issues = this.poseDiagnostics.length + sample.diagnostics.length;
-    this.badge.textContent = rowFailure ? `Main v2 · ${rowFailure.message}`
-      : rowPoseFailure ? `Main v2 · ${rowPoseFailure.message}`
-      : `Main v2 · modèle de référence${issues ? ` · ${issues} contrainte(s) non résolue(s)` : " · pouce et collisions non qualifiés"}`;
+    const issues = new Set([...this.poseDiagnostics, ...sample.diagnostics].map(d => d.code)).size;
+    this.badge.style.background = this.poseDiagnostics.length || motionFailure ? "#614324e8" : "#19251dde";
+    this.badge.textContent = rowFailure ? `Main v2 · pose non qualifiée · ${rowFailure.message}`
+      : rowPoseFailure ? `Main v2 · pose non qualifiée · ${rowPoseFailure.message}`
+      : this.poseDiagnostics.length || motionFailure
+        ? `Main v2 · pose non qualifiée · ${issues} contrainte(s) non résolue(s)`
+        : `Main v2 · modèle de référence${issues ? ` · ${issues} contrainte(s) non résolue(s)` : " · pouce et collisions non qualifiés"}`;
     this.renderer.render(this.scene, this.camera);
   }
 

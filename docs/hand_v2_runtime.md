@@ -90,13 +90,21 @@ puis annulaire, majeur et index vers le sillet, avec 7,5 mm entre centres de
 pulpe pour le profil de main de référence. Le calcul utilise la largeur réelle
 de chaque frette et conserve corde, frette, doigt et intervalles musicaux. Si la
 largeur ne suffit plus, le plan signale `SAME_FRET_CONTACTS_UNREACHABLE` sur
-l'intervalle concerné et masque la pose de main impossible. La main est également
-masquée si le rig de référence n'atteint pas l'un de ces contacts malgré une
-largeur suffisante ; le résidu de contact reste visible comme diagnostic. Un
+l'intervalle concerné. La main reste opaque et suit sa trajectoire ; le badge
+indique « pose non qualifiée » et les marqueurs de contact ne valident pas une
+pression impossible. Même règle si le rig de référence n'atteint pas un contact
+malgré une largeur suffisante ; le résidu reste visible comme diagnostic. Un
 chevauchement enchaîné qui demanderait de déplacer latéralement un doigt déjà
 maintenu porte
 `SAME_FRET_STATIC_LAYOUT_UNRESOLVED` ; cette limite du plan statique ne prétend
 pas rendre le doigté musicalement impossible.
+
+La paume attend la fin des contacts tenus avant un changement de position. Si
+la fenêtre restante ne suffit pas, le déplacement reste continu, l'arrivée
+tardive est signalée par `ROOT_SHIFT_WINDOW_SHORT` et aucune note n'est coupée.
+Un avertissement global de reprise (`REPEAT_UNFOLDING_REQUIRED`) reste visible
+dans les diagnostics sans changer l'opacité de la main ni invalider à lui seul
+ses contacts géométriques.
 
 Les liens hammer-on/pull-off/slide sont contrôlés contre les doigts, cordes et cases.
 Le pull-off prépare le doigt inférieur et possède une déviation tangentielle.

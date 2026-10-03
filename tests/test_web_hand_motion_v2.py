@@ -80,6 +80,71 @@ console.log(JSON.stringify({count:plan.byFinger.index.length,
     assert result["end"] == 1
 
 
+def test_palm_waits_for_release_before_long_shift_and_skin_stays_opaque() -> None:
+    """A sustained note must not drag its palm away or flash the hand material."""
+    result = run_js(f"""
+const T=await import({json.dumps((JS / 'vendor/three.module.min.js').as_uri())});
+const {{createReferenceRig}}=await import({json.dumps((JS / 'hand_reference_rig.js').as_uri())});
+const rig=createReferenceRig(new T.Group());
+const plan=compilePerformance(performance([
+  note('held','index',2,3,0,960),note('next','index',2,15,1920,2880)]));
+const before=sampleMotion(plan,.483),release=sampleMotion(plan,.5),moving=sampleMotion(plan,1.05);
+const held=rig.pose(before,plan.geometry).find(m=>m.finger==='index');
+const skin=rig.hand.children.find(child=>child.isMesh).material;
+console.log(JSON.stringify({{frames:plan.rootFrames,held,rootBefore:before.rootPositionM[0],
+  rootRelease:release.rootPositionM[0],rootMoving:moving.rootPositionM[0],
+  skinOpacity:skin.opacity,skinTransparent:skin.transparent,handVisible:rig.hand.visible,
+  codes:plan.diagnostics.map(d=>d.code)}}));
+""")
+    first, second = result["frames"]
+    assert second["start"] >= 0.5
+    assert second["on"] > 1
+    assert result["rootBefore"] == pytest.approx(first["x"])
+    assert result["rootRelease"] == pytest.approx(first["x"])
+    assert first["x"] < result["rootMoving"] < second["x"]
+    assert result["held"]["errorMm"] < 0.5
+    assert result["skinOpacity"] == 1
+    assert result["skinTransparent"] is False
+    assert result["handVisible"] is True
+    assert "ROOT_SHIFT_WINDOW_SHORT" in result["codes"]
+
+
+def test_repeated_contact_after_rest_gets_full_approach_window() -> None:
+    """Same fret after a gap still moves from rest; do not cram it into 65 ms."""
+    result = run_js("""
+const plan=compilePerformance(performance([
+  note('first','pinky',2,5,0,960),note('again','pinky',2,5,2880,3840)]));
+const second=plan.byFinger.pinky[1];
+const length=Math.hypot(...second.from.map((x,i)=>x-second.target[i]));
+console.log(JSON.stringify({duration:second.on-second.prepareStart,length,
+  firstEnd:plan.byFinger.pinky[0].end,secondStart:second.prepareStart}));
+""")
+    assert result["secondStart"] >= result["firstEnd"]
+    assert result["length"] > 0.01
+    assert result["duration"] >= 0.065 + result["length"] / 0.35 - 1e-6
+
+
+def test_repeat_warning_does_not_make_skin_transparent() -> None:
+    """Song-wide repeat metadata must not fade every frame of the 3D hand."""
+    result = run_js(f"""
+const T=await import({json.dumps((JS / 'vendor/three.module.min.js').as_uri())});
+const {{createReferenceRig}}=await import({json.dumps((JS / 'hand_reference_rig.js').as_uri())});
+const rig=createReferenceRig(new T.Group());
+const p=performance([note('a','index',2,3,0,960)]);
+p.diagnostics=[{{code:'REPEAT_UNFOLDING_REQUIRED',message:'Repeat',noteIds:['a']}}];
+const plan=compilePerformance(p),sample=sampleMotion(plan,.2);
+const contact=rig.pose(sample,plan.geometry).find(m=>m.finger==='index');
+const skin=rig.hand.children.find(child=>child.isMesh).material;
+console.log(JSON.stringify({{valid:sample.valid,contactError:contact.errorMm,
+  opacity:skin.opacity,transparent:skin.transparent,visible:rig.hand.visible}}));
+""")
+    assert result["valid"] is False
+    assert result["contactError"] < 0.5
+    assert result["opacity"] == 1
+    assert result["transparent"] is False
+    assert result["visible"] is True
+
+
 def test_conflicting_sustain_is_reported_without_shortening_note() -> None:
     result = run_js("""
 const p=performance([note('a','index',2,1,0,3840),note('b','index',3,5,1920,4800)]);

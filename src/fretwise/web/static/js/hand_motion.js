@@ -343,27 +343,6 @@ export function compilePerformance(performance, {playbackRate = 1, rigRevision =
       contact.supportUntil = clock.tickToSeconds(to.onTick);
     }
   }
-  const rootFrames = [];
-  for (const onTick of [...new Set(notes.map(n => n.onTick))].sort((a, b) => a - b)) {
-    const group = notes.filter(n => n.onTick === onTick && FINGERS.includes(n.fingering.finger)
-      && !deadNoteIds.has(n.occurrenceId));
-    if (!group.length) continue;
-    const implied = group.map(n => Math.max(geometry.capo + 1,
-      n.fingering.fretAbs - FINGERS.indexOf(n.fingering.finger))).sort((a, b) => a - b);
-    const hints = group.map(n => n.fingering.handPositionHint).filter(finite).sort((a, b) => a - b);
-    // Imported source annotations may label every finger with its own fret.
-    // A hand-position hint is a preference, never a rigid translation: the
-    // complete chord must first fit the relative placement of all four fingers.
-    const preferred = hints.length ? hints[Math.floor(hints.length / 2)]
-      : implied[Math.floor(implied.length / 2)];
-    const position = clamp(preferred, implied[0], implied.at(-1));
-    const x = geometry.target({fretAbs: position, stringNo: 3})[0];
-    const on = clock.tickToSeconds(onTick);
-    if (rootFrames.at(-1)?.x === x) continue;
-    const previous = rootFrames.at(-1);
-    rootFrames.push({on, start: Math.max(startSec, previous?.on ?? startSec,
-      on - (0.10 + Math.abs(x - (previous?.x ?? x)) / .5) * playbackRate), x});
-  }
   for (const finger of FINGERS) {
     const sorted = byFinger[finger].sort((a, b) => a.on - b.on || a.id.localeCompare(b.id));
     const merged = [];
@@ -384,13 +363,50 @@ export function compilePerformance(performance, {playbackRate = 1, rigRevision =
     }
   }
   spreadSameFretContacts(byFinger, geometry, fail);
+  const rootFrames = [];
+  for (const onTick of [...new Set(notes.map(n => n.onTick))].sort((a, b) => a - b)) {
+    const group = notes.filter(n => n.onTick === onTick && FINGERS.includes(n.fingering.finger)
+      && !deadNoteIds.has(n.occurrenceId));
+    if (!group.length) continue;
+    const implied = group.map(n => Math.max(geometry.capo + 1,
+      n.fingering.fretAbs - FINGERS.indexOf(n.fingering.finger))).sort((a, b) => a - b);
+    const hints = group.map(n => n.fingering.handPositionHint).filter(finite).sort((a, b) => a - b);
+    // Imported source annotations may label every finger with its own fret.
+    // A hand-position hint is a preference, never a rigid translation: the
+    // complete chord must first fit the relative placement of all four fingers.
+    const preferred = hints.length ? hints[Math.floor(hints.length / 2)]
+      : implied[Math.floor(implied.length / 2)];
+    const position = clamp(preferred, implied[0], implied.at(-1));
+    const x = geometry.target({fretAbs: position, stringNo: 3})[0];
+    const desiredOn = clock.tickToSeconds(onTick);
+    const previous = rootFrames.at(-1);
+    if (previous?.x === x) continue;
+    const travel = (0.10 + Math.abs(x - (previous?.x ?? x)) / .5) * playbackRate;
+    const heldUntil = previous ? Math.max(startSec, ...FINGERS.flatMap(finger => byFinger[finger])
+      .filter(contact => contact.on < desiredOn && contact.end > previous.on)
+      .map(contact => contact.end)) : startSec;
+    // A sustained finger anchors the palm. If release leaves too little time,
+    // finish the shift late and report it instead of detaching or teleporting.
+    const start = Math.max(startSec, previous?.on ?? startSec, desiredOn - travel, heldUntil);
+    const on = previous ? Math.max(desiredOn, start + travel) : desiredOn;
+    if (on > desiredOn + 1e-7) {
+      fail("ROOT_SHIFT_WINDOW_SHORT", "Déplacement de la paume après fin des notes tenues ; arrivée tardive.",
+        group.map(note => note.occurrenceId), desiredOn, on);
+    }
+    rootFrames.push({on, start, x});
+  }
   for (const finger of FINGERS) {
     const merged = byFinger[finger];
     for (let i = 0; i < merged.length; i++) {
       const contact = merged[i], previous = merged[i - 1];
-      const from = previous?.target || restTarget(finger, rootAt(rootFrames, contact.on, geometry.fretX(3)));
-      const length = distance(from, contact.target);
-      const realDuration = clamp(0.065 + length / 0.7, 0.065, 0.40);
+      const restAtOn = restTarget(finger, rootAt(rootFrames, contact.on, geometry.fretX(3)));
+      const from = previous?.target || restAtOn;
+      // After a real release the finger has returned to rest. A repeated note
+      // at the same fret can still require a full approach from that rest pose.
+      const released = previous && contact.on - previous.end > .10 * playbackRate;
+      const length = Math.max(distance(from, contact.target),
+        released ? distance(restAtOn, contact.target) : 0);
+      const realDuration = clamp(0.065 + length / (released ? 0.35 : 0.7), 0.065, 0.40);
       const required = realDuration * playbackRate;
       const earliestTick = contact.execution?.preparationWindow?.earliestTick;
       const earliest = Math.max(startSec, previous?.end ?? startSec,
@@ -421,7 +437,7 @@ export function compilePerformance(performance, {playbackRate = 1, rigRevision =
   if ((performance.barres || []).length) {
     diagnostics.push(diagnostic("BARRE_SURFACE_UNQUALIFIED", "Barrés conservés ; contact surfacique complet non qualifié."));
   }
-  const key = stableKey({performance, playbackRate, rigRevision, planner: 2});
+  const key = stableKey({performance, playbackRate, rigRevision, planner: 3});
   return {schemaVersion: "1.0", key, performance, playbackRate, clock, geometry,
     byFinger, expressions, details, diagnostics, invalid, events: events.sort((a, b) => a.sec - b.sec),
     rootFrames, startSec, endSec, status: invalid.length ? "partial" : "illustrative"};

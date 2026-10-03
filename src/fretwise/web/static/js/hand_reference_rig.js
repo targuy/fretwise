@@ -147,6 +147,7 @@ return {
   setDiagnostics(enabled){jointGroup.visible=enabled;contactGroup.visible=enabled;},
   pose(sample, geometryProfile) {
     const values=Object.values(sample.fingers);
+    const contactFailure=sample.diagnostics.some(d=>d.code!=="REPEAT_UNFOLDING_REQUIRED");
     const shift=sample.rootPositionM[0]*1000-rest[chains[0][1]].x+18;
     hand.position.set(shift,-74,84);
     for(let j=0;j<25;j++)setBone(j,rest[j],new T.Quaternion());
@@ -158,7 +159,7 @@ return {
         : V(shift+rest[chains[f][1]].x+3,12,16+f*1.5);
       const result=solveContact(f,tg.clone().sub(hand.position)),sol=result.sol;
       const point=result.point.clone().add(hand.position);
-      rings[f].position.copy(point);rings[f].visible=value.pressure01>0&&result.error<.5;
+      rings[f].position.copy(point);rings[f].visible=value.pressure01>0&&result.error<.5&&!contactFailure;
       fretRings[f].visible=rings[f].visible;
       if(value.fretAbs!==null)fretRings[f].position.set(
         geometryProfile.fretX(value.fretAbs)*1000,
@@ -173,9 +174,6 @@ return {
     thumbPose();foldAmount.value[4]=.1;
     dots.forEach((d,j)=>d.position.copy(bonePos[j]));
     [...chains,tc].forEach((c,j)=>lines[j].geometry.setFromPoints(c.map(i=>bonePos[i])));
-    // A failed pose is visible as a diagnostic illustration, never a frozen old pose.
-    skin.opacity=sample.valid&&lastMetrics.every(m=>!m.active||m.valid)?1:.42;
-    skin.transparent=skin.opacity<1;
     return lastMetrics;
   },
   getMetrics(){return lastMetrics;},
