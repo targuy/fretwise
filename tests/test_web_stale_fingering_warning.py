@@ -39,7 +39,7 @@ const context = vm.createContext({console:{error(){}}, Set, Map,
   currentFile:'song.gp', currentTrackId:3, _reviewTrackName:'Guitare',
   _selectFileToken:1, _selectTrackToken:1, _solveInFlight:false,
   _bgComputeRunning:false,
-  _solveCache:new Map(), _solveCacheRevision:0, _prefetchAbortToken:0,
+  _solveCache:new Map(), _solveCacheRevision:0,
   btnInsertFingerings:element(),
   fetchSaveGp:async (...args)=>{calls.save.push(args);return {sidecar_saved:true};},
   selectTrack:async (...args)=>{calls.reload.push(args);context._selectTrackToken++;},
@@ -51,12 +51,11 @@ vm.runInContext(declaration('// ── Saved fingering version warning',
   'let _bgComputeRunning') + '\n'
   + declaration('function _updateInsertFingeringsBtn') + '\n'
   + declaration('async function _cachedSolve') + '\n'
-  + declaration('function _prefetchAllTrackModes') + '\n'
   + declaration('async function _computeOtherGuitarTracks') + '\n'
   + `globalThis.ui = {show:_showStaleFingeringWarning,reset:_resetStaleFingeringWarning,
     dismiss:_dismissStaleFingeringWarning,recalculate:_recalculateStaleFingerings,
     insert:_insertFingerings,updateButton:_updateInsertFingeringsBtn,
-    cachedSolve:_cachedSolve,prefetch:_prefetchAllTrackModes,
+    cachedSolve:_cachedSolve,
     refresh:_refreshStaleFingeringControls,background:_computeOtherGuitarTracks};`, context);
 context._computeOtherGuitarTracks=(...args)=>calls.background.push(args);
 const ui = context.ui;
@@ -211,19 +210,6 @@ assert.equal(context._solveCache.values().next().value.fingering_is_outdated,fal
         ),
         pytest.param(
             r"""
-const pending=deferred(); context.fetchSolve=()=>pending.promise;
-context.getRulePreferences=()=>({}); context._svgRenderWidth=()=>800;
-context.isGuitarKind=()=>true; context._PREFETCH_MODES=['tablature'];
-context.MODES={STANDARD:'standard'};
-ui.prefetch('song.gp',[{id:3,kind:'guitar'}]);
-ui.show(stale); await ui.recalculate();
-pending.resolve(stale); await Promise.resolve(); await Promise.resolve();
-assert.equal(context._solveCache.size,0);
-""",
-            id="old-background-prefetch-cannot-recache-after-save",
-        ),
-        pytest.param(
-            r"""
 context._bgComputeRunning=true; ui.show(stale);
 assert.equal(save.disabled,true); assert.match(status.textContent,/déjà en cours/);
 await ui.recalculate(); await ui.insert(); assert.equal(calls.save.length,0);
@@ -281,7 +267,7 @@ def test_warning_lifecycle_is_wired_to_viewer_and_accessible_markup() -> None:
     html = (_STATIC / "index.html").read_text(encoding="utf-8")
     css = (_STATIC / "css/style.css").read_text(encoding="utf-8")
     select_file = source.split("async function selectFile(filename) {", 1)[1].split(
-        "const _PREFETCH_MODES", 1
+        "async function selectTrack(trackId, trackName) {", 1
     )[0]
     select_track = source.split("async function selectTrack(trackId, trackName) {", 1)[1].split(
         "// ── Loading feedback", 1

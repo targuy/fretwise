@@ -221,7 +221,19 @@ export async function fetchSolve(filename, trackId, representationMode, preferen
     `&infer_implicit_legato=${inferImplicitLegato ? 'true' : 'false'}`;
   if (trackId !== null && trackId !== undefined) url += `&track_id=${trackId}`;
   if (svgWidth) url += `&svg_width=${svgWidth}`;
-  const res = await fetch(url);
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), 60_000);
+  let res;
+  try {
+    res = await fetch(url, { signal: controller.signal });
+  } catch (error) {
+    if (controller.signal.aborted) {
+      throw new Error('Le serveur met trop de temps à répondre. Réessayez d’ouvrir la piste.');
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeout);
+  }
   if (!res.ok) {
     const err = await res.json().catch(() => ({ detail: 'Unknown error' }));
     throw new Error(err.detail || 'Solve failed');

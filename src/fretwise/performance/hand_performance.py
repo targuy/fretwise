@@ -587,17 +587,24 @@ def build_hand_performance(
                 kind=kind,
             )
             if kind == "bend" and event.bend_points:
+                points = [
+                    {
+                        "tick": note.onTick
+                        + round(position * (note.notatedEndTick - note.onTick)),
+                        "value": cents,
+                    }
+                    for position, cents in event.bend_points
+                ]
+                # GP bends may end before the note does. Hold the last pitch
+                # until note-off so the curve covers its declared interval.
+                if points[0]["tick"] > note.onTick:
+                    points.insert(0, {"tick": note.onTick, "value": points[0]["value"]})
+                if points[-1]["tick"] < note.notatedEndTick:
+                    points.append({"tick": note.notatedEndTick, "value": points[-1]["value"]})
                 payload.update(
                     cents={
                         "interpolation": "linear",
-                        "points": [
-                            {
-                                "tick": note.onTick
-                                + round(position * (note.notatedEndTick - note.onTick)),
-                                "value": cents,
-                            }
-                            for position, cents in event.bend_points
-                        ],
+                        "points": points,
                     },
                     direction="auto",
                     preBend=event.bend_points[0][1] != 0,

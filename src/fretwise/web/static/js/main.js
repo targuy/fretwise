@@ -1248,69 +1248,10 @@ async function selectFile(filename) {
     // first track when the song has no guitar at all.
     const firstGuitar = tracks.find((t) => isGuitarKind(t.kind)) || tracks[0];
     await selectTrack(firstGuitar.id, firstGuitar.name);
-    if (fileToken !== _selectFileToken) return;
-    // Warm the server-side solve cache for every track × representation
-    // mode while the user is reading the first one. Runs entirely in the
-    // background; failures are silent (next interactive solve will retry).
-    _prefetchAllTrackModes(filename, tracks);
   } catch (err) {
     if (fileToken !== _selectFileToken) return;
     const libEmpty = $('#lib-empty');
     if (libEmpty) { libEmpty.style.display = ''; libEmpty.textContent = `Error loading "${sanitize(filename)}": ${sanitize(err.message)}`; }
-  }
-}
-
-const _PREFETCH_MODES = [
-  MODES.STANDARD_TABLATURE,
-  MODES.TABLATURE,
-  MODES.STANDARD,
-  MODES.TABLATURE_RHYTHM,
-];
-let _prefetchAbortToken = 0;
-
-/**
- * Fire-and-forget solve requests for every (track × mode) combination so the
- * server-side LRU cache is warm by the time the user clicks anything. The
- * primary (foreground) solve has already been issued by selectTrack; we
- * deliberately re-issue the same call here so it short-circuits on the
- * server-side cache without doing any work.
- *
- * A token guards against stale prefetches when the user opens a new file
- * before the previous prefetch fan-out has finished.
- */
-function _prefetchAllTrackModes(filename, tracks) {
-  const myToken = ++_prefetchAbortToken;
-  const prefs = getRulePreferences();
-  // Order: every mode for the CURRENT track first, then every mode for the
-  // other tracks. The first batch covers the most likely next click (mode
-  // change on the visible track); subsequent batches warm the rest in the
-  // background. No artificial throttle — browsers cap concurrent HTTP/1.1
-  // requests per origin (~6), which acts as natural backpressure and lets
-  // the foreground response come back first.
-  const orderedTracks = [...tracks].sort((a, b) => {
-    if (a.id === currentTrackId) return -1;
-    if (b.id === currentTrackId) return 1;
-    return 0;
-  });
-  for (const t of orderedTracks) {
-    // Non-guitar tracks only ever render in staff view, so warm just that
-    // mode. Missing/unknown kind is treated as guitar (warm every mode).
-    const modes = isGuitarKind(t.kind) ? _PREFETCH_MODES : [MODES.STANDARD];
-    for (const mode of modes) {
-      if (myToken !== _prefetchAbortToken) return;
-      const svgW = _svgRenderWidth(mode);
-      const key = _solveCacheKey(filename, t.id, mode, prefs, svgW);
-      if (_solveCache.has(key)) continue;  // already warm — skip the round-trip
-      // Warm BOTH the server LRU and our client-side object cache so the next
-      // interactive switch to this (track, mode) renders without any network.
-      fetchSolve(filename, t.id, mode, prefs, svgW)
-        .then((data) => {
-          if (myToken === _prefetchAbortToken && filename === currentFile) {
-            _solveCache.set(key, data);
-          }
-        })
-        .catch(() => { /* silent — interactive solve will retry */ });
-    }
   }
 }
 
@@ -1330,6 +1271,7 @@ let _playStartPending = false;     // Play requested while instrument prepares
 
 async function selectTrack(trackId, trackName) {
   const myToken = ++_selectTrackToken;
+  _handVizLoadState = 'loading';
   _resetStaleFingeringWarning();
   _updateFingeringValidity(null);
   _solveInFlight = true;
@@ -1351,6 +1293,7 @@ async function selectTrack(trackId, trackName) {
   // Freeze selected view before clearing/rebuilding renderer. This prevents
   // a 2D canvas flash when recalculating from the 3D hand view.
   _prepareRepresentationLoading(getSelectedRepresentationMode());
+  _postHandVizData();
   _applyTrackKindLock();
   // Capture playback position BEFORE pausing/recreating so we can restore
   // it on the new track. Without this, switching tracks always restarts
@@ -1497,6 +1440,8 @@ async function selectTrack(trackId, trackName) {
     }
   } catch (err) {
     if (myToken !== _selectTrackToken) return;
+    _handVizLoadState = 'load-failed';
+    _postHandVizData();
     _autoPlayAfterSolve = false;
     ctx.clearRect(0, 0, tabCanvas.width, tabCanvas.height);
     ctx.fillStyle = '#ff5555';
@@ -2549,6 +2494,7 @@ function exportPDFLegacyCanvas() {
 }
 
 function initRenderer(data) {
+  _handVizLoadState = null;
   // Reset loop state
   loopASet = false;
   if (btnLoopA)     btnLoopA.classList.remove('active');
@@ -3809,8 +3755,6 @@ async function _insertFingerings({ background = true, stream = false, context = 
     if (!result.sidecar_saved) {
       throw new Error('L’enregistrement des doigtés est incomplet. Vous pouvez réessayer.');
     }
-    // A pre-save prefetch must not repopulate the cache with an old version.
-    ++_prefetchAbortToken;
     ++_solveCacheRevision;
     // Invalidate client-side solve cache so the reload reads the fresh sidecar.
     const prefix = `${file}#${primaryTrack}#`;
@@ -4846,6 +4790,7 @@ function _emptyHandVizPayload(reason) {
 }
 
 function _buildHandVizPayload() {
+  if (_handVizLoadState) return _emptyHandVizPayload(_handVizLoadState);
   if (!renderer || !renderer.data || !Array.isArray(renderer.data.results)) {
     return _emptyHandVizPayload('no-track');
   }
@@ -4952,6 +4897,7 @@ const _handSessionId = globalThis.crypto?.randomUUID?.()
   || `hand-${performance.timeOrigin}-${Math.random().toString(36).slice(2)}`;
 let _handSequence = 0;
 let _handPlanId = 'empty';
+let _handVizLoadState = null;
 
 function _postHandVizData() {
   const payload = _buildHandVizPayload();

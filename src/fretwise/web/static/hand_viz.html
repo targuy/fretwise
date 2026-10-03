@@ -111,12 +111,21 @@
 
     async function installData(data) {
       const revision = ++loadRevision;
-      const performanceData = handPerformanceFor(data);
-      currentPerformance = performanceData;
       if (!renderer) {
         handStatus('Main 3D indisponible sur cet appareil.', 'error');
         return;
       }
+      if (data?.meta?.empty_reason === 'loading' || data?.meta?.empty_reason === 'load-failed') {
+        currentPerformance = null;
+        renderer.clearPerformance('');
+        handStatus(data.meta.empty_reason === 'loading'
+          ? 'Main 3D : chargement de la partition…'
+          : 'Main 3D indisponible : la partition ne répond pas. Réessayez d’ouvrir la piste.',
+        data.meta.empty_reason === 'loading' ? 'info' : 'error');
+        return;
+      }
+      const performanceData = handPerformanceFor(data);
+      currentPerformance = performanceData;
       if (!performanceData || hasNoFingering(data, performanceData)) {
         renderer.clearPerformance('Aucun doigté pour cette piste');
         handStatus('Aucun doigté pour cette piste.');

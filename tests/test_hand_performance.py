@@ -79,6 +79,27 @@ def test_curve_keeps_plateau_and_release_in_absolute_ticks() -> None:
     assert bend["preBend"] is False
 
 
+def test_short_gp_bend_holds_last_pitch_until_note_end() -> None:
+    event = NoteEvent(69, 2, 0.25, 120, bend_points=((0, 0), (0.25, 50)))
+    performance = build_hand_performance([event], [_result(event)])
+    assert performance["expressions"][0]["cents"]["points"] == [
+        {"tick": 1920, "value": 0},
+        {"tick": 1980, "value": 50},
+        {"tick": 2160, "value": 50},
+    ]
+
+
+def test_gp_bend_with_offset_origin_covers_note_from_onset() -> None:
+    event = NoteEvent(69, 0, 1, 120, bend_points=((0.25, 0), (0.75, 100)))
+    performance = build_hand_performance([event], [_result(event)])
+    assert performance["expressions"][0]["cents"]["points"] == [
+        {"tick": 0, "value": 0},
+        {"tick": 240, "value": 0},
+        {"tick": 720, "value": 100},
+        {"tick": 960, "value": 100},
+    ]
+
+
 def test_prebend_starts_at_source_deformation() -> None:
     event = NoteEvent(69, 0, 1, 120, bend_points=((0, 200), (1, 0)))
     performance = build_hand_performance([event], [_result(event)])
